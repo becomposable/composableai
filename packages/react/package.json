@@ -1,0 +1,37 @@
+{
+    "name": "@composableai/react",
+    "version": "0.16.0",
+    "description": "React helpers for Composable AI",
+    "type": "module",
+    "types": "./lib/index.d.ts",
+    "main": "./lib/index.js",
+    "files": [
+        "lib",
+        "src"
+    ],
+    "license": "MIT",
+    "homepage": "https://composableprompts.com/docs",
+    "keywords": [
+        "llm",
+        "streaming",
+        "composable",
+        "prompt",
+        "ai",
+        "react"
+    ],
+    "scripts": {
+        "eslint": "eslint './src/**/*.{jsx,js,tsx,ts}'",
+        "build": "rm -rf ./lib ./tsconfig.tsbuildinfo && tsc --build",
+        "clean": "rm -rf .turbo node_modules ./lib"
+    },
+    "devDependencies": {
+        "typescript": "^5.0.2"
+    },
+    "peerDependencies": {
+        "react": ">=16.8.0"
+    },
+    "dependencies": {
+        "@composableai/client": "^0.16.0",
+        "@composableai/common": "^0.16.0"
+    }
+}

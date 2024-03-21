@@ -1,0 +1,125 @@
+import { program } from 'commander';
+import runExport from './codegen/index.js';
+import { addProfile, deleteProfile, listProfiles, showProfile, updateProfile, useProfile } from './config/commands.js';
+import { genTestData } from './datagen/index.js';
+import { listEnvirnments } from './envs/index.js';
+import { listInteractions } from './interactions/index.js';
+import { getVersion, upgrade } from './package.js';
+import { listProjects } from './projects/index.js';
+import runInteraction from './run/index.js';
+import { runHistory } from './runs/index.js';
+import { requestPublicKey } from './apikeys/index.js';
+
+//warnIfNotLatest();
+
+program.version(getVersion())
+    .option('-k, --apikey <API_KEY>', 'API Key for your Composable Prompts project')
+    .option('-p, --project <PROJECT_ID>', 'Project ID: you can find it on your project dashboard on https://app.composableprompts.com')
+    .option('-s, --server [URL]', 'Server URL if necessary');
+
+program.command("upgrade")
+    .description("Upgrade to the latest version of the CLI")
+    .action(upgrade)
+program.command("projects")
+    .description("List the projects you have access to")
+    .action(() => {
+        listProjects(program);
+    })
+program.command("pk [projectId]")
+    .description("Get or create a public API key associated with the account owning the current API key. The current API key must have at least the \"application\" role. If a projectId is given then the key will be associated with that project")
+    .option('--name [name]', 'An optional name for the generated key. If not specified a name will be generated.')
+    .option('--ttl [ttl]', 'A ttl value in seconds to be used to expire the generated key. The default is 24h.')
+    .action((projectId: string | undefined, options: Record<string, any>) => {
+        requestPublicKey(program, projectId, options);
+    })
+program.command("envs [envId]")
+    .description("List the enironment you have access to")
+    .action((envId: string | undefined, options: Record<string, any>) => {
+        listEnvirnments(program, envId, options);
+    })
+program.command("interactions [interaction]")
+    .description("List the interactions available in the current project")
+    .action((interactionId: string | undefined, options: Record<string, any>) => {
+        listInteractions(program, interactionId, options);
+    })
+program.command("datagen <interaction>")
+    .description("Generate test input data, given an interaction ID")
+    .option('-e, --env [envId]', 'The environment ID to use to generating the test data')
+    .option('-m, --model [model]', 'The model to use to generating the test data. If the selected environment has a default model then this option is optional.')
+    .option('-t, --temperature [value]', 'The temperature used to generating the test data.')
+    .option('-o, --output [file]', 'A file to save the generated test data. If not specified the data will be printed to stdout.')
+    .option('-c, --count [value]', 'The number of data objects to generate', '1')
+    .option('-m, --message [value]', 'An optional message')
+    .action((interactionId: string, options: Record<string, any>) => {
+        genTestData(program, interactionId, options);
+    })
+program.command("codegen [interactionName]")
+    .description("Generate code given an interaction name of for all the interactions in the project if no interaction is specified.")
+    .option('--versions [versions]', 'A comma separated list of version selectors to include. A version selector is either a version number or one of the "draft" or "latest" keywords. The default is "draft, latest"', "draft,latest")
+    .option('-a, -all', 'When used, all the interaction versions will be exported')
+    .option('-d, --dir [file]', 'The output directory if any. Default to "./interactions" if not specified.', './interactions')
+    .option('-x, --export <version>', 'The version to export from index.ts. If not specified, the latest version will be exported or if no version is available, the draft version will be exported')
+    .action((interactionName: string | undefined, options) => runExport(program, interactionName, options));
+program.command("run <interactionId>")
+    .description("Run an interaction by id")
+    .option('-i, --input [file]', 'The input data if any. If no file path is specified it will read from stdin')
+    .option('-o, --output [file]', 'The output file if any. If not specified it will print to stdout')
+    .option('-d, --data [json]', 'Inline data as a JSON string. If specified takes precendence over --input')
+    .option('-T, --tags [tags]', 'A comma separated list of tags to add to the execution run')
+    .option('-t, --temperature [temperature]', 'The temperature to use')
+    .option('-m, --model [model]', 'The model to use. Optional.')
+    .option('-e, --env [environmentId]', 'The environment Id to use. Optional.')
+    .option('-S, --no-stream', 'When used, the output will be printed only when the execution is complete')
+    .option('-c, --count [count]', 'The number of times to run the interaction', '1')
+    .option('-v, --verbose', 'Only used in no streaming mode. Instead of printing a progress it will print details about each executed run.')
+    .option('--jsonl', 'Write output in jsonl. The default is to write the json. Ignored when only one run is executed')
+    .option('--data-only', 'Write down only the data returned by the LLM and not the entire execution run. This mode is forced when streaming', false)
+    .action((interactionId: string, options: Record<string, any>) => runInteraction(program, interactionId, options));
+program.command("runs [interactionId]")
+    .description('Search the run history for specific execution runs')
+    .option('-t, --tags [tags]', 'A comma separated list of tags to filter the run history')
+    .option('--status [status]', 'A status to filter on')
+    .option('-e, --env [environmentId]', 'Filter by environment')
+    .option('-m, --model [model]', 'Filter by model')
+    .option('-q, --query [query]', 'A lucene query')
+    .option('-l, --limit [limit]', 'The maximum number of runs to return in a page', "100")
+    .option('-P, --page [page]', 'The page number to return (starting from 0)', "0")
+    .option('-f, --format [format]', 'The output format: json, jsonl or csv.', 'json')
+    .option("-o, --output [file]", "The output file if any. If not specified it will print to stdout")
+    .option("--before [date]", "Filter runs before the given date. The date must be in ISO format")
+    .option("--after [date]", "Filter runs after the given date. The date must be in ISO format")
+    .action((interactionId: string | undefined, options: Record<string, any>) => {
+        runHistory(program, interactionId, options);
+    });
+const configRoot = program.command("config")
+    .description("Manage configuration profiles")
+    .action(() => {
+        listProfiles();
+    });
+configRoot.command('show [name]')
+    .description("Show the configured profiles or the profile with the given name")
+    .action((name?: string) => {
+        showProfile(name);
+    });
+configRoot.command('use <name>')
+    .description("Switch to another configuration profile")
+    .action((name) => {
+        useProfile(name);
+    });
+configRoot.command('add')
+    .description("Add a new configuration profile")
+    .action(() => {
+        addProfile();
+    });
+configRoot.command('edit <name>')
+    .description("Edit an existing configuration profile")
+    .action((name) => {
+        updateProfile(name);
+    });
+configRoot.command('delete <name>')
+    .description("delete an existing configuration profile")
+    .action((name) => {
+        deleteProfile(name);
+    });
+
+program.parse();

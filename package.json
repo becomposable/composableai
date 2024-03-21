@@ -1,0 +1,19 @@
+{
+    "name": "@composableai/parent",
+    "version": "0.16.0",
+    "private": true,
+    "workspaces": [
+        "./packages/common",
+        "./packages/client",
+        "./packages/cli",
+        "./packages/react"
+    ],
+    "scripts": {
+        "release": "npm publish --ws --access public",
+        "build": "npm run build --ws",
+        "test": "npm run test --ws"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.3"
+    }
+}

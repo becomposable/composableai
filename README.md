@@ -14,7 +14,7 @@ It will also work with node version 17.5 by using the `--experimental-fetch` fla
 ## Installation
 
 ```bash
-npm install @composableai/sdk
+npm install @composableai/common @composableai/client
 ```
 
 ## Documentation

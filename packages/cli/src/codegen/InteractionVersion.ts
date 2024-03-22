@@ -1,4 +1,4 @@
-import { InteractionRefWithSchema, InteractionStatus, mergePromptsSchema } from "@composableai/sdk";
+import { InteractionRefWithSchema, InteractionStatus, mergePromptsSchema } from "@composableai/common";
 import { compile as compileSchema } from 'json-schema-to-typescript';
 import { join } from 'path';
 import { writeFile } from "../utils/stdio.js";
@@ -22,7 +22,7 @@ export interface InteractionTemplateVars extends Record<string, string> {
     date: string;
 }
 
-export function processInteractionTemplate (vars: InteractionTemplateVars) {
+export function processInteractionTemplate(vars: InteractionTemplateVars) {
     return processTemplate('interaction', { ...vars, date: new Date().toISOString() });
 }
 
@@ -36,24 +36,24 @@ export class InteractionVersion {
         this.className = textToPascalCase(interaction.name || '__Unknown');
     }
 
-    get isLatest () {
+    get isLatest() {
         return this.interaction.latest;
     }
 
-    get versionName () {
+    get versionName() {
         return this.isDraft ? 'draft' : `v${this.interaction.version}`;
     }
-    get fileName () {
+    get fileName() {
         return `${this.versionName}.ts`;
     }
 
-    async build (dir: string, opts: InteractionsExportOptions) {
+    async build(dir: string, opts: InteractionsExportOptions) {
         const file = join(dir, this.fileName);
         writeFile(file, await this.genCode(opts));
         return file;
     }
 
-    async genCode (opts: InteractionsExportOptions) {
+    async genCode(opts: InteractionsExportOptions) {
         const interaction = this.interaction;
         const className = this.className;
         const inputSchema = mergePromptsSchema(interaction);

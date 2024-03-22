@@ -1,10 +1,10 @@
-import { Interaction, InteractionRef, InteractionStatus } from "@composableai/sdk";
+import { Interaction, InteractionRef, InteractionStatus } from "@composableai/common";
 import colors from "ansi-colors";
 import { Command } from "commander";
 import { getClient } from "../client.js";
 import { textToPascalCase } from "../codegen/utils.js";
 
-export function listInteractions (program: Command, interactionId: string | undefined, options: Record<string, any>) {
+export function listInteractions(program: Command, interactionId: string | undefined, options: Record<string, any>) {
     const client = getClient(program);
     if (!interactionId) {
         return client.interactions.list().then((interactions) => {
@@ -25,7 +25,7 @@ export function listInteractions (program: Command, interactionId: string | unde
 }
 
 
-function printInteraction (interaction: Interaction, versions: InteractionRef[], _options: Record<string, any>) {
+function printInteraction(interaction: Interaction, versions: InteractionRef[], _options: Record<string, any>) {
     console.log(colors.bold(interaction.name) + " [" + interaction.id + "]");
     console.log(colors.bold("Description:"), interaction.description || 'n/a');
     console.log(colors.bold("Class name:"), textToPascalCase(interaction.name));

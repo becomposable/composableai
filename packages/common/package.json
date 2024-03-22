@@ -6,7 +6,7 @@
     "scripts": {
         "test": "vitest run",
         "build": "tsmod build",
-        "clean": "rm -rf ./lib tsconfig.tsbuildinfo"
+        "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
     },
     "exports": {
         "types": "./lib/types/index.d.ts",

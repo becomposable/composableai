@@ -1,6 +1,6 @@
-import { ExecutionRun, InteractionBase, InteractionExecutionPayload } from "@composableai/sdk";
+import { InteractionBase } from "@composableai/client";
+import { ExecutionRun, InteractionExecutionPayload } from "@composableai/common";
 import { useMemo, useState } from "react";
-
 
 export function useInteractionStreaming<TProps, TReturn>(interaction: InteractionBase<TProps, TReturn>) {
 

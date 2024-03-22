@@ -1,4 +1,4 @@
-import { InteractionRefWithSchema } from "@composableai/sdk";
+import { InteractionRefWithSchema } from "@composableai/common";
 import { join, resolve } from "path";
 import { makeDir, writeFile } from "../utils/stdio.js";
 import { InteractionVersion, InteractionsExportOptions } from "./InteractionVersion.js";
@@ -12,12 +12,12 @@ export class InteractionBucket {
     constructor(public name: string) {
     }
 
-    add (version: InteractionVersion) {
+    add(version: InteractionVersion) {
         this.versions.push(version);
         return this;
     }
 
-    writeIndex (dir: string, opts: InteractionsExportOptions) {
+    writeIndex(dir: string, opts: InteractionsExportOptions) {
         let version: InteractionVersion | undefined;
         const exportVersion = opts.exportVersion ? parseInt(opts.exportVersion) : undefined;
         if (exportVersion) {
@@ -58,7 +58,7 @@ export class InteractionBucket {
         }
     }
 
-    build (dir: string, opts: InteractionsExportOptions) {
+    build(dir: string, opts: InteractionsExportOptions) {
         console.log('Generating interaction', this.name);
         dir = join(dir, this.name);
         makeDir(dir);
@@ -72,7 +72,7 @@ export class InteractionBucket {
 export class CodeBuilder {
     buckets: Record<string, InteractionBucket> = {};
 
-    add (interaction: InteractionRefWithSchema) {
+    add(interaction: InteractionRefWithSchema) {
         const version = new InteractionVersion(interaction);
         const name = version.className;
         const bucket = this.buckets[name];
@@ -83,7 +83,7 @@ export class CodeBuilder {
         }
     }
 
-    build (interactions: InteractionRefWithSchema[], opts: InteractionsExportOptions) {
+    build(interactions: InteractionRefWithSchema[], opts: InteractionsExportOptions) {
         if (interactions.length === 0) {
             console.log("Nothing to export");
             return;

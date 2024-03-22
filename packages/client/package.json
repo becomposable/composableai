@@ -11,7 +11,7 @@
     "scripts": {
         "eslint": "eslint './src/**/*.{jsx,js,tsx,ts}'",
         "build": "tsmod build",
-        "clean": "rm -rf .turbo node_modules ./lib tsconfig.tsbuildinfo"
+        "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
     },
     "devDependencies": {
         "@types/eventsource": "^1.1.14",

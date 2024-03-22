@@ -1,7 +1,7 @@
 //#export {{projectId}} {{id}} @{{date}}
 // This is a generated file. Do not edit.
 
-import { StudioClient, StudioClientProps, InteractionBase } from "@composableai/sdk";
+import { InteractionBase, StudioClient, StudioClientProps } from "@composableai/client";
 
 {{types}}
 /**

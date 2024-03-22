@@ -3,6 +3,10 @@
     "version": "0.16.1",
     "type": "module",
     "types": "./lib/types/index.d.ts",
+    "files": [
+        "lib",
+        "src"
+    ],
     "scripts": {
         "test": "vitest run",
         "build": "tsmod build",

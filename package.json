@@ -12,7 +12,7 @@
         "release": "npm publish --ws --access public",
         "build": "npm run build --ws",
         "test": "npm run test --ws",
-        "clean": "npm run clean --ws"
+        "clean": "rimraf ./node_modules && npm run clean --ws"
     },
     "devDependencies": {
         "rimraf": "^5.0.5",

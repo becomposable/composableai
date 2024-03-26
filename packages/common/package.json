@@ -1,6 +1,6 @@
 {
     "name": "@composableai/common",
-    "version": "0.16.2",
+    "version": "0.16.3",
     "type": "module",
     "types": "./lib/types/index.d.ts",
     "files": [

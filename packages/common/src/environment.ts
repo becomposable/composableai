@@ -1,14 +1,17 @@
-import { AIModel, BuiltinProviders } from "@llumiverse/core";
+import { AIModel } from "@llumiverse/core";
+
 
 export enum SupportedProviders {
-    openai = BuiltinProviders.openai,
-    huggingface_ie = BuiltinProviders.huggingface_ie,
-    replicate = BuiltinProviders.replicate,
-    bedrock = BuiltinProviders.bedrock,
-    vertexai = BuiltinProviders.vertexai,
-    togetherai = BuiltinProviders.togetherai,
-    mistralai = BuiltinProviders.mistralai,
-    groq = BuiltinProviders.groq,
+    // from llumiverse
+    openai = 'openai',
+    huggingface_ie = 'huggingface_ie',
+    replicate = 'replicate',
+    bedrock = 'bedrock',
+    vertexai = 'vertexai',
+    togetherai = 'togetherai',
+    mistralai = 'mistralai',
+    groq = 'groq',
+    // from studio
     virtual_lb = 'virtual_lb',
     virtual_mediator = 'virtual_mediator',
     test = 'test'

@@ -24,7 +24,7 @@
         "vitest": "^1.4.0"
     },
     "dependencies": {
-        "@llumiverse/core": "0.12.0",
+        "@llumiverse/core": "^0.12.2",
         "json-schema": "^0.4.0"
     },
     "ts_dual_module": {

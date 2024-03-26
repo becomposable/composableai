@@ -22,7 +22,7 @@
     },
     "dependencies": {
         "@composableai/common": "0.16.2",
-        "@llumiverse/core": "0.12.0",
+        "@llumiverse/core": "^0.12.2",
         "api-fetch-client": "^0.8.6",
         "eventsource": "^2.0.2"
     },

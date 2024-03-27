@@ -1,9 +1,8 @@
 {
     "name": "@composableai/client",
-    "version": "0.16.4",
+    "version": "0.16.5",
     "type": "module",
     "types": "./lib/types/index.d.ts",
-    "main": "./lib/index.js",
     "files": [
         "lib",
         "src"
@@ -16,13 +15,13 @@
     "devDependencies": {
         "@types/eventsource": "^1.1.14",
         "@types/node": "^20.8.9",
-        "ts-dual-module": "^0.6.2",
+        "ts-dual-module": "^0.6.3",
         "typescript": "^5.0.2",
         "vitest": "^1.4.0"
     },
     "dependencies": {
-        "@composableai/common": "^0.16.4",
-        "@llumiverse/core": "^0.12.2",
+        "@composableai/common": "^0.16.5",
+        "@llumiverse/core": "^0.12.3",
         "api-fetch-client": "^0.8.6",
         "eventsource": "^2.0.2"
     },
@@ -31,7 +30,6 @@
     },
     "exports": {
         "types": "./lib/types/index.d.ts",
-        "default": "./lib/esm/index.js",
         "import": "./lib/esm/index.js",
         "require": "./lib/cjs/index.js"
     }

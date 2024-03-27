@@ -1,6 +1,6 @@
 {
     "name": "@composableai/common",
-    "version": "0.16.4",
+    "version": "0.16.5",
     "type": "module",
     "types": "./lib/types/index.d.ts",
     "files": [
@@ -14,17 +14,16 @@
     },
     "exports": {
         "types": "./lib/types/index.d.ts",
-        "default": "./lib/esm/index.js",
         "import": "./lib/esm/index.js",
         "require": "./lib/cjs/index.js"
     },
     "devDependencies": {
-        "ts-dual-module": "^0.6.2",
+        "ts-dual-module": "^0.6.3",
         "typescript": "^5.0.2",
         "vitest": "^1.4.0"
     },
     "dependencies": {
-        "@llumiverse/core": "^0.12.2",
+        "@llumiverse/core": "^0.12.3",
         "json-schema": "^0.4.0"
     },
     "ts_dual_module": {

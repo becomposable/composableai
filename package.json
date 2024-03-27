@@ -3,6 +3,7 @@
     "version": "0.16.5",
     "private": true,
     "workspaces": [
+        "./llumiverse/core",
         "./packages/common",
         "./packages/client",
         "./packages/cli",

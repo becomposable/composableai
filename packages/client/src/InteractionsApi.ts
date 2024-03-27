@@ -12,7 +12,7 @@ export default class InteractionsApi extends ApiTopic {
      * Get the list of all interactions in the current project
      * @returns IInteractionRef[]
      **/
-    list(name?: string, tags?: string[], version?: number): Promise<InteractionRef[]> {
+    list({ name, tags, version }: { name?: string, tags?: string[], version?: number } = {}): Promise<InteractionRef[]> {
         const searchParams = {
             name,
             tags,

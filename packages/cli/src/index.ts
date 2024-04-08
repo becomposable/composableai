@@ -1,4 +1,5 @@
 import { program } from 'commander';
+import { requestPublicKey } from './apikeys/index.js';
 import runExport from './codegen/index.js';
 import { addProfile, deleteProfile, listProfiles, showProfile, updateProfile, useProfile } from './config/commands.js';
 import { genTestData } from './datagen/index.js';
@@ -8,13 +9,12 @@ import { getVersion, upgrade } from './package.js';
 import { listProjects } from './projects/index.js';
 import runInteraction from './run/index.js';
 import { runHistory } from './runs/index.js';
-import { requestPublicKey } from './apikeys/index.js';
 
 //warnIfNotLatest();
 
 program.version(getVersion())
     .option('-k, --apikey <API_KEY>', 'API Key for your Composable Prompts project')
-    .option('-p, --project <PROJECT_ID>', 'Project ID: you can find it on your project dashboard on https://app.composableprompts.com')
+    .option('-p, --project [PROJECT_ID]', 'If the key has access to multiple projects, specify the project ID')
     .option('-s, --server [URL]', 'Server URL if necessary');
 
 program.command("upgrade")

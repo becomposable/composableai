@@ -16,7 +16,7 @@ function createClient(program: Command) {
     const env = {
         apikey: profile?.apikey || process.env.COMPOSABLE_PROMPTS_APIKEY,
         serverUrl: profile?.serverUrl || process.env.COMPOSABLE_PROMPTS_SERVER_URL || 'https://api.composableprompts.com',
-        projectId: profile?.projectId || process.env.COMPOSABLE_PROMPTS_PROJECT_ID,
+        projectId: profile?.projectId || process.env.COMPOSABLE_PROMPTS_PROJECT_ID || undefined,
         sessionTags: profile?.sessionTags ? profile.sessionTags.split(/\s*,\s*/) : 'cli',
     }
 

@@ -33,7 +33,7 @@ program.command("pk [projectId]")
         requestPublicKey(program, projectId, options);
     })
 program.command("envs [envId]")
-    .description("List the enironment you have access to")
+    .description("List the environments you have access to")
     .action((envId: string | undefined, options: Record<string, any>) => {
         listEnvirnments(program, envId, options);
     })

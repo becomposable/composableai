@@ -72,6 +72,7 @@ export type InteractionVisibility = 'public' | 'private';
 export interface Interaction {
     readonly id: string;
     name: string;
+    endpoint: string;
     description?: string;
     status: InteractionStatus;
     parent?: string;
@@ -167,7 +168,9 @@ export interface ExecutionRun<P = any, R = any> {
     result: R;
     parameters: P; //params used to create the interaction, only in varies on?
     tags?: string[];
+    //TODO a string is returned when executing not the interaction object
     interaction: Interaction;
+    //TODO a string is returned when execution not the env object
     environment: ExecutionEnvironmentRef;
     modelId: string;
     ttl: number;

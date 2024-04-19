@@ -105,7 +105,7 @@ export interface PopulatedInteraction
 export interface InteractionCreatePayload
     extends Omit<
         Interaction,
-        "id" | "created_at" | "updated_at" | "project" | "formatter" | "tags" | "parent" | "version" | "visibility"
+        "id" | "created_at" | "updated_at" | "project" | "formatter" | "tags" | "parent" | "version" | "visibility" | "endpoint"
     > {
     visibility?: InteractionVisibility;
 }

@@ -1,12 +1,9 @@
 import { ExecutionRunRef, ExecutionRunStatus, NamedInteractionExecutionPayload } from "./interaction.js";
 /**
  * Interaction execution payload for creating a new run
- * It uses intercation field (from NamedInteractionExecutionPayload) to pass the intercation ID to run
- * The interactionId field is also allowed for backward compatiility. If `interaction` is not specified then 
- * the `interactionId` is used as a fallback.
+ * It uses interaction field (from NamedInteractionExecutionPayload) to pass the intercation ID to run
  */
 export interface RunCreatePayload extends NamedInteractionExecutionPayload {
-    interactionId?: string;
 }
 
 export interface StringFacet {

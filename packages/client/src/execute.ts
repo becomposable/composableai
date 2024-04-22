@@ -25,7 +25,7 @@ export async function executeInteraction<P = any, R = any>(client: StudioClient,
     onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
     const stream = !!onChunk;
     const response = await client.runs.create({
-        ...payload, interactionId, stream
+        ...payload, interaction: interactionId, stream
     });
     if (stream) {
         if (response.status === ExecutionRunStatus.failed) {

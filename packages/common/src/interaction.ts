@@ -137,6 +137,15 @@ export interface InteractionExecutionPayload<Input = any> {
     tags?: string | string[]; // tags to be added to the execution run
 }
 
+export interface NamedInteractionExecutionPayload<Input = any> extends InteractionExecutionPayload<Input> {
+    /**
+     * The interaction name and suffixed by an optional tag or version separated from the name using a @ character
+     * If no version/tag part is specified then the latest version is used.
+     * Example: ReviewContract, ReviewContract@draft, ReviewContract@1, ReviewContract@some-tag
+     */
+    interaction: string;
+}
+
 export enum RunSourceTypes {
     api = "api",
     cli = "cli",

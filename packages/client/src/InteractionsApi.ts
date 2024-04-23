@@ -1,7 +1,7 @@
 import { ExecutionRun, GenerateTestDataPayload, ImprovePromptPayload, Interaction, InteractionCreatePayload, InteractionExecutionPayload, InteractionForkPayload, InteractionPublishPayload, InteractionRef, InteractionRefWithSchema, InteractionUpdatePayload, InteractionsExportPayload } from "@composableai/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 import { StudioClient } from "./client.js";
-import { executeInteraction } from "./execute.js";
+import { executeInteraction, executeInteractionByName } from "./execute.js";
 
 export default class InteractionsApi extends ApiTopic {
     constructor(parent: ClientBase) {
@@ -95,6 +95,26 @@ export default class InteractionsApi extends ApiTopic {
     execute<P = any, R = any>(id: string, payload: InteractionExecutionPayload = {},
         onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
         return executeInteraction(this.client as StudioClient, id, payload, onChunk);
+    }
+
+    /**
+     * Same as execute but uses the interaction name selector instead of the id.
+     * 
+     * A name selector is the interaction endpoint name suffuxed with an optional tag or version wich is starting with a `@` character.
+     * The special `draft` tag is used to select the draft version of the interaction. If no tag or version is specified then the latest version is selected.
+     * Examples of selectors:
+     * - `ReviewContract` - select the latest version of the ReviewContract interaction
+     * - `ReviewContract@1` - select the version 1 of the ReviewContract interaction
+     * - `ReviewContract@draft` - select the draft version of the ReviewContract interaction
+     * - `ReviewContract@fixed` - select the ReviewContract interaction which is tagged with 'fixed' tag.
+     * @param nameWithTag 
+     * @param payload 
+     * @param onChunk 
+     * @returns 
+     */
+    executeByName<P = any, R = any>(nameWithTag: string, payload: InteractionExecutionPayload = {},
+        onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
+        return executeInteractionByName(this.client as StudioClient, nameWithTag, payload, onChunk);
     }
 
     publish(id: string, payload: InteractionPublishPayload): Promise<Interaction> {

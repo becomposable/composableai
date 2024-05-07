@@ -1,6 +1,6 @@
 {
     "name": "@composableai/client",
-    "version": "0.17.1",
+    "version": "0.17.2",
     "type": "module",
     "types": "./lib/types/index.d.ts",
     "files": [
@@ -20,7 +20,7 @@
         "vitest": "^1.4.0"
     },
     "dependencies": {
-        "@composableai/common": "^0.17.1",
+        "@composableai/common": "^0.17.2",
         "@llumiverse/core": "^0.12.3",
         "api-fetch-client": "^0.8.6",
         "eventsource": "^2.0.2"

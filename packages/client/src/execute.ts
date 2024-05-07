@@ -9,12 +9,12 @@ export function EventSourceProvider(): Promise<typeof EventSource> {
     }
 }
 /**
- * 
- * Execute an interaction and return a promise which will be resolved with the executed run when 
+ *
+ * Execute an interaction and return a promise which will be resolved with the executed run when
  * the run completes or fails.
- * If the onChunk callback is passed then the streaming of the result is enabled. 
+ * If the onChunk callback is passed then the streaming of the result is enabled.
  * The onChunk callback with be called with the next chunk of the result as soon as it is available.
- * When all chunks are received the fucntion will return the resolved promise 
+ * When all chunks are received the fucntion will return the resolved promise
  * @param id of the interaction to execute
  * @param payload InteractionExecutionPayload
  * @param onChunk callback to be called when the next chunk of the response is available
@@ -45,20 +45,24 @@ export async function executeInteraction<P = any, R = any>(client: StudioClient,
  * - `ReviewContract@1` - select the version 1 of the ReviewContract interaction
  * - `ReviewContract@draft` - select the draft version of the ReviewContract interaction
  * - `ReviewContract@fixed` - select the ReviewContract interaction which is tagged with 'fixed' tag.
- * 
- * @param client 
- * @param interaction 
- * @param payload 
- * @param onChunk 
- * @returns 
+ *
+ * @param client
+ * @param interaction
+ * @param payload
+ * @param onChunk
+ * @returns
  */
 export async function executeInteractionByName<P = any, R = any>(client: StudioClient,
     interaction: string,
     payload: InteractionExecutionPayload<P> = {},
     onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
     const stream = !!onChunk;
-    const response = await client.runs.create({
-        ...payload, interaction: interaction, stream
+    const response = await client.post('/api/v1/execute', {
+        payload: {
+            ...payload,
+            interaction,
+            stream
+        },
     });
     if (stream) {
         if (response.status === ExecutionRunStatus.failed) {

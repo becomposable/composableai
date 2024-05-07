@@ -1,6 +1,6 @@
 {
     "name": "@composableai/parent",
-    "version": "0.16.5",
+    "version": "0.17.1",
     "private": true,
     "workspaces": [
         "./llumiverse/core",
@@ -16,6 +16,7 @@
         "clean": "rimraf ./node_modules && npm run clean --ws"
     },
     "devDependencies": {
+        "npm-ws-tools": "^0.1.2",
         "rimraf": "^5.0.5",
         "typescript": "^5.3.3"
     }

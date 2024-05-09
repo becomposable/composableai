@@ -207,7 +207,7 @@ export interface InteractionExecutionConfiguration {
     model?: string;
     temperature?: number;
     max_tokens?: number;
-    schema?: JSONSchema4
+    resultSchema?: JSONSchema4
 }
 
 export interface GenerateTestDataPayload {

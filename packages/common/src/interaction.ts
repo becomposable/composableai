@@ -134,6 +134,7 @@ export interface InteractionExecutionPayload<Input = any> {
     stream?: boolean;
     data?: Input;
     config?: InteractionExecutionConfiguration;
+    resultSchema?: JSONSchema4;
     tags?: string | string[]; // tags to be added to the execution run
 }
 
@@ -182,6 +183,7 @@ export interface ExecutionRun<P = any, R = any> {
     //TODO a string is returned when execution not the env object
     environment: ExecutionEnvironmentRef;
     modelId: string;
+    resultSchema: JSONSchema4;
     ttl: number;
     status: ExecutionRunStatus;
     prompt: any;
@@ -207,7 +209,6 @@ export interface InteractionExecutionConfiguration {
     model?: string;
     temperature?: number;
     max_tokens?: number;
-    resultSchema?: JSONSchema4
 }
 
 export interface GenerateTestDataPayload {

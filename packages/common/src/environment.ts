@@ -11,6 +11,7 @@ export enum SupportedProviders {
     togetherai = 'togetherai',
     mistralai = 'mistralai',
     groq = 'groq',
+    watsonx = 'watsonx',
     // from studio
     virtual_lb = 'virtual_lb',
     virtual_mediator = 'virtual_mediator',
@@ -84,6 +85,13 @@ export const SupportedProvidersList: Record<SupportedProviders, SupportedProvide
         requiresApiKey: false,
         requiresEndpointUrl: false,
         supportSearch: false,
+    },
+    watsonx: {
+        id: 'watsonx',
+        name: SupportedProviders.watsonx,
+        requiresApiKey: true,
+        requiresEndpointUrl: true,
+        supportSearch: false
     },
     /*'cohere': {
         id: 'cohere',

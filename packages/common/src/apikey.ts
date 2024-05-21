@@ -34,3 +34,20 @@ export interface CreatePublicKeyPayload {
     projectId?: string,
     ttl?: number,
 }
+
+export interface AuthTokenPayload {
+    subject: string;
+    name: string;
+    email?: string;
+
+    type: 'user' | 'apikey';
+    account: string;
+    accountName?: string;
+    project?: string;
+    role?: string;
+    other_accounts?: string[]
+
+    iss: string; //issuer
+    aud: string; //audience
+    exp: number; //expires in (EPOC seconds)
+}

@@ -11,3 +11,16 @@ export function requestPublicKey(program: Command, projectId: string | undefined
         console.log(key);
     });
 }
+
+
+export function requestJWT(program: Command, apiKey: string | undefined) {
+    if (apiKey) {
+        getClient(program).apikeys.getAuthToken(apiKey).then((token) => {
+            console.log(token);
+        });
+    } else {
+        getClient(program).getAuthToken().then((token) => {
+            console.log(token);
+        });
+    }
+}

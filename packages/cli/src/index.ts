@@ -1,5 +1,5 @@
 import { program } from 'commander';
-import { requestPublicKey } from './apikeys/index.js';
+import { requestJWT, requestPublicKey } from './apikeys/index.js';
 import runExport from './codegen/index.js';
 import { addProfile, deleteProfile, listProfiles, showProfile, updateProfile, useProfile } from './config/commands.js';
 import { genTestData } from './datagen/index.js';
@@ -20,6 +20,7 @@ program.version(getVersion())
 program.command("upgrade")
     .description("Upgrade to the latest version of the CLI")
     .action(upgrade)
+
 program.command("projects")
     .description("List the projects you have access to")
     .action(() => {
@@ -32,6 +33,12 @@ program.command("pk [projectId]")
     .action((projectId: string | undefined, options: Record<string, any>) => {
         requestPublicKey(program, projectId, options);
     })
+program.command("jwt [apiKey]")
+    .description("Get a JWT token for the given apikey. The token is usable with zeno. If no api key is provided the connection apikey will be used.")
+    .action((apiKey: string | undefined) => {
+        requestJWT(program, apiKey);
+    })
+
 program.command("envs [envId]")
     .description("List the environments you have access to")
     .action((envId: string | undefined, options: Record<string, any>) => {

@@ -1,4 +1,4 @@
-import { ApiKey, ApiKeyWithValue, CreateOrUpdateApiKeyPayload, CreatePublicKeyPayload } from "@composableai/common";
+import { ApiKey, ApiKeyWithValue, AuthTokenPayload, CreateOrUpdateApiKeyPayload, CreatePublicKeyPayload } from "@composableai/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export class ApiKeysApi extends ApiTopic {
@@ -49,6 +49,12 @@ export class ApiKeysApi extends ApiTopic {
         }
     }
 
+    /**
+     * Get Auth Token for a Key
+     */
+    getAuthToken(id: string): Promise<AuthTokenPayload> {
+        return this.get(`/${id}/token`);
+    }
 
     /**
      * get or create a temporary public key which can be used from browser to browse and execute itneractions.

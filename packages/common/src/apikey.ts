@@ -1,4 +1,5 @@
 import { ProjectRoles } from "./project.js";
+import { AccountRef } from "./user.js";
 
 
 export enum ApiKeyTypes {
@@ -37,4 +38,20 @@ export interface CreatePublicKeyPayload {
 
 export interface AuthTokenResponse {
     token: string;
+}
+
+export interface AuthTokenPayload {
+    subject: string;
+    name: string;
+    email?: string;
+
+    type: 'user' | 'apikey';
+    account: string;
+    accounts: AccountRef[];
+    project?: string;
+    role?: string;
+
+    iss: string; //issuer
+    aud: string; //audience
+    exp: number; //expires in (EPOC seconds)
 }

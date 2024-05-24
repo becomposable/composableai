@@ -1,4 +1,4 @@
-import { ApiKey, ApiKeyWithValue, AuthTokenPayload, CreateOrUpdateApiKeyPayload, CreatePublicKeyPayload } from "@composableai/common";
+import { ApiKey, ApiKeyWithValue, AuthTokenResponse, CreateOrUpdateApiKeyPayload, CreatePublicKeyPayload } from "@composableai/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export class ApiKeysApi extends ApiTopic {
@@ -52,7 +52,7 @@ export class ApiKeysApi extends ApiTopic {
     /**
      * Get Auth Token for a Key
      */
-    getAuthToken(id: string): Promise<AuthTokenPayload> {
+    getAuthToken(id: string): Promise<AuthTokenResponse> {
         return this.get(`/${id}/token`);
     }
 
@@ -61,12 +61,12 @@ export class ApiKeysApi extends ApiTopic {
      * If a public key already exists for the given project (or for the current organization) then it is returned, otherwise a new one is created.
      * The payload object can contain the following properties:
      * - name: the name of the public key. If not specified a random name is generated.
-     * - projectId: the id of the project to which the public key will be associated. 
+     * - projectId: the id of the project to which the public key will be associated.
      * If not specified the key is associated with the current organization. (i.e. account).
-     * - ttl: the time to live of the public key in seconds. 
+     * - ttl: the time to live of the public key in seconds.
      * The ttl defaults to 1h.
-     * @param opts 
-     * @returns 
+     * @param opts
+     * @returns
      */
     requestPublicKey(payload: CreatePublicKeyPayload = {}): Promise<string> {
         return this.get('/pk', { query: payload as Record<string, string | number> });

@@ -1,4 +1,4 @@
-import { AuthTokenPayload } from "@composableai/common";
+import { AuthTokenResponse } from "@composableai/common";
 import { AbstractFetchClient } from "api-fetch-client";
 import AccountApi from "./AccountApi.js";
 import AccountsApi from "./AccountsApi.js";
@@ -60,7 +60,7 @@ export class StudioClient extends AbstractFetchClient<StudioClient> {
         return this.headers["x-project-id"] || null;
     }
 
-    async getAuthToken(): Promise<AuthTokenPayload> {
+    async getAuthToken(): Promise<AuthTokenResponse> {
         return this.get('/api/v1/token');
     }
 

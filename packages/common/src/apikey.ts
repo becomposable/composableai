@@ -1,4 +1,5 @@
 import { ProjectRoles } from "./project.js";
+import { AccountRef } from "./user.js";
 
 
 export enum ApiKeyTypes {
@@ -42,10 +43,9 @@ export interface AuthTokenPayload {
 
     type: 'user' | 'apikey';
     account: string;
-    accountName?: string;
+    accounts: AccountRef[];
     project?: string;
     role?: string;
-    other_accounts?: string[]
 
     iss: string; //issuer
     aud: string; //audience

@@ -61,7 +61,7 @@ export class StudioClient extends AbstractFetchClient<StudioClient> {
     }
 
     async getAuthToken(): Promise<AuthTokenResponse> {
-        return this.get('/api/v1/token');
+        return this.get('/auth/token');
     }
 
     projects = new ProjectsApi(this);

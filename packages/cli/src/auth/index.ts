@@ -6,7 +6,7 @@ export function requestPublicKey(program: Command, projectId: string | undefined
     getClient(program).apikeys.requestPublicKey({
         name: options.name || undefined,
         ttl: options.ttl ? parseInt(options.ttl) : undefined,
-        projectId: projectId || undefined
+        projectId: projectId
     }).then((key) => {
         console.log(key);
     });

@@ -1,5 +1,5 @@
 import { program } from 'commander';
-import { requestJWT, requestPublicKey } from './apikeys/index.js';
+import { requestJWT, requestPublicKey } from './auth/index.js';
 import runExport from './codegen/index.js';
 import { addProfile, deleteProfile, listProfiles, showProfile, updateProfile, useProfile } from './config/commands.js';
 import { genTestData } from './datagen/index.js';
@@ -26,14 +26,18 @@ program.command("projects")
     .action(() => {
         listProjects(program);
     })
-program.command("pk [projectId]")
-    .description("Get or create a public API key associated with the account owning the current API key. The current API key must have at least the \"application\" role. If a projectId is given then the key will be associated with that project")
+const authRoot = program.command("auth")
+    .description("Manage authentication tokens")
+
+authRoot.command("pk <projectId>")
+    .description("Get or create a public API key associated with the account owning the current API key. The current API key must have at least the \"application\" role. The generated key will be associated with the given project")
     .option('--name [name]', 'An optional name for the generated key. If not specified a name will be generated.')
     .option('--ttl [ttl]', 'A ttl value in seconds to be used to expire the generated key. The default is 24h.')
-    .action((projectId: string | undefined, options: Record<string, any>) => {
+    .action((projectId: string, options: Record<string, any>) => {
         requestPublicKey(program, projectId, options);
     })
-program.command("jwt [apiKey]")
+
+authRoot.command("token [apiKey]")
     .description("Get a JWT token for the given apikey. The token is usable with zeno. If no api key is provided the connection apikey will be used.")
     .action((apiKey: string | undefined) => {
         requestJWT(program, apiKey);

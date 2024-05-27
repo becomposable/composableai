@@ -60,8 +60,16 @@ export class StudioClient extends AbstractFetchClient<StudioClient> {
         return this.headers["x-project-id"] || null;
     }
 
-    async getAuthToken(): Promise<AuthTokenResponse> {
-        return this.get('/auth/token');
+    /**
+     * 
+     * Generate a token for use with other Composable's services
+     * 
+     * @param accountId: selected account to generate the token for
+     * @returns AuthTokenResponse
+     */
+    async getAuthToken(accountId?: string): Promise<AuthTokenResponse> {
+        const query = accountId ? { accountId } : undefined;
+        return this.get('/auth/token', { query });
     }
 
     projects = new ProjectsApi(this);

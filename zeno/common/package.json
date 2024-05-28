@@ -1,0 +1,32 @@
+{
+  "name": "@composableai/zeno-common",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Zeno common types and functions",
+  "main": "./lib/esm/index.js",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsmod build",
+    "clean": "rm -rf ./lib tsconfig.tsbuildinfo"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "ts-dual-module": "^0.6.3",
+    "typescript": "^5.4.5",
+    "vitest": "^1.2.2"
+  },
+  "ts_dual_module": {
+    "outDir": "lib"
+  },
+  "exports": {
+    "types": "./lib/types/index.d.ts",
+    "default": "./lib/esm/index.js",
+    "import": "./lib/esm/index.js",
+    "require": "./lib/cjs/index.js"
+  },
+  "types": "./lib/types/index.d.ts"
+}

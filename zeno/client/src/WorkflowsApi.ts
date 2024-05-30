@@ -1,4 +1,4 @@
-import { ContentWorkflow, CreateContentWorkflowPayload, ExecuteWorkflowPayload, ListWorkflowRunsResponse } from "@composableai/zeno-common";
+import { WorkflowRule, CreateWorkflowRulePayload, ExecuteWorkflowPayload, ListWorkflowRunsResponse, WorkflowRuleItem } from "@composableai/zeno-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 
@@ -9,40 +9,38 @@ export class WorkflowsApi extends ApiTopic {
     }
 
 
-    list(): Promise<ContentWorkflow[]> {
+    listRules(): Promise<WorkflowRuleItem[]> {
         return this.get("/");
     }
 
 
-    getWorkflow(id: string): Promise<ContentWorkflow> {
+    getRule(id: string): Promise<WorkflowRule> {
         return this.get(`/${id}`);
     }
 
-    updatetWorkflow(id: string, payload: any): Promise<ContentWorkflow> {
+    updateRule(id: string, payload: any): Promise<WorkflowRule> {
         return this.put(`/${id}`, {
             payload
         });
     }
 
-    createWorkflow(payload: CreateContentWorkflowPayload): Promise<ContentWorkflow> {
+    createRule(payload: CreateWorkflowRulePayload): Promise<WorkflowRule> {
         return this.post("/", {
             payload
         });
     }
 
-    execute(id: string, objectIds?: string[], config?: Record<string, any>): Promise<{ runIds: string[] }> {
+    deleteRule(id: string) {
+        return this.del(`/${id}`);
+    }
 
+    execute(id: string, objectIds?: string[], config?: Record<string, any>): Promise<{ runIds: string[] }> {
         const payload: ExecuteWorkflowPayload = {
             targetObjectIds: objectIds,
             config
         };
         return this.post(`/${id}/execute`, { payload });
     }
-
-    deleteWorkflow(id: string) {
-        return this.del(`/${id}`);
-    }
-
 
     listRuns(documentId: string, eventName: string, ruleId: string): Promise<ListWorkflowRunsResponse> {
         return this.post(`/runs`, { payload: { documentId, eventName, ruleId } });

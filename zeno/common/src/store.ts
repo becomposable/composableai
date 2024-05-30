@@ -140,12 +140,12 @@ export interface ContentObjectTypeLayout {
 export interface CreateContentObjectTypePayload extends Omit<ContentObjectType, 'id' | 'created_at' | 'updated_at' | 'owner'> {
 }
 
-export enum ContentWorkflowInputType {
+export enum WorkflowRuleInputType {
     single = 'single',
     multiple = 'multiple',
     none = 'none'
 }
-export interface ContentWorkflow {
+export interface WorkflowRuleItem {
     // the workflow ID
     id: string;
     // the workflow name
@@ -156,7 +156,9 @@ export interface ContentWorkflow {
     owner: string;
     created_at: string;
     updated_at: string;
-    input_type: ContentWorkflowInputType;
+    input_type: WorkflowRuleInputType;
+}
+export interface WorkflowRule extends WorkflowRuleItem {
     // matching rules for the workflow
     match: {
         object_type?: string,
@@ -171,5 +173,5 @@ export interface ContentWorkflow {
 }
 
 
-export interface CreateContentWorkflowPayload extends Omit<ContentWorkflow, 'id' | 'created_at' | 'updated_at' | 'owner'> {
+export interface CreateWorkflowRulePayload extends Omit<WorkflowRule, 'id' | 'created_at' | 'updated_at' | 'owner'> {
 }

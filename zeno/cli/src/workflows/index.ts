@@ -1,4 +1,4 @@
-import { ContentWorkflowInputType } from "@composableai/zeno-common";
+import { WorkflowRuleInputType } from "@composableai/zeno-common";
 import { Command } from "commander";
 import { getClient } from "../client.js";
 
@@ -18,10 +18,10 @@ export async function createWorkflow(program: Command, options: Record<string, a
         process.exit(1);
     }
     const [event_name, object_type] = on.split(':');
-    const workflow = await getClient(program).workflows.createWorkflow({
+    const workflow = await getClient(program).workflows.createRule({
         name,
         endpoint: run,
-        input_type: inputType ?? ContentWorkflowInputType.single,
+        input_type: inputType ?? WorkflowRuleInputType.single,
         match: {
             event_name,
             object_type
@@ -36,7 +36,7 @@ export async function deleteWorkflow(program: Command, objectId: string, _option
 }
 
 export async function getWorkflow(program: Command, objectId: string, _options: Record<string, any>) {
-    const res = await getClient(program).workflows.getWorkflow(objectId);
+    const res = await getClient(program).workflows.getRule(objectId);
     console.log(res);
 
 }
@@ -49,6 +49,6 @@ export async function executeWorkflow(program: Command, workflowId: string, opti
 }
 
 export async function listWorkflows(program: Command, _options: Record<string, any>) {
-    const res = await getClient(program).workflows.list();
+    const res = await getClient(program).workflows.listRules();
     console.log(res);
 }

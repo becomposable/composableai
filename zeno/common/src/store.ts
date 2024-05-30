@@ -173,5 +173,9 @@ export interface WorkflowRule extends WorkflowRuleItem {
 }
 
 
-export interface CreateWorkflowRulePayload extends Omit<WorkflowRule, 'id' | 'created_at' | 'updated_at' | 'owner'> {
+export interface CreateWorkflowRulePayload extends UploadWorkflowRulePayload {
+    name: string; // required
+    endpoint: string; // required
+}
+export interface UploadWorkflowRulePayload extends Partial<Omit<WorkflowRule, 'id' | 'created_at' | 'updated_at' | 'owner'>> {
 }

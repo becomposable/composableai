@@ -27,10 +27,10 @@ export interface WorkflowParams {
      * The Unix timestamp when the workflow was started.
      */
     timestamp: number;
-    /**
-     * The workflow ID.
+    /*
+     * The Workflow Rule ID.
      */
-    workflowId: string;
+    wfRuleName: string;
     /**
      * Workfllow configuration.
      */

@@ -5,19 +5,15 @@ export class StreamSource {
     constructor(public stream: ReadableStream, public name: string, public type?: string) { }
 }
 
-export class UriSource {
-    constructor(
-        // the source URI
-        public source: string,
-        // the original name of the input file if any
-        public name?: string,
-        // the mime type of the content source.
-        public type?: string
-    ) { }
-}
-
 export interface UploadContentObjectPayload extends Omit<CreateContentObjectPayload, 'content'> {
-    content?: StreamSource | File | UriSource
+    content?: StreamSource | File | {
+        // the source URI
+        source: string,
+        // the original name of the input file if any
+        name?: string,
+        // the mime type of the content source.
+        type?: string
+    }
 }
 
 
@@ -119,10 +115,9 @@ export class StoreApi extends ApiTopic {
         const createPayload: CreateContentObjectPayload = {
             ...payload
         };
-        if (payload.content && !(payload.content instanceof UriSource)) {
+        if (payload.content instanceof StreamSource || payload.content instanceof File) {
             createPayload.content = await this.uploadFile(payload.content);
         }
-
         // create the object
         return await this.post('/objects', {
             payload: createPayload

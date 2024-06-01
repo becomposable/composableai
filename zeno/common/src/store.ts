@@ -9,13 +9,16 @@ export enum ContentObjectStatus {
 
 export interface ContentObject extends ContentObjectItem {
     text?: string; // the text representation of the object
+    text_etag?: string;
     tokens?: {
         count: number; // the number of tokens in the text
         encoding: string; // the encoding used to calculate the tokens
+        etag: string;
     };
-    embedding: {
+    embedding?: {
         model?: string;
-        content?: number[];
+        content: number[];
+        etag: string;
     },
 }
 
@@ -40,6 +43,8 @@ export interface ContentObjectItem {
         type?: string;
         // the original name of the input file if any
         name?: string;
+        // the etag of the content source if any
+        etag?: string;
     };
     external_id?: string;
     name: string;

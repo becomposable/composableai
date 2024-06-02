@@ -13,13 +13,15 @@ export interface ContentObject extends ContentObjectItem {
     tokens?: {
         count: number; // the number of tokens in the text
         encoding: string; // the encoding used to calculate the tokens
-        etag: string;
+        etag: string; //the etag of the text used for the token count
     };
     embedding?: {
         model?: string;
         content: number[];
-        etag: string;
+        etag: string; // the etag of the text used for the embedding
     },
+    parts?: string[]; // the list of objectId of the parts of the object
+    parts_etag?: string; // the etag of the text used for the parts list
 }
 
 /**
@@ -70,22 +72,40 @@ export interface ContentObjectTypeRef {
     name: string;
 }
 
-export interface SearchQuery {
+export interface SimpleSearchQuery {
     location?: string;
     status?: string;
     type?: string;
     parent?: string;
+    similarTo?: string;
 }
 
 export interface SearchPayload {
-    query?: SearchQuery;
+    query?: SimpleSearchQuery;
     limit?: number;
     offset?: number;
 }
 
+export interface ComplexSearchQuery {
+    location?: string;
+    status?: string;
+    type?: string;
+    parent?: string;
+    vector?: {
+        objectId?: string;
+        values?: number[];
+        text?: string;
+        threshold?: number;
+    }
+}
+
+export interface ComplexSearchPayload extends Omit<SearchPayload, 'query'> {
+    query?: ComplexSearchQuery;
+}
+
 export interface ComputeFacetPayload {
     facets: FacetSpec[];
-    query?: SearchQuery;
+    query?: SimpleSearchQuery;
 }
 export interface FacetSpec {
     name: string;

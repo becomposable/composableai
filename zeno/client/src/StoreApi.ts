@@ -1,4 +1,4 @@
-import { ComputeFacetPayload, ContentObject, ContentObjectItem, ContentObjectType, ContentObjectTypeItem, ContentObjectTypeLayout, CreateContentObjectPayload, CreateContentObjectTypePayload, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload } from "@composableai/zeno-common";
+    import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, ContentObjectType, ContentObjectTypeItem, ContentObjectTypeLayout, CreateContentObjectPayload, CreateContentObjectTypePayload, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@composableai/zeno-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export class StreamSource {
@@ -48,10 +48,13 @@ export class StoreApi extends ApiTopic {
     listObjects(payload: SearchPayload = {}): Promise<ContentObjectItem[]> {
         const limit = payload.limit || 100;
         const offset = payload.offset || 0;
+        const query = payload.query || {} as SimpleSearchQuery;
+
         return this.get("/objects", {
             query: {
-                limit, offset,
-                ...payload.query
+                limit, 
+                offset,
+                ...query
             }
         });
     }
@@ -66,7 +69,7 @@ export class StoreApi extends ApiTopic {
         path;//TODO
     }
 
-    search(payload: SearchPayload): Promise<ContentObjectItem[]> {
+    search(payload: ComplexSearchPayload): Promise<ContentObjectItem[]> {
         return this.post("/objects/search", {
             payload
         });

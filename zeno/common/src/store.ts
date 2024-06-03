@@ -184,13 +184,10 @@ export interface WorkflowRuleItem {
     input_type: WorkflowRuleInputType;
 }
 export interface WorkflowRule extends WorkflowRuleItem {
-    // matching rules for the workflow
-    match: {
-        object_type?: string,
-        event_name?: string,
-        rules?: Record<string, any>
-    }
-
+    /*
+     * mongo matching rules for a content event
+     */
+    match?: Record<string, any>;
     /**
      * Activities configuration if any.
      */

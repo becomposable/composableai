@@ -91,7 +91,7 @@ export class StoreApi extends ApiTopic {
             mimeType: source.type
         });
         // upload the file content to the signed URL
-        await this.fetch(url, {
+        const res = await this.fetch(url, {
             method: 'PUT',
             //@ts-ignore: duplex is not in the types. See https://github.com/node-fetch/node-fetch/issues/1769
             duplex: isStream ? "half" : undefined,
@@ -109,7 +109,8 @@ export class StoreApi extends ApiTopic {
         return {
             source: id,
             name: source.name,
-            type: mimeType
+            type: mimeType,
+            etag: res.headers.get('etag') ?? undefined
         }
     }
 

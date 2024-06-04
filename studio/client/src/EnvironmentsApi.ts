@@ -1,5 +1,5 @@
 import { AIModel, EmbeddingsOptions, EmbeddingsResult, ModelSearchPayload } from "@llumiverse/core";
-import { ExecutionEnvironment, ExecutionEnvironmentCreatePayload, ExecutionEnvironmentRef, ExecutionEnvironmentUpdatePayload, LoadBalancingEnvConfig, MediatorEnvConfig } from "@composableai/common";
+import { ExecutionEnvironment, ExecutionEnvironmentCreatePayload, ExecutionEnvironmentRef, ExecutionEnvironmentUpdatePayload, LoadBalancingEnvConfig, MediatorEnvConfig } from "@composableai/studio-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export default class EnvironmentsApi extends ApiTopic {
@@ -35,10 +35,10 @@ export default class EnvironmentsApi extends ApiTopic {
      * udpate enabled models and / or config. If enabled_models is not provided, the existing enabled models will not change.
      * Same, if config is not provioded the exiting config is not changed.
      * If the config is provided then it will be updated without removing fields that are not provided.
-     * 
-     * @param id 
-     * @param payload 
-     * @returns 
+     *
+     * @param id
+     * @param payload
+     * @returns
      */
     updateConfig(id: string, payload: {
         enabled_models?: AIModel[],

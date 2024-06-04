@@ -1,4 +1,4 @@
-import { ApiKey, ApiKeyWithValue, AuthTokenResponse, CreateOrUpdateApiKeyPayload, CreatePublicKeyPayload } from "@composableai/common";
+import { ApiKey, ApiKeyWithValue, AuthTokenResponse, CreateOrUpdateApiKeyPayload, CreatePublicKeyPayload } from "@composableai/studio-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export class ApiKeysApi extends ApiTopic {

@@ -1,4 +1,4 @@
-import { RunAnalyticsQuery, RunAnalyticsResult } from "@composableai/common";
+import { RunAnalyticsQuery, RunAnalyticsResult } from "@composableai/studio-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 

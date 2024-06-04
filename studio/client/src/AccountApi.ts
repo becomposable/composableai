@@ -1,4 +1,4 @@
-import { Account, InviteUserRequestPayload, InviteUserResponsePayload, OnboardingProgress, TransientToken, UpdateAccountPayload, UserInviteTokenData } from "@composableai/common";
+import { Account, InviteUserRequestPayload, InviteUserResponsePayload, OnboardingProgress, TransientToken, UpdateAccountPayload, UserInviteTokenData } from "@composableai/studio-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export default class AccountApi extends ApiTopic {
@@ -62,5 +62,3 @@ export default class AccountApi extends ApiTopic {
     }
 
 }
-
-

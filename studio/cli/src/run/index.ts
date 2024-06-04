@@ -1,4 +1,4 @@
-import { ExecutionRun } from "@composableai/common";
+import { ExecutionRun } from "@composableai/studio-common";
 import { Command } from "commander";
 import { getClient } from "../client.js";
 import { readFile, readStdin, writeFile } from "../utils/stdio.js";

@@ -1,4 +1,4 @@
-import { PromptTemplate, PromptTemplateCreatePayload, PromptTemplateRef, PromptTemplateUpdatePayload } from "@composableai/common";
+import { PromptTemplate, PromptTemplateCreatePayload, PromptTemplateRef, PromptTemplateUpdatePayload } from "@composableai/studio-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export default class PromptsApi extends ApiTopic {
@@ -91,7 +91,7 @@ export default class PromptsApi extends ApiTopic {
 
     /**
      * List the versions of the prompt template. Returens an empty array if no versions are found
-     * @param id 
+     * @param id
      * @returns the versions list or an empty array if no versions are found
      */
     listVersions(id: string): Promise<PromptTemplateRef[]> {

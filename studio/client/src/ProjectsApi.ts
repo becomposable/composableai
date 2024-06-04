@@ -1,5 +1,5 @@
 import { ClientBase, ApiTopic } from "api-fetch-client";
-import { ICreateProjectPayload, Project } from "@composableai/common";
+import { ICreateProjectPayload, Project } from "@composableai/studio-common";
 
 export default class ProjectsApi extends ApiTopic {
     constructor(parent: ClientBase) {

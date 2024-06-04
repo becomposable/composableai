@@ -1,4 +1,4 @@
-import { Account } from "@composableai/common";
+import { Account } from "@composableai/studio-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export default class AccountsApi extends ApiTopic {

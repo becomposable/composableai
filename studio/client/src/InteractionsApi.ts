@@ -1,4 +1,4 @@
-import { ExecutionRun, GenerateTestDataPayload, ImprovePromptPayload, Interaction, InteractionCreatePayload, InteractionExecutionPayload, InteractionForkPayload, InteractionPublishPayload, InteractionRef, InteractionRefWithSchema, InteractionUpdatePayload, InteractionsExportPayload } from "@composableai/common";
+import { ExecutionRun, GenerateTestDataPayload, ImprovePromptPayload, Interaction, InteractionCreatePayload, InteractionExecutionPayload, InteractionForkPayload, InteractionPublishPayload, InteractionRef, InteractionRefWithSchema, InteractionUpdatePayload, InteractionsExportPayload } from "@composableai/studio-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 import { StudioClient } from "./client.js";
 import { executeInteraction, executeInteractionByName } from "./execute.js";
@@ -23,7 +23,7 @@ export default class InteractionsApi extends ApiTopic {
 
     /**
      * List interaction names in the current project
-     * @returns 
+     * @returns
      */
     listNames(): Promise<{ id: string, name: string }[]> {
         return this.get('/names');
@@ -77,11 +77,11 @@ export default class InteractionsApi extends ApiTopic {
     }
 
     /**
-     * Execute an interaction and return a promise which will be resolved with the executed run when 
+     * Execute an interaction and return a promise which will be resolved with the executed run when
      * the run completes or fails.
-     * If the onChunk callback is passed then the streaming of the result is enabled. 
+     * If the onChunk callback is passed then the streaming of the result is enabled.
      * The onChunk callback with be called with the next chunk of the result as soon as it is available.
-     * When all chunks are received the fucntion will return the resolved promise 
+     * When all chunks are received the fucntion will return the resolved promise
      * @param id of the interaction to execute
      * @param payload InteractionExecutionPayload
      * @param onChunk callback to be called when the next chunk of the response is available
@@ -99,7 +99,7 @@ export default class InteractionsApi extends ApiTopic {
 
     /**
      * Same as execute but uses the interaction name selector instead of the id.
-     * 
+     *
      * A name selector is the interaction endpoint name suffuxed with an optional tag or version wich is starting with a `@` character.
      * The special `draft` tag is used to select the draft version of the interaction. If no tag or version is specified then the latest version is selected.
      * Examples of selectors:
@@ -107,10 +107,10 @@ export default class InteractionsApi extends ApiTopic {
      * - `ReviewContract@1` - select the version 1 of the ReviewContract interaction
      * - `ReviewContract@draft` - select the draft version of the ReviewContract interaction
      * - `ReviewContract@fixed` - select the ReviewContract interaction which is tagged with 'fixed' tag.
-     * @param nameWithTag 
-     * @param payload 
-     * @param onChunk 
-     * @returns 
+     * @param nameWithTag
+     * @param payload
+     * @param onChunk
+     * @returns
      */
     executeByName<P = any, R = any>(nameWithTag: string, payload: InteractionExecutionPayload = {},
         onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
@@ -151,7 +151,7 @@ export default class InteractionsApi extends ApiTopic {
 
     /**
      * List the versions of the interaxction. Returns an empty array if no versions are found
-     * @param id 
+     * @param id
      * @returns the versions list or an empty array if no versions are found
      */
     listVersions(id: string): Promise<InteractionRef[]> {
@@ -160,7 +160,7 @@ export default class InteractionsApi extends ApiTopic {
 
     /**
      * List the forks of the interaxction. Returns an empty array if no forks are found
-     * @param id 
+     * @param id
      * @returns the versions list or an empty array if no forks are found
      */
     listForks(id: string): Promise<InteractionRef[]> {

@@ -1,4 +1,4 @@
-import { AuthTokenResponse } from "@composableai/common";
+import { AuthTokenResponse } from "@composableai/studio-common";
 import { AbstractFetchClient } from "api-fetch-client";
 import AccountApi from "./AccountApi.js";
 import AccountsApi from "./AccountsApi.js";
@@ -61,9 +61,9 @@ export class StudioClient extends AbstractFetchClient<StudioClient> {
     }
 
     /**
-     * 
+     *
      * Generate a token for use with other Composable's services
-     * 
+     *
      * @param accountId: selected account to generate the token for
      * @returns AuthTokenResponse
      */

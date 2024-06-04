@@ -1,4 +1,4 @@
-import { InteractionRefWithSchema, InteractionStatus, mergePromptsSchema } from "@composableai/common";
+import { InteractionRefWithSchema, InteractionStatus, mergePromptsSchema } from "@composableai/studio-common";
 import { compile as compileSchema } from 'json-schema-to-typescript';
 import { join } from 'path';
 import { writeFile } from "../utils/stdio.js";

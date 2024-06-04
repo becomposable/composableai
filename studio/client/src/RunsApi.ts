@@ -1,4 +1,4 @@
-import { ExecutionRun, ExecutionRunRef, RunCreatePayload, RunListingFilters, RunListingQueryOptions, RunSearchPayload, RunSearchResponse } from "@composableai/common";
+import { ExecutionRun, ExecutionRunRef, RunCreatePayload, RunListingFilters, RunListingQueryOptions, RunSearchPayload, RunSearchResponse } from "@composableai/studio-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 import { StudioClient } from "./client.js";
 
@@ -35,7 +35,7 @@ export class RunsApi extends ApiTopic {
 
     /**
      * Get a run by id
-     * @param id 
+     * @param id
      * @returns InteractionResult
      **/
     retrieve(id: string): Promise<ExecutionRun> {

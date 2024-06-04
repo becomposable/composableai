@@ -1,4 +1,4 @@
-import { StudioClient } from "@composableai/client";
+import { StudioClient } from "@composableai/studio-client";
 import { Command } from "commander";
 import { config } from "./config/index.js";
 

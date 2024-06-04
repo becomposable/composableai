@@ -1,6 +1,6 @@
 {
-    "name": "@composableai/parent",
-    "version": "0.22.4",
+    "name": "@composableai/studio",
+    "version": "0.23.0",
     "private": true,
     "workspaces": [
         "../llumiverse/core",

@@ -45,7 +45,7 @@ export interface AuthTokenPayload {
     name: string;
     email?: string;
 
-    type: 'user' | 'apikey';
+    type: 'user' | 'apikey' | 'account';
     account:  AccountRef;
     accounts: AccountRef[];
     project?: string;

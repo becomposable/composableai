@@ -59,8 +59,8 @@ export interface ContentObjectItem {
  * When creating from an uploaded file the content shouild be an URL to the uploaded file
  */
 export interface CreateContentObjectPayload extends Partial<Omit<ContentObject,
-    'id' | 'root' | 'parent' | 'created_at' | 'updated_at' | 'type'
-    | 'owner' | 'name'>> {
+    'id' | 'root' | 'created_at' | 'updated_at' | 'type'
+    | 'owner'>> {
     id?: string; // An optional existing object ID to be replaced by the new one
     type?: string; // the object type ID
 }

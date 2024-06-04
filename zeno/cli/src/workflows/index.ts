@@ -31,7 +31,7 @@ export async function createWorkflow(program: Command, options: Record<string, a
 }
 
 export async function deleteWorkflow(program: Command, objectId: string, _options: Record<string, any>) {
-    const res = await getClient(program).store.delete(objectId);
+    const res = await getClient(program).workflows.delete(objectId);
     console.log(res);
 }
 

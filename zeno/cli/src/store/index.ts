@@ -94,7 +94,7 @@ export async function createObjectFromFile(program: Command, file: string, optio
     const client = getClient(program);
     const stream = createReadStream(file);
 
-    const res = await client.store.createObject({
+    const res = await client.objects.create({
         name: options.name || fileName,
         type: options.type,
         location: options.path,
@@ -105,16 +105,16 @@ export async function createObjectFromFile(program: Command, file: string, optio
 }
 
 export async function deleteObject(program: Command, objectId: string, _options: Record<string, any>) {
-    await getClient(program).store.delete(objectId);
+    await getClient(program).objects.delete(objectId);
 }
 
 export async function getObject(program: Command, objectId: string, _options: Record<string, any>) {
-    const object = await getClient(program).store.getObject(objectId);
+    const object = await getClient(program).objects.retrieve(objectId);
     console.log(object);
 }
 
 //@ts-ignore
 export async function listObjects(program: Command, folderPath: string | undefined, _options: Record<string, any>) {
-    const objects = await getClient(program).store.listObjects();
+    const objects = await getClient(program).objects.list();
     console.log(objects.map(o => `${o.id}\t ${o.name}`).join('\n'));
 }

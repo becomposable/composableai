@@ -1,7 +1,8 @@
-import { AbstractFetchClient } from "api-fetch-client";
+import { AbstractFetchClient, RequestError } from "api-fetch-client";
 import { ObjectsApi } from "./ObjectsApi.js";
 import { TypesApi } from "./TypesApi.js";
 import { WorkflowsApi } from "./WorkflowsApi.js";
+import { ZenoClientNotFoundError } from "./errors.js";
 
 export interface ZenoClientProps {
     serverUrl?: string;
@@ -21,6 +22,13 @@ export class ZenoClient extends AbstractFetchClient<ZenoClient> {
         }
         this.onRequest = opts.onRequest;
         this.onResponse = opts.onResponse;
+        this.errorFactory = (err: RequestError) => {
+            if (err.status === 404) {
+                return new ZenoClientNotFoundError(err);
+            } else {
+                return err;
+            }
+        }
     }
 
     withApiKey(apiKey: string | null) {

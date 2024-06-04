@@ -1,5 +1,5 @@
 import { AbstractFetchClient } from "api-fetch-client";
-import { StoreApi } from "./StoreApi.js";
+import { ObjectsApi } from "./ObjectsApi.js";
 import { WorkflowsApi } from "./WorkflowsApi.js";
 
 export interface ZenoClientProps {
@@ -28,6 +28,6 @@ export class ZenoClient extends AbstractFetchClient<ZenoClient> {
         );
     }
 
-    store = new StoreApi(this);
+    store = new ObjectsApi(this);
     workflows = new WorkflowsApi(this);
 }

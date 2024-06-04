@@ -1,4 +1,4 @@
-    import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, ContentObjectType, ContentObjectTypeItem, ContentObjectTypeLayout, CreateContentObjectPayload, CreateContentObjectTypePayload, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@composableai/zeno-common";
+import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, CreateContentObjectPayload, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@composableai/zeno-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export class StreamSource {
@@ -16,7 +16,6 @@ export interface UploadContentObjectPayload extends Omit<CreateContentObjectPayl
     }
 }
 
-
 export interface ComputeFacetsResponse {
     type?: { _id: string, count: number }[];
     location?: { _id: string, count: number }[];
@@ -25,10 +24,10 @@ export interface ComputeFacetsResponse {
     //[key: string]: { _id: string, count: number }[];
 }
 
-export class StoreApi extends ApiTopic {
+export class ObjectsApi extends ApiTopic {
 
     constructor(parent: ClientBase) {
-        super(parent, "/api/v1/store");
+        super(parent, "/api/v1/store/objects");
     }
 
     getUploadUrl(payload: GetUploadUrlPayload): Promise<GetUploadUrlResponse> {
@@ -45,12 +44,12 @@ export class StoreApi extends ApiTopic {
         })
     }
 
-    listObjects(payload: SearchPayload = {}): Promise<ContentObjectItem[]> {
+    list(payload: SearchPayload = {}): Promise<ContentObjectItem[]> {
         const limit = payload.limit || 100;
         const offset = payload.offset || 0;
         const query = payload.query || {} as SimpleSearchQuery;
 
-        return this.get("/objects", {
+        return this.get("/", {
             query: {
                 limit, 
                 offset,
@@ -60,7 +59,7 @@ export class StoreApi extends ApiTopic {
     }
 
     computeFacets(query: ComputeFacetPayload): Promise<ComputeFacetsResponse> {
-        return this.post("/objects/facets", {
+        return this.post("/facets", {
             payload: query
         });
     }
@@ -70,20 +69,24 @@ export class StoreApi extends ApiTopic {
     }
 
     search(payload: ComplexSearchPayload): Promise<ContentObjectItem[]> {
-        return this.post("/objects/search", {
+        return this.post("/search", {
             payload
         });
     }
 
-    getObject(id: string): Promise<ContentObject> {
-        return this.get(`/objects/${id}`);
+    retrieve(id: string, selectors?: string): Promise<ContentObject> {
+        return this.get(`/${id}`, {
+            query: {
+                selectors
+            }
+        });
     }
 
     getObjectText(id: string): Promise<{ text: string }> {
-        return this.get(`/objects/${id}/text`);
+        return this.get(`/${id}/text`);
     }
 
-    async uploadFile(source: StreamSource | File) {
+    async upload(source: StreamSource | File) {
         const isStream = source instanceof StreamSource;
         // get a signed URL to upload the file a computed mimeType and the file object id.
         const { url, id, mimeType } = await this.getUploadUrl({
@@ -114,59 +117,28 @@ export class StoreApi extends ApiTopic {
         }
     }
 
-    async createObject(payload: UploadContentObjectPayload): Promise<ContentObject> {
+    async create(payload: UploadContentObjectPayload): Promise<ContentObject> {
 
         const createPayload: CreateContentObjectPayload = {
             ...payload
         };
         if (payload.content instanceof StreamSource || payload.content instanceof File) {
-            createPayload.content = await this.uploadFile(payload.content);
+            createPayload.content = await this.upload(payload.content);
         }
         // create the object
-        return await this.post('/objects', {
+        return await this.post('/', {
             payload: createPayload
         });
     }
 
-    deleteObject(id: string) {
+    update(id: string, payload: Partial<CreateContentObjectPayload>): Promise<ContentObject> {
+        return this.put(`/${id}`, {
+            payload
+        });
+    }
+
+    delete(id: string) {
         return this.del(`/objects/${id}`);
-    }
-
-
-    listTypes(): Promise<ContentObjectTypeItem[]> {
-        return this.get('/types');
-    }
-
-    listTypeLayouts(): Promise<ContentObjectTypeLayout[]> {
-        return this.get('/types', {
-            query: { layout: true }
-        });
-    }
-
-    getType(typeId: string): Promise<ContentObjectType> {
-        return this.get(`/types/${typeId}`);
-    }
-
-    getTypeByName(typeName: string): Promise<ContentObjectType> {
-        return this.get("/types", {
-            query: { name: typeName }
-        });
-    }
-
-    updateType(typeId: string, payload: Partial<CreateContentObjectTypePayload>): Promise<ContentObjectType> {
-        return this.put(`/types/${typeId}`, {
-            payload
-        });
-    }
-
-    createType(payload: CreateContentObjectTypePayload): Promise<ContentObjectType> {
-        return this.post(`/types`, {
-            payload
-        });
-    }
-
-    deleteType(id: string) {
-        return this.del(`/types/${id}`);
     }
 
     listWorkflowRuns(documentId: string): Promise<ListWorkflowRunsResponse> {

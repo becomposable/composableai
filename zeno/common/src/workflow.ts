@@ -35,6 +35,11 @@ export interface WorkflowParams {
      * Workfllow configuration.
      */
     config: Record<string, any>;
+
+    /**
+     * Auth Token to access Zeno and Composable from the workers
+     */
+    authToken: string;
 }
 
 /**

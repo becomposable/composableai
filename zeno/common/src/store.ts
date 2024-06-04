@@ -60,10 +60,8 @@ export interface ContentObjectItem {
  */
 export interface CreateContentObjectPayload extends Partial<Omit<ContentObject,
     'id' | 'root' | 'parent' | 'created_at' | 'updated_at' | 'type'
-    | 'status' | 'owner' | 'embedding' | 'name'>> {
+    | 'owner' | 'name'>> {
     id?: string; // An optional existing object ID to be replaced by the new one
-    name?: string; // the name will be computed from the content URL if any, otherwise an 400 error will be returned
-    parent?: string; // the parent object ID
     type?: string; // the object type ID
 }
 
@@ -78,6 +76,7 @@ export interface SimpleSearchQuery {
     type?: string;
     parent?: string;
     similarTo?: string;
+    name?: string;
 }
 
 export interface SearchPayload {
@@ -86,11 +85,7 @@ export interface SearchPayload {
     offset?: number;
 }
 
-export interface ComplexSearchQuery {
-    location?: string;
-    status?: string;
-    type?: string;
-    parent?: string;
+export interface ComplexSearchQuery extends SimpleSearchQuery {
     vector?: {
         objectId?: string;
         values?: number[];

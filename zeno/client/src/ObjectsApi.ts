@@ -27,7 +27,7 @@ export interface ComputeFacetsResponse {
 export class ObjectsApi extends ApiTopic {
 
     constructor(parent: ClientBase) {
-        super(parent, "/api/v1/store/objects");
+        super(parent, "/api/v1/objects");
     }
 
     getUploadUrl(payload: GetUploadUrlPayload): Promise<GetUploadUrlResponse> {
@@ -51,7 +51,7 @@ export class ObjectsApi extends ApiTopic {
 
         return this.get("/", {
             query: {
-                limit, 
+                limit,
                 offset,
                 ...query
             }

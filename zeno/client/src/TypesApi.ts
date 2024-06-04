@@ -5,7 +5,7 @@ import { ApiTopic, ClientBase } from "api-fetch-client";
 export class TypesApi extends ApiTopic {
 
     constructor(parent: ClientBase) {
-        super(parent, "/api/v1/store/types");
+        super(parent, "/api/v1/types");
     }
 
     list(): Promise<ContentObjectTypeItem[]> {

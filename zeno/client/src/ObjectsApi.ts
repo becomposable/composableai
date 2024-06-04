@@ -74,10 +74,10 @@ export class ObjectsApi extends ApiTopic {
         });
     }
 
-    retrieve(id: string, selectors?: string): Promise<ContentObject> {
+    retrieve(id: string, select?: string): Promise<ContentObject> {
         return this.get(`/${id}`, {
             query: {
-                selectors
+                select
             }
         });
     }

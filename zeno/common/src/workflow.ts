@@ -103,8 +103,7 @@ export interface MultiDocumentsInteractionParams extends Omit<MultipleObjectsWor
     config: {
         interactionName: string;
         action: DocumentActionConfig;
-        resultSchema?: any;
-        formatter?: (res: any) => any;
+        data: Record<string, any>;
     }
 }
 

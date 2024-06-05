@@ -1,6 +1,6 @@
 {
     "name": "@composableai/studio-cli",
-    "version": "0.24.0",
+    "version": "0.24.1",
     "description": "Code generation for the interaction defined with Composable AI Studio",
     "type": "module",
     "bin": {
@@ -33,8 +33,8 @@
         "typescript": "^5.0.2"
     },
     "dependencies": {
-        "@composableai/studio-client": "^0.24.0",
-        "@composableai/studio-common": "^0.24.0",
+        "@composableai/studio-client": "^0.24.1",
+        "@composableai/studio-common": "^0.24.1",
         "ansi-colors": "^4.1.3",
         "ansi-escapes": "^6.2.0",
         "api-fetch-client": "^0.10.1",

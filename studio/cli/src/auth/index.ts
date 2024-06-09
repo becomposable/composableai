@@ -13,14 +13,8 @@ export function requestPublicKey(program: Command, projectId: string | undefined
 }
 
 
-export function requestJWT(program: Command, apiKey: string | undefined) {
-    if (apiKey) {
-        getClient(program).apikeys.getAuthToken(apiKey).then((token) => {
-            console.log(token);
+export function requestJWT(program: Command) {
+        getClient(program).getAuthToken().then((res) => {
+            console.log(res.token);
         });
-    } else {
-        getClient(program).getAuthToken().then((token) => {
-            console.log(token);
-        });
-    }
 }

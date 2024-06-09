@@ -1,4 +1,4 @@
-import { program } from 'commander';
+import { Command } from 'commander';
 import { requestJWT, requestPublicKey } from './auth/index.js';
 import runExport from './codegen/index.js';
 import { addProfile, deleteProfile, listProfiles, showProfile, updateProfile, useProfile } from './config/commands.js';
@@ -11,6 +11,8 @@ import runInteraction from './run/index.js';
 import { runHistory } from './runs/index.js';
 
 //warnIfNotLatest();
+
+const program = new Command();
 
 program.version(getVersion())
     .option('-k, --apikey <API_KEY>', 'API Key for your Composable Prompts project')
@@ -26,8 +28,18 @@ program.command("projects")
     .action(() => {
         listProjects(program);
     })
+
 const authRoot = program.command("auth")
-    .description("Manage authentication tokens")
+    .description("Manage authentication")
+    .action(() => {
+        console.log("Use the subcommands to manage authentication");
+    });
+    
+authRoot.command("token")
+    .description("Get a JWT token for the apikey used in the authentication.")
+    .action(() => {
+        requestJWT(program);
+    })
 
 authRoot.command("pk <projectId>")
     .description("Get or create a public API key associated with the account owning the current API key. The current API key must have at least the \"application\" role. The generated key will be associated with the given project")
@@ -37,10 +49,10 @@ authRoot.command("pk <projectId>")
         requestPublicKey(program, projectId, options);
     })
 
-authRoot.command("token [apiKey]")
-    .description("Get a JWT token for the given apikey. The token is usable with zeno. If no api key is provided the connection apikey will be used.")
-    .action((apiKey: string | undefined) => {
-        requestJWT(program, apiKey);
+program.command("auth-token")
+    .description("Get a JWT token for the apikey used in the authentication.")
+    .action(() => {
+        requestJWT(program);
     })
 
 program.command("envs [envId]")
@@ -102,11 +114,13 @@ program.command("runs [interactionId]")
     .action((interactionId: string | undefined, options: Record<string, any>) => {
         runHistory(program, interactionId, options);
     });
+
 const configRoot = program.command("config")
     .description("Manage configuration profiles")
     .action(() => {
         listProfiles();
     });
+
 configRoot.command('show [name]')
     .description("Show the configured profiles or the profile with the given name")
     .action((name?: string) => {
@@ -133,4 +147,4 @@ configRoot.command('delete <name>')
         deleteProfile(name);
     });
 
-program.parse();
+program.parse(process.argv);

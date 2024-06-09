@@ -1,4 +1,4 @@
-import { ApiKey, ApiKeyWithValue, AuthTokenResponse, CreateOrUpdateApiKeyPayload, CreatePublicKeyPayload } from "@composableai/studio-common";
+import { ApiKey, ApiKeyWithValue, CreateOrUpdateApiKeyPayload, CreatePublicKeyPayload } from "@composableai/studio-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export class ApiKeysApi extends ApiTopic {
@@ -47,13 +47,6 @@ export class ApiKeysApi extends ApiTopic {
         } else {
             return this.get(`/${id}`);
         }
-    }
-
-    /**
-     * Get Auth Token for a Key
-     */
-    getAuthToken(id: string): Promise<AuthTokenResponse> {
-        return this.get(`/${id}/token`);
     }
 
     /**

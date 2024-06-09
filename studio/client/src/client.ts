@@ -67,9 +67,13 @@ export class StudioClient extends AbstractFetchClient<StudioClient> {
      * @param accountId: selected account to generate the token for
      * @returns AuthTokenResponse
      */
-    async getAuthToken(accountId?: string): Promise<AuthTokenResponse> {
-        const query = accountId ? { accountId } : undefined;
-        return this.get('/auth/token', { query });
+    async getAuthToken(token?: string, accountId?: string): Promise<AuthTokenResponse> {
+        const query = {
+            accountId,
+            token
+        };
+
+        return this.get('/auth/token', { query: query });
     }
 
     projects = new ProjectsApi(this);

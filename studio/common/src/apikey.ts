@@ -1,4 +1,4 @@
-import { ProjectRoles } from "./project.js";
+import { ProjectRef, ProjectRoles } from "./project.js";
 import { AccountRef } from "./user.js";
 
 
@@ -44,11 +44,13 @@ export interface AuthTokenPayload {
     subject: string;
     name: string;
     email?: string;
+    picture?: string;
 
     type: 'user' | 'apikey' | 'account';
     account:  AccountRef;
     accounts: AccountRef[];
-    project?: string;
+    project?: ProjectRef;
+    projects: ProjectRef[];
     role?: string;
 
     iss: string; //issuer

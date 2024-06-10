@@ -105,3 +105,11 @@ export interface SignupData {
     companyWebsite?: string;
     maturity?: string;
 }
+
+/**
+ * Signup Payload: used to create a new user
+ */
+export interface SignupPayload {
+    firebaseToken: string;
+    signupData: SignupData;
+}

@@ -47,7 +47,7 @@ export interface AuthTokenPayload {
     email?: string;
     picture?: string;
 
-    type: 'user' | 'apikey' | 'account';
+    type: PrincipalType
     account:  AccountRef;
     accounts: AccountRef[];
     project?: ProjectRef;
@@ -57,4 +57,11 @@ export interface AuthTokenPayload {
     iss: string; //issuer
     aud: string; //audience
     exp: number; //expires in (EPOC seconds)
+}
+
+
+export enum PrincipalType {
+    User = "user",
+    ApiKey = "apikey",
+    ServiceAcount = "service_account",
 }

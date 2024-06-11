@@ -97,4 +97,22 @@ export default class PromptsApi extends ApiTopic {
     listVersions(id: string): Promise<PromptTemplateRef[]> {
         return this.get(`/${id}/versions`);
     }
+
+
+    /**
+     * Retrieve list of interactions that use the prompt template
+     */
+    listInteractions(id: string): Promise<ListInteractionsResponse> {
+        return this.get(`/${id}/interactions`);
+    }
+
+}
+
+export interface ListInteractionsResponse {
+    prompt: string,
+    interactions: {
+        id: string,
+        name: string,
+        versions: string[],
+    }[]
 }

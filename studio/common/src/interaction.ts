@@ -130,6 +130,7 @@ export interface InteractionPublishPayload {
 export interface InteractionForkPayload {
     keepTags?: boolean;
     forkPrompts?: boolean;
+    targetProject?: string;
 }
 
 export interface InteractionExecutionPayload<Input = any> {

@@ -30,6 +30,7 @@ export function isRoleIncludedIn(role: string, includingRole: string) {
 export interface ProjectRef {
     id: string;
     name: string;
+    account: string;
 }
 export interface Project {
     id: string;
@@ -50,4 +51,4 @@ export interface ProjectUpdatePayload {
     description?: string;
 }
 
-export const ProjectRefPopulate = "id name";
+export const ProjectRefPopulate = "id name account";

@@ -137,13 +137,13 @@ export class ObjectsApi extends ApiTopic {
         });
     }
 
-    delete(id: string) {
-        return this.del(`/objects/${id}`);
+    delete(id: string): Promise<{id: string}> {
+        return this.del(`/${id}`);
     }
 
     listWorkflowRuns(documentId: string): Promise<ListWorkflowRunsResponse> {
 
-        return this.get(`/objects/${documentId}/workflow-runs`)
+        return this.get(`/${documentId}/workflow-runs`)
 
     }
 

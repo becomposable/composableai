@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { addProfile, deleteProfile, listProfiles, showProfile, updateProfile, useProfile } from './config/commands.js';
 import { getVersion, upgrade } from './package.js';
 import { createObject, deleteObject, getObject, listObjects } from './store/index.js';
-import { createOrUpdateWorkflowDefinition, createWorkflowRule, deleteWorkflowRule, executeWorkflowRule, listWorkflowsDefinition, listWorkflowsRule } from './workflows/index.js';
+import { createOrUpdateWorkflowDefinition, createOrUpdateWorkflowRule, createWorkflowRule, deleteWorkflowDefinition, deleteWorkflowRule, executeWorkflowRule, getWorkflowDefinition, getWorkflowRule, listWorkflowsDefinition, listWorkflowsRule } from './workflows/index.js';
 
 const program = new Command()
     .option('-k, --apikey <API_KEY>', 'API Key to authenticate with Zenos server')
@@ -88,20 +88,35 @@ rules.command("create")
         createWorkflowRule(program, options);
     });
 
-    rules.command("list")
+rules.command("get <objectId>")
+    .description("Get a workflow given its ID")
+    .option('-f, --file [file]', 'The file to save the workflow definition to.')
+    .action((objectId: string, options: Record<string, any>) => {
+        getWorkflowRule(program, objectId, options);
+    });
+
+rules.command("apply")
+    .description("Get a workflow given its ID")
+    .option('-f, --file <file>', 'The file to save the workflow definition to.')
+    .action((options: Record<string, any>) => {
+        createOrUpdateWorkflowRule(program, options);
+    });
+
+rules.command("list")
     .description("List all workflows")
     .action((options: Record<string, any>) => {
         listWorkflowsRule(program, options);
     });
 
-    rules.command("execute <workflowId>")
+rules.command("execute <workflowId>")
     .description("Execute a workflow")
     .option('-o, --objectId [objectIds...]', 'The object to execute the workflow on.')
+    .option('-f, --file [file]', 'The file containing workflow execution payload.')
     .action((workflowId: string, options: Record<string, any>) => {
         executeWorkflowRule(program, workflowId, options);
     });
 
-    rules.command("delete <objectId>")
+rules.command("delete <objectId>")
     .description("Delete a workflow given its ID")
     .action((objectId: string, options: Record<string, any>) => {
         deleteWorkflowRule(program, objectId, options);
@@ -132,8 +147,14 @@ definitions.command("list")
 definitions.command("get <objectId>")
     .description("Get a workflow definition given its ID.")
     .option('-f, --file [file]', 'The file to save the workflow definition to.')
+    .action((objectId: string, options: Record<string, any>) => {
+        getWorkflowDefinition(program, objectId, options);
+    });
 
 definitions.command("delete <objectId>")
     .description("Delete a workflow definition given its ID.")
+    .action((objectId: string, options: Record<string, any>) => {
+        deleteWorkflowDefinition(program, objectId, options);
+    });
 
-program.parse( process.argv );
+program.parse(process.argv);

@@ -1,5 +1,4 @@
 import { BaseObject } from "./index.js";
-import { WorkflowParams } from "./workflow.js";
 
 export interface DSLWorkflowActivity {
     /**
@@ -58,10 +57,7 @@ export interface DSLWorkflowDefinition extends BaseObject{
     // the name of the variable that will hold the workflow result
     // if not specified "result" will be assumed
     result?: string;
-}
-
-export interface DSLWorkflowParams extends Omit<WorkflowParams, 'config'> {
-    config: DSLWorkflowDefinition;
+    debug_mode?: boolean;
 }
 
 export interface WorkflowDefinitionRef {

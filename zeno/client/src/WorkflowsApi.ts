@@ -7,14 +7,6 @@ export class WorkflowsApi extends ApiTopic {
         super(parent, "/api/v1/workflows");
     }
 
-    execute(id: string, objectIds?: string[], config?: Record<string, any>): Promise<{ runIds: string[] }> {
-        const payload: ExecuteWorkflowPayload = {
-            targetObjectIds: objectIds,
-            config
-        };
-        return this.post(`/${id}/execute`, { payload });
-    }
-
     listRuns(documentId: string, eventName: string, ruleId: string): Promise<ListWorkflowRunsResponse> {
         return this.post(`/runs`, { payload: { documentId, eventName, ruleId } });
     }
@@ -38,7 +30,6 @@ export class WorkflowsRulesApi extends ApiTopic {
     constructor(parent: WorkflowsApi) {
         super(parent, "/rules");
     }
-
 
 
     list(): Promise<WorkflowRuleItem[]> {
@@ -66,6 +57,14 @@ export class WorkflowsRulesApi extends ApiTopic {
         return this.del(`/${id}`);
     }
 
+
+    execute(id: string, objectIds?: string[], config?: Record<string, any>): Promise<{ runIds: string[] }> {
+        const payload: ExecuteWorkflowPayload = {
+            targetObjectIds: objectIds,
+            config
+        };
+        return this.post(`/${id}/execute`, { payload });
+    }
 
 }
 

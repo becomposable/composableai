@@ -1,36 +1,10 @@
-import { CreateWorkflowRulePayload, ExecuteWorkflowPayload, ListWorkflowRunsResponse, WorkflowRule, WorkflowRuleItem, WorkflowRunWithDetails } from "@composableai/zeno-common";
+import { CreateWorkflowRulePayload, DSLWorkflowDefinition, ExecuteWorkflowPayload, ListWorkflowRunsResponse, WorkflowDefinitionRef, WorkflowRule, WorkflowRuleItem, WorkflowRunWithDetails } from "@composableai/zeno-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export class WorkflowsApi extends ApiTopic {
 
     constructor(parent: ClientBase) {
         super(parent, "/api/v1/workflows");
-    }
-
-
-    listRules(): Promise<WorkflowRuleItem[]> {
-        return this.get("/");
-    }
-
-
-    getRule(id: string): Promise<WorkflowRule> {
-        return this.get(`/${id}`);
-    }
-
-    updateRule(id: string, payload: any): Promise<WorkflowRule> {
-        return this.put(`/${id}`, {
-            payload
-        });
-    }
-
-    createRule(payload: CreateWorkflowRulePayload): Promise<WorkflowRule> {
-        return this.post("/", {
-            payload
-        });
-    }
-
-    deleteRule(id: string) {
-        return this.del(`/${id}`);
     }
 
     execute(id: string, objectIds?: string[], config?: Record<string, any>): Promise<{ runIds: string[] }> {
@@ -51,6 +25,81 @@ export class WorkflowsApi extends ApiTopic {
 
     terminate(workflowId: string, runId: string, reason?: string): Promise<{ message: string }> {
         return this.post(`/runs/${workflowId}/${runId}/terminate`, { payload: { reason } });
+    }
+
+    rules = new WorkflowsRulesApi(this);
+    definitions = new WorkflowsDefinitionApi(this);
+
+}
+
+
+export class WorkflowsRulesApi extends ApiTopic {
+
+    constructor(parent: WorkflowsApi) {
+        super(parent, "/rules");
+    }
+
+
+
+    list(): Promise<WorkflowRuleItem[]> {
+        return this.get("/");
+    }
+
+
+    retrieve(id: string): Promise<WorkflowRule> {
+        return this.get(`/${id}`);
+    }
+
+    update(id: string, payload: any): Promise<WorkflowRule> {
+        return this.put(`/${id}`, {
+            payload
+        });
+    }
+
+    create(payload: CreateWorkflowRulePayload): Promise<WorkflowRule> {
+        return this.post("/", {
+            payload
+        });
+    }
+
+    delete(id: string) {
+        return this.del(`/${id}`);
+    }
+
+
+}
+
+export class WorkflowsDefinitionApi extends ApiTopic {
+
+    //model: DSLWorkflowDefinition;
+
+    constructor(parent: WorkflowsApi) {
+        super(parent, "/definitions");
+    }
+
+    list(): Promise<WorkflowDefinitionRef[]> {
+        return this.get("/");
+    }
+
+
+    retrieve(id: string): Promise<DSLWorkflowDefinition> {
+        return this.get(`/${id}`);
+    }
+
+    update(id: string, payload: any): Promise<DSLWorkflowDefinition> {
+        return this.put(`/${id}`, {
+            payload
+        });
+    }
+
+    create(payload: CreateWorkflowRulePayload): Promise<DSLWorkflowDefinition> {
+        return this.post("/", {
+            payload
+        });
+    }
+
+    delete(id: string) {
+        return this.del(`/${id}`);
     }
 
 

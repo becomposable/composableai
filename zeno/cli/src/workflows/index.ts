@@ -1,9 +1,10 @@
 import { WorkflowRuleInputType } from "@composableai/zeno-common";
 import { Command } from "commander";
+import fs from 'fs';
 import { getClient } from "../client.js";
 
 
-export async function createWorkflow(program: Command, options: Record<string, any>) {
+export async function createWorkflowRule(program: Command, options: Record<string, any>) {
     const { name, on, run, inputType } = options;
     if (!name) {
         console.log('A name for the worklow is required. Use --name argument');
@@ -18,7 +19,7 @@ export async function createWorkflow(program: Command, options: Record<string, a
         process.exit(1);
     }
     const [event_name, object_type] = on.split(':');
-    const workflow = await getClient(program).workflows.createRule({
+    const workflow = await getClient(program).workflows.rules.create({
         name,
         endpoint: run,
         input_type: inputType ?? WorkflowRuleInputType.single,
@@ -30,25 +31,75 @@ export async function createWorkflow(program: Command, options: Record<string, a
     console.log("Created workflow", workflow.id);
 }
 
-export async function deleteWorkflow(program: Command, objectId: string, _options: Record<string, any>) {
-    const res = await getClient(program).workflows.delete(objectId);
+export async function deleteWorkflowRule(program: Command, objectId: string, _options: Record<string, any>) {
+    const res = await getClient(program).workflows.rules.delete(objectId);
     console.log(res);
+    
 }
 
-export async function getWorkflow(program: Command, objectId: string, _options: Record<string, any>) {
-    const res = await getClient(program).workflows.getRule(objectId);
+export async function getWorkflowRule(program: Command, objectId: string, _options: Record<string, any>) {
+    const res = await getClient(program).workflows.rules.retrieve(objectId);
     console.log(res);
 
 }
 
-export async function executeWorkflow(program: Command, workflowId: string, options: Record<string, any>) {
+export async function executeWorkflowRule(program: Command, workflowId: string, options: Record<string, any>) {
     console.log("Executing workflow", workflowId, options);
     const { objectId, config } = options;
     const res = await getClient(program).workflows.execute(workflowId, objectId, config);
     console.log(res);
 }
 
-export async function listWorkflows(program: Command, _options: Record<string, any>) {
-    const res = await getClient(program).workflows.listRules();
+export async function listWorkflowsRule(program: Command, _options: Record<string, any>) {
+    const res = await getClient(program).workflows.rules.list();
     console.log(res);
+
 }
+
+
+export async function createOrUpdateWorkflowDefinition(program: Command, options: Record<string, any>) {
+    const { name, file, tags } = options;
+
+    if (!name) {
+        console.log('A name for the worklow is required. Use --name argument');
+        process.exit(1);
+    }
+
+    if (!file) {
+        console.log('A file with the workflow definition is required. Use --file argument');
+        process.exit(1);
+    }
+
+    const payload = fs.readFileSync(file, 'utf-8');
+    const json = JSON.parse(payload);
+    if (tags) {
+        json.tags = tags;
+    }
+
+    const workflow = await getClient(program).workflows.definitions.create(json);
+    
+    console.log("Created workflow", workflow.id);
+
+}
+
+
+export async function listWorkflowsDefinition(program: Command, _options: Record<string, any>) {
+    const res = await getClient(program).workflows.definitions.list();
+    console.log(res);
+
+}
+
+export async function getWorkflowDefinition(program: Command, objectId: string, options: Record<string, any>) {
+    const res = await getClient(program).workflows.definitions.retrieve(objectId);
+
+    if (options.file) {
+        fs.writeFileSync(options.file, JSON.stringify(res, null, 2));
+    } else {
+        console.log(res);
+    }
+}
+
+export async function deleteWorkflowDefinition(program: Command, objectId: string, _options: Record<string, any>) {
+    const res = await getClient(program).workflows.definitions.delete(objectId);
+    console.log(res);
+};

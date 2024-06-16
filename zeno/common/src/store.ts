@@ -1,3 +1,4 @@
+import { BaseObject } from "./index.js";
 
 export enum ContentObjectStatus {
     created = 'created',
@@ -27,14 +28,11 @@ export interface ContentObject extends ContentObjectItem {
 /**
  * The content object item is a simplified version of the ContentObject that is returned by the store API when listing objects.
  */
-export interface ContentObjectItem {
-    id: string;
+export interface ContentObjectItem extends BaseObject{
     root?: string; // the ID of the root parent object. The root object doesn't have the root field set.
     parent: string; // the id of the direct parent object. The root object doesn't have the parent field set.
     location: string; // the path of the parent object
     status: ContentObjectStatus;
-    created_at: string;
-    updated_at: string;
     owner: string;
     // A ref to the object type
     type?: ContentObjectTypeRef;
@@ -49,9 +47,7 @@ export interface ContentObjectItem {
         etag?: string;
     };
     external_id?: string;
-    name: string;
     summary?: string;
-    tags?: string[];
     properties: Record<string, any>; // a JSON object that describes the object
 }
 
@@ -165,17 +161,10 @@ export enum WorkflowRuleInputType {
     multiple = 'multiple',
     none = 'none'
 }
-export interface WorkflowRuleItem {
-    // the workflow ID
-    id: string;
-    // the workflow name
-    name: string;
+export interface WorkflowRuleItem extends BaseObject {
     // the name of the workflow function
     endpoint: string;
-    description?: string;
     owner: string;
-    created_at: string;
-    updated_at: string;
     input_type: WorkflowRuleInputType;
 }
 export interface WorkflowRule extends WorkflowRuleItem {

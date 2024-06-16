@@ -1,13 +1,15 @@
-import { program } from 'commander';
+import { Command } from 'commander';
 import { addProfile, deleteProfile, listProfiles, showProfile, updateProfile, useProfile } from './config/commands.js';
 import { getVersion, upgrade } from './package.js';
 import { createObject, deleteObject, getObject, listObjects } from './store/index.js';
-import { createWorkflow, executeWorkflow, listWorkflows } from './workflows/index.js';
+import { createOrUpdateWorkflowDefinition, createWorkflowRule, deleteWorkflowRule, executeWorkflowRule, listWorkflowsDefinition, listWorkflowsRule } from './workflows/index.js';
 
-
-program.version(getVersion())
+const program = new Command()
     .option('-k, --apikey <API_KEY>', 'API Key to authenticate with Zenos server')
-    .option('-s, --server [URL]', 'Server URL if necessary');
+    .option('-s, --server [URL]', 'Server URL if necessary')
+    .option('-t, --tags [tags...]', 'Tags to add to the object');
+
+program.version(getVersion());
 
 program.command("upgrade")
     .description("Upgrade to the latest version of the CLI")
@@ -75,28 +77,63 @@ store.command('list [folderPath]')
     });
 
 const workflows = program.command("workflows");
+const rules = workflows.command("rules");
 
-workflows.command("create")
+rules.command("create")
     .description("Create a new workflow definition.")
     .option('--name [name]', 'The name of the workflow definition to create.')
     .option('--on [event]', 'The event which trigger this workflow. Format: "eventName[:objectType]" where objectType is optional.')
     .option('--run [endpoint]', 'The workflow to run.')
     .action((options: Record<string, any>) => {
-        createWorkflow(program, options);
+        createWorkflowRule(program, options);
     });
 
-workflows.command("list")
+    rules.command("list")
     .description("List all workflows")
     .action((options: Record<string, any>) => {
-        listWorkflows(program, options);
+        listWorkflowsRule(program, options);
     });
 
-workflows.command("execute <workflowId>")
+    rules.command("execute <workflowId>")
     .description("Execute a workflow")
     .option('-o, --objectId [objectIds...]', 'The object to execute the workflow on.')
     .action((workflowId: string, options: Record<string, any>) => {
-        executeWorkflow(program, workflowId, options);
+        executeWorkflowRule(program, workflowId, options);
     });
 
+    rules.command("delete <objectId>")
+    .description("Delete a workflow given its ID")
+    .action((objectId: string, options: Record<string, any>) => {
+        deleteWorkflowRule(program, objectId, options);
+    });
 
-program.parse();
+const definitions = workflows.command("definitions");
+
+definitions.command("create")
+    .description("Create a new workflow definition.")
+    .option('-f, --file <file>', 'The file containing the workflow definition.')
+    .action((options: Record<string, any>) => {
+        createOrUpdateWorkflowDefinition(program, options);
+    });
+
+definitions.command("apply")
+    .description("Create or update a workflow definition using a file.")
+    .option('-f, --file <file>', 'The file containing the workflow definition.')
+    .action((options: Record<string, any>) => {
+        createOrUpdateWorkflowDefinition(program, options);
+    });
+
+definitions.command("list")
+    .description("List all workflow definitions.")
+    .action((options: Record<string, any>) => {
+        listWorkflowsDefinition(program, options);
+    });
+
+definitions.command("get <objectId>")
+    .description("Get a workflow definition given its ID.")
+    .option('-f, --file [file]', 'The file to save the workflow definition to.')
+
+definitions.command("delete <objectId>")
+    .description("Delete a workflow definition given its ID.")
+
+program.parse( process.argv );

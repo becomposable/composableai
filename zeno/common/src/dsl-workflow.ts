@@ -1,3 +1,4 @@
+import { BaseObject } from "./index.js";
 import { WorkflowParams } from "./workflow.js";
 
 export interface DSLWorkflowActivity {
@@ -49,15 +50,27 @@ export interface DSLWorkflowActivity {
 }
 
 
-export interface DSLWorkflowConfig {
+export interface DSLWorkflowDefinition extends BaseObject{
     activities: DSLWorkflowActivity[];
     vars: Record<string, any>;
-    // this must be an ActivityOptions from @temporalio/common
+    // this must be an ActivityOptions from @temporalio/common //TODO: why not type it this way?
     options?: Record<string, any>;
     // the name of the variable that will hold the workflow result
     // if not specified "result" will be assumed
     result?: string;
 }
+
 export interface DSLWorkflowParams extends Omit<WorkflowParams, 'config'> {
-    config: DSLWorkflowConfig;
+    config: DSLWorkflowDefinition;
 }
+
+export interface WorkflowDefinitionRef {
+    id: string;
+    name: string;
+    description?: string;
+    tags?: string[];
+    created_at: Date;
+    updated_at: Date;
+}
+
+export const WorkflowDefinitionRefPopulate = "id name description tags created_at updated_at"

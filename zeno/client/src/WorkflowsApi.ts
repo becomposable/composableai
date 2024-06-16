@@ -1,6 +1,5 @@
-import { WorkflowRule, CreateWorkflowRulePayload, ExecuteWorkflowPayload, ListWorkflowRunsResponse, WorkflowRuleItem } from "@composableai/zeno-common";
+import { CreateWorkflowRulePayload, ExecuteWorkflowPayload, ListWorkflowRunsResponse, WorkflowRule, WorkflowRuleItem, WorkflowRunWithDetails } from "@composableai/zeno-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
-
 
 export class WorkflowsApi extends ApiTopic {
 
@@ -44,6 +43,14 @@ export class WorkflowsApi extends ApiTopic {
 
     listRuns(documentId: string, eventName: string, ruleId: string): Promise<ListWorkflowRunsResponse> {
         return this.post(`/runs`, { payload: { documentId, eventName, ruleId } });
+    }
+
+    getRunDetails(runId: string, workflowId: string): Promise<WorkflowRunWithDetails> {
+        return this.get(`/runs/${workflowId}/${runId}`, { query: { workflowId } });
+    }
+
+    terminate(workflowId: string, runId: string, reason?: string): Promise<{ message: string }> {
+        return this.post(`/runs/${workflowId}/${runId}/terminate`, { payload: { reason } });
     }
 
 

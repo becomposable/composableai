@@ -86,13 +86,46 @@ export interface ListWorkflowRunsPayload {
     ruleId?: string;
 }
 
+
+interface WorkflowRunEvent {
+
+    eventId: number;
+    eventTime: number;
+    eventType: string;
+    taskId: string;
+    attempt: number;    
+
+    activity?: {
+        name: string;
+        id: string;
+        input?: any;
+    }
+    
+    error?: {
+        message: string;
+        source: string;
+        stackTrace: string;
+        type?: string;
+    };
+
+    result?: any
+
+}
+
 export interface WorkflowRun {
-    status?: string,
+    status?: WorkflowExecutionStatus | string,
     type?: string,
-    started_at?: number,
-    closed_at?: number,
+    startedAt?: number,
+    closedAt?: number,
     execution_duration?: number,
-    run_id?: string,
+    runId?: string,
+    workflowId?: string,
+    raw?: any
+}
+
+
+export interface WorkflowRunWithDetails extends WorkflowRun {
+    history?: WorkflowRunEvent[];
 }
 export interface ListWorkflowRunsResponse {
     runs: WorkflowRun[];
@@ -115,4 +148,18 @@ export interface DocumentActionConfig {
     upsert: boolean; //wether to upsert or update only
     documentId?: string; //doc Id to update
     parentId?: string; //parentId for the created doc
+}
+
+
+
+
+export enum WorkflowExecutionStatus {
+    WORKFLOW_EXECUTION_STATUS_UNSPECIFIED = 0,
+    RUNNING = 1,
+    COMPLETED = 2,
+    WORKFLOW_EXECUTION_STATUS_FAILED = 3,
+    WORKFLOW_EXECUTION_STATUS_CANCELED = 4,
+    WORKFLOW_EXECUTION_STATUS_TERMINATED = 5,
+    WORKFLOW_EXECUTION_STATUS_CONTINUED_AS_NEW = 6,
+    WORKFLOW_EXECUTION_STATUS_TIMED_OUT = 7,
 }

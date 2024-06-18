@@ -1,4 +1,4 @@
-import { BaseObject, WorkflowParams } from "./index.js";
+import { BaseObject, WorkflowExecutionPayload } from "./index.js";
 
 /**
  * The interface of a function that can be used as a DSL workflow activity.
@@ -7,7 +7,7 @@ export interface DSLActivityFn {
     (context: DSLActivityExecutionPayload, params: Record<string, any>): Promise<any>;
 }
 
-export interface DSLActivityExecutionPayload extends WorkflowParams {
+export interface DSLActivityExecutionPayload extends WorkflowExecutionPayload {
     activity: DSLWorkflowActivity;
     params: Record<string, any>;
 }

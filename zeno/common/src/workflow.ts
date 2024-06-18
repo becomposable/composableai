@@ -9,9 +9,9 @@ export enum ContentEventName {
 
 
 /**
- *  Params for a workflow that require objects to be processed.
+ * The payload sent when starting a workflow from the temporal client to the workflow instance.
  */
-export interface WorkflowParams {
+export interface WorkflowExecutionPayload {
     /**
      * The event which started the workflow who created the activity.
      */
@@ -115,7 +115,7 @@ export interface ListWorkflowRunsResponse {
 }
 
 
-export interface MultiDocumentsInteractionParams extends Omit<WorkflowParams, 'config'> {
+export interface MultiDocumentsInteractionParams extends Omit<WorkflowExecutionPayload, 'config'> {
     config: {
         interactionName: string;
         action: DocumentActionConfig;

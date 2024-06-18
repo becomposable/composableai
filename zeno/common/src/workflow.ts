@@ -45,14 +45,6 @@ export interface WorkflowParams {
      * Auth Token to access Zeno and Composable from the workers
      */
     authToken: string;
-}
-
-
-/**
- * Params for a workflow that processes multiple objects.
-
- */
-export interface MultipleObjectsWorkflowParams extends WorkflowParams {
 
     /**
      * The ID of the target objects processed by the workflow.
@@ -60,7 +52,6 @@ export interface MultipleObjectsWorkflowParams extends WorkflowParams {
     objectIds: string[];
 
 }
-
 
 
 export interface ExecuteWorkflowPayload {
@@ -124,7 +115,7 @@ export interface ListWorkflowRunsResponse {
 }
 
 
-export interface MultiDocumentsInteractionParams extends Omit<MultipleObjectsWorkflowParams, 'config'> {
+export interface MultiDocumentsInteractionParams extends Omit<WorkflowParams, 'config'> {
     config: {
         interactionName: string;
         action: DocumentActionConfig;

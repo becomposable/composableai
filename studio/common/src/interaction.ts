@@ -206,6 +206,7 @@ export interface ExecutionRunRef
     interaction: InteractionRef;
 }
 
+export const ExecutionRunRefSelect = "-result -parameters -resultSchema";
 
 export interface InteractionExecutionConfiguration {
     environment?: string;

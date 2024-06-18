@@ -58,10 +58,10 @@ export class WorkflowsRulesApi extends ApiTopic {
     }
 
 
-    execute(id: string, objectIds?: string[], config?: Record<string, any>): Promise<{ runIds: string[] }> {
+    execute(id: string, objectIds?: string[], vars?: Record<string, any>): Promise<{ runIds: string[] }> {
         const payload: ExecuteWorkflowPayload = {
-            targetObjectIds: objectIds,
-            config
+            objectIds,
+            vars
         };
         return this.post(`/${id}/execute`, { payload });
     }

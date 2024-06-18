@@ -8,13 +8,10 @@ export enum ContentEventName {
 }
 
 
-/**
- * The payload sent when starting a workflow from the temporal client to the workflow instance.
- */
 export interface WorkflowExecutionPayload {
     /**
-     * The event which started the workflow who created the activity.
-     */
+ * The event which started the workflow who created the activity.
+ */
     event: ContentEventName;
 
     /**
@@ -32,14 +29,23 @@ export interface WorkflowExecutionPayload {
      * The Unix timestamp when the workflow was started.
      */
     timestamp: number;
+
     /*
-     * The Workflow Rule ID.
+     * The Workflow Rule ID if any. If the workflow was started by a rule this field will contain the rule ID
+     * otherwise if the workflow was started on demand the property will be undefined.
      */
     wfRuleName: string;
+
     /**
-     * Workfllow configuration.
+     * The vars field is mainly used to pass the user input to the workflow.
+     * The user input ar custom user options that can be used to configure the workflow.
+     * You can see the user input as the arguments for a command line app.
+     *
+     * In the case of workflows started by events (e.g. using a a workflow rule) the user input vars will be initialized with the workflow rule configuration field.
+     *
+     * In case of dsl workflows the worflow execution payload vars will be applied over the default vars values stored in the DSL vars field.
      */
-    config: Record<string, any>;
+    vars: Record<string, any>;
 
     /**
      * Auth Token to access Zeno and Composable from the workers
@@ -50,15 +56,12 @@ export interface WorkflowExecutionPayload {
      * The ID of the target objects processed by the workflow.
      */
     objectIds: string[];
-
 }
 
 
 export interface ExecuteWorkflowPayload {
-
-    targetObjectIds?: string[];
-    config?: any;
-
+    objectIds?: string[];
+    vars?: Record<string, any>;
 }
 
 

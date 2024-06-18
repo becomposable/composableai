@@ -4,13 +4,29 @@ import { BaseObject, WorkflowExecutionPayload } from "./index.js";
  * The interface of a function that can be used as a DSL workflow activity.
  */
 export interface DSLActivityFn {
-    (context: DSLActivityExecutionPayload, params: Record<string, any>): Promise<any>;
+    (payload: DSLActivityExecutionPayload): Promise<any>;
 }
 
+
+/**
+ * The payload sent when starting a workflow from the temporal client to the workflow instance.
+ */
+export interface DSLWorkflowExecutionPayload extends WorkflowExecutionPayload {
+    /**
+     * The workflow definition to be used by the DSL workflow.
+     * If a dsl workflow is executed and no definition is provided the workflow will fail.
+     */
+    workflow: DSLWorkflowDefinition;
+}
+
+/**
+ * The payload for a DSL activity execution.
+ */
 export interface DSLActivityExecutionPayload extends WorkflowExecutionPayload {
     activity: DSLWorkflowActivity;
     params: Record<string, any>;
 }
+
 
 export interface ActivityFetchSpec {
     /**
@@ -60,6 +76,8 @@ export interface DSLWorkflowActivity {
     /**
      * The name of the workflow variable that will store the result of the activity
      * If not specified the result will not be stored
+     * The parameters describe how the actual parameters will be obtained from the worlkfow execution vars.
+     * since it may contain references to workflow execution vars.
      */
     output?: string;
 
@@ -93,6 +111,8 @@ export interface DSLWorkflowActivity {
 
 export interface DSLWorkflowDefinition extends BaseObject {
     activities: DSLWorkflowActivity[];
+    // a dictionary of vars to initialize the workflow execution vars
+    // Initial vars cannot contains references to other vars
     vars: Record<string, any>;
     // this must be an ActivityOptions from @temporalio/common //TODO: why not type it this way?
     options?: Record<string, any>;

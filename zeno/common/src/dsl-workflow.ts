@@ -1,4 +1,40 @@
-import { BaseObject } from "./index.js";
+import { BaseObject, MultipleObjectsWorkflowParams } from "./index.js";
+
+/**
+ * The interface of a function that can be used as a DSL workflow activity.
+ */
+export interface DSLActivityFn {
+    (context: DSLActivityExecutionPayload, params: Record<string, any>): Promise<any>;
+}
+
+export interface DSLActivityExecutionPayload extends MultipleObjectsWorkflowParams {
+    activity: DSLWorkflowActivity;
+    params: Record<string, any>;
+}
+
+export interface ActivityFetchSpec {
+    /**
+     * The data provider name
+     */
+    provider: "store" | "interaction_runs";
+    /**
+     * An optinal URI to the data source.
+     */
+    source?: string;
+    /**
+     * The query to be executed by the data provider
+     */
+    query: Record<string, any>;
+    /**
+     * a string of space separated field names.
+     * Prefix a field name with "-" to exclude it from the result.
+     */
+    select?: string;
+    /**
+     * A variable name to store the result of the fetch
+     */
+    as: string;
+}
 
 export interface DSLWorkflowActivity {
     /**
@@ -35,6 +71,11 @@ export interface DSLWorkflowActivity {
      */
     condition?: Record<string, any>;
 
+    /**
+     * The fetch phase is used to fetch data from external sources.
+     */
+    fetch?: ActivityFetchSpec[];
+
     // ---------- Optional features not implemented in a first step ------------
     /**
      * If true the activity will be executed in parallel with the other activities.
@@ -46,10 +87,11 @@ export interface DSLWorkflowActivity {
      * Await for a parallel activity execution to return.
      */
     await?: string; //the activity name to await
+
 }
 
 
-export interface DSLWorkflowDefinition extends BaseObject{
+export interface DSLWorkflowDefinition extends BaseObject {
     activities: DSLWorkflowActivity[];
     vars: Record<string, any>;
     // this must be an ActivityOptions from @temporalio/common //TODO: why not type it this way?

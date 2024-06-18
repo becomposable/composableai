@@ -47,23 +47,10 @@ export interface WorkflowParams {
     authToken: string;
 }
 
-/**
- * The parameters for a workflow that processes a single object.
- */
-export interface SingleObjectWorkflowParams extends WorkflowParams {
-
-    /**
-     * The ID of the object processed by the workflow.
-     */
-    objectId: string;
-
-}
-
-
 
 /**
  * Params for a workflow that processes multiple objects.
- 
+
  */
 export interface MultipleObjectsWorkflowParams extends WorkflowParams {
 
@@ -98,14 +85,14 @@ interface WorkflowRunEvent {
     eventTime: number;
     eventType: string;
     taskId: string;
-    attempt: number;    
+    attempt: number;
 
     activity?: {
         name: string;
         id: string;
         input?: any;
     }
-    
+
     error?: {
         message: string;
         source: string;

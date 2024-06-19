@@ -32,7 +32,7 @@ export interface ActivityFetchSpec {
     /**
      * The data provider name
      */
-    provider: "store" | "interaction_runs";
+    type: "document" | "document_type" | "interaction_runs";
     /**
      * An optinal URI to the data source.
      */
@@ -46,10 +46,16 @@ export interface ActivityFetchSpec {
      * Prefix a field name with "-" to exclude it from the result.
      */
     select?: string;
+
     /**
-     * A variable name to store the result of the fetch
+     * The number of results to return. If the result is limitedto 1 the result will be a single object
      */
-    as: string;
+    limit?: number;
+
+    /**
+     * How to jandle errors. ignore and return undefined or throw an error.
+     */
+    onError?: "ignore" | "throw";
 }
 
 export interface DSLWorkflowActivity {
@@ -92,7 +98,15 @@ export interface DSLWorkflowActivity {
     /**
      * The fetch phase is used to fetch data from external sources.
      */
-    fetch?: ActivityFetchSpec[];
+    fetch?: Record<string, ActivityFetchSpec>;
+
+    /**
+     * Projection stage to build the final params of the activity.
+     * This stage is always run after all the fetch stages are done.
+     * The parameters defined here will be added over the parameters defined by params.
+     * You cannot delete existing parameters
+     */
+    project?: Record<string, any>;
 
     // ---------- Optional features not implemented in a first step ------------
     /**

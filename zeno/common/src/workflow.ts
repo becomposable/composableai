@@ -56,6 +56,14 @@ export interface WorkflowExecutionPayload {
      * The ID of the target objects processed by the workflow.
      */
     objectIds: string[];
+
+    /**
+     * The configuration for the workflow execution.
+     */
+    config: {
+        studioUrl: string;
+        storeUrl: string;
+    }
 }
 
 

@@ -60,7 +60,7 @@ export interface WorkflowExecutionPayload {
     /**
      * The configuration for the workflow execution.
      */
-    config: {
+    config?: {
         studioUrl: string;
         storeUrl: string;
     }

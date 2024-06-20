@@ -1,4 +1,4 @@
-import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, CreateContentObjectPayload, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@composableai/zeno-common";
+import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, CreateContentObjectPayload, FindPayload, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@composableai/zeno-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export class StreamSource {
@@ -66,6 +66,12 @@ export class ObjectsApi extends ApiTopic {
 
     listFolders(path: string = '/') {
         path;//TODO
+    }
+
+    find(payload: FindPayload): Promise<ContentObject[]> {
+        return this.post("/find", {
+            payload
+        });
     }
 
     search(payload: ComplexSearchPayload): Promise<ContentObjectItem[]> {
@@ -137,7 +143,7 @@ export class ObjectsApi extends ApiTopic {
         });
     }
 
-    delete(id: string): Promise<{id: string}> {
+    delete(id: string): Promise<{ id: string }> {
         return this.del(`/${id}`);
     }
 

@@ -89,7 +89,7 @@ export interface RunSearchPayload {
     onlyMeta?: boolean,
 
     /**
-     * A facet name to facet definition map. If defined then performs a faceted search. 
+     * A facet name to facet definition map. If defined then performs a faceted search.
      * If onlyMeta the actual search will not be performed but only the meta search
      */
     facets?: Record<string, Facet>,
@@ -118,4 +118,11 @@ export interface RunSearchPayload {
      * If not specified no parent filter is done (both parent and child runs are returned.)
      */
     parent?: string[] | false;
+}
+
+//TODO move to a common place with zeno since it is used by both
+export interface FindPayload {
+    query: Record<string, any>;
+    limit?: number;
+    select?: string;
 }

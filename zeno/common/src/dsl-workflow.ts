@@ -28,6 +28,7 @@ export interface DSLActivityExecutionPayload extends WorkflowExecutionPayload {
 }
 
 
+export type ImportSpec = (string | Record<string, string>)[];
 export interface ActivityFetchSpec {
     /**
      * The data provider name
@@ -53,9 +54,11 @@ export interface ActivityFetchSpec {
     limit?: number;
 
     /**
-     * How to jandle errors. ignore and return undefined or throw an error.
+     * How to handle not found objects.
+     * 1. ignore - Ignore and return an empty array for multi objects query (or undefined for single object query) or empty array for multiple objectthrow an error.
+     * 2. throw - Throw an error if the object or no objects are found.
      */
-    onError?: "ignore" | "throw";
+    onNotFound?: "ignore" | "throw";
 }
 
 export interface DSLWorkflowActivity {
@@ -94,6 +97,15 @@ export interface DSLWorkflowActivity {
      * Ex: {$eq: {wfVarName: value}}
      */
     condition?: Record<string, any>;
+
+    /**
+     * The import spec is used to import data from workflow variables.
+     * The import spec is a list of variable names to import from the workflow context.
+     * You can also use objects to rename the imported variables, or to reference an expression.
+     * Example:
+     * ["runId", {"typeId": "docType.id"}]
+     */
+    import?: ImportSpec;
 
     /**
      * The fetch phase is used to fetch data from external sources.

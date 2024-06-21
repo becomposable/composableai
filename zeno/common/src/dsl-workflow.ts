@@ -16,14 +16,14 @@ export interface DSLWorkflowExecutionPayload extends WorkflowExecutionPayload {
      * The workflow definition to be used by the DSL workflow.
      * If a dsl workflow is executed and no definition is provided the workflow will fail.
      */
-    workflow: DSLWorkflowDefinition;
+    workflow: DSLWorkflowSpec;
 }
 
 /**
  * The payload for a DSL activity execution.
  */
 export interface DSLActivityExecutionPayload extends WorkflowExecutionPayload {
-    activity: DSLWorkflowActivity;
+    activity: DSLActivitySpec;
     params: Record<string, any>;
 }
 
@@ -33,7 +33,7 @@ export interface ActivityFetchSpec {
     /**
      * The data provider name
      */
-    type: "document" | "document_type" | "interaction_runs";
+    type: "document" | "document_type" | "interaction_run";
     /**
      * An optinal URI to the data source.
      */
@@ -61,7 +61,7 @@ export interface ActivityFetchSpec {
     onNotFound?: "ignore" | "throw";
 }
 
-export interface DSLWorkflowActivity {
+export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<string, any>> {
     /**
      * The name of the activity function
      */
@@ -81,7 +81,7 @@ export interface DSLWorkflowActivity {
      * The workflow variables are built from the workflow params (e.g. the workflow configuration)
      * and from the result of the previous activities.
      */
-    params?: Record<string, any>;
+    params?: PARAMS;
     /**
      * The name of the workflow variable that will store the result of the activity
      * If not specified the result will not be stored
@@ -134,9 +134,12 @@ export interface DSLWorkflowActivity {
 
 }
 
+export interface DSLWorkflowSpec {
+    name: string;
+    description?: string;
+    tags?: string[];
 
-export interface DSLWorkflowDefinition extends BaseObject {
-    activities: DSLWorkflowActivity[];
+    activities: DSLActivitySpec[];
     // a dictionary of vars to initialize the workflow execution vars
     // Initial vars cannot contains references to other vars
     vars: Record<string, any>;
@@ -146,6 +149,9 @@ export interface DSLWorkflowDefinition extends BaseObject {
     // if not specified "result" will be assumed
     result?: string;
     debug_mode?: boolean;
+}
+
+export interface DSLWorkflowDefinition extends BaseObject, DSLWorkflowSpec {
 }
 
 export interface WorkflowDefinitionRef {

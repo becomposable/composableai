@@ -113,12 +113,9 @@ export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<str
     fetch?: Record<string, ActivityFetchSpec>;
 
     /**
-     * Projection stage to build the final params of the activity.
-     * This stage is always run after all the fetch stages are done.
-     * The parameters defined here will be added over the parameters defined by params.
-     * You cannot delete existing parameters
+     * Projection to apply to the result. Not all activities support this.
      */
-    project?: Record<string, any>;
+    projection?: Record<string, any>;
 
     // ---------- Optional features not implemented in a first step ------------
     /**

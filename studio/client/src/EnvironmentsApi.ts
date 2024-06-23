@@ -7,8 +7,12 @@ export default class EnvironmentsApi extends ApiTopic {
         super(parent, "/api/v1/environments");
     }
 
-    list(project?: string): Promise<ExecutionEnvironmentRef[]> {
-        const query = project ? { project } : undefined;
+    /**
+     * List all environments for the current project
+     * @param all if true, list all environments, otherwise only the ones for the current project
+     */
+    list(all: boolean = false): Promise<ExecutionEnvironmentRef[]> {
+        const query = all ? { all: true } : undefined;
 
         return this.get('/', { query });
     }

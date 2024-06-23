@@ -164,7 +164,8 @@ export interface ExecutionEnvironment {
     enabled_models?: AIModel[];
     apiKey?: string;
     config?: any;
-    project: string;
+    account: string;
+    allowed_projects?: string[];
     created_at: string;
     updated_at: string;
 }
@@ -173,10 +174,17 @@ export interface ExecutionEnvironmentRef {
     id: string;
     name: string;
     provider: SupportedProviders;
+    enabled_models?: AIModel[];
+    default_model?: string;
+    endpoint_url?: string;
+    allowed_projects?: string[];
+    account: string;
+    created_at: string;
+    updated_at: string;
 }
 
-export const ExecutionEnvironmentRefPopulate = "id name provider";
+export const ExecutionEnvironmentRefPopulate = "id name provider enabled_models default_model endpoint_url allowed_projects account created_at updated_at";
 
-export interface ExecutionEnvironmentCreatePayload extends Omit<ExecutionEnvironment, 'id' | 'created_at' | 'updated_at' | 'project'> { }
-export interface ExecutionEnvironmentUpdatePayload extends Partial<Omit<ExecutionEnvironment, 'id' | 'created_at' | 'updated_at'>> { }
+export interface ExecutionEnvironmentCreatePayload extends Omit<ExecutionEnvironment, 'id' | 'account' | 'created_at' | 'updated_at' | 'project'> { }
+export interface ExecutionEnvironmentUpdatePayload extends Partial<Omit<ExecutionEnvironment, 'id' | 'account' | 'created_at' | 'updated_at'>> { }
 

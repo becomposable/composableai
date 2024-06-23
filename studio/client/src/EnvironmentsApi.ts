@@ -1,5 +1,5 @@
-import { AIModel, EmbeddingsOptions, EmbeddingsResult, ModelSearchPayload } from "@llumiverse/core";
 import { ExecutionEnvironment, ExecutionEnvironmentCreatePayload, ExecutionEnvironmentRef, ExecutionEnvironmentUpdatePayload, LoadBalancingEnvConfig, MediatorEnvConfig } from "@composableai/studio-common";
+import { AIModel, EmbeddingsOptions, EmbeddingsResult, ModelSearchPayload } from "@llumiverse/core";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export default class EnvironmentsApi extends ApiTopic {
@@ -7,12 +7,10 @@ export default class EnvironmentsApi extends ApiTopic {
         super(parent, "/api/v1/environments");
     }
 
-    list(): Promise<ExecutionEnvironment[]> {
-        return this.get('/');
-    }
+    list(project?: string): Promise<ExecutionEnvironmentRef[]> {
+        const query = project ? { project } : undefined;
 
-    listRefs(): Promise<ExecutionEnvironmentRef[]> {
-        return this.get('/refs');
+        return this.get('/', { query });
     }
 
     create(payload: ExecutionEnvironmentCreatePayload): Promise<ExecutionEnvironment> {

@@ -24,6 +24,11 @@ export interface WorkflowParams {
     accountId: string;
 
     /**
+     * The project ID of the account who created the activity.
+     */
+    projectId: string;
+
+    /**
      * The Unix timestamp when the workflow was started.
      */
     timestamp: number;

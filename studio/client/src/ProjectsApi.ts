@@ -1,5 +1,5 @@
-import { ClientBase, ApiTopic } from "api-fetch-client";
 import { ICreateProjectPayload, Project } from "@composableai/studio-common";
+import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export default class ProjectsApi extends ApiTopic {
     constructor(parent: ClientBase) {
@@ -19,4 +19,12 @@ export default class ProjectsApi extends ApiTopic {
             payload
         });
     }
+
+    update(projectId: string, payload: Partial<Project>): Promise<Project> {
+        return this.put(`/${projectId}`, {
+            payload
+        });
+    }
+
+
 }

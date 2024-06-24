@@ -32,11 +32,28 @@ export interface ProjectRef {
     name: string;
     account: string;
 }
+
+export enum ResourceVisibility {
+    public = "public",
+    account = "account",
+    project = "project"
+}
+
+
+export interface ProjectConfiguration {
+
+    default_environment?: string;
+    default_model?: string;
+    default_visibility: ResourceVisibility;
+
+}
+
 export interface Project {
     id: string;
     name: string;
     description?: string;
     account: string;
+    configuration: ProjectConfiguration;
     created_at: Date;
     updated_at: Date;
 }

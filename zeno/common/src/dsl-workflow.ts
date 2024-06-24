@@ -115,7 +115,7 @@ export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<str
     /**
      * Projection to apply to the result. Not all activities support this.
      */
-    projection?: Record<string, any>;
+    projection?: never | Record<string, any>;
 
     // ---------- Optional features not implemented in a first step ------------
     /**

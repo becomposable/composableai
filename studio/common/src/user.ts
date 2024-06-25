@@ -78,7 +78,6 @@ export interface SessionInfo<T extends User | ApiKey> {
     current_account: Account;
     //role: string; // TODO the role on the selected account
     accounts: AccountRef[];
-    intercom_hash?: string; //used for Intercom to authentify the user
 }
 
 export interface UserSessionInfo extends SessionInfo<User> { }

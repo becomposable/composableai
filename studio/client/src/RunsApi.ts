@@ -1,4 +1,4 @@
-import { ExecutionRun, ExecutionRunRef, RunCreatePayload, RunListingFilters, RunListingQueryOptions, RunSearchPayload, RunSearchResponse } from "@composableai/studio-common";
+import { ExecutionRun, ExecutionRunRef, FindPayload, RunCreatePayload, RunListingFilters, RunListingQueryOptions, RunSearchPayload, RunSearchResponse } from "@composableai/studio-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 import { StudioClient } from "./client.js";
 
@@ -31,6 +31,12 @@ export class RunsApi extends ApiTopic {
         }
 
         return this.get('/', { query: query });
+    }
+
+    find(payload: FindPayload): Promise<ExecutionRun[]> {
+        return this.post("/find", {
+            payload
+        });
     }
 
     /**

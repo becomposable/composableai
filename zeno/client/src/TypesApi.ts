@@ -1,4 +1,4 @@
-import { ContentObjectType, ContentObjectTypeItem, ContentObjectTypeLayout, CreateContentObjectTypePayload } from "@composableai/zeno-common";
+import { ContentObjectType, ContentObjectTypeItem, ContentObjectTypeLayout, CreateContentObjectTypePayload, FindPayload } from "@composableai/zeno-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 
@@ -10,6 +10,12 @@ export class TypesApi extends ApiTopic {
 
     list(): Promise<ContentObjectTypeItem[]> {
         return this.get('/');
+    }
+
+    find(payload: FindPayload): Promise<ContentObjectType[]> {
+        return this.post("/find", {
+            payload
+        });
     }
 
     layouts(): Promise<ContentObjectTypeLayout[]> {

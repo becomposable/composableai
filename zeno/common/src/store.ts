@@ -28,7 +28,7 @@ export interface ContentObject extends ContentObjectItem {
 /**
  * The content object item is a simplified version of the ContentObject that is returned by the store API when listing objects.
  */
-export interface ContentObjectItem extends BaseObject{
+export interface ContentObjectItem extends BaseObject {
     root?: string; // the ID of the root parent object. The root object doesn't have the root field set.
     parent: string; // the id of the direct parent object. The root object doesn't have the parent field set.
     location: string; // the path of the parent object
@@ -184,4 +184,11 @@ export interface CreateWorkflowRulePayload extends UploadWorkflowRulePayload {
     endpoint: string; // required
 }
 export interface UploadWorkflowRulePayload extends Partial<Omit<WorkflowRule, 'id' | 'created_at' | 'updated_at' | 'owner'>> {
+}
+
+//TODO move to a common place with studio since it is used by both
+export interface FindPayload {
+    query: Record<string, any>;
+    limit?: number;
+    select?: string;
 }

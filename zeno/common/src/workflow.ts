@@ -8,13 +8,10 @@ export enum ContentEventName {
 }
 
 
-/**
- *  Params for a workflow that require objects to be processed.
- */
-export interface WorkflowParams {
+export interface WorkflowExecutionPayload {
     /**
-     * The event which started the workflow who created the activity.
-     */
+ * The event which started the workflow who created the activity.
+ */
     event: ContentEventName;
 
     /**
@@ -32,55 +29,47 @@ export interface WorkflowParams {
      * The Unix timestamp when the workflow was started.
      */
     timestamp: number;
+
     /*
-     * The Workflow Rule ID.
+     * The Workflow Rule ID if any. If the workflow was started by a rule this field will contain the rule ID
+     * otherwise if the workflow was started on demand the property will be undefined.
      */
     wfRuleName: string;
+
     /**
-     * Workfllow configuration.
+     * The vars field is mainly used to pass the user input to the workflow.
+     * The user input ar custom user options that can be used to configure the workflow.
+     * You can see the user input as the arguments for a command line app.
+     *
+     * In the case of workflows started by events (e.g. using a a workflow rule) the user input vars will be initialized with the workflow rule configuration field.
+     *
+     * In case of dsl workflows the worflow execution payload vars will be applied over the default vars values stored in the DSL vars field.
      */
-    config: Record<string, any>;
+    vars: Record<string, any>;
 
     /**
      * Auth Token to access Zeno and Composable from the workers
      */
     authToken: string;
-}
-
-/**
- * The parameters for a workflow that processes a single object.
- */
-export interface SingleObjectWorkflowParams extends WorkflowParams {
-
-    /**
-     * The ID of the object processed by the workflow.
-     */
-    objectId: string;
-
-}
-
-
-
-/**
- * Params for a workflow that processes multiple objects.
- 
- */
-export interface MultipleObjectsWorkflowParams extends WorkflowParams {
 
     /**
      * The ID of the target objects processed by the workflow.
      */
     objectIds: string[];
 
+    /**
+     * The configuration for the workflow execution.
+     */
+    config?: {
+        studioUrl: string;
+        storeUrl: string;
+    }
 }
 
 
-
 export interface ExecuteWorkflowPayload {
-
-    targetObjectIds?: string[];
-    config?: any;
-
+    objectIds?: string[];
+    vars?: Record<string, any>;
 }
 
 
@@ -98,14 +87,14 @@ interface WorkflowRunEvent {
     eventTime: number;
     eventType: string;
     taskId: string;
-    attempt: number;    
+    attempt: number;
 
     activity?: {
         name: string;
         id: string;
         input?: any;
     }
-    
+
     error?: {
         message: string;
         source: string;
@@ -137,7 +126,7 @@ export interface ListWorkflowRunsResponse {
 }
 
 
-export interface MultiDocumentsInteractionParams extends Omit<MultipleObjectsWorkflowParams, 'config'> {
+export interface MultiDocumentsInteractionParams extends Omit<WorkflowExecutionPayload, 'config'> {
     config: {
         interactionName: string;
         action: DocumentActionConfig;

@@ -1,4 +1,4 @@
-import { Account, InviteUserRequestPayload, InviteUserResponsePayload, OnboardingProgress, TransientToken, UpdateAccountPayload, UserInviteTokenData } from "@composableai/studio-common";
+import { Account, InviteUserRequestPayload, InviteUserResponsePayload, OnboardingProgress, ProjectRef, TransientToken, UpdateAccountPayload, UserInviteTokenData } from "@composableai/studio-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export default class AccountApi extends ApiTopic {
@@ -21,6 +21,13 @@ export default class AccountApi extends ApiTopic {
      */
     update(payload: UpdateAccountPayload): Promise<Account> {
         return this.put('/', { payload });
+    }
+
+    /**
+     * Get all projects for account
+    */
+    projects(): Promise< ProjectRef[] > {
+        return this.get('/projects').then(res => res.data);
     }
 
     /**

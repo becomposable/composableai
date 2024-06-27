@@ -41,7 +41,6 @@ export interface AuthTokenResponse {
 }
 
 export interface AuthTokenPayload {
-    subject: string;
     sub: string
     name: string;
     email?: string;

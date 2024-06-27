@@ -15,7 +15,7 @@ function createClient(program: Command) {
     const profile = config.current;
     const env = {
         apikey: profile?.apikey || process.env.ZENO_APIKEY,
-        serverUrl: profile?.serverUrl || process.env.ZENO_SERVER_URL || 'https://api.zeno.dot',
+        serverUrl: profile?.serverUrl || process.env.ZENO_SERVER_URL,
     }
 
     const serverUrl = program.getOptionValue('server');

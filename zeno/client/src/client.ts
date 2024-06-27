@@ -11,12 +11,19 @@ export interface ZenoClientProps {
     onResponse?: (response: Response) => void;
 }
 
+function ensureDefined(serverUrl: string | undefined) {
+    if (!serverUrl) {
+        throw new Error("zeno client serverUrl is required");
+    }
+    return serverUrl;
+}
+
 export class ZenoClient extends AbstractFetchClient<ZenoClient> {
 
     constructor(
         opts: ZenoClientProps = {}
     ) {
-        super(opts.serverUrl || "https://api.zeno.dot");
+        super(ensureDefined(opts.serverUrl));
         if (opts.apikey) {
             this.withApiKey(opts.apikey);
         }

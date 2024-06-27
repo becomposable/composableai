@@ -2,6 +2,8 @@ import { WorkflowRuleInputType } from "@composableai/zeno-common";
 import { Command } from "commander";
 import fs from 'fs';
 import { getClient } from "../client.js";
+import { loadJSONWorkflowDefinition } from "./json-loader.js";
+import { loadTsWorkflowDefinition } from "./ts-loader.js";
 
 
 export async function createWorkflowRule(program: Command, options: Record<string, any>) {
@@ -47,7 +49,7 @@ export async function createOrUpdateWorkflowRule(program: Command, options: Reco
     }
 
     const rule = await getClient(program).workflows.rules.create(json);
-    
+
     console.log("Applied workflow rule", rule.id);
 
 }
@@ -55,7 +57,7 @@ export async function createOrUpdateWorkflowRule(program: Command, options: Reco
 export async function deleteWorkflowRule(program: Command, objectId: string, _options: Record<string, any>) {
     const res = await getClient(program).workflows.rules.delete(objectId);
     console.log(res);
-    
+
 }
 
 export async function getWorkflowRule(program: Command, objectId: string, options: Record<string, any>) {
@@ -77,7 +79,7 @@ export async function executeWorkflowRule(program: Command, workflowId: string, 
 
     let mergedConfig = config ? {
         ...config,
-    } : {} ;
+    } : {};
 
     if (file) {
         const payload = JSON.parse(fs.readFileSync(file, 'utf-8'));
@@ -87,7 +89,7 @@ export async function executeWorkflowRule(program: Command, workflowId: string, 
         };
     }
 
-    const res = await getClient(program).workflows.rules.execute(workflowId, objectId, mergedConfig );
+    const res = await getClient(program).workflows.rules.execute(workflowId, objectId, mergedConfig);
     console.log(res);
 }
 
@@ -106,14 +108,14 @@ export async function createOrUpdateWorkflowDefinition(program: Command, options
         process.exit(1);
     }
 
-    const payload = fs.readFileSync(file, 'utf-8');
-    const json = JSON.parse(payload);
+    const loadWorkflow = file.endsWith('.ts') ? loadTsWorkflowDefinition : loadJSONWorkflowDefinition;
+    const json = await loadWorkflow(file);
     if (tags) {
         json.tags = tags;
     }
 
     const workflow = await getClient(program).workflows.definitions.create(json);
-    
+
     console.log("Created workflow", workflow.id);
 
 }

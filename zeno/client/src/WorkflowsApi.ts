@@ -1,4 +1,4 @@
-import { CreateWorkflowRulePayload, DSLWorkflowDefinition, ExecuteWorkflowPayload, ListWorkflowRunsResponse, WorkflowDefinitionRef, WorkflowRule, WorkflowRuleItem, WorkflowRunWithDetails } from "@composableai/zeno-common";
+import { CreateWorkflowRulePayload, DSLWorkflowDefinition, DSLWorkflowSpec, ExecuteWorkflowPayload, ListWorkflowRunsResponse, WorkflowDefinitionRef, WorkflowRule, WorkflowRuleItem, WorkflowRunWithDetails } from "@composableai/zeno-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export class WorkflowsApi extends ApiTopic {
@@ -91,7 +91,7 @@ export class WorkflowsDefinitionApi extends ApiTopic {
         });
     }
 
-    create(payload: CreateWorkflowRulePayload): Promise<DSLWorkflowDefinition> {
+    create(payload: DSLWorkflowSpec): Promise<DSLWorkflowDefinition> {
         return this.post("/", {
             payload
         });

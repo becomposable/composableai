@@ -27,8 +27,7 @@
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
     },
     "devDependencies": {
-        "rimraf": "^5.0.5",
-        "typescript": "^5.0.2"
+        "rimraf": "^5.0.5"
     },
     "dependencies": {
         "@composableai/zeno-client": "^0.3.1",
@@ -41,6 +40,7 @@
         "enquirer": "^2.4.1",
         "glob": "^10.3.12",
         "node-web-stream-adapters": "^0.1.0",
-        "signal-exit": "^4.1.0"
+        "signal-exit": "^4.1.0",
+        "typescript": "^5.5.2"
     }
 }

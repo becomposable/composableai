@@ -34,7 +34,7 @@ export async function createOrUpdateDocumentFromInteractionRun(payload: DSLActiv
     const objectTypeName = params.object_type;
 
     if (!runId) {
-        throw new ActivityParamNotFound("run", payload.activity);
+        throw new ActivityParamNotFound("run_id", payload.activity);
     }
     if (!objectTypeName && !params.updateExistingId) {
         throw new ActivityParamNotFound("object_type", payload.activity);

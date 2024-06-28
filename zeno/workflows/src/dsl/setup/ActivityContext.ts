@@ -57,7 +57,7 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
     });
 
     // if (vars.get("debug_mode")) {
-    log.info(`Setting up activity ${payload.activity.name}`, { payload: { ...payload, authToken: undefined }, vars });
+    log.info(`Setting up activity ${payload.activity.name}`, { config: payload.config, activity: payload.activity, params: payload.params });
     //}
 
     const fetchContext: FetchContext = {

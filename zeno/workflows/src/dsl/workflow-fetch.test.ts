@@ -3,9 +3,9 @@ import { TestWorkflowEnvironment } from '@temporalio/testing';
 import { Worker } from '@temporalio/worker';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { dslWorkflow } from './dsl-workflow.js';
+import { setupActivity } from "./setup/ActivityContext.js";
 import { DataProvider } from './setup/fetch/DataProvider.js';
 import { FetchContext, registerFetchProviderFactory } from './setup/fetch/index.js';
-import { setupActivity } from "./setup/ActivityContext.js";
 
 
 class DocumentTestProvider extends DataProvider {
@@ -18,6 +18,7 @@ class DocumentTestProvider extends DataProvider {
 
     doFetch(payload: FindPayload): Promise<Record<string, any>[]> {
         const query = payload.query;
+        console.log('query', query);
         if (query.lang === 'en') {
             return Promise.resolve([query.greeting ? { text: 'Hello' } : { text: "World" }])
         } else {
@@ -85,7 +86,7 @@ describe('DSL Workflow', () => {
         const { client, nativeConnection } = testEnv;
         const taskQueue = 'test';
 
-        const lang = 'fr';
+        const lang = 'en';
 
         const worker = await Worker.create({
             connection: nativeConnection,
@@ -122,7 +123,7 @@ describe('DSL Workflow', () => {
             taskQueue,
         }));
 
-        expect(result).toBe('Bonjour, Monde!');
+        expect(result).toBe('Hello, World!');
 
     });
 

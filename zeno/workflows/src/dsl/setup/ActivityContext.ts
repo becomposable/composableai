@@ -1,8 +1,8 @@
+import { verifyAuthToken } from "@composableai/cloud-client";
 import { StudioClient } from "@composableai/studio-client";
 import { Project } from "@composableai/studio-common";
 import { ZenoClient } from "@composableai/zeno-client";
 import { DSLActivityExecutionPayload, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@composableai/zeno-common";
-import { verifyAuthToken } from "@composableai/cloud-client";
 import { log } from "@temporalio/activity";
 import { NoDocumentFound, WorkflowParamNotFound } from "../../errors.js";
 import { getContentStore, getStudioClient } from "../../utils/clients.js";
@@ -55,6 +55,11 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
         ...payload.params, // imported params (doesn't contain expressions)
         ...payload.activity.params, // activity params (may contain expressions)
     });
+
+   // if (vars.get("debug_mode")) {
+        log.info(`Setting up activity ${payload.activity.name}`, { payload: { ...payload, authToken: undefined}, vars });
+    //} 
+
     const fetchContext: FetchContext = {
         zeno: getContentStore(payload),
         studio: getStudioClient(payload)
@@ -70,7 +75,10 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
                 if (query) {
                     query = vars.resolveParamsDeep(query);
                 }
+
                 const provider = await getFetchProvider(fetchContext, fetchSpec);
+
+                log.info(`Fetching data for ${key} with provider ${provider.name}`, { fetchSpec });
                 const result = await provider.fetch(fetchSpec);
                 if (result && result.length > 0) {
                     if (fetchSpec.limit === 1) {
@@ -88,6 +96,8 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
     }
 
     const params = vars.resolve() as T;
+    log.info(`Activity ${payload.activity.name} setup complete`, { params });
+
     return new ActivityContext<T>(payload, fetchContext, params);
 }
 

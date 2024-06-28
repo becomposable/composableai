@@ -51,14 +51,16 @@ export class ActivityContext<T extends Record<string, any> = Record<string, any>
 
 export async function setupActivity<T extends Record<string, any> = Record<string, any>>(payload: DSLActivityExecutionPayload) {
 
+    const isDebugMode = !!payload.debug_mode;
+
     const vars = new Vars({
         ...payload.params, // imported params (doesn't contain expressions)
         ...payload.activity.params, // activity params (may contain expressions)
     });
 
-    // if (vars.get("debug_mode")) {
-    log.info(`Setting up activity ${payload.activity.name}`, { payload: { ...payload, authToken: undefined }, vars });
-    //}
+    if (isDebugMode) {
+        log.info(`Setting up activity ${payload.activity.name}`, { payload: { ...payload, authToken: undefined }, vars });
+    }
 
     const fetchContext: FetchContext = {
         zeno: getContentStore(payload),

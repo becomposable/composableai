@@ -3,9 +3,14 @@ import { ActivityOptions, log, proxyActivities } from "@temporalio/workflow";
 import { ActivityParamNotFound, NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
 import { Vars } from "./vars.js";
 
-export function dslActivityPayload(workflowPayload: WorkflowExecutionPayload, activity: DSLActivitySpec, params: Record<string, any> = {}) {
+interface BaseActivityPayload extends WorkflowExecutionPayload {
+    workflow_name: string;
+    debug_mode?: boolean;
+}
+
+export function dslActivityPayload(basePayload: BaseActivityPayload, activity: DSLActivitySpec, params: Record<string, any> = {}) {
     return {
-        ...workflowPayload,
+        ...basePayload,
         activity,
         params,
     } as DSLActivityExecutionPayload
@@ -18,8 +23,10 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
         throw new WorkflowParamNotFound("workflow");
     }
     // the base payload wiull be used to create the activities payload
-    const basePayload: WorkflowExecutionPayload = {
-        ...payload
+    const basePayload: BaseActivityPayload = {
+        ...payload,
+        workflow_name: definition.name,
+        debug_mode: !!definition.debug_mode,
     }
     delete (basePayload as any).workflow;
 

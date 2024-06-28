@@ -1,6 +1,6 @@
 {
     "name": "@composableai/studio-common",
-    "version": "0.24.1",
+    "version": "0.25.0",
     "type": "module",
     "types": "./lib/types/index.d.ts",
     "files": [

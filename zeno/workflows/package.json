@@ -1,6 +1,6 @@
 {
   "name": "@composableai/workflows",
-  "version": "0.24.1",
+  "version": "0.25.0",
   "type": "module",
   "description": "Composable prompts workflows",
   "main": "./lib/esm/index.js",
@@ -25,12 +25,12 @@
     "vitest": "^1.6.0"
   },
   "dependencies": {
-    "@composableai/cloud-client": "^0.24.1",
-    "@composableai/studio-client": "^0.24.1",
-    "@composableai/studio-common": "^0.24.1",
-    "@composableai/zeno-blobs": "^0.24.1",
-    "@composableai/zeno-client": "^0.24.1",
-    "@composableai/zeno-common": "^0.24.1",
+    "@composableai/cloud-client": "^0.25.0",
+    "@composableai/studio-client": "^0.25.0",
+    "@composableai/studio-common": "^0.25.0",
+    "@composableai/zeno-blobs": "^0.25.0",
+    "@composableai/zeno-client": "^0.25.0",
+    "@composableai/zeno-common": "^0.25.0",
     "@opendocsg/pdf2md": "^0.1.29",
     "@temporalio/activity": "^1.9.3",
     "@temporalio/workflow": "^1.9.3",

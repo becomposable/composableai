@@ -1,6 +1,6 @@
 {
   "name": "@composableai/zeno-client",
-  "version": "0.24.1",
+  "version": "0.25.0",
   "type": "module",
   "description": "Zeno javascript client",
   "main": "./lib/esm/index.js",
@@ -20,7 +20,7 @@
     "vitest": "^1.2.2"
   },
   "dependencies": {
-    "@composableai/zeno-common": "^0.24.1",
+    "@composableai/zeno-common": "^0.25.0",
     "api-fetch-client": "^0.10.1"
   },
   "ts_dual_module": {

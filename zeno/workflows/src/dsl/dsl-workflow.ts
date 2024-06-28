@@ -1,7 +1,7 @@
 import { DSLActivityExecutionPayload, DSLActivitySpec, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@composableai/zeno-common";
 import { ActivityOptions, log, proxyActivities } from "@temporalio/workflow";
+import { ActivityParamNotFound, NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
 import { Vars } from "./vars.js";
-import { WorkflowParamNotFound } from "../errors.js";
 
 export function dslActivityPayload(workflowPayload: WorkflowExecutionPayload, activity: DSLActivitySpec, params: Record<string, any> = {}) {
     return {
@@ -31,7 +31,11 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
             backoffCoefficient: 2,
             maximumAttempts: 20,
             maximumInterval: 100 * 30 * 1000, //ms
-            nonRetryableErrorTypes: [],
+            nonRetryableErrorTypes: [
+                NoDocumentFound.name,
+                ActivityParamNotFound.name,
+                WorkflowParamNotFound.name,
+            ],
         },
     };
     const proxy = proxyActivities(options as any);

@@ -25,6 +25,8 @@ export interface DSLWorkflowExecutionPayload extends WorkflowExecutionPayload {
 export interface DSLActivityExecutionPayload extends WorkflowExecutionPayload {
     activity: DSLActivitySpec;
     params: Record<string, any>;
+    workflow_name: string;
+    debug_mode?: boolean;
 }
 
 

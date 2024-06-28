@@ -100,7 +100,7 @@ export async function listWorkflowsRule(program: Command, _options: Record<strin
 }
 
 
-export async function createOrUpdateWorkflowDefinition(program: Command, options: Record<string, any>) {
+export async function createOrUpdateWorkflowDefinition(program: Command, workflowId: string|undefined, options: Record<string, any>) {
     const { file, tags } = options;
 
     if (!file) {
@@ -114,9 +114,14 @@ export async function createOrUpdateWorkflowDefinition(program: Command, options
         json.tags = tags;
     }
 
-    const workflow = await getClient(program).workflows.definitions.create(json);
-
-    console.log("Created workflow", workflow.id);
+    if (workflowId) {
+        const res = await getClient(program).workflows.definitions.update(workflowId, json);
+        console.log("Updated workflow", res.id);
+        return;
+    } else {    
+        const res = await getClient(program).workflows.definitions.create(json);
+        console.log("Created workflow", res.id);
+    }
 
 }
 

@@ -88,15 +88,15 @@ rules.command("create")
         createWorkflowRule(program, options);
     });
 
-rules.command("get <objectId>")
+rules.command("get <workflowId>")
     .description("Get a workflow given its ID")
     .option('-f, --file [file]', 'The file to save the workflow definition to.')
-    .action((objectId: string, options: Record<string, any>) => {
-        getWorkflowRule(program, objectId, options);
+    .action((workflowId: string, options: Record<string, any>) => {
+        getWorkflowRule(program, workflowId, options);
     });
 
 rules.command("apply")
-    .description("Get a workflow given its ID")
+    .description("Update a workflow a workflow given its ID")
     .option('-f, --file <file>', 'The file to save the workflow definition to.')
     .action((options: Record<string, any>) => {
         createOrUpdateWorkflowRule(program, options);
@@ -128,14 +128,14 @@ definitions.command("create")
     .description("Create a new workflow definition.")
     .option('-f, --file <file>', 'The file containing the workflow definition.')
     .action((options: Record<string, any>) => {
-        createOrUpdateWorkflowDefinition(program, options);
+        createOrUpdateWorkflowDefinition(program, undefined, options);
     });
 
-definitions.command("apply")
+definitions.command("apply [workflowId]")
     .description("Create or update a workflow definition using a file.")
     .option('-f, --file <file>', 'The file containing the workflow definition.')
-    .action((options: Record<string, any>) => {
-        createOrUpdateWorkflowDefinition(program, options);
+    .action((workflowId, options: Record<string, any>) => {
+        createOrUpdateWorkflowDefinition(program, workflowId, options);
     });
 
 definitions.command("list")

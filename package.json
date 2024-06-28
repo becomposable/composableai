@@ -3,11 +3,17 @@
     "version": "0.24.1",
     "private": true,
     "workspaces": [
-        "../llumiverse/core",
-        "./common",
-        "./client",
-        "./cli",
-        "./react"
+        "./llumiverse/core",
+        "./studio/common",
+        "./studio/cloud",
+        "./studio/client",
+        "./studio/cli",
+        "./studio/react",
+        "./zeno/common",
+        "./zeno/client",
+        "./zeno/blobs",
+        "./zeno/workflows",
+        "./zeno/cli"
     ],
     "scripts": {
         "release": "npm publish --ws --access public",

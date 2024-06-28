@@ -6,6 +6,9 @@
  * 3. Here we export the API to be used to validate workflows and the types reuired to create workflow TS definitions.
  */
 
+//TODO remove this - it is only for backward compat - iot is used from old workflows
+export { dslWorkflow } from "./dsl/dsl-workflow.js";
+
 //TODO may be export vars as a named export vars ?
 export * from "./dsl/vars.js";
 

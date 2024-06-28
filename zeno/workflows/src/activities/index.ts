@@ -1,3 +1,6 @@
+/**
+ * Here we export all activities to be registered with the temporal worker
+ */
 export { chunkDocument } from "./chunkDocument.js";
 export { executeInteraction } from "./executeInteraction.js";
 export { extractDocumentText } from "./extractDocumentText.js";

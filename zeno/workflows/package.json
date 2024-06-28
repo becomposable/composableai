@@ -41,7 +41,11 @@
     "tiktoken": "^1.0.15"
   },
   "ts_dual_module": {
-    "outDir": "lib"
+    "outDir": "lib",
+    "exports": {
+      "activities": "./activities",
+      "workflows": "./workflows"
+    }
   },
   "exports": {
     ".": {
@@ -49,9 +53,21 @@
       "import": "./lib/esm/index.js",
       "require": "./lib/cjs/index.js"
     },
+    "./activities": {
+      "types": "./lib/types/activities/index.d.ts",
+      "import": "./lib/esm/activities/index.js",
+      "require": "./lib/cjs/activities/index.js"
+    },
     "./workflows": {
       "import": "./lib/workflows-bundle.js"
     }
   },
-  "types": "./lib/types/index.d.ts"
+  "types": "./lib/types/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "activities": [
+        "./lib/types/activities/index.d.ts"
+      ]
+    }
+  }
 }

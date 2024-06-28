@@ -56,9 +56,9 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
         ...payload.activity.params, // activity params (may contain expressions)
     });
 
-   // if (vars.get("debug_mode")) {
-        log.info(`Setting up activity ${payload.activity.name}`, { payload: { ...payload, authToken: undefined}, vars });
-    //} 
+    // if (vars.get("debug_mode")) {
+    log.info(`Setting up activity ${payload.activity.name}`, { payload: { ...payload, authToken: undefined }, vars });
+    //}
 
     const fetchContext: FetchContext = {
         zeno: getContentStore(payload),
@@ -66,14 +66,16 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
     }
     const fetchSpecs = payload.activity.fetch;
     if (fetchSpecs) {
+
         const keys = Object.keys(fetchSpecs);
         if (keys.length > 0) {
             // create a new Vars instance to store the fetched data
             for (const key of keys) {
-                const fetchSpec = fetchSpecs[key];
+                let fetchSpec = fetchSpecs[key];
                 let query = fetchSpec.query;
                 if (query) {
                     query = vars.resolveParamsDeep(query);
+                    fetchSpec = { ...fetchSpec, query };
                 }
 
                 const provider = await getFetchProvider(fetchContext, fetchSpec);

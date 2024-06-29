@@ -1,5 +1,6 @@
 import { ImportSpec } from "@composableai/zeno-common";
 import { matchCondition } from "./conditions.js";
+import { walkObject } from "./walk.js";
 
 const FALLBACK_VALUE_SEP = "??";
 
@@ -311,6 +312,38 @@ export class Vars {
                 }
             }
         }
+        return result;
+    }
+
+    getUnknownReferences(obj: any) {
+        const result: { name: string, expression: string }[] = [];
+        walkObject(obj, (_key, value) => {
+            if (typeof value === "string") {
+                const v = this.createValue(this, value);
+                if (v instanceof ExprValue) {
+                    for (const p of v.parts) {
+                        if (p instanceof RefValue) {
+                            if (!this.has(p.ref)) {
+                                result.push({ name: p.ref, expression: p.stringify() });
+                            }
+                        } else if (p instanceof PathRefValue) {
+                            if (!this.has(p.ref)) {
+                                result.push({ name: p.ref, expression: p.stringify() });
+                            }
+                        }
+                    }
+                } else if (v instanceof PathRefValue) {
+                    if (!this.has(v.ref)) {
+                        result.push({ name: v.ref, expression: v.stringify() });
+                    }
+
+                } else if (v instanceof RefValue) {
+                    if (!this.has(v.ref)) {
+                        result.push({ name: v.ref, expression: v.stringify() });
+                    }
+                }
+            }
+        })
         return result;
     }
 }

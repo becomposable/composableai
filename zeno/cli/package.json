@@ -30,6 +30,7 @@
         "rimraf": "^5.0.5"
     },
     "dependencies": {
+        "@composableai/workflow": "^0.25.0",
         "@composableai/zeno-client": "^0.25.0",
         "@composableai/zeno-common": "^0.25.0",
         "ansi-colors": "^4.1.3",

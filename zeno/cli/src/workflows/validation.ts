@@ -10,9 +10,14 @@ export class ValidationError extends Error {
 export function validateWorkflow(spec: DSLWorkflowSpec): DSLWorkflowSpec {
     const errors = validate(spec);
     if (errors && errors.length > 0) {
-        console.log("The workflow has validation errors:");
-        console.log(errors.join("\n"));
-        process.exit(2);
+        console.log("");
+        console.log("# ");
+        console.log("# The workflow has validation errors:");
+        console.log("# ");
+        console.log("");
+        console.log(errors.map((v, i) => `${i + 1}. ${v}`).join("\n"));
+        console.log("");
+        throw new ValidationError("Exiting because of validation errors.");
     }
     return spec;
 }

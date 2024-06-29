@@ -4,6 +4,7 @@ import fs from 'fs';
 import { getClient } from "../client.js";
 import { loadJSONWorkflowDefinition } from "./json-loader.js";
 import { loadTsWorkflowDefinition } from "./ts-loader.js";
+import { ValidationError } from "./validation.js";
 
 
 export async function createWorkflowRule(program: Command, options: Record<string, any>) {
@@ -100,7 +101,7 @@ export async function listWorkflowsRule(program: Command, _options: Record<strin
 }
 
 
-export async function createOrUpdateWorkflowDefinition(program: Command, workflowId: string|undefined, options: Record<string, any>) {
+export async function createOrUpdateWorkflowDefinition(program: Command, workflowId: string | undefined, options: Record<string, any>) {
     const { file, tags } = options;
 
     if (!file) {
@@ -109,16 +110,27 @@ export async function createOrUpdateWorkflowDefinition(program: Command, workflo
     }
 
     const loadWorkflow = file.endsWith('.ts') ? loadTsWorkflowDefinition : loadJSONWorkflowDefinition;
-    const json = await loadWorkflow(file);
+    let json: any;
+    try {
+        json = await loadWorkflow(file);
+    } catch (err: any) {
+        if (err instanceof ValidationError) {
+            console.log(err.message);
+            process.exit(1);
+        } else {
+            throw err;
+        }
+    }
     if (tags) {
         json.tags = tags;
     }
+
 
     if (workflowId) {
         const res = await getClient(program).workflows.definitions.update(workflowId, json);
         console.log("Updated workflow", res.id);
         return;
-    } else {    
+    } else {
         const res = await getClient(program).workflows.definitions.create(json);
         console.log("Created workflow", res.id);
     }

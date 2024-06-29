@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@composableai/zeno-common": "^0.26.0",
-    "api-fetch-client": "0.11.0"
+    "api-fetch-client": "0.12.0"
   },
   "ts_dual_module": {
     "outDir": "lib"

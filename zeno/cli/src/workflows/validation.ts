@@ -1,5 +1,5 @@
 import { DSLWorkflowSpec } from "@composableai/zeno-common";
-
+import { validateWorkflow as validate } from "@composableai/workflow";
 export class ValidationError extends Error {
     constructor(message: string) {
         super("Invalid workflow definition: " + message);
@@ -8,11 +8,11 @@ export class ValidationError extends Error {
 }
 
 export function validateWorkflow(spec: DSLWorkflowSpec): DSLWorkflowSpec {
-    if (!spec.name) {
-        throw new ValidationError("name is required");
-    }
-    if (!spec.activities || !Array.isArray(spec.activities) || spec.activities.length === 0) {
-        throw new ValidationError("activities is required and should be an array with at least one element");
+    const errors = validate(spec);
+    if (errors && errors.length > 0) {
+        console.log("The workflow has validation errors:");
+        console.log(errors.join("\n"));
+        process.exit(2);
     }
     return spec;
 }

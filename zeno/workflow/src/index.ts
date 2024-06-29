@@ -11,6 +11,7 @@ export { dslWorkflow } from "./dsl/dsl-workflow.js";
 
 //TODO may be export vars as a named export vars ?
 export * from "./dsl/vars.js";
+export * from "./dsl/validation.js";
 
 export * from "./activities/chunkDocument.js";
 export * from "./activities/executeInteraction.js";

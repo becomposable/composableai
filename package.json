@@ -12,7 +12,7 @@
         "./zeno/common",
         "./zeno/client",
         "./zeno/blobs",
-        "./zeno/workflows",
+        "./zeno/workflow",
         "./zeno/cli"
     ],
     "scripts": {

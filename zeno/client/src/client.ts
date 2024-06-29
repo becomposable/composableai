@@ -7,7 +7,7 @@ import { ZenoClientNotFoundError } from "./errors.js";
 export interface ZenoClientProps {
     serverUrl?: string;
     apikey?: string;
-    onRequest?: (url: string, init: RequestInit) => void;
+    onRequest?: (request: Request) => void;
     onResponse?: (response: Response) => void;
 }
 
@@ -31,7 +31,7 @@ export class ZenoClient extends AbstractFetchClient<ZenoClient> {
         this.onResponse = opts.onResponse;
         this.errorFactory = (err: RequestError) => {
             if (err.status === 404) {
-                return new ZenoClientNotFoundError(err);
+                return new ZenoClientNotFoundError(err.request, err);
             } else {
                 return err;
             }

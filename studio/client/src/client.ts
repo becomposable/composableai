@@ -16,7 +16,7 @@ export interface StudioClientProps {
     apikey?: string;
     projectId?: string;
     sessionTags?: string | string[];
-    onRequest?: (url: string, init: RequestInit) => void;
+    onRequest?: (request: Request) => void;
     onResponse?: (response: Response) => void;
 }
 

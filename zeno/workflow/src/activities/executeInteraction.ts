@@ -1,5 +1,5 @@
 import { StudioClient } from "@composableai/studio-client";
-import { ExecutionRun, ExecutionRunStatus } from "@composableai/studio-common";
+import { ExecutionRun, ExecutionRunStatus, InteractionExecutionConfiguration } from "@composableai/studio-common";
 import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/zeno-common";
 import { activityInfo, log } from "@temporalio/activity";
 import { projectResult } from "../dsl/projections.js";
@@ -118,7 +118,7 @@ export async function executeInteraction(payload: DSLActivityExecutionPayload) {
         }
     }
 
-    const res = await executeInteractionFromActivity(studio, interactionName, params, prompt_data);
+    const res = await executeInteractionFromActivity(studio, interactionName, params, prompt_data, payload.debug_mode);
 
     return projectResult(payload, params, res, {
         runId: res.id,
@@ -127,7 +127,7 @@ export async function executeInteraction(payload: DSLActivityExecutionPayload) {
 
 }
 
-export async function executeInteractionFromActivity(studio: StudioClient, interactionName: string, params: InteractionExecutionParams, prompt_data: any) {
+export async function executeInteractionFromActivity(studio: StudioClient, interactionName: string, params: InteractionExecutionParams, prompt_data: any, debug?: boolean) {
     const userTags = params.tags;
     const info = activityInfo();
     const runId = info.workflowExecution.runId;
@@ -155,17 +155,28 @@ export async function executeInteractionFromActivity(studio: StudioClient, inter
             }
         }
     }
+    if (debug && previousStudioExecutionRun?.error) {
+        log.info(`Found  previous run error`, { error: previousStudioExecutionRun?.error });
+    }
+
+    const config: InteractionExecutionConfiguration = {
+        environment: params.environment,
+        model: params.model,
+        max_tokens: params.max_tokens,
+        temperature: params.temperature
+    }
+    const data = {
+        ...prompt_data,
+        previous_error: previousStudioExecutionRun?.error,
+    }
+
+    if (debug) {
+        log.info(`About to execute interaction ${interactionName}`, { config, data, tags });
+    }
+
     const res = await studio.interactions.executeByName(interactionName, {
-        config: {
-            environment: params.environment,
-            model: params.model,
-            max_tokens: params.max_tokens,
-            temperature: params.temperature
-        },
-        data: {
-            ...prompt_data,
-            previous_error: previousStudioExecutionRun?.error,
-        },
+        config,
+        data,
         resultSchema: params.result_schema,
         tags,
         stream: false,
@@ -173,6 +184,10 @@ export async function executeInteractionFromActivity(studio: StudioClient, inter
         log.error(`Error executing interaction ${interactionName}`, { err });
         throw new Error(`Interaction Execution failed ${interactionName}: ${err.message}`);
     });
+
+    if (debug) {
+        log.info(`Interaction executed ${interactionName}`, res);
+    }
 
     if (res.error || res.status === ExecutionRunStatus.failed) {
         log.error(`Error executing interaction ${interactionName}`, res.error);

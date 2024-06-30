@@ -140,6 +140,7 @@ definitions.command("create")
 definitions.command("apply [workflowId]")
     .description("Create or update a workflow definition using a file.")
     .option('-f, --file <file>', 'The file containing the workflow definition.')
+    .option('--skip-validation', 'Skip the validation of the workflow definition.')
     .action((workflowId, options: Record<string, any>) => {
         createOrUpdateWorkflowDefinition(program, workflowId, options);
     });

@@ -10,8 +10,8 @@ function parseJSON(content: string): DSLWorkflowSpec {
     }
 }
 
-export function loadJSONWorkflowDefinition(file: string): Promise<DSLWorkflowSpec> {
+export function loadJSONWorkflowDefinition(file: string, skipValidation: boolean = false): Promise<DSLWorkflowSpec> {
     return readFile(file, 'utf-8').then(content => {
-        return validateWorkflow(parseJSON(content));
+        return skipValidation ? validateWorkflow(parseJSON(content)) : parseJSON(content);
     });
 }

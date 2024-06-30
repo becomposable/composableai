@@ -110,7 +110,7 @@ export async function transpileWorkflow(_program: Command, file: string) {
 }
 
 export async function createOrUpdateWorkflowDefinition(program: Command, workflowId: string | undefined, options: Record<string, any>) {
-    const { file, tags } = options;
+    const { file, tags, skipValidation } = options;
 
     if (!file) {
         console.log('A file with the workflow definition is required. Use --file argument');
@@ -120,7 +120,7 @@ export async function createOrUpdateWorkflowDefinition(program: Command, workflo
     const loadWorkflow = file.endsWith('.ts') ? loadTsWorkflowDefinition : loadJSONWorkflowDefinition;
     let json: any;
     try {
-        json = await loadWorkflow(file);
+        json = await loadWorkflow(file, skipValidation);
     } catch (err: any) {
         if (err instanceof ValidationError) {
             console.log(err.message);

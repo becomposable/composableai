@@ -1,6 +1,6 @@
 import { DSLWorkflowSpec } from "@composableai/zeno-common";
 import { readFileSync, rmSync, writeFileSync } from "fs";
-import { resolve, basename } from "path";
+import { basename, resolve } from "path";
 import * as ts from "typescript";
 import { ValidationError, validateWorkflow } from "./validation.js";
 
@@ -65,7 +65,7 @@ function tryDeleteFile(file: string) {
     }
 }
 
-export function loadTsWorkflowDefinition(file: string): Promise<DSLWorkflowSpec> {
+export function loadTsWorkflowDefinition(file: string, skipValidation: boolean = false): Promise<DSLWorkflowSpec> {
     console.log("Transpiling typescript file to JSON workflow definition");
     if (!file.endsWith('.ts')) {
         throw new Error("Not a type script file: " + file);
@@ -95,6 +95,6 @@ export function loadTsWorkflowDefinition(file: string): Promise<DSLWorkflowSpec>
         if (!module.default || typeof module.default !== "object") {
             throw new ValidationError("Workflow module does not export a default object");
         }
-        return validateWorkflow(module.default);
+        return skipValidation ? module.default : validateWorkflow(module.default);
     }).finally(() => tryDeleteFile(emittedFile));
 }

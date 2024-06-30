@@ -170,14 +170,16 @@ export async function executeInteractionFromActivity(studio: StudioClient, inter
         previous_error: previousStudioExecutionRun?.error,
     }
 
+    const resultSchema = params.result_schema;
+
     if (debug) {
-        log.info(`About to execute interaction ${interactionName}`, { config, data, tags });
+        log.info(`About to execute interaction ${interactionName}`, { config, data, resultSchema, tags });
     }
 
     const res = await studio.interactions.executeByName(interactionName, {
         config,
         data,
-        resultSchema: params.result_schema,
+        resultSchema,
         tags,
         stream: false,
     }).catch((err) => {

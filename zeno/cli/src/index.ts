@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import { addProfile, deleteProfile, listProfiles, showProfile, updateProfile, useProfile } from './config/commands.js';
 import { getVersion, upgrade } from './package.js';
 import { createObject, deleteObject, getObject, listObjects } from './store/index.js';
-import { createOrUpdateWorkflowDefinition, createOrUpdateWorkflowRule, createWorkflowRule, deleteWorkflowDefinition, deleteWorkflowRule, executeWorkflowRule, getWorkflowDefinition, getWorkflowRule, listWorkflowsDefinition, listWorkflowsRule } from './workflows/index.js';
+import { createOrUpdateWorkflowDefinition, createOrUpdateWorkflowRule, createWorkflowRule, deleteWorkflowDefinition, deleteWorkflowRule, executeWorkflowRule, getWorkflowDefinition, getWorkflowRule, listWorkflowsDefinition, listWorkflowsRule, transpileWorkflow } from './workflows/index.js';
 
 const program = new Command()
     .option('-k, --apikey <API_KEY>', 'API Key to authenticate with Zenos server')
@@ -123,6 +123,12 @@ rules.command("delete <objectId>")
     });
 
 const definitions = workflows.command("definitions");
+
+definitions.command("transpile <file>")
+    .description("Transpile a typescript workflow definition to JSON.")
+    .action((file: string) => {
+        transpileWorkflow(program, file);
+    });
 
 definitions.command("create")
     .description("Create a new workflow definition.")

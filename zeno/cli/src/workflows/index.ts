@@ -100,6 +100,14 @@ export async function listWorkflowsRule(program: Command, _options: Record<strin
 
 }
 
+export async function transpileWorkflow(_program: Command, file: string) {
+    if (!file) {
+        console.log('A .ts file argument is required.');
+        process.exit(1);
+    }
+    const json = await loadTsWorkflowDefinition(file);
+    console.log(JSON.stringify(json, null, 2));
+}
 
 export async function createOrUpdateWorkflowDefinition(program: Command, workflowId: string | undefined, options: Record<string, any>) {
     const { file, tags } = options;

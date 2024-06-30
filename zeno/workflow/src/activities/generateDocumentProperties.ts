@@ -1,8 +1,8 @@
 import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/zeno-common";
-import { TruncateSpec, truncByMaxTokens } from "../utils/tokens.js";
-import { InteractionExecutionParams, executeInteractionFromActivity } from "./executeInteraction.js";
-import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { log } from "@temporalio/activity";
+import { setupActivity } from "../dsl/setup/ActivityContext.js";
+import { TruncateSpec } from "../utils/tokens.js";
+import { InteractionExecutionParams, executeInteractionFromActivity } from "./executeInteraction.js";
 
 export interface GenerateDocumentPropertiesParams extends InteractionExecutionParams {
     typesHint?: string[];
@@ -39,13 +39,18 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
     }*/
 
 
-    log.info("Extracting information from object", { objectId: objectId, schema: type.object_schema });
+    log.info(` Extracting information from object ${objectId} with type ${type.name}`, payload.debug_mode ? { params } : undefined);
 
-    const content = truncByMaxTokens(doc.text, params.truncate || 4000);
-
-    const infoRes = await executeInteractionFromActivity(studio, "ExtractInformation", params, {
-        content,
-    });
+    const infoRes = await executeInteractionFromActivity(
+        studio,
+        "ExtractInformation",
+        {
+            ...params,
+            result_schema: type.object_schema,
+        },
+        {
+            content: doc.text,
+        });
 
     await zeno.objects.update(doc.id, {
         properties: {

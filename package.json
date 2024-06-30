@@ -22,7 +22,7 @@
         "clean": "rimraf ./node_modules && npm run clean --ws"
     },
     "devDependencies": {
-        "npm-ws-tools": "^0.1.2",
+        "npm-ws-tools": "^0.2.0",
         "rimraf": "^5.0.5",
         "typescript": "^5.3.3"
     }

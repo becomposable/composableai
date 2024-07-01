@@ -66,7 +66,6 @@ function tryDeleteFile(file: string) {
 }
 
 export function loadTsWorkflowDefinition(file: string, skipValidation: boolean = false): Promise<DSLWorkflowSpec> {
-    console.log("Transpiling typescript file to JSON workflow definition");
     if (!file.endsWith('.ts')) {
         throw new Error("Not a type script file: " + file);
     }

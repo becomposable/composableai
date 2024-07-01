@@ -1,6 +1,7 @@
 import { WorkflowRuleInputType } from "@composableai/zeno-common";
 import { Command } from "commander";
 import fs from 'fs';
+import { resolve, join, basename } from "path";
 import { getClient } from "../client.js";
 import { loadJSONWorkflowDefinition } from "./json-loader.js";
 import { loadTsWorkflowDefinition } from "./ts-loader.js";
@@ -100,13 +101,41 @@ export async function listWorkflowsRule(program: Command, _options: Record<strin
 
 }
 
-export async function transpileWorkflow(_program: Command, file: string) {
-    if (!file) {
+export async function transpileWorkflow(_program: Command, files: string[], options: Record<string, any>) {
+    if (!files || !files.length) {
         console.log('A .ts file argument is required.');
         process.exit(1);
     }
-    const json = await loadTsWorkflowDefinition(file);
-    console.log(JSON.stringify(json, null, 2));
+    const out = options.out ? resolve(options.out) : undefined;
+    let saveToDir = false;
+    try {
+        if (out && fs.lstatSync(out).isDirectory()) {
+            saveToDir = true;
+        }
+    } catch (err) {
+        //ignore
+    }
+    if (files.length > 1 && !saveToDir) {
+        console.log('When multiple files are specified the output must be a directory.');
+        process.exit(1);
+    }
+    for (const file of files) {
+        const json = await loadTsWorkflowDefinition(file);
+        if (!out) {
+            console.log(JSON.stringify(json, null, 2));
+        } else {
+            let outFile;
+            if (saveToDir) {
+                let fileName = basename(file);
+                fileName = fileName.replace('.ts', '.json');
+                outFile = join(out, fileName);
+            } else { // save to file
+                outFile = out;
+            }
+            console.log("Generating file", outFile);
+            fs.writeFileSync(outFile, JSON.stringify(json, null, 2));
+        }
+    }
 }
 
 export async function createOrUpdateWorkflowDefinition(program: Command, workflowId: string | undefined, options: Record<string, any>) {
@@ -117,9 +146,13 @@ export async function createOrUpdateWorkflowDefinition(program: Command, workflo
         process.exit(1);
     }
 
-    const loadWorkflow = file.endsWith('.ts') ? loadTsWorkflowDefinition : loadJSONWorkflowDefinition;
+    const isTs = file.endsWith('.ts');
+    const loadWorkflow = isTs ? loadTsWorkflowDefinition : loadJSONWorkflowDefinition;
     let json: any;
     try {
+        if (isTs) {
+            console.log(`Transpiling file ${file} ...`);
+        }
         json = await loadWorkflow(file, skipValidation);
     } catch (err: any) {
         if (err instanceof ValidationError) {

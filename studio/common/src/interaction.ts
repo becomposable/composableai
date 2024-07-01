@@ -134,10 +134,11 @@ export interface InteractionForkPayload {
 }
 
 export interface InteractionExecutionPayload<Input = any> {
-    stream?: boolean;
     data?: Input;
     config?: InteractionExecutionConfiguration;
     resultSchema?: JSONSchema4;
+    stream?: boolean;
+    validate?: boolean;
     tags?: string | string[]; // tags to be added to the execution run
 }
 
@@ -213,6 +214,7 @@ export interface InteractionExecutionConfiguration {
     model?: string;
     temperature?: number;
     max_tokens?: number;
+    validate?: boolean;
 }
 
 export interface GenerateTestDataPayload {

@@ -60,7 +60,7 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
 
     //}
     if (isDebugMode) {
-        log.info(`Setting up activity ${payload.activity.name}`,  { config: payload.config, activity: payload.activity, params: payload.params, vars });
+        log.info(`Setting up activity ${payload.activity.name}`, { config: payload.config, activity: payload.activity, params: payload.params, vars });
     }
 
     const fetchContext: FetchContext = {
@@ -77,7 +77,7 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
                 let fetchSpec = fetchSpecs[key];
                 let query = fetchSpec.query;
                 if (query) {
-                    query = vars.resolveParamsDeep(query);
+                    query = vars.resolveParams(query);
                     fetchSpec = { ...fetchSpec, query };
                 }
 
@@ -87,14 +87,14 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
                 const result = await provider.fetch(fetchSpec);
                 if (result && result.length > 0) {
                     if (fetchSpec.limit === 1) {
-                        vars.set(key, result[0]);
+                        vars.setValue(key, result[0]);
                     } else {
-                        vars.set(key, result);
+                        vars.setValue(key, result);
                     }
                 } else if (fetchSpec.onNotFound === 'throw') {
                     throw new NoDocumentFound("No documents found for: " + JSON.stringify(fetchSpec));
                 } else {
-                    vars.set(key, null);
+                    vars.setValue(key, null);
                 }
             }
         }

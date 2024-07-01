@@ -1,7 +1,4 @@
-import { describe, test, expect } from "vitest";
-import { Vars } from "./vars.ts";
-import { walkObject } from "./walk.ts";
-import { DSLWorkflowDefinition } from "@composableai/zeno-common";
+import { describe, expect, test } from "vitest";
 import { validateWorkflow } from "./validation.ts";
 
 describe('workflow validation', () => {
@@ -213,23 +210,28 @@ describe('workflow validation', () => {
         const workflow: any = {
             name: "test",
             vars: { "foo": true, "bar": "true" },
-            activities: [{
-                name: "test",
-                import: ["foo", { "barLen": "bar.length" }],
-                fetch: {
-                    doc: {
-                        query: {
-                            foo: "${foo}",
-                            barLen: "${barLen}"
+            activities: [
+                {
+                    name: "test0",
+                    output: "previousResult"
+                }, {
+                    name: "test",
+                    import: ["foo", { "barLen": "bar.length" }, "previousResult"],
+                    fetch: {
+                        doc: {
+                            query: {
+                                foo: "${foo}",
+                                barLen: "${barLen}"
+                            }
                         }
+                    },
+                    params: {
+                        foo: "${foo}",
+                        barLen: "${barLen}",
+                        doc: "${doc.text}",
+                        prev: "${previousResult}"
                     }
-                },
-                params: {
-                    foo: "${foo}",
-                    barLen: "${barLen}",
-                    doc: "${doc.text}"
-                }
-            }]
+                }]
         }
         const errors = validateWorkflow(workflow);
         expect(errors.length).toBe(0);

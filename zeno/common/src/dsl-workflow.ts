@@ -151,6 +151,8 @@ export interface DSLWorkflowSpec {
 }
 
 export interface DSLWorkflowDefinition extends BaseObject, DSLWorkflowSpec {
+    // an optional JSON schema to describe the input vars of the workflow.
+    input_schema?: Record<string, any>;
 }
 
 export interface WorkflowDefinitionRef {

@@ -99,8 +99,11 @@ export class ObjectsApi extends ApiTopic {
             name: source.name,
             mime_type: source.type
         });
+
+        console.log(`Uploading file to ${url}`, { id, mime_type, isStream, source })
+
         // upload the file content to the signed URL
-        const res = await this.fetch(url, {
+        /*const res = await this.fetch(url, {
             method: 'PUT',
             //@ts-ignore: duplex is not in the types. See https://github.com/node-fetch/node-fetch/issues/1769
             duplex: isStream ? "half" : undefined,
@@ -112,9 +115,29 @@ export class ObjectsApi extends ApiTopic {
             if (res.ok) {
                 return res;
             } else {
+                console.log(res);
+                throw new Error(`Failed to upload file: ${res.statusText}`);
+            }
+        });*/
+
+        const res = await fetch(url, {
+            method: 'PUT',
+            body: isStream ? source.stream : source,
+            //@ts-ignore: duplex is not in the types. See https://github.com/node-fetch/node-fetch/issues/1769
+            duplex: isStream ? "half" : undefined,
+            headers: {
+                'Content-Type': 'application/octet-stream'
+            }
+        }).then((res: Response) => {
+            if (res.ok) {
+                return res;
+            } else {
+                console.log(res);
                 throw new Error(`Failed to upload file: ${res.statusText}`);
             }
         });
+
+
         return {
             source: id,
             name: source.name,

@@ -1,9 +1,9 @@
 import { ExecutionRun } from "@composableai/studio-common";
 import { Command } from "commander";
 import { getClient } from "../client.js";
+import { Spinner } from "../utils/console.js";
 import { readFile, readStdin, writeFile } from "../utils/stdio.js";
 import { ExecutionQueue, ExecutionRequest } from "./executor.js";
-import { Spinner } from "../utils/console.js";
 
 
 export default async function runInteraction(program: Command, interactionId: string, options: Record<string, any>) {

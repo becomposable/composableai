@@ -20,7 +20,7 @@ const JSON: DSLActivitySpec = {
         max_tokens: 100,
         temperature: 0.5,
         tags: ["test"],
-        resultSchema: "${docType.object_schema}",
+        result_schema: "${docType.object_schema}",
         prompt_data: {
             documents: "${documents}",
             guidline: "${guidline.text}"
@@ -41,7 +41,7 @@ const JSON: DSLActivitySpec = {
                 id: "${guidlineId}",
             },
             select: "+text",
-            onNotFound: "throw"
+            on_not_found: "throw"
         },
         docType: {
             type: "document_type",
@@ -170,16 +170,16 @@ export async function executeInteractionFromActivity(studio: StudioClient, inter
         previous_error: previousStudioExecutionRun?.error,
     }
 
-    const resultSchema = params.result_schema;
+    const result_schema = params.result_schema;
 
     if (debug) {
-        log.info(`About to execute interaction ${interactionName}`, { config, data, resultSchema, tags });
+        log.info(`About to execute interaction ${interactionName}`, { config, data, result_schema, tags });
     }
 
     const res = await studio.interactions.executeByName(interactionName, {
         config,
         data,
-        resultSchema,
+        result_schema,
         tags,
         stream: false,
     }).catch((err) => {

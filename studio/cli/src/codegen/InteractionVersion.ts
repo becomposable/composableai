@@ -57,7 +57,7 @@ export class InteractionVersion {
         const interaction = this.interaction;
         const className = this.className;
         const inputSchema = mergePromptsSchema(interaction);
-        const outputSchema = interaction.resultSchema;
+        const outputSchema = interaction.result_schema;
 
         const out = [];
         const types = [];

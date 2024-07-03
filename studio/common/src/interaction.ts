@@ -32,7 +32,7 @@ export const InteractionRefPopulate = "id name description status version latest
 
 export interface InteractionRefWithSchema
     extends Omit<InteractionRef, "prompts"> {
-    resultSchema?: JSONSchema4;
+    result_schema?: JSONSchema4;
     prompts?: PromptSegmentDef<PromptTemplateRefWithSchema>[];
 }
 
@@ -85,7 +85,7 @@ export interface Interaction {
     version: number;
     tags: string[];
     test_data?: JSONObject;
-    resultSchema?: JSONSchema4;
+    result_schema?: JSONSchema4;
     cache_policy?: CachePolicy;
     model: string;
     temperature?: number;
@@ -116,10 +116,10 @@ export interface InteractionUpdatePayload
     extends Partial<
         Omit<
             Interaction,
-            "resultSchema" | "id" | "created_at" | "updated_at" | "project"
+            "result_schema" | "id" | "created_at" | "updated_at" | "project"
         >
     > {
-    resultSchema?: JSONSchema4 | null;
+    result_schema?: JSONSchema4 | null;
 }
 
 export interface InteractionPublishPayload {
@@ -136,7 +136,7 @@ export interface InteractionForkPayload {
 export interface InteractionExecutionPayload<Input = any> {
     data?: Input;
     config?: InteractionExecutionConfiguration;
-    resultSchema?: JSONSchema4;
+    result_schema?: JSONSchema4;
     stream?: boolean;
     validate?: boolean;
     tags?: string | string[]; // tags to be added to the execution run
@@ -187,7 +187,7 @@ export interface ExecutionRun<P = any, R = any> {
     //TODO a string is returned when execution not the env object
     environment: ExecutionEnvironmentRef;
     modelId: string;
-    resultSchema: JSONSchema4;
+    result_schema: JSONSchema4;
     ttl: number;
     status: ExecutionRunStatus;
     prompt: any;
@@ -207,7 +207,7 @@ export interface ExecutionRunRef
     interaction: InteractionRef;
 }
 
-export const ExecutionRunRefSelect = "-result -parameters -resultSchema";
+export const ExecutionRunRefSelect = "-result -parameters -result_schema";
 
 export interface InteractionExecutionConfiguration {
     environment?: string;

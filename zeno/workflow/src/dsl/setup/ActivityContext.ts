@@ -91,7 +91,7 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
                     } else {
                         vars.set(key, result);
                     }
-                } else if (fetchSpec.onNotFound === 'throw') {
+                } else if (fetchSpec.on_not_found === 'throw') {
                     throw new NoDocumentFound("No documents found for: " + JSON.stringify(fetchSpec));
                 } else {
                     vars.set(key, null);
@@ -108,7 +108,7 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
 
 
 async function _fetchProject(studio: StudioClient, payload: WorkflowExecutionPayload) {
-    const { project } = await verifyAuthToken(payload.authToken);
+    const { project } = await verifyAuthToken(payload.auth_token);
     console.log(`Getting project data for ${project?.id}`);
     return project ? await studio.projects.retrieve(project.id) : undefined;
 }

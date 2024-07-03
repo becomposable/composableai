@@ -18,12 +18,12 @@ export interface WorkflowExecutionPayload {
      * The account ID of the user who created the activity.
      * This is usefull to select the right database to work on.
      */
-    accountId: string;
+    account_id: string;
 
     /**
      * The project ID of the account who created the activity.
      */
-    projectId: string;
+    project_id: string;
 
     /**
      * The Unix timestamp when the workflow was started.
@@ -34,7 +34,7 @@ export interface WorkflowExecutionPayload {
      * The Workflow Rule ID if any. If the workflow was started by a rule this field will contain the rule ID
      * otherwise if the workflow was started on demand the property will be undefined.
      */
-    wfRuleName: string;
+    wf_rule_name: string;
 
     /**
      * The vars field is mainly used to pass the user input to the workflow.
@@ -50,7 +50,7 @@ export interface WorkflowExecutionPayload {
     /**
      * Auth Token to access Zeno and Composable from the workers
      */
-    authToken: string;
+    auth_token: string;
 
     /**
      * The ID of the target objects processed by the workflow.
@@ -61,8 +61,8 @@ export interface WorkflowExecutionPayload {
      * The configuration for the workflow execution.
      */
     config?: {
-        studioUrl: string;
-        storeUrl: string;
+        studio_url: string;
+        store_url: string;
     }
 }
 
@@ -75,18 +75,18 @@ export interface ExecuteWorkflowPayload {
 
 
 export interface ListWorkflowRunsPayload {
-    documentId?: string;
-    eventName?: string;
-    ruleId?: string;
+    document_id?: string;
+    event_name?: string;
+    rule_id?: string;
 }
 
 
 interface WorkflowRunEvent {
 
-    eventId: number;
-    eventTime: number;
-    eventType: string;
-    taskId: string;
+    event_id: number;
+    event_time: number;
+    event_type: string;
+    task_id: string;
     attempt: number;
 
     activity?: {
@@ -98,7 +98,7 @@ interface WorkflowRunEvent {
     error?: {
         message: string;
         source: string;
-        stackTrace: string;
+        stacktrace: string;
         type?: string;
     };
 
@@ -109,11 +109,11 @@ interface WorkflowRunEvent {
 export interface WorkflowRun {
     status?: WorkflowExecutionStatus | string,
     type?: string,
-    startedAt?: number,
-    closedAt?: number,
+    started_at?: number,
+    closed_at?: number,
     execution_duration?: number,
-    runId?: string,
-    workflowId?: string,
+    run_id?: string,
+    workflow_id?: string,
     raw?: any
 }
 

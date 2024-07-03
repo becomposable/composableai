@@ -9,7 +9,7 @@ export interface RunCreatePayload extends NamedInteractionExecutionPayload {
 export interface StringFacet {
     type: "string",
     path: string,
-    numBuckets?: number,
+    num_buckets?: number,
 }
 
 export interface NumericFacet {
@@ -49,7 +49,7 @@ export interface FacetResult<T extends (string | number) = string> {
 
 export interface RunSearchMetaRepsonse {
     count: {
-        lowerBound?: number,
+        lower_bound?: number,
         total?: number,
     },
     facet: Record<string, FacetResult>
@@ -76,17 +76,17 @@ export interface RunSearchPayload {
      * An ISO date string to use as an anchor for the search.
      * If no anchor date is provided then the latest runs will be returned and the anchorDateDirection is ignored.
      */
-    anchorDate?: string,
+    anchor_date?: string,
 
     /**
      * The direction to use when using an anchor date. Defaults to after. d the anchorDate is undefiend then this parameter is ignored.
      */
-    anchorDateDirection?: 'before' | 'after',
+    anchor_date_direction?: 'before' | 'after',
 
     /**
      * Perform only meta search. If true facets must be defined.
      */
-    onlyMeta?: boolean,
+    only_meta?: boolean,
 
     /**
      * A facet name to facet definition map. If defined then performs a faceted search.
@@ -111,7 +111,7 @@ export interface RunSearchPayload {
      */
     query?: string,
 
-    defaultQueryPath?: string;
+    default_query_path?: string;
 
     /**
      * If false then only top level runs are returned, if a string array then only child runs within the given parent ids are returned.

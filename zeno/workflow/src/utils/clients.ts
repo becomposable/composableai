@@ -9,37 +9,37 @@ import { WorkflowExecutionPayload } from "@composableai/zeno-common";
 
 export function getContentStore(payload: WorkflowExecutionPayload) {
 
-    if (!payload.authToken) {
+    if (!payload.auth_token) {
         throw new Error("Authentication Token is missing from WorkflowExecutionPayload.authToken");
     }
 
-    if (!payload.config?.storeUrl) {
+    if (!payload.config?.store_url) {
         throw new Error("Content Store URL is missing from WorkflowExecutionPayload.servers.storeUrl");
     }
 
     //TODO: handle token check and refresh?
     //TODO: handle client caching?
     return new ZenoClient({
-        serverUrl: payload.config.storeUrl,
-        apikey: payload.authToken
+        serverUrl: payload.config.store_url,
+        apikey: payload.auth_token
     });
 }
 
 
 export function getStudioClient(payload: WorkflowExecutionPayload) {
 
-    if (!payload.authToken) {
+    if (!payload.auth_token) {
         throw new Error("Authentication Token is missing from WorkflowExecutionPayload.authToken");
     }
 
-    if (!payload.config?.studioUrl) {
+    if (!payload.config?.studio_url) {
         throw new Error("Content Store URL is missing from WorkflowExecutionPayload.servers.storeUrl");
     }
 
-    console.log(`Connecting to studio at ${payload.config.studioUrl}`);
+    console.log(`Connecting to studio at ${payload.config.studio_url}`);
     const client = new StudioClient({
-        serverUrl: payload.config.studioUrl,
-        apikey: payload.authToken
+        serverUrl: payload.config.studio_url,
+        apikey: payload.auth_token
     });
 
     return client;

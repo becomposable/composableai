@@ -60,7 +60,7 @@ export interface ActivityFetchSpec {
      * 1. ignore - Ignore and return an empty array for multi objects query (or undefined for single object query) or empty array for multiple objectthrow an error.
      * 2. throw - Throw an error if the object or no objects are found.
      */
-    onNotFound?: "ignore" | "throw";
+    on_not_found?: "ignore" | "throw";
 }
 
 export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<string, any>> {

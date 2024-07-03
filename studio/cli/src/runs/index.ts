@@ -10,8 +10,8 @@ export async function runHistory(program: Command, interactionId: string | undef
     if (limit <= 0) limit === 100;
     const offset = page * limit;
 
-    const anchorDate = options.before || options.after || undefined;
-    const anchorDateDirection = options.before ? 'before' : (options.after ? 'after' : undefined);
+    const anchor_date = options.before || options.after || undefined;
+    const anchor_date_direction = options.before ? 'before' : (options.after ? 'after' : undefined);
 
     const response = await client.runs.search({
         limit, offset,
@@ -22,8 +22,8 @@ export async function runHistory(program: Command, interactionId: string | undef
             environment: options.env || undefined,
             model: options.model || undefined,
         },
-        anchorDate,
-        anchorDateDirection,
+        anchor_date,
+        anchor_date_direction,
         query: options.query as string || undefined,
     });
 

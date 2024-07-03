@@ -95,9 +95,9 @@ export class ObjectsApi extends ApiTopic {
     async upload(source: StreamSource | File) {
         const isStream = source instanceof StreamSource;
         // get a signed URL to upload the file a computed mimeType and the file object id.
-        const { url, id, mimeType } = await this.getUploadUrl({
+        const { url, id, mime_type } = await this.getUploadUrl({
             name: source.name,
-            mimeType: source.type
+            mime_type: source.type
         });
         // upload the file content to the signed URL
         const res = await this.fetch(url, {
@@ -106,7 +106,7 @@ export class ObjectsApi extends ApiTopic {
             duplex: isStream ? "half" : undefined,
             body: isStream ? source.stream : source,
             headers: {
-                'Content-Type': mimeType || 'application/octet-stream'
+                'Content-Type': mime_type || 'application/octet-stream'
             }
         }).then((res: Response) => {
             if (res.ok) {
@@ -118,7 +118,7 @@ export class ObjectsApi extends ApiTopic {
         return {
             source: id,
             name: source.name,
-            type: mimeType,
+            type: mime_type,
             etag: res.headers.get('etag') ?? undefined
         }
     }

@@ -61,7 +61,7 @@ export function makeProjection(spec: Record<string, any>, params: Record<string,
         '#': result,
     });
 
-    const projection = vars.resolveParamsDeep(spec);
+    const projection = vars.resolveParams(spec);
 
     const out: any = {}
     for (const [key, value] of Object.entries(projection)) {

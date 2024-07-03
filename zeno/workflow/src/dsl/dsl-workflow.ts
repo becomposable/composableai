@@ -72,9 +72,9 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
             log.info("Executing activity: " + activity.name, { importParams });
             const result = await fn(executionPayload);
             if (activity.output) {
-                vars.set(activity.output, result);
+                vars.setValue(activity.output, result);
             }
         }
     }
-    return vars.get(definition.result || 'result');
+    return vars.getValue(definition.result || 'result');
 }

@@ -1,4 +1,4 @@
-import { describe, test, expect } from "vitest";
+import { describe, expect, test } from "vitest";
 import { Vars } from "./vars.ts";
 
 describe('Workflow vars', () => {
@@ -8,9 +8,9 @@ describe('Workflow vars', () => {
             objectId: "123",
             timestamp: 123456,
         });
-        expect(vars.get("objectId")).toBe("123");
-        expect(vars.get("timestamp")).toBe(123456);
-        expect(vars.get("foo")).toBeUndefined();
+        expect(vars.getValue("objectId")).toBe("123");
+        expect(vars.getValue("timestamp")).toBe(123456);
+        expect(vars.getValue("foo")).toBeUndefined();
     })
 
     test('set and access variables', () => {
@@ -18,9 +18,9 @@ describe('Workflow vars', () => {
             objectId: "123",
             timestamp: 123456,
         });
-        expect(vars.get("objectId")).toBe("123");
-        vars.set("objectId", "456");
-        expect(vars.get("objectId")).toBe("456");
+        expect(vars.getValue("objectId")).toBe("123");
+        vars.setValue("objectId", "456");
+        expect(vars.getValue("objectId")).toBe("456");
     })
 
     test('access and modify ref variables', () => {
@@ -32,12 +32,12 @@ describe('Workflow vars', () => {
             objectIdAlias: "${objectId}",
             configNameAlias: "${config.name}",
         });
-        expect(vars.get("objectIdAlias")).toBe("123");
-        expect(vars.get("configNameAlias")).toBe("foo");
-        vars.set("objectId", "456");
-        vars.get("config").name = "bar";
-        expect(vars.get("objectIdAlias")).toBe("456");
-        expect(vars.get("configNameAlias")).toBe("bar");
+        expect(vars.getValue("objectIdAlias")).toBe("123");
+        expect(vars.getValue("configNameAlias")).toBe("foo");
+        vars.setValue("objectId", "456");
+        vars.getValue("config").name = "bar";
+        expect(vars.getValue("objectIdAlias")).toBe("456");
+        expect(vars.getValue("configNameAlias")).toBe("bar");
     })
 
     test('replace literal with ref', () => {
@@ -45,19 +45,19 @@ describe('Workflow vars', () => {
             objectId: "123",
             otherId: "1234",
         });
-        expect(vars.get("objectId")).toBe("123");
-        expect(vars.get("otherId")).toBe("1234");
-        vars.set("objectId", "456");
-        vars.set("otherId", "${objectId}");
-        expect(vars.get("objectId")).toBe("456");
-        expect(vars.get("otherId")).toBe("456");
+        expect(vars.getValue("objectId")).toBe("123");
+        expect(vars.getValue("otherId")).toBe("1234");
+        vars.setValue("objectId", "456");
+        vars.load({ "otherId": "${objectId}" });
+        expect(vars.getValue("objectId")).toBe("456");
+        expect(vars.getValue("otherId")).toBe("456");
     });
 
     test("undefined ref variable", () => {
         const vars = new Vars({
             otherId: "${objectId}",
         });
-        expect(vars.get("otherId")).toBeUndefined();
+        expect(vars.getValue("otherId")).toBeUndefined();
     })
 
     test("default values", () => {
@@ -69,11 +69,11 @@ describe('Workflow vars', () => {
             array: "${objectId ?? [1,2]}",
         });
         // object valus and path expression are not supported
-        expect(vars.get("squote")).toBe("123");
-        expect(vars.get("dquote")).toBe("123");
-        expect(vars.get("number")).toBe(123);
-        expect(vars.get("boolean")).toBe(true);
-        expect(vars.get("array")).toEqual([1, 2]);
+        expect(vars.getValue("squote")).toBe("123");
+        expect(vars.getValue("dquote")).toBe("123");
+        expect(vars.getValue("number")).toBe(123);
+        expect(vars.getValue("boolean")).toBe(true);
+        expect(vars.getValue("array")).toEqual([1, 2]);
     })
 
     test("array map", () => {
@@ -81,27 +81,10 @@ describe('Workflow vars', () => {
             docs: [{ text: "hello" }, { text: "world" }],
         });
         // object valus and path expression are not supported
-        expect(vars.resolveParamValue("docs.text").join(' ')).toBe("hello world");
+        expect(vars.getValue("docs.text").join(' ')).toBe("hello world");
     })
 
     test("resolveParams", () => {
-        const vars = new Vars({
-            objectId: "123",
-            otherId: "${objectId}",
-        });
-        const params = {
-            foo: "bar",
-            objectId: "${objectId}",
-            otherId: "${otherId}",
-        }
-        const resolved = vars.resolveParams(params);
-        expect(Object.keys(resolved).length).toBe(3);
-        expect(resolved.foo).toBe("bar");
-        expect(resolved.objectId).toBe("123");
-        expect(resolved.otherId).toBe("123");
-    })
-
-    test("resolveParamsDeep", () => {
         const vars = new Vars({
             objectIds: ["123", "456"],
             objectId: "123",
@@ -115,7 +98,7 @@ describe('Workflow vars', () => {
             secondDocId: "${objectIds.1}",
             secondDocIdByBracket: "${objectIds[1]}",
         }
-        const resolved = vars.resolveParamsDeep(params);
+        const resolved = vars.resolveParams(params);
         expect(Object.keys(resolved).length).toBe(3);
         expect(resolved.query).toBeTypeOf("object");
         expect(resolved.query._id).toBe("123");
@@ -129,16 +112,20 @@ describe('Workflow vars', () => {
     test("resolve", () => {
         const vars = new Vars({
             objectId: "123",
-            data: { message: "hello" },
-            data2: "${data}",
+            message: "hello",
+            prompt_data: { message: "${message}" },
+            data2: "${prompt_data}",
+            unknown: "${notdefined}"
         });
         const resolved = vars.resolve();
-        expect(Object.keys(resolved).length).toBe(3);
+        console.log('@@@@@@@@@@@@@@@@@@@', resolved);
+        expect(Object.keys(resolved).length).toBe(4); // since unknown will be undefined it will not be included
         expect(resolved.objectId).toBe("123");
-        expect(resolved.data).toBeTypeOf("object");
-        expect(resolved.data.message).toBe("hello");
+        expect(resolved.prompt_data).toBeTypeOf("object");
+        expect(resolved.prompt_data.message).toBe("hello");
         expect(resolved.data2).toBeTypeOf("object");
         expect(resolved.data2.message).toBe("hello");
+        expect(resolved.unnown).toBeUndefined();
     });
 
 

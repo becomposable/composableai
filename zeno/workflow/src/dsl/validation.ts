@@ -34,6 +34,9 @@ export function validateWorkflow(workflow: DSLWorkflowSpec, vars: string[] = [])
                 errors.push(`Activity "${activity.name}": ${err}`);
             }
         }
+        if (activity.output) {
+            workflowVars.add(activity.output);
+        }
     }
 
     return errors;

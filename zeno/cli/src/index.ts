@@ -124,10 +124,11 @@ rules.command("delete <objectId>")
 
 const definitions = workflows.command("definitions");
 
-definitions.command("transpile <file>")
+definitions.command("transpile <files...>")
     .description("Transpile a typescript workflow definition to JSON.")
-    .action((file: string) => {
-        transpileWorkflow(program, file);
+    .option('-o, --out [file]', 'An output file or directory. When multiple files are specified it must be a directory. If not specified the transpiled files are printed to stdoud.')
+    .action((files: string[], options: Record<string, any>) => {
+        transpileWorkflow(program, files, options);
     });
 
 definitions.command("create")

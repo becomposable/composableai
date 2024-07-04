@@ -25,6 +25,17 @@ export interface ContentObject extends ContentObjectItem {
     parts_etag?: string; // the etag of the text used for the parts list
 }
 
+export interface ContentSource {
+    // the URI of the content source. Usually an URL to the uploaded file inside a cloud file storage like s3.
+    source?: string;
+    // the mime type of the content source.
+    type?: string;
+    // the original name of the input file if any
+    name?: string;
+    // the etag of the content source if any
+    etag?: string;
+}
+
 /**
  * The content object item is a simplified version of the ContentObject that is returned by the store API when listing objects.
  */
@@ -36,16 +47,8 @@ export interface ContentObjectItem extends BaseObject {
     owner: string;
     // A ref to the object type
     type?: ContentObjectTypeRef;
-    content: { // the content source URL and type
-        // the URI of the content source. Usually an URL to the uploaded file inside a cloud file storage like s3.
-        source?: string;
-        // the mime type of the content source.
-        type?: string;
-        // the original name of the input file if any
-        name?: string;
-        // the etag of the content source if any
-        etag?: string;
-    };
+    // the content source URL and type
+    content: ContentSource;
     external_id?: string;
     summary?: string;
     properties: Record<string, any>; // a JSON object that describes the object

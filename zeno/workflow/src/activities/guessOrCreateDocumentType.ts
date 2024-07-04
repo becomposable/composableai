@@ -25,15 +25,23 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
     log.info("SelectDocumentType for object: " + objectId, { payload });
 
     const object = await zeno.objects.retrieve(objectId, "+text");
+    if (object.type) {
+        log.warn(`Object ${objectId} has already a type. Skipping type creation.`);
+        return null;
+    }
 
     if (!object || !object.text) {
-        log.warn(`Object ${objectId} not found or text is empty`);
+        log.info(`Object ${objectId} not found or text is empty`);
         return null;
     }
 
     if (object.type) {
         log.warn(`Object ${objectId} has already a type. Skipping type creation.`);
-        return null;
+        return {
+            id: object.type,
+            isNew: false,
+            message: "Object already has a type"
+        };
     }
 
     const types = await zeno.types.list();

@@ -1,4 +1,4 @@
-import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, CreateContentObjectPayload, FindPayload, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@composableai/zeno-common";
+import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, FindPayload, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@composableai/zeno-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export class StreamSource {
@@ -42,6 +42,10 @@ export class ObjectsApi extends ApiTopic {
                 file: fileUri
             }
         })
+    }
+
+    getContentSource(objectId: string): Promise<ContentSource> {
+        return this.get(`/${objectId}/content-source`);
     }
 
     list(payload: SearchPayload = {}): Promise<ContentObjectItem[]> {

@@ -185,10 +185,10 @@ export class ObjectsApi extends ApiTopic {
     }
 
     getRendition(documentId: string, options: GetRenditionParams): Promise<ContentObject> {
-        
+
         const query = {
             max_hw: options.max_hw,
-            generateIfMissing: options.generateIfMissing
+            generate_if_missing: options.generate_if_missing
         }
 
         return this.get(`/${documentId}/renditions/${options.format}`, { query });
@@ -200,5 +200,5 @@ export class ObjectsApi extends ApiTopic {
 interface GetRenditionParams {
     format: string;
     max_hw?: number;
-    generateIfMissing?: boolean;
+    generate_if_missing?: boolean;
 }

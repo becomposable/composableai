@@ -90,7 +90,10 @@ export async function chunkDocument(payload: DSLActivityExecutionPayload): Promi
             location: location(),
             properties: {
                 part_number: i + 1,
-                etag: document.text_etag
+                etag: document.text_etag,
+                source_line_start: part.line_number_start,
+                source_line_end: part.line_number_end,
+                title: part.name
             }
         });
         return docPart;

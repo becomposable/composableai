@@ -34,7 +34,7 @@ export interface WorkflowExecutionPayload {
      * The Workflow Rule ID if any. If the workflow was started by a rule this field will contain the rule ID
      * otherwise if the workflow was started on demand the property will be undefined.
      */
-    wf_rule_name: string;
+    wf_rule_name?: string;
 
     /**
      * The vars field is mainly used to pass the user input to the workflow.

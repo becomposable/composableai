@@ -102,7 +102,7 @@ async function generateNewType(context: ActivityContext, existing_types: string[
 
 
     if (!genTypeRes.result.document_type) {
-        log.error("No name generated for type: " + JSON.stringify(genTypeRes.result), genTypeRes.result);
+        log.error("No name generated for type", genTypeRes);
         throw new Error("No name generated for type");
     }
 

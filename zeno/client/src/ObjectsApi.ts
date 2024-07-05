@@ -180,5 +180,25 @@ export class ObjectsApi extends ApiTopic {
 
     }
 
+    listRenditions(documentId: string): Promise<ContentObjectItem[]> {
+        return this.get(`/${documentId}/renditions`);
+    }
 
+    getRendition(documentId: string, options: GetRenditionParams): Promise<ContentObject> {
+        
+        const query = {
+            max_hw: options.max_hw,
+            generateIfMissing: options.generateIfMissing
+        }
+
+        return this.get(`/${documentId}/renditions/${options.format}`, { query });
+    }
+
+
+}
+
+interface GetRenditionParams {
+    format: string;
+    max_hw?: number;
+    generateIfMissing?: boolean;
 }

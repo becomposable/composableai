@@ -28,5 +28,8 @@
     "import": "./lib/esm/index.js",
     "require": "./lib/cjs/index.js"
   },
-  "types": "./lib/types/index.d.ts"
+  "types": "./lib/types/index.d.ts",
+  "dependencies": {
+    "ajv": "^8.16.0"
+  }
 }

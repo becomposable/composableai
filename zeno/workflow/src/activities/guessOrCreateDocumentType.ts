@@ -11,6 +11,12 @@ export interface GuessOrCreateDocumentTypeParams extends InteractionExecutionPar
      * truncate the input doc text to the specified max_tokens
      */
     truncate?: TruncateSpec;
+
+    /**
+     * The name of the interaction to execute
+     * @default SelectDocumentType
+     */
+    interactionName?: string;
 }
 
 export interface GuessOrCreateDocumentType extends DSLActivitySpec<GuessOrCreateDocumentTypeParams> {
@@ -30,8 +36,8 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
         return null;
     }
 
-    if (!object || !object.text) {
-        log.info(`Object ${objectId} not found or text is empty`);
+    if (!object || (!object.text && !object.content?.type?.startsWith("image/") )) {
+        log.info(`Object ${objectId} not found or text is empty and not an image`, { object });
         return null;
     }
 
@@ -53,12 +59,27 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
         existing_types.push(...newHints);
     }
 
-    const content = truncByMaxTokens(object.text, params.truncate || 4000);
+    const content = object.text ? truncByMaxTokens(object.text, params.truncate || 4000) : undefined;
+    
+    const getImage = async () => {
+        if (!object.content?.type?.startsWith("image/")) {
+            return undefined;
+        }
+        const res = await zeno.objects.getRendition(objectId, { max_hw: 1024, format: "image/jpeg", generate_if_missing: true });
+        if (!res.rendition && res.status === "generating") {
+            //throw to try again
+            throw new Error(`Rendition for object ${objectId} is in progress`);
+        } else if (res.rendition) {
+            return "store:" + objectId;
+        }
+    }
+
+    const fileRef = await getImage();
 
     log.info("Execute SelectDocumentType interaction on content with \nexisting types: " + existing_types.join(","));
 
     const res = await executeInteractionFromActivity(studio, "SelectDocumentType", params, {
-        existing_types, content
+        existing_types, content, file: fileRef
     });
 
     log.info("Selected Document Type Result: " + JSON.stringify(res.result));
@@ -70,7 +91,7 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
 
     if (!selectedType) {
         log.warn("Document type not idenfified: starting type generation");
-        const newType = await generateNewType(context, existing_types, content);
+        const newType = await generateNewType(context, existing_types, content, fileRef);
 
         selectedType = { id: newType.id, name: newType.name };
     }
@@ -92,12 +113,13 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
     };
 }
 
-async function generateNewType(context: ActivityContext, existing_types: string[], content: string) {
+async function generateNewType(context: ActivityContext, existing_types: string[], content?: string, fileRef?: string) {
     const { studio, zeno, params } = context;
 
     const genTypeRes = await executeInteractionFromActivity(studio, "GenerateMetadataModel", params, {
         existing_types: existing_types,
-        content: content
+        content: content,
+        file: fileRef
     });
 
 

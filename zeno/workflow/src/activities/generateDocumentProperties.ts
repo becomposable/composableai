@@ -23,8 +23,8 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
     const doc = await zeno.objects.retrieve(objectId, "+text");
     const type = doc.type ? await zeno.types.retrieve(doc.type.id) : undefined;
 
-    if (!doc?.text) {
-        log.warn(`Object ${objectId} not found or text is empty`);
+    if (!doc?.text && !doc?.content?.type?.startsWith("image/")) {
+        log.warn(`Object ${objectId} not found or text is empty`, { doc });
         return { status: "failed", error: "no-text" }
     }
 
@@ -38,6 +38,13 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
         return { status: "skipped" };
     }*/
 
+    const getImageRef = () => {
+        if (!doc.content?.type?.startsWith("image/")) {
+            return null;
+        }
+
+        return "store:" + doc.id;
+    }
 
     log.info(` Extracting information from object ${objectId} with type ${type.name}`, payload.debug_mode ? { params } : undefined);
 
@@ -49,9 +56,11 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
             result_schema: type.object_schema,
         },
         {
-            content: doc.text,
+            content: doc.text ?? undefined,
+            file: getImageRef() ?? undefined,
         });
 
+    log.info(`Extracted information from object ${objectId} with type ${type.name}`, { infoRes });
     await zeno.objects.update(doc.id, {
         properties: {
             ...infoRes.result,

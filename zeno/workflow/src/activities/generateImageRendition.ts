@@ -94,17 +94,19 @@ export async function generateImageRendition(payload: DSLActivityExecutionPayloa
 
     log.info(`Creating rendition for ${objectId} with max_hw: ${params.max_hw} and format: ${params.format}`);
     const rendition = await zeno.objects.create({
-        name: inputObject.name + `[Rendition ${params.max_hw}]`,
+        name: inputObject.name + ` [Rendition ${params.max_hw}]`,
         type: renditionType.id,
         parent: inputObject.id,
-        content: new StreamSource(renderedFile, getRenditionName()),
+        content: new StreamSource(renderedFile, getRenditionName(), `image/${params.format}`),
         properties: {
             mime_type: 'image/' + params.format,
             source_etag: inputObject.content.source,
             height: params.max_hw,
-            width: params.max_hw
+            width: params.max_hw,
         } satisfies RenditionProperties
     });
+
+    log.info(`Rendition ${rendition.id} created for ${objectId}`, { rendition });
 
     return { id: rendition.id, format: params.format, status: "success" };
 

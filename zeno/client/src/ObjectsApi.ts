@@ -162,6 +162,7 @@ export class ObjectsApi extends ApiTopic {
             createPayload.content = await this.upload(payload.content);
         }
         // create the object
+        console.log('Creating object with payload', createPayload);
         return await this.post('/', {
             payload: createPayload
         });

@@ -1,4 +1,4 @@
-import { BaseObject } from "./index.js";
+import { BaseObject, RenditionProperties } from "./index.js";
 
 export enum ContentObjectStatus {
     created = 'created',
@@ -8,7 +8,7 @@ export enum ContentObjectStatus {
     archived = 'archived',
 }
 
-export interface ContentObject extends ContentObjectItem {
+export interface ContentObject<T=any> extends ContentObjectItem<T> {
     text?: string; // the text representation of the object
     text_etag?: string;
     tokens?: {
@@ -39,7 +39,7 @@ export interface ContentSource {
 /**
  * The content object item is a simplified version of the ContentObject that is returned by the store API when listing objects.
  */
-export interface ContentObjectItem extends BaseObject {
+export interface ContentObjectItem<T=any> extends BaseObject {
     root?: string; // the ID of the root parent object. The root object doesn't have the root field set.
     parent: string; // the id of the direct parent object. The root object doesn't have the parent field set.
     location: string; // the path of the parent object
@@ -51,13 +51,13 @@ export interface ContentObjectItem extends BaseObject {
     content: ContentSource;
     external_id?: string;
     summary?: string;
-    properties: Record<string, any>; // a JSON object that describes the object
+    properties: T | Record<string, any>; // a JSON object that describes the object
 }
 
 /**
  * When creating from an uploaded file the content shouild be an URL to the uploaded file
  */
-export interface CreateContentObjectPayload extends Partial<Omit<ContentObject,
+export interface CreateContentObjectPayload<T=any> extends Partial<Omit<ContentObject<T>,
     'id' | 'root' | 'created_at' | 'updated_at' | 'type'
     | 'owner'>> {
     id?: string; // An optional existing object ID to be replaced by the new one
@@ -194,4 +194,12 @@ export interface FindPayload {
     query: Record<string, any>;
     limit?: number;
     select?: string;
+}
+
+
+export interface GetRenditionResponse {
+
+    status: 'found' | 'generating' | 'failed';
+    rendition?: ContentObject<RenditionProperties> //TODO add <Rendition>
+    workflow_run_id?: string;
 }

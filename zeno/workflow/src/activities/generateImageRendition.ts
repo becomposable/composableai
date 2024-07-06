@@ -4,10 +4,10 @@ import { DSLActivityExecutionPayload, DSLActivitySpec, RenditionProperties } fro
 import { log } from "@temporalio/activity";
 import { createReadableStreamFromReadable } from "node-web-stream-adapters";
 import sharp from "sharp";
+import { Readable } from "stream";
+import { imageResizer, pdfToImage } from "../conversion/image.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
-
-
 
 interface GenerateImageRenditionParams {
     max_hw: number; //maximum size of the longuest side of the image
@@ -25,7 +25,7 @@ export interface GenerateImageRendition extends DSLActivitySpec<GenerateImageRen
 export async function generateImageRendition(payload: DSLActivityExecutionPayload) {
     const { zeno, objectId, params } = await setupActivity<GenerateImageRenditionParams>(payload);
 
-    const supportedNonImageInputTypes = ['application/pdf']   
+    const supportedNonImageInputTypes = ['application/pdf']
     const inputObject = await zeno.objects.retrieve(objectId);
     const renditionType = await zeno.types.getTypeByName('Rendition');
 
@@ -53,34 +53,51 @@ export async function generateImageRendition(payload: DSLActivityExecutionPayloa
         log.error(`Document ${objectId} is not an image`);
         throw new NoDocumentFound(`Document ${objectId} is not an image or pdf: ${inputObject.content.type}`, [objectId]);
     }
-    
+
     const file = await Blobs.getFile(inputObject.content.source);
     if (!file) {
         log.error(`Document ${objectId} source not found`);
         throw new NoDocumentFound(`Document ${objectId} source not found`, [objectId]);
     }
 
-    const resizer = sharp().resize({
-        width: params.max_hw,
-        height: params.max_hw,
-        fit: sharp.fit.inside,
-        withoutEnlargement: true
-    }).toFormat(params.format);
+
+    let renderedFile: Readable | undefined = undefined;
 
 
-    const resized = (await file.read()).pipe(resizer);
+    //if PDF, take first page
+    if (inputObject.content.type === 'application/pdf') {
+        const pdfBuffer = await file.readAsBuffer();
+        const images = await pdfToImage(pdfBuffer, { pages: [1], format: "jpeg", max_hw: params.max_hw });
+        const fistPage = sharp(images[0]).toFormat(params.format);
+        if (!fistPage) {
+            log.error(`Failed to convert pdf to image`);
+            throw new Error(`Failed to convert pdf to image`);
+        }
+        renderedFile = createReadableStreamFromReadable(fistPage);
+    }
+
+    if (inputObject.content.type.startsWith('image/')) {
+        const resized = (await file.read()).pipe(imageResizer(params.max_hw, params.format));
+        renderedFile = createReadableStreamFromReadable(resized);
+    }
 
     const getRenditionName = () => {
-        const name = objectId + `_rendition_${params.max_hw}` + '.jpg';
+        const name = objectId + `_rendition_${params.max_hw}` + '.' + params.format;
         return name;
     }
 
-    console.log(`Creating rendition for ${objectId} with max_hw: ${params.max_hw} and format: ${params.format}`);
+    if (!renderedFile) {
+        log.error(`Failed to generate rendition for ${objectId}`);
+        throw new Error(`Failed to generate rendition for ${objectId}`);
+    }
+
+
+    log.info(`Creating rendition for ${objectId} with max_hw: ${params.max_hw} and format: ${params.format}`);
     const rendition = await zeno.objects.create({
         name: inputObject.name + `[Rendition ${params.max_hw}]`,
         type: renditionType.id,
         parent: inputObject.id,
-        content: new StreamSource(createReadableStreamFromReadable(resized), getRenditionName()),
+        content: new StreamSource(renderedFile, getRenditionName()),
         properties: {
             mime_type: 'image/' + params.format,
             source_etag: inputObject.content.source,
@@ -89,7 +106,7 @@ export async function generateImageRendition(payload: DSLActivityExecutionPayloa
         } satisfies RenditionProperties
     });
 
-    return { id: rendition.id, format: "image/jpeg", status: "success" };
+    return { id: rendition.id, format: params.format, status: "success" };
 
 }
 

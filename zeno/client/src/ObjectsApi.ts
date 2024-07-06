@@ -1,4 +1,4 @@
-import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, FindPayload, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@composableai/zeno-common";
+import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@composableai/zeno-common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export class StreamSource {
@@ -139,6 +139,9 @@ export class ObjectsApi extends ApiTopic {
                 console.log(res);
                 throw new Error(`Failed to upload file: ${res.statusText}`);
             }
+        }).catch(err => {
+            console.error('Failed to upload file', err);
+            throw err;
         });
 
 
@@ -184,7 +187,7 @@ export class ObjectsApi extends ApiTopic {
         return this.get(`/${documentId}/renditions`);
     }
 
-    getRendition(documentId: string, options: GetRenditionParams): Promise<ContentObject> {
+    getRendition(documentId: string, options: GetRenditionParams): Promise<GetRenditionResponse> {
 
         const query = {
             max_hw: options.max_hw,

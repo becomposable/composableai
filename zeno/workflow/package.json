@@ -32,6 +32,7 @@
     "@composableai/zeno-client": "^0.26.0",
     "@composableai/zeno-common": "^0.26.0",
     "@opendocsg/pdf2md": "^0.1.29",
+    "@pdftron/pdfnet-node": "^10.10.0",
     "@temporalio/activity": "^1.9.3",
     "@temporalio/workflow": "^1.9.3",
     "@tensorflow/tfjs-node": "^4.19.0",

@@ -9,8 +9,8 @@ let testEnv: TestWorkflowEnvironment;
 let activityContext: MockActivityEnvironment;
 
 beforeAll(async () => {
-  testEnv = await TestWorkflowEnvironment.createLocal();
-  activityContext = new MockActivityEnvironment();
+  //testEnv = await TestWorkflowEnvironment.createLocal();
+  //activityContext = new MockActivityEnvironment();
 });
 
 

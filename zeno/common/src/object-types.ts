@@ -46,7 +46,9 @@ export interface DocumentPartProperties {
     title?: string,
     source_line_start?: number,
     source_line_end?: number,
-
+    type?: 'text' | 'image' | 'table' | 'chart' | 'diagram' | 'code' | 'other',
+    page_number?: number,
+    description?: string,
 }
 
 
@@ -76,6 +78,22 @@ export const DocumentPartSchema: JSONSchemaType<DocumentPartProperties> = {
         source_line_end: {
             type: "integer",
             description: "The line number where the chunk ends",
+            nullable: true
+        },
+        type: {
+            type: "string",
+            description: "The type of the chunk",
+            enum: ['text', 'image', 'table', 'chart', 'diagram', 'code', 'other'],
+            nullable: true
+        },
+        page_number: {
+            type: "integer",
+            description: "The page number of the chunk",
+            nullable: true
+        },
+        description: {
+            type: "string",
+            description: "The description of the chunk",
             nullable: true
         },
     },

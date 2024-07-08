@@ -1,7 +1,10 @@
 import pdf2md from "@opendocsg/pdf2md";
-import { PDFNet } from '@pdftron/pdfnet-node';
+import type { PDFNet as PDFTron } from '@pdftron/pdfnet-node';
 import fs from 'fs';
 import os from 'os';
+
+import pkg from '@pdftron/pdfnet-node';
+const { PDFNet } = pkg;
 
 
 const pdf2mdFn = pdf2md as unknown as (buffer: Uint8Array) => Promise<string>;
@@ -33,7 +36,7 @@ async function extractImages(buffer: Buffer, minHw: number = 300) {
 
     return { workingDir };
 
-    async function ProcessElements(reader: PDFNet.ElementReader, pageNumber: number) {
+    async function ProcessElements(reader: PDFTron.ElementReader, pageNumber: number) {
         // Traverse the page display list
         let imgCount = 1;
 
@@ -69,7 +72,7 @@ async function extractImages(buffer: Buffer, minHw: number = 300) {
 }
 
 export async function extractImagesFromPdfWithApryse(buffer: Buffer, minHw: number = 300) {
-    const APRYSE_KEY = process.env.VITE_APRYSE_KEY;
+    const APRYSE_KEY = process.env.APRYSE_KEY;
 
     const extractImagesWrapper = async () => {
         return await extractImages(buffer, minHw); 

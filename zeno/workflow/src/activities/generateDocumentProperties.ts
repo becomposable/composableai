@@ -17,9 +17,10 @@ export interface GenerateDocumentProperties extends DSLActivitySpec<GenerateDocu
 
 export async function generateDocumentProperties(payload: DSLActivityExecutionPayload) {
     const context = await setupActivity<GenerateDocumentPropertiesParams>(payload);
-    const { params, studio, zeno, objectId } = context;
+    const { params, studio, zeno, objectId} = context;
 
-
+    const project = await context.fetchProject();
+    
     const doc = await zeno.objects.retrieve(objectId, "+text");
     const type = doc.type ? await zeno.types.retrieve(doc.type.id) : undefined;
 
@@ -58,6 +59,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
         {
             content: doc.text ?? undefined,
             file: getImageRef() ?? undefined,
+            human_context: project?.configuration?.human_context ?? undefined,
         });
 
     log.info(`Extracted information from object ${objectId} with type ${type.name}`, { infoRes });

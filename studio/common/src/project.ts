@@ -42,6 +42,8 @@ export enum ResourceVisibility {
 
 export interface ProjectConfiguration {
 
+    human_context: string;
+
     default_environment?: string;
     default_model?: string;
     default_visibility: ResourceVisibility;

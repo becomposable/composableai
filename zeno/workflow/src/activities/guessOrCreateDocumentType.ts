@@ -116,9 +116,12 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
 async function generateNewType(context: ActivityContext, existing_types: string[], content?: string, fileRef?: string) {
     const { studio, zeno, params } = context;
 
+    const project = await context.fetchProject();
+
     const genTypeRes = await executeInteractionFromActivity(studio, "GenerateMetadataModel", params, {
         existing_types: existing_types,
         content: content,
+        human_context: project?.configuration?.human_context ?? undefined, 
         file: fileRef
     });
 

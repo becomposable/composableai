@@ -1,13 +1,12 @@
+import { PromptRole } from "@llumiverse/core";
 import { JSONSchema4 } from "json-schema";
 import { InteractionRefWithSchema, PopulatedInteraction } from "../interaction.js";
-import { PromptSegmentDefType } from "../prompt.js";
-import { PromptRole } from "@llumiverse/core";
+import { PopulatedPromptSegmentDef, PromptSegmentDef, PromptSegmentDefType, PromptTemplateRefWithSchema } from "../prompt.js";
 
-export function mergePromptsSchema(interaction: InteractionRefWithSchema | PopulatedInteraction) {
+export function _mergePromptsSchema(prompts: PromptSegmentDef<PromptTemplateRefWithSchema>[] | PopulatedPromptSegmentDef[]) {
     const props: Record<string, JSONSchema4> = {};
     let required: string[] = [];
-    if (!interaction.prompts) return null;
-    for (const prompt of interaction.prompts) {
+    for (const prompt of prompts) {
         if (prompt.template?.inputSchema?.properties) {
             const schema = prompt.template?.inputSchema;
             if (schema.required) {
@@ -37,4 +36,9 @@ export function mergePromptsSchema(interaction: InteractionRefWithSchema | Popul
         }
     }
     return Object.keys(props).length > 0 ? { properties: props, required } as JSONSchema4 : null;
+}
+
+export function mergePromptsSchema(interaction: InteractionRefWithSchema | PopulatedInteraction) {
+    if (!interaction.prompts) return null;
+    return _mergePromptsSchema(interaction.prompts);
 }

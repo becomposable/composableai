@@ -88,12 +88,12 @@ export const DocumentPartSchema: JSONSchemaType<DocumentPartProperties> = {
         },
         page_number: {
             type: "integer",
-            description: "The page number of the chunk",
+            description: "The page number of the document part",
             nullable: true
         },
         description: {
             type: "string",
-            description: "The description of the chunk",
+            description: "The description of the document part, if it's an image, the exhaustive description of the image",
             nullable: true
         },
     },

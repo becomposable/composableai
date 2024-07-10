@@ -4,13 +4,16 @@ import { DSLActivityExecutionPayload, DSLActivitySpec, DocumentPartProperties } 
 import { log } from "@temporalio/activity";
 import fs from 'fs';
 import { createReadableStreamFromReadable } from "node-web-stream-adapters";
+import sharp from "sharp";
+import { imageResizer } from "../conversion/image.js";
 import { extractImagesFromPdfWithApryse } from "../conversion/pdf.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { NoDocumentFound } from "../errors.js";
 
 interface ExtractImagesFromPdfParams {
 
-    min_hw: number; //minimum size of the longuest side of the image
+    min_hw: number; //minimum size of the longuest side of the image to be extracted
+    max_hw: number; //max size of the extracted image
 
 }
 
@@ -61,18 +64,22 @@ export async function extractImagesFromPdf(payload: DSLActivityExecutionPayload)
 
     const promises = imagesRef.map(async (image, i) => {
         const file = fs.createReadStream(image.path);
-        const fileStream = createReadableStreamFromReadable(file);
+        const resized = (await file.read()).pipe(imageResizer(params.max_hw, "png"));
+        const stream = createReadableStreamFromReadable(resized);
+        const metadata = await sharp(resized).metadata();
         const partName = `[ImagePart] ${inputObject.name}: ${image.page}-${image.imgCount}`;
         const imagePart = await zeno.objects.create({
             name: partName,
             type: docPartType.id,
             parent: inputObject.id,
-            content: new StreamSource(fileStream, partName, `image/png`),
+            content: new StreamSource(stream, partName, `image/png`),
             properties: {
                 source_etag: inputObject.content.source,
                 part_number: i,
                 type: 'image',
                 page_number: image.page,
+                height: metadata.height,
+                width: metadata.width,
             } satisfies DocumentPartProperties
         }); 
         return imagePart;

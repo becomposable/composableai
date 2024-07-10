@@ -49,6 +49,8 @@ export interface DocumentPartProperties {
     type?: 'text' | 'image' | 'table' | 'chart' | 'diagram' | 'code' | 'other',
     page_number?: number,
     description?: string,
+    height?: number,
+    width?: number,
 }
 
 
@@ -96,6 +98,16 @@ export const DocumentPartSchema: JSONSchemaType<DocumentPartProperties> = {
             description: "The description of the document part, if it's an image, the exhaustive description of the image",
             nullable: true
         },
+        height: {
+            type: "integer",
+            description: "The height of the rendition",
+            nullable: true
+        },
+        width: {
+            type: "integer",
+            description: "The width of the rendition",
+            nullable: true
+        }
     },
     required: ["part_number"],
 }

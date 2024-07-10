@@ -58,7 +58,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
         },
         {
             content: doc.text ?? undefined,
-            file: getImageRef() ?? undefined,
+            files: [getImageRef()] ?? [],
             human_context: project?.configuration?.human_context ?? undefined,
         });
 

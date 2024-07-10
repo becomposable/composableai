@@ -122,7 +122,7 @@ async function generateNewType(context: ActivityContext, existing_types: string[
         existing_types: existing_types,
         content: content,
         human_context: project?.configuration?.human_context ?? undefined, 
-        file: fileRef
+        files: fileRef ? [fileRef] : []
     });
 
 

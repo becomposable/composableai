@@ -41,7 +41,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
 
     const getImageRef = () => {
         if (!doc.content?.type?.startsWith("image/")) {
-            return null;
+            return undefined;
         }
 
         return "store:" + doc.id;
@@ -58,7 +58,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
         },
         {
             content: doc.text ?? undefined,
-            files: [getImageRef()] ?? [],
+            files: getImageRef() ? [getImageRef()] : [],
             human_context: project?.configuration?.human_context ?? undefined,
         });
 

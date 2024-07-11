@@ -1,5 +1,5 @@
 import { StudioClient } from "@composableai/studio-client";
-import { ExecutionRun } from "@composableai/studio-common";
+import { ExecutionRun } from "@composableai/common";
 
 export class ExecutionQueue {
     requests: ExecutionRequest[] = [];

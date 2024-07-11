@@ -1,5 +1,5 @@
 import { StudioClient } from "@composableai/studio-client";
-import { ExecutionRun, ExecutionRunStatus, InteractionExecutionConfiguration } from "@composableai/studio-common";
+import { ExecutionRun, ExecutionRunStatus, InteractionExecutionConfiguration } from "@composableai/common";
 import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
 import { activityInfo, log } from "@temporalio/activity";
 import { projectResult } from "../dsl/projections.js";

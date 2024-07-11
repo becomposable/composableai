@@ -1,4 +1,4 @@
-import { Interaction, InteractionRef, InteractionStatus } from "@composableai/studio-common";
+import { Interaction, InteractionRef, InteractionStatus } from "@composableai/common";
 import colors from "ansi-colors";
 import { Command } from "commander";
 import { getClient } from "../client.js";

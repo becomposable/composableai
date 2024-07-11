@@ -1,6 +1,6 @@
 import { verifyAuthToken } from "@composableai/cloud-client";
 import { StudioClient } from "@composableai/studio-client";
-import { Project } from "@composableai/studio-common";
+import { Project } from "@composableai/common";
 import { ZenoClient } from "@composableai/zeno-client";
 import { DSLActivityExecutionPayload, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@composableai/common";
 import { log } from "@temporalio/activity";

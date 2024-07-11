@@ -3,13 +3,22 @@ import enquirer from "enquirer";
 import { config } from "./index.js";
 const { prompt } = enquirer;
 
-export function listProfiles() {
+export async function listProfiles() {
     const selected = config.current?.name;
     for (const profile of config.profiles) {
         console.log(profile.name + (selected === profile.name ? " " + colors.symbols.check : ""));
     }
     if (!config.profiles.length) {
         console.log("No profiles are defined. Run `cpcli config create` to add a new profile.");
+        console.log();
+        const r: any = await prompt({
+            type: "confirm",
+            name: 'create',
+            message: "Do you want to create a profile now?",
+        })
+        if (r.create) {
+            return createProfile();
+        }
     }
 }
 

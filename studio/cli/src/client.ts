@@ -1,6 +1,6 @@
 import { StudioClient } from "@composableai/studio-client";
 import { Command } from "commander";
-import { config } from "./config/index.js";
+import { config } from "./profiles/index.js";
 
 
 let _client: StudioClient | undefined;

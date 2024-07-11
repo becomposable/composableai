@@ -30,8 +30,7 @@
   },
   "types": "./lib/types/index.d.ts",
   "dependencies": {
-    "@composableai/zeno-common": "^0.28.0",
-    "@composableai/studio-common": "^0.28.0",
+    "@composableai/common": "^0.28.0",
     "@google-cloud/secret-manager": "^5.6.0",
     "jsonwebtoken": "^9.0.2"
   }

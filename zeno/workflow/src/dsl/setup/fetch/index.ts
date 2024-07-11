@@ -1,6 +1,6 @@
 import { StudioClient } from "@composableai/studio-client";
 import { ZenoClient } from "@composableai/zeno-client";
-import { ActivityFetchSpec } from "@composableai/zeno-common";
+import { ActivityFetchSpec } from "@composableai/common";
 import { DataProvider } from "./DataProvider.js";
 
 

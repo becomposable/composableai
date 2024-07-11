@@ -1,4 +1,4 @@
-import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/zeno-common";
+import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
 import { log } from "@temporalio/activity";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { InteractionExecutionParams, executeInteractionFromActivity } from "./executeInteraction.js";

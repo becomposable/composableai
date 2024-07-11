@@ -1,6 +1,6 @@
 import { Blobs } from "@composableai/zeno-blobs";
 import { StreamSource } from "@composableai/zeno-client";
-import { DSLActivityExecutionPayload, DSLActivitySpec, DocumentPartProperties } from "@composableai/zeno-common";
+import { DSLActivityExecutionPayload, DSLActivitySpec, DocumentPartProperties } from "@composableai/common";
 import { log } from "@temporalio/activity";
 import fs from 'fs';
 import { createReadableStreamFromReadable } from "node-web-stream-adapters";
@@ -81,13 +81,11 @@ export async function extractImagesFromPdf(payload: DSLActivityExecutionPayload)
                 height: metadata.height,
                 width: metadata.width,
             } satisfies DocumentPartProperties
-        }); 
+        });
         return imagePart;
     });
 
     const parts = await Promise.all(promises);
 
-    return { objectId, status: "success", message: "Images extracted", images: parts.map((p) => p.id )}
+    return { objectId, status: "success", message: "Images extracted", images: parts.map((p) => p.id) }
 }
-
-

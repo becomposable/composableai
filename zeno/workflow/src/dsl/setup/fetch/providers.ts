@@ -1,6 +1,6 @@
 import { StudioClient } from "@composableai/studio-client";
 import { ZenoClient } from "@composableai/zeno-client";
-import { FindPayload } from "@composableai/zeno-common";
+import { FindPayload } from "@composableai/common";
 import { DataProvider } from "./DataProvider.js";
 import { FetchContext } from "./index.js";
 

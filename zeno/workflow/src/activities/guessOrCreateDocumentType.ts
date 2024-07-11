@@ -1,4 +1,4 @@
-import { CreateContentObjectTypePayload, DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/zeno-common";
+import { CreateContentObjectTypePayload, DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
 import { log } from "@temporalio/activity";
 import { ActivityContext, setupActivity } from "../dsl/setup/ActivityContext.js";
 import { TruncateSpec, truncByMaxTokens } from "../utils/tokens.js";
@@ -36,7 +36,7 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
         return null;
     }
 
-    if (!object || (!object.text && !object.content?.type?.startsWith("image/") )) {
+    if (!object || (!object.text && !object.content?.type?.startsWith("image/"))) {
         log.info(`Object ${objectId} not found or text is empty and not an image`, { object });
         return null;
     }
@@ -60,7 +60,7 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
     }
 
     const content = object.text ? truncByMaxTokens(object.text, params.truncate || 4000) : undefined;
-    
+
     const getImage = async () => {
         if (!object.content?.type?.startsWith("image/")) {
             return undefined;
@@ -121,7 +121,7 @@ async function generateNewType(context: ActivityContext, existing_types: string[
     const genTypeRes = await executeInteractionFromActivity(studio, "GenerateMetadataModel", params, {
         existing_types: existing_types,
         content: content,
-        human_context: project?.configuration?.human_context ?? undefined, 
+        human_context: project?.configuration?.human_context ?? undefined,
         files: fileRef ? [fileRef] : []
     });
 

@@ -1,4 +1,4 @@
-import { FindPayload } from "@composableai/zeno-common";
+import { FindPayload } from "@composableai/common";
 
 function parseSelector(selector: string) {
     const parts = selector.split(/\s+/);

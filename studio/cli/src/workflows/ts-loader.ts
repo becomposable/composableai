@@ -1,4 +1,4 @@
-import { DSLWorkflowSpec } from "@composableai/zeno-common";
+import { DSLWorkflowSpec } from "@composableai/common";
 import { readFileSync, rmSync, writeFileSync } from "fs";
 import { basename, resolve } from "path";
 import * as ts from "typescript";

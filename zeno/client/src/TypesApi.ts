@@ -1,4 +1,4 @@
-import { ContentObjectType, ContentObjectTypeItem, ContentObjectTypeLayout, CreateContentObjectTypePayload, FindPayload } from "@composableai/zeno-common";
+import { ContentObjectType, ContentObjectTypeItem, ContentObjectTypeLayout, CreateContentObjectTypePayload, FindPayload } from "@composableai/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 

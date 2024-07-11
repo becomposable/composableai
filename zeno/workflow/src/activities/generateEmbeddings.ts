@@ -1,6 +1,6 @@
 import { StudioClient } from "@composableai/studio-client";
 import { md5 } from '@composableai/zeno-blobs';
-import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/zeno-common";
+import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
 import { EmbeddingsResult } from "@llumiverse/core";
 import { log } from "@temporalio/activity";
 import * as tf from '@tensorflow/tfjs-node';

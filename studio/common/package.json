@@ -1,5 +1,5 @@
 {
-    "name": "@composableai/studio-common",
+    "name": "@composableai/common",
     "version": "0.28.0",
     "type": "module",
     "types": "./lib/types/index.d.ts",
@@ -24,6 +24,7 @@
     },
     "dependencies": {
         "@llumiverse/core": "^0.13.0",
+        "ajv": "^8.16.0",
         "json-schema": "^0.4.0"
     },
     "ts_dual_module": {

@@ -2,7 +2,7 @@ import { verifyAuthToken } from "@composableai/cloud-client";
 import { StudioClient } from "@composableai/studio-client";
 import { Project } from "@composableai/studio-common";
 import { ZenoClient } from "@composableai/zeno-client";
-import { DSLActivityExecutionPayload, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@composableai/zeno-common";
+import { DSLActivityExecutionPayload, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@composableai/common";
 import { log } from "@temporalio/activity";
 import { NoDocumentFound, WorkflowParamNotFound } from "../../errors.js";
 import { getContentStore, getStudioClient } from "../../utils/clients.js";

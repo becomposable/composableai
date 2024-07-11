@@ -1,4 +1,4 @@
-import { DSLActivitySpec, DSLWorkflowSpec } from "@composableai/zeno-common";
+import { DSLActivitySpec, DSLWorkflowSpec } from "@composableai/common";
 
 
 export class NoDocumentFound extends Error {

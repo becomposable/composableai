@@ -1,7 +1,6 @@
 import colors from 'ansi-colors';
 import enquirer from "enquirer";
-import { Profile, config } from "./index.js";
-
+import { config } from "./index.js";
 const { prompt } = enquirer;
 
 export function listProfiles() {
@@ -10,18 +9,21 @@ export function listProfiles() {
         console.log(profile.name + (selected === profile.name ? " " + colors.symbols.check : ""));
     }
     if (!config.profiles.length) {
-        console.log("No profiles are defined");
+        console.log("No profiles are defined. Run `cpcli config create` to add a new profile.");
     }
 }
 
-export function useProfile(name: string) {
+export async function useProfile(name?: string) {
+    if (!name) {
+        name = await selectProfile("Select the profile to use");
+    }
     config.use(name).save();
 }
 
 export function showProfile(name?: string) {
     if (!name) {
         if (config.profiles.length === 0) {
-            console.log('No profiles are defined (add -h for help on commands)');
+            console.log('No profiles are defined. Run `cpcli config create` to add a new profile.');
             return;
         } else {
             console.log(JSON.stringify({
@@ -39,69 +41,82 @@ export function showProfile(name?: string) {
     }
 }
 
-export async function updateProfile(name: string) {
-    const profile = config.getProfile(name);
-    if (!profile) {
-        console.error(`Profile ${name} not found`);
-        return;
-    }
-    const newProfile = await readProfile(profile);
-    config.replace(profile, newProfile).save();
-}
 
 export function deleteProfile(name: string) {
     config.remove(name).save();
 }
 
-export async function addProfile() {
-    const profile = await readProfile();
-    profile && config.add(profile).save();
-}
-
-async function readProfile(defaults: Partial<Profile> = {}) {
+export async function createProfile(name?: string, target?: string) {
     const format = (value: string) => value.trim();
-    const profile = await prompt([
-        {
+    const questions: any[] = [];
+    if (!name) {
+        questions.push({
             type: 'input',
             name: 'name',
             message: "Profile name",
-            initial: defaults.name,
-            format
-        },
-        {
-            type: 'input',
-            name: 'apikey',
-            message: "API Key",
-            initial: defaults.apikey,
-            format
-        },
-        {
-            type: 'input',
-            name: 'projectId',
-            message: "Project Id",
-            initial: defaults.projectId,
-            format
-        },
-        {
-            type: 'input',
-            name: 'serverUrl',
-            message: "Server URL",
-            initial: defaults.serverUrl || "default",
-            format
-        },
-        {
-            type: 'input',
-            name: 'sessionTags',
-            message: "Session Tags (comma separated list)",
-            initial: "cli",
-            format
-        },
-
-    ]) as Profile;
-
-    if (profile.serverUrl === "default") {
-        delete profile.serverUrl;
+            format,
+            validate: (value: string) => {
+                const v = value.trim();
+                if (!v) {
+                    return "Profile name cannot be empty";
+                }
+                if (config.hasProfile(v)) {
+                    return `A profile named "${v}" already exists`;
+                }
+                return true;
+            }
+        });
+    }
+    if (!target) {
+        questions.push({
+            type: 'select',
+            name: 'target',
+            message: "Target environment",
+            choices: ['local', 'dev', 'staging (not yet impl)', 'prod', 'custom'],
+            initial: 'dev',
+        });
     }
 
-    return profile;
+    if (questions.length > 0) {
+        const response: any = await prompt(questions)
+        if (!name) {
+            name = response.name;
+        }
+        if (!target) {
+            target = response.target;
+        }
+    }
+
+    config.createProfile(name!, target!).start();
+}
+
+export async function updateProfile(name?: string) {
+    if (!name) {
+        name = await selectProfile("Select the profile to update");
+    }
+    const profile = config.getProfile(name!);
+    if (!profile) {
+        console.error(`Profile ${name} not found`);
+        return;
+    }
+    config.updateProfile(name).start();
+}
+
+export function updateCurrentProfile() {
+    if (!config.current) {
+        console.log("No profile is selected. Run `cpcli config use <name>` to select a profile");
+        process.exit(1);
+    }
+    config.updateProfile(config.current.name).start();
+}
+
+
+async function selectProfile(message = "Select the profile") {
+    const response: any = await prompt({
+        type: 'select',
+        name: 'name',
+        message,
+        choices: config.profiles.map(p => p.name)
+    })
+    return response.name as string;
 }

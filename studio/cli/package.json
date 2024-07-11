@@ -43,6 +43,7 @@
         "enquirer": "^2.4.1",
         "json-schema": "^0.4.0",
         "json-schema-to-typescript": "^13.1.1",
+        "open": "^10.1.0",
         "signal-exit": "^4.1.0"
     }
 }

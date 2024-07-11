@@ -1,7 +1,8 @@
 import { Command } from 'commander';
 import { requestJWT, requestPublicKey } from './auth/index.js';
 import runExport from './codegen/index.js';
-import { addProfile, deleteProfile, listProfiles, showProfile, updateProfile, useProfile } from './config/commands.js';
+import { createProfile, deleteProfile, listProfiles, showProfile, updateCurrentProfile, updateProfile, useProfile } from './config/commands.js';
+import { getConfigFile } from './config/index.js';
 import { genTestData } from './datagen/index.js';
 import { listEnvirnments } from './envs/index.js';
 import { listInteractions } from './interactions/index.js';
@@ -34,7 +35,7 @@ const authRoot = program.command("auth")
     .action(() => {
         console.log("Use the subcommands to manage authentication");
     });
-    
+
 authRoot.command("token")
     .description("Get a JWT token for the apikey used in the authentication.")
     .action(() => {
@@ -126,25 +127,38 @@ configRoot.command('show [name]')
     .action((name?: string) => {
         showProfile(name);
     });
-configRoot.command('use <name>')
+configRoot.command('use [name]')
     .description("Switch to another configuration profile")
     .action((name) => {
         useProfile(name);
     });
-configRoot.command('add')
-    .description("Add a new configuration profile")
-    .action(() => {
-        addProfile();
+configRoot.command('add [name]')
+    .alias('create')
+    .option("-t, --target <env>", "The target environment for the profile. Possible values are: local, dev, staging, prod or an URL for custom servers.")
+    .description("Create a new configuration profile")
+    .action((name?: string, options?: Record<string, any>) => {
+        createProfile(name, options?.target);
     });
-configRoot.command('edit <name>')
+configRoot.command('edit [name]')
+    .alias('update')
     .description("Edit an existing configuration profile")
-    .action((name) => {
+    .action((name: string | undefined) => {
         updateProfile(name);
+    });
+configRoot.command('refresh')
+    .description("Refresh token for the current configuration profile")
+    .action(() => {
+        updateCurrentProfile();
     });
 configRoot.command('delete <name>')
     .description("delete an existing configuration profile")
     .action((name) => {
         deleteProfile(name);
+    });
+configRoot.command('file')
+    .description("print the configuration file path")
+    .action(() => {
+        console.log(getConfigFile('profiles.json'));
     });
 
 program.parse(process.argv);

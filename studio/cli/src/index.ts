@@ -10,6 +10,8 @@ import { getVersion, upgrade } from './package.js';
 import { listProjects } from './projects/index.js';
 import runInteraction from './run/index.js';
 import { runHistory } from './runs/index.js';
+import { registerObjectsCommand } from './objects/index.js';
+import { registerWorkflowsCommand } from './workflows/index.js';
 
 //warnIfNotLatest();
 
@@ -160,5 +162,8 @@ profilesRoot.command('file')
     .action(() => {
         console.log(getConfigFile('profiles.json'));
     });
+
+registerObjectsCommand(program);
+registerWorkflowsCommand(program);
 
 program.parse(process.argv);

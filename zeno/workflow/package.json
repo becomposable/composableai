@@ -49,6 +49,7 @@
     "exports": {
       "activities": "./activities",
       "workflows": "./workflows",
+      "vars": "./vars",
       "dsl-workflow": "./dsl-workflow"
     }
   },
@@ -57,6 +58,11 @@
       "types": "./lib/types/index.d.ts",
       "import": "./lib/esm/index.js",
       "require": "./lib/cjs/index.js"
+    },
+    "./vars": {
+      "types": "./lib/types/vars.d.ts",
+      "import": "./lib/esm/vars.js",
+      "require": "./lib/cjs/vars.js"
     },
     "./activities": {
       "types": "./lib/types/activities/index.d.ts",

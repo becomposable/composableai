@@ -12,8 +12,7 @@
         "./zeno/common",
         "./zeno/client",
         "./zeno/blobs",
-        "./zeno/workflow",
-        "./zeno/cli"
+        "./zeno/workflow"
     ],
     "scripts": {
         "release": "npm publish --ws --access public",

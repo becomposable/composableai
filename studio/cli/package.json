@@ -4,7 +4,7 @@
     "description": "Code generation for the interaction defined with Composable AI Studio",
     "type": "module",
     "bin": {
-        "cpcli": "./bin/app.js"
+        "composable": "./bin/app.js"
     },
     "main": "./lib/index.js",
     "types": "./lib/index.d.ts",

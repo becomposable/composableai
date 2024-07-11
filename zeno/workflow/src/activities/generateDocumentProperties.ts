@@ -47,7 +47,13 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
         return "store:" + doc.id;
     }
 
-    log.info(` Extracting information from object ${objectId} with type ${type.name}`, payload.debug_mode ? { params } : undefined);
+    const promptData = {
+        content: doc.text ?? undefined,
+        files: getImageRef() ? [getImageRef()] : [],
+        human_context: project?.configuration?.human_context ?? undefined,
+    }
+
+    log.info(` Extracting information from object ${objectId} with type ${type.name}`, payload.debug_mode ? { params,  } : undefined);
 
     const infoRes = await executeInteractionFromActivity(
         studio,
@@ -56,11 +62,9 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
             ...params,
             result_schema: type.object_schema,
         },
-        {
-            content: doc.text ?? undefined,
-            files: getImageRef() ? [getImageRef()] : [],
-            human_context: project?.configuration?.human_context ?? undefined,
-        });
+        promptData,
+        payload.debug_mode ?? false
+        );
 
     log.info(`Extracted information from object ${objectId} with type ${type.name}`, { infoRes });
     await zeno.objects.update(doc.id, {

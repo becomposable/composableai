@@ -1,4 +1,4 @@
-import { ExecutionRun, ExecutionRunRef, FindPayload, RunCreatePayload, RunListingFilters, RunListingQueryOptions, RunSearchPayload, RunSearchResponse } from "@composableai/studio-common";
+import { ExecutionRun, ExecutionRunRef, FindPayload, RunCreatePayload, RunListingFilters, RunListingQueryOptions, RunSearchPayload, RunSearchResponse } from "@composableai/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 import { StudioClient } from "./client.js";
 

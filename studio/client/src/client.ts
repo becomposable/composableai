@@ -1,4 +1,4 @@
-import { AuthTokenResponse } from "@composableai/studio-common";
+import { AuthTokenResponse } from "@composableai/common";
 import { AbstractFetchClient } from "api-fetch-client";
 import AccountApi from "./AccountApi.js";
 import AccountsApi from "./AccountsApi.js";

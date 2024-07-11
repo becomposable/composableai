@@ -1,4 +1,4 @@
-import { ContentObjectStatus, DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/zeno-common";
+import { ContentObjectStatus, DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 
 //@ts-ignore

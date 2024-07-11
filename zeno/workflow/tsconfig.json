@@ -45,7 +45,7 @@
       "path": "../blobs/tsconfig.json"
     },
     {
-      "path": "../common/tsconfig.json"
+      "path": "../../studio/common/tsconfig.json"
     }
   ]
 }

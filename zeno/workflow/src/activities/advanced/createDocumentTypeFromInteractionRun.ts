@@ -1,5 +1,5 @@
-import { ExecutionRun } from "@composableai/studio-common";
-import { CreateContentObjectTypePayload, DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/zeno-common";
+import { ExecutionRun } from "@composableai/common";
+import { CreateContentObjectTypePayload, DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
 import { log } from "@temporalio/activity";
 import { setupActivity } from "../../dsl/setup/ActivityContext.js";
 import { ActivityParamNotFound } from "../../errors.js";

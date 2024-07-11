@@ -1,4 +1,4 @@
-import { ImportSpec } from "@composableai/zeno-common";
+import { ImportSpec } from "@composableai/common";
 import { matchCondition } from "./conditions.js";
 import { ObjectKey, ObjectVisitor, ObjectWalker } from "./walk.js";
 

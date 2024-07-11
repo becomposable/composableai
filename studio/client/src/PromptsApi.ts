@@ -1,4 +1,4 @@
-import { PromptTemplate, PromptTemplateCreatePayload, PromptTemplateRef, PromptTemplateUpdatePayload } from "@composableai/studio-common";
+import { PromptTemplate, PromptTemplateCreatePayload, PromptTemplateRef, PromptTemplateUpdatePayload } from "@composableai/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export default class PromptsApi extends ApiTopic {

@@ -1,4 +1,4 @@
-import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/zeno-common";
+import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
 import { log } from "@temporalio/activity";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { TruncateSpec } from "../utils/tokens.js";
@@ -17,10 +17,10 @@ export interface GenerateDocumentProperties extends DSLActivitySpec<GenerateDocu
 
 export async function generateDocumentProperties(payload: DSLActivityExecutionPayload) {
     const context = await setupActivity<GenerateDocumentPropertiesParams>(payload);
-    const { params, studio, zeno, objectId} = context;
+    const { params, studio, zeno, objectId } = context;
 
     const project = await context.fetchProject();
-    
+
     const doc = await zeno.objects.retrieve(objectId, "+text");
     const type = doc.type ? await zeno.types.retrieve(doc.type.id) : undefined;
 
@@ -53,7 +53,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
         human_context: project?.configuration?.human_context ?? undefined,
     }
 
-    log.info(` Extracting information from object ${objectId} with type ${type.name}`, payload.debug_mode ? { params,  } : undefined);
+    log.info(` Extracting information from object ${objectId} with type ${type.name}`, payload.debug_mode ? { params, } : undefined);
 
     const infoRes = await executeInteractionFromActivity(
         studio,
@@ -64,7 +64,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
         },
         promptData,
         payload.debug_mode ?? false
-        );
+    );
 
     log.info(`Extracted information from object ${objectId} with type ${type.name}`, { infoRes });
     await zeno.objects.update(doc.id, {

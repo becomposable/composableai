@@ -1,3 +1,4 @@
+import { Facet, FacetResult } from "./facets.js";
 import { ExecutionRunRef, ExecutionRunStatus, NamedInteractionExecutionPayload } from "./interaction.js";
 /**
  * Interaction execution payload for creating a new run
@@ -5,28 +6,6 @@ import { ExecutionRunRef, ExecutionRunStatus, NamedInteractionExecutionPayload }
  */
 export interface RunCreatePayload extends NamedInteractionExecutionPayload {
 }
-
-export interface StringFacet {
-    type: "string",
-    path: string,
-    num_buckets?: number,
-}
-
-export interface NumericFacet {
-    type: "number",
-    path: string,
-    boundaries: number[],
-    default?: string
-}
-
-export interface DateFacet<T extends (Date | string) = string> {
-    type: "date",
-    path: string,
-    boundaries: T[], // array of dates
-    default?: string
-}
-
-export type Facet<DateT extends (Date | string) = string> = StringFacet | NumericFacet | DateFacet<DateT>;
 
 /**
  * To be used as a value for a numeric or date filters
@@ -36,15 +15,6 @@ export interface RangeValue {
     gte?: number | string,
     lt?: number | string,
     lte?: number | string,
-}
-
-export interface FacetBucket<T extends (string | number) = string> {
-    _id: T,
-    count: number,
-}
-
-export interface FacetResult<T extends (string | number) = string> {
-    buckets: FacetBucket<T>[]
 }
 
 export interface RunSearchMetaRepsonse {
@@ -118,11 +88,4 @@ export interface RunSearchPayload {
      * If not specified no parent filter is done (both parent and child runs are returned.)
      */
     parent?: string[] | false;
-}
-
-//TODO move to a common place with zeno since it is used by both
-export interface FindPayload {
-    query: Record<string, any>;
-    limit?: number;
-    select?: string;
 }

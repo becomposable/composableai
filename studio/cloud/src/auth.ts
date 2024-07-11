@@ -1,4 +1,4 @@
-import { AuthTokenPayload } from '@composableai/studio-common';
+import { AuthTokenPayload } from '@composableai/common';
 import jwt from 'jsonwebtoken';
 import { VaultClient } from './vault.js';
 

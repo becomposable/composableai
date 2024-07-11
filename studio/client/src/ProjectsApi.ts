@@ -1,4 +1,4 @@
-import { ICreateProjectPayload, Project, ProjectRef } from "@composableai/studio-common";
+import { ICreateProjectPayload, Project, ProjectRef } from "@composableai/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export default class ProjectsApi extends ApiTopic {
@@ -7,7 +7,7 @@ export default class ProjectsApi extends ApiTopic {
     }
 
     list(account?: string[]): Promise<ProjectRef[]> {
-        return this.get('/', {query: { account } });
+        return this.get('/', { query: { account } });
     }
 
     retrieve(projectId: string): Promise<Project> {

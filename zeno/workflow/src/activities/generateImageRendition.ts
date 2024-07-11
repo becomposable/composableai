@@ -1,6 +1,6 @@
 import { Blobs } from "@composableai/zeno-blobs";
 import { StreamSource } from "@composableai/zeno-client";
-import { DSLActivityExecutionPayload, DSLActivitySpec, RenditionProperties } from "@composableai/zeno-common";
+import { DSLActivityExecutionPayload, DSLActivitySpec, RenditionProperties } from "@composableai/common";
 import { log } from "@temporalio/activity";
 import { createReadableStreamFromReadable } from "node-web-stream-adapters";
 import sharp from "sharp";
@@ -111,5 +111,3 @@ export async function generateImageRendition(payload: DSLActivityExecutionPayloa
     return { id: rendition.id, format: params.format, status: "success" };
 
 }
-
-

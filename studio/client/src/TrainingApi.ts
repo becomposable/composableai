@@ -1,5 +1,5 @@
 import { TrainingJob } from "@llumiverse/core";
-import { ExecutionRunRef, ListTrainingSessionsQuery, TrainingSession, TrainingSessionCreatePayload, TrainingSessionRef } from "@composableai/studio-common";
+import { ExecutionRunRef, ListTrainingSessionsQuery, TrainingSession, TrainingSessionCreatePayload, TrainingSessionRef } from "@composableai/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 

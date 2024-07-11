@@ -1,4 +1,5 @@
-import { BaseObject, WorkflowExecutionPayload } from "./index.js";
+import { WorkflowExecutionPayload } from "./index.js";
+import { BaseObject } from "./common.js";
 
 /**
  * The interface of a function that can be used as a DSL workflow activity.

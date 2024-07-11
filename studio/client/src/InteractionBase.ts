@@ -1,4 +1,4 @@
-import { ExecutionRun, InteractionUpdatePayload, InteractionExecutionPayload } from "@composableai/studio-common";
+import { ExecutionRun, InteractionUpdatePayload, InteractionExecutionPayload } from "@composableai/common";
 import { StudioClient, StudioClientProps } from "./client.js";
 import { executeInteraction } from "./execute.js";
 

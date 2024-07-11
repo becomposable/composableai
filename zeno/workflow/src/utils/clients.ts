@@ -4,7 +4,7 @@
 
 import { StudioClient } from "@composableai/studio-client";
 import { ZenoClient } from "@composableai/zeno-client";
-import { WorkflowExecutionPayload } from "@composableai/zeno-common";
+import { WorkflowExecutionPayload } from "@composableai/common";
 
 
 export function getContentStore(payload: WorkflowExecutionPayload) {

@@ -32,6 +32,6 @@
     },
     "dependencies": {
         "@composableai/studio-client": "^0.28.0",
-        "@composableai/studio-common": "^0.28.0"
+        "@composableai/common": "^0.28.0"
     }
 }

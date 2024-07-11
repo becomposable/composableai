@@ -1,6 +1,6 @@
 {
     "name": "@composableai/studio-react",
-    "version": "0.27.0",
+    "version": "0.28.0",
     "description": "React helpers for Composable AI",
     "type": "module",
     "types": "./lib/index.d.ts",
@@ -31,7 +31,7 @@
         "react": ">=16.8.0"
     },
     "dependencies": {
-        "@composableai/studio-client": "^0.27.0",
-        "@composableai/studio-common": "^0.27.0"
+        "@composableai/studio-client": "^0.28.0",
+        "@composableai/studio-common": "^0.28.0"
     }
 }

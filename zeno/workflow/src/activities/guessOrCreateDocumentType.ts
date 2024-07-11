@@ -79,7 +79,7 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
     log.info("Execute SelectDocumentType interaction on content with \nexisting types: " + existing_types.join(","));
 
     const res = await executeInteractionFromActivity(studio, "SelectDocumentType", params, {
-        existing_types, content, file: fileRef
+        existing_types, content, image: fileRef
     });
 
     log.info("Selected Document Type Result: " + JSON.stringify(res.result));

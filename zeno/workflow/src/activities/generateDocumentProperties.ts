@@ -49,7 +49,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
 
     const promptData = {
         content: doc.text ?? undefined,
-        files: getImageRef() ? [getImageRef()] : [],
+        image: getImageRef() ?? undefined,
         human_context: project?.configuration?.human_context ?? undefined,
     }
 

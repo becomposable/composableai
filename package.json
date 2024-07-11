@@ -1,18 +1,18 @@
 {
     "name": "@composableai/studio",
-    "version": "0.26.0",
+    "version": "0.27.0",
     "private": true,
     "workspaces": [
         "./llumiverse/core",
         "./studio/common",
         "./studio/cloud",
         "./studio/client",
-        "./studio/cli",
         "./studio/react",
         "./zeno/common",
         "./zeno/client",
         "./zeno/blobs",
-        "./zeno/workflow"
+        "./zeno/workflow",
+        "./studio/cli"
     ],
     "scripts": {
         "release": "npm publish --ws --access public",

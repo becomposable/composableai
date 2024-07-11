@@ -1,6 +1,6 @@
 {
   "name": "@composableai/zeno-blobs",
-  "version": "0.26.0",
+  "version": "0.27.0",
   "type": "module",
   "description": "Zeno blobs abstraction",
   "main": "./lib/esm/index.js",

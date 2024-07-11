@@ -1,5 +1,6 @@
-import { RenditionProperties } from "./index.js";
+import { FacetSpec } from "../facets.js";
 import { BaseObject } from "./common.js";
+import { RenditionProperties } from "./index.js";
 
 export enum ContentObjectStatus {
     created = 'created',
@@ -102,14 +103,6 @@ export interface ComputeFacetPayload {
     facets: FacetSpec[];
     query?: SimpleSearchQuery;
 }
-export interface FacetSpec {
-    name: string;
-    field: string;
-}
-export interface FacetBucket {
-    _id: string;
-    count: number;
-}
 
 export interface ColumnLayout {
     /**
@@ -189,14 +182,6 @@ export interface CreateWorkflowRulePayload extends UploadWorkflowRulePayload {
 }
 export interface UploadWorkflowRulePayload extends Partial<Omit<WorkflowRule, 'id' | 'created_at' | 'updated_at' | 'owner'>> {
 }
-
-//TODO move to a common place with studio since it is used by both
-export interface FindPayload {
-    query: Record<string, any>;
-    limit?: number;
-    select?: string;
-}
-
 
 export interface GetRenditionResponse {
 

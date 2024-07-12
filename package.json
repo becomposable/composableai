@@ -8,8 +8,8 @@
         "./studio/cloud",
         "./studio/client",
         "./studio/react",
-        "./zeno/blobs",
-        "./zeno/workflow",
+        "./studio/blobs",
+        "./studio/workflow",
         "./studio/cli"
     ],
     "scripts": {

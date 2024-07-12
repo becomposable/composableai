@@ -1,6 +1,6 @@
 import { DSLActivityExecutionPayload, DSLActivitySpec, DocumentPartProperties } from "@composableai/common";
 import { StreamSource } from "@composableai/client";
-import { Blobs } from "@composableai/zeno-blobs";
+import { Blobs } from "@composableai/blobs";
 import { log } from "@temporalio/activity";
 import fs from 'fs';
 import { createReadableStreamFromReadable } from "node-web-stream-adapters";

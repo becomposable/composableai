@@ -1,5 +1,5 @@
 import { ContentObject, CreateContentObjectPayload, DSLActivityExecutionPayload, DSLActivitySpec } from '@composableai/common';
-import { Blobs, md5 } from '@composableai/zeno-blobs';
+import { Blobs, md5 } from '@composableai/blobs';
 import { log } from "@temporalio/activity";
 import { manyToMarkdown } from '../conversion/pandoc.js';
 import { trasformPdfToMarkdown } from '../conversion/pdf.js';

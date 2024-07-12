@@ -1,8 +1,8 @@
 {
-  "name": "@composableai/zeno-blobs",
+  "name": "@composableai/blobs",
   "version": "0.28.0",
   "type": "module",
-  "description": "Zeno blobs abstraction",
+  "description": "Blobs abstraction",
   "main": "./lib/esm/index.js",
   "files": [
     "lib",

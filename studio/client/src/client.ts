@@ -13,7 +13,7 @@ import TrainingApi from "./TrainingApi.js";
 import { ZenoClient } from "./store/client.js";
 
 export interface StudioClientProps {
-    serverUrl?: string;
+    serverUrl: string;
     storeUrl: string;
     apikey?: string;
     projectId?: string;
@@ -37,7 +37,10 @@ export class StudioClient extends AbstractFetchClient<StudioClient> {
     constructor(
         opts: StudioClientProps = {} as any
     ) {
-        super(opts.serverUrl || "https://api.composableprompts.com");
+        super(opts.serverUrl);
+        if (!opts.serverUrl) {
+            throw new Error("storeUrl is required for StudioClient");
+        }
         if (!opts.storeUrl) {
             throw new Error("storeUrl is required for StudioClient");
         }

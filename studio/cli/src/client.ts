@@ -11,15 +11,14 @@ export function getClient(program: Command) {
     return _client;
 }
 
-function createClient(program: Command) {
+function createClient(_program: Command) {
     const profile = config.current;
-    const options = program.opts();
 
     const env = {
-        apikey: options.apikey || profile?.apikey || process.env.COMPOSABLE_PROMPTS_APIKEY,
-        serverUrl: options.server || profile?.studio_server_url || process.env.COMPOSABLE_PROMPTS_SERVER_URL || 'https://api.composableprompts.com',
+        apikey: profile?.apikey || process.env.COMPOSABLE_PROMPTS_APIKEY,
+        serverUrl: profile?.studio_server_url || process.env.COMPOSABLE_PROMPTS_SERVER_URL!,
         storeUrl: profile?.zeno_server_url || process.env.ZENO_SERVER_URL!,
-        projectId: options.project || profile?.project || process.env.COMPOSABLE_PROMPTS_PROJECT_ID || undefined,
+        projectId: profile?.project || process.env.COMPOSABLE_PROMPTS_PROJECT_ID || undefined,
         sessionTags: profile?.session_tags ? profile.session_tags.split(/\s*,\s*/) : 'cli',
     }
 

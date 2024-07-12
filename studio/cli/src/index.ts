@@ -17,10 +17,7 @@ import { registerWorkflowsCommand } from './workflows/index.js';
 
 const program = new Command();
 
-program.version(getVersion())
-    .option('-k, --apikey <API_KEY>', 'API Key for your Composable Prompts project')
-    .option('-p, --project [PROJECT_ID]', 'If the key has access to multiple projects, specify the project ID')
-    .option('-s, --server [URL]', 'Server URL if necessary');
+program.version(getVersion());
 
 program.command("upgrade")
     .description("Upgrade to the latest version of the CLI")

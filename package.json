@@ -4,13 +4,13 @@
     "private": true,
     "workspaces": [
         "./llumiverse/core",
-        "./studio/common",
-        "./studio/cloud",
-        "./studio/client",
-        "./studio/react",
-        "./studio/blobs",
-        "./studio/workflow",
-        "./studio/cli"
+        "./packages/common",
+        "./packages/cloud",
+        "./packages/client",
+        "./packages/react",
+        "./packages/blobs",
+        "./packages/workflow",
+        "./packages/cli"
     ],
     "scripts": {
         "release": "npm publish --ws --access public",

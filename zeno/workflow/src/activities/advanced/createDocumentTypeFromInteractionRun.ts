@@ -1,9 +1,8 @@
-import { ExecutionRun } from "@composableai/common";
-import { CreateContentObjectTypePayload, DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
+import { CreateContentObjectTypePayload, DSLActivityExecutionPayload, DSLActivitySpec, ExecutionRun } from "@composableai/common";
 import { log } from "@temporalio/activity";
+import { projectResult } from "../../dsl/projections.js";
 import { setupActivity } from "../../dsl/setup/ActivityContext.js";
 import { ActivityParamNotFound } from "../../errors.js";
-import { projectResult } from "../../dsl/projections.js";
 
 
 export interface CreateDocumentTypeFromInteractionRunParams {
@@ -23,7 +22,7 @@ export interface CreateDocumentTypeFromInteractionRun extends DSLActivitySpec<Cr
 }
 
 export async function createDocumentTypeFromInteractionRun(payload: DSLActivityExecutionPayload) {
-    const { params, zeno } = await setupActivity<CreateDocumentTypeFromInteractionRunParams>(payload);
+    const { params, client } = await setupActivity<CreateDocumentTypeFromInteractionRunParams>(payload);
 
     if (!params.run) {
         throw new ActivityParamNotFound("run", payload.activity);
@@ -43,10 +42,10 @@ export async function createDocumentTypeFromInteractionRun(payload: DSLActivityE
         is_chunkable: !!genTypeRes.is_chunkable,
     }
 
-    const type = await zeno.types.create(typeData);
+    const type = await client.types.create(typeData);
 
     if (params.updateObjectId) {
-        await zeno.objects.update(params.updateObjectId, {
+        await client.objects.update(params.updateObjectId, {
             type: type.id,
         });
     }

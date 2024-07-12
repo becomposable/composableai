@@ -17,12 +17,12 @@ export interface GenerateDocumentProperties extends DSLActivitySpec<GenerateDocu
 
 export async function generateDocumentProperties(payload: DSLActivityExecutionPayload) {
     const context = await setupActivity<GenerateDocumentPropertiesParams>(payload);
-    const { params, studio, zeno, objectId } = context;
+    const { params, client, objectId } = context;
 
     const project = await context.fetchProject();
 
-    const doc = await zeno.objects.retrieve(objectId, "+text");
-    const type = doc.type ? await zeno.types.retrieve(doc.type.id) : undefined;
+    const doc = await client.objects.retrieve(objectId, "+text");
+    const type = doc.type ? await client.types.retrieve(doc.type.id) : undefined;
 
     if (!doc?.text && !doc?.content?.type?.startsWith("image/")) {
         log.warn(`Object ${objectId} not found or text is empty`, { doc });
@@ -56,7 +56,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
     log.info(` Extracting information from object ${objectId} with type ${type.name}`, payload.debug_mode ? { params, } : undefined);
 
     const infoRes = await executeInteractionFromActivity(
-        studio,
+        client,
         "ExtractInformation",
         {
             ...params,
@@ -67,7 +67,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
     );
 
     log.info(`Extracted information from object ${objectId} with type ${type.name}`, { infoRes });
-    await zeno.objects.update(doc.id, {
+    await client.objects.update(doc.id, {
         properties: {
             ...infoRes.result,
             etag: doc.text_etag

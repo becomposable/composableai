@@ -10,9 +10,11 @@ import ProjectsApi from "./ProjectsApi.js";
 import PromptsApi from "./PromptsApi.js";
 import { RunsApi } from "./RunsApi.js";
 import TrainingApi from "./TrainingApi.js";
+import { ZenoClient } from "./store/client.js";
 
 export interface StudioClientProps {
     serverUrl?: string;
+    storeUrl: string;
     apikey?: string;
     projectId?: string;
     sessionTags?: string | string[];
@@ -23,14 +25,29 @@ export interface StudioClientProps {
 export class StudioClient extends AbstractFetchClient<StudioClient> {
 
     /**
+     * The store client
+     */
+    store: ZenoClient;
+
+    /**
      * The session name will be sent when executing an interaction as a tag
      */
     sessionTags?: string | string[];
 
     constructor(
-        opts: StudioClientProps = {}
+        opts: StudioClientProps = {} as any
     ) {
         super(opts.serverUrl || "https://api.composableprompts.com");
+        if (!opts.storeUrl) {
+            throw new Error("storeUrl is required for StudioClient");
+        }
+        this.store = new ZenoClient({
+            serverUrl: opts.storeUrl,
+            apikey: opts.apikey,
+            onRequest: opts.onRequest,
+            onResponse: opts.onResponse
+        });
+
         if (opts.apikey) {
             this.withApiKey(opts.apikey);
         }
@@ -42,11 +59,44 @@ export class StudioClient extends AbstractFetchClient<StudioClient> {
         this.sessionTags = opts.sessionTags;
     }
 
+
+    /**
+     * Overwrite to keep zeno and studio clients synchronized on the auth callback
+     * @param authCb
+     * @returns
+     */
+    withAuthCallback(authCb?: (() => Promise<string>) | null) {
+        this.store.withAuthCallback(authCb);
+        return super.withAuthCallback(authCb);
+    }
+
     withApiKey(apiKey: string | null) {
         return this.withAuthCallback(
             apiKey ? () => Promise.resolve(`Bearer ${apiKey}`) : undefined
         );
     }
+
+    /**
+     * Alias for store.workflows
+     */
+    get workflows() {
+        return this.store.workflows;
+    }
+
+    /**
+     * Alias for store.objects
+     */
+    get objects() {
+        return this.store.objects;
+    }
+
+    /**
+     * Alias for store.types
+     */
+    get types() {
+        return this.store.types;
+    }
+
 
     set project(projectId: string | null) {
         if (projectId) {

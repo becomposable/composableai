@@ -1,6 +1,6 @@
+import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
 import { StudioClient } from "@composableai/studio-client";
 import { md5 } from '@composableai/zeno-blobs';
-import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
 import { EmbeddingsResult } from "@llumiverse/core";
 import { log } from "@temporalio/activity";
 import * as tf from '@tensorflow/tfjs-node';
@@ -19,7 +19,7 @@ export interface GenerateEmbeddings extends DSLActivitySpec<GenerateEmbeddingsPa
 }
 
 export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
-    const { params, studio, zeno, objectId, fetchProject } = await setupActivity<GenerateEmbeddingsParams>(payload);
+    const { params, client, objectId, fetchProject } = await setupActivity<GenerateEmbeddingsParams>(payload);
     const force = params.force;
     const projectData = await fetchProject();
 
@@ -31,7 +31,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
         return { id: objectId, status: "failed", message: "no environment ID" }
     }
 
-    const document = await zeno.objects.retrieve(objectId, "+text +parts +embedding +tokens");
+    const document = await client.objects.retrieve(objectId, "+text +parts +embedding +tokens");
 
     if (!document) {
         return { id: objectId, status: "failed", message: "object not found" }
@@ -49,7 +49,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
     if (!document.tokens?.count) {
         log.warn('Updating token count for document: ' + objectId);
         const tokensData = countTokens(document.text);
-        await zeno.objects.update(document.id, {
+        await client.objects.update(document.id, {
             tokens: {
                 ...tokensData,
                 etag: document.text_etag ?? md5(document.text)
@@ -68,7 +68,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
             return { id: objectId, status: "failed", message: "no parts found" }
         }
 
-        const docParts = await Promise.all(document.parts?.map(async (partId) => zeno.objects.retrieve(partId, "+text +embedding +tokens")));
+        const docParts = await Promise.all(document.parts?.map(async (partId) => client.objects.retrieve(partId, "+text +embedding +tokens")));
 
         const res = await Promise.all(docParts.map(async (part, i) => {
             if (!part.text) {
@@ -79,7 +79,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
                 return { id: part.id, number: i, result: part.embedding }
             }
 
-            const e = await generateEmbeddingsFromStudio(part.text, env, studio).catch(e => {
+            const e = await generateEmbeddingsFromStudio(part.text, env, client).catch(e => {
                 log.error('Error generating embeddings for part', { part: part.id, tokens: part.tokens, text_length: part.text?.length, error: e });
                 return null;
             });
@@ -88,7 +88,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
                 return { id: part.id, number: i, result: null }
             }
 
-            const updated = await zeno.objects.update(part.id, {
+            const updated = await client.objects.update(part.id, {
                 embedding: {
                     content: e.values,
                     model: e.model,
@@ -110,7 +110,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
         const documentEmbedding = computeAttentionEmbedding(validEmbeddings.map(item => item.result.values));
 
         // Save the document-level embedding
-        await zeno.objects.update(objectId, {
+        await client.objects.update(objectId, {
             embedding: {
                 content: documentEmbedding,
                 model: "attention",
@@ -121,12 +121,12 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
 
     } else {
         log.info('Generating embeddings for document');
-        const res = await generateEmbeddingsFromStudio(document.text, env, studio);
+        const res = await generateEmbeddingsFromStudio(document.text, env, client);
         if (!res || !res.values) {
             return { id: objectId, status: "failed", message: "no embeddings generated" }
         }
 
-        await zeno.objects.update(objectId, {
+        await client.objects.update(objectId, {
             embedding: {
                 content: res.values,
                 model: res.model,

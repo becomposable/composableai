@@ -1,13 +1,11 @@
 import { verifyAuthToken } from "@composableai/cloud-client";
+import { DSLActivityExecutionPayload, DSLWorkflowExecutionPayload, Project, WorkflowExecutionPayload } from "@composableai/common";
 import { StudioClient } from "@composableai/studio-client";
-import { Project } from "@composableai/common";
-import { ZenoClient } from "@composableai/zeno-client";
-import { DSLActivityExecutionPayload, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@composableai/common";
 import { log } from "@temporalio/activity";
 import { NoDocumentFound, WorkflowParamNotFound } from "../../errors.js";
-import { getContentStore, getStudioClient } from "../../utils/clients.js";
+import { getClient } from "../../utils/client.js";
 import { Vars } from "../vars.js";
-import { FetchContext, getFetchProvider, registerFetchProviderFactory } from "./fetch/index.js";
+import { getFetchProvider, registerFetchProviderFactory } from "./fetch/index.js";
 import { DocumentProvider, DocumentTypeProvider, InteractionRunProvider } from "./fetch/providers.js";
 
 
@@ -15,14 +13,12 @@ registerFetchProviderFactory(DocumentProvider.ID, DocumentProvider.factory);
 registerFetchProviderFactory(DocumentTypeProvider.ID, DocumentTypeProvider.factory);
 registerFetchProviderFactory(InteractionRunProvider.ID, InteractionRunProvider.factory);
 
-export class ActivityContext<T extends Record<string, any> = Record<string, any>> implements FetchContext {
-    zeno: ZenoClient;
-    studio: StudioClient;
+export class ActivityContext<T extends Record<string, any> = Record<string, any>> {
+    client: StudioClient;
     _project?: Promise<Project | undefined>;
 
-    constructor(public payload: DSLActivityExecutionPayload, fetchContext: FetchContext, public params: T) {
-        this.zeno = fetchContext.zeno;
-        this.studio = fetchContext.studio;
+    constructor(public payload: DSLActivityExecutionPayload, client: StudioClient, public params: T) {
+        this.client = client;
         this.fetchProject = this.fetchProject.bind(this);
     }
 
@@ -41,7 +37,7 @@ export class ActivityContext<T extends Record<string, any> = Record<string, any>
 
     fetchProject() {
         if (!this._project) {
-            this._project = _fetchProject(this.studio, this.payload);
+            this._project = _fetchProject(this.client, this.payload);
         }
         return this._project;
     }
@@ -63,10 +59,7 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
         log.info(`Setting up activity ${payload.activity.name}`, { config: payload.config, activity: payload.activity, params: payload.params, vars });
     }
 
-    const fetchContext: FetchContext = {
-        zeno: getContentStore(payload),
-        studio: getStudioClient(payload)
-    }
+    const client = getClient(payload);
     const fetchSpecs = payload.activity.fetch;
     if (fetchSpecs) {
 
@@ -81,7 +74,7 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
                     fetchSpec = { ...fetchSpec, query };
                 }
 
-                const provider = await getFetchProvider(fetchContext, fetchSpec);
+                const provider = await getFetchProvider(client, fetchSpec);
 
                 log.info(`Fetching data for ${key} with provider ${provider.name}`, { fetchSpec });
                 const result = await provider.fetch(fetchSpec);
@@ -103,7 +96,7 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
     const params = vars.resolve() as T;
     log.info(`Activity ${payload.activity.name} setup complete`, { params });
 
-    return new ActivityContext<T>(payload, fetchContext, params);
+    return new ActivityContext<T>(payload, client, params);
 }
 
 

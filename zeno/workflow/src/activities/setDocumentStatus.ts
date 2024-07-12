@@ -24,9 +24,9 @@ export interface SetDocumentStatus extends DSLActivitySpec<SetDocumentStatusPara
  * @param status
  */
 export async function setDocumentStatus(payload: DSLActivityExecutionPayload) {
-    const { zeno, params, objectId } = await setupActivity<SetDocumentStatusParams>(payload);
+    const { client, params, objectId } = await setupActivity<SetDocumentStatusParams>(payload);
 
-    const res = await zeno.objects.update(objectId, { status: params.status });
+    const res = await client.objects.update(objectId, { status: params.status });
 
     return res.status;
 

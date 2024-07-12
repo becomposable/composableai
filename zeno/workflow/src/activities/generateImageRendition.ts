@@ -1,6 +1,6 @@
-import { Blobs } from "@composableai/zeno-blobs";
-import { StreamSource } from "@composableai/zeno-client";
 import { DSLActivityExecutionPayload, DSLActivitySpec, RenditionProperties } from "@composableai/common";
+import { StreamSource } from "@composableai/studio-client";
+import { Blobs } from "@composableai/zeno-blobs";
 import { log } from "@temporalio/activity";
 import { createReadableStreamFromReadable } from "node-web-stream-adapters";
 import sharp from "sharp";
@@ -23,11 +23,11 @@ export interface GenerateImageRendition extends DSLActivitySpec<GenerateImageRen
 
 
 export async function generateImageRendition(payload: DSLActivityExecutionPayload) {
-    const { zeno, objectId, params } = await setupActivity<GenerateImageRenditionParams>(payload);
+    const { client, objectId, params } = await setupActivity<GenerateImageRenditionParams>(payload);
 
     const supportedNonImageInputTypes = ['application/pdf']
-    const inputObject = await zeno.objects.retrieve(objectId);
-    const renditionType = await zeno.types.getTypeByName('Rendition');
+    const inputObject = await client.objects.retrieve(objectId);
+    const renditionType = await client.types.getTypeByName('Rendition');
 
     if (!params.format) {
         log.error(`Format not found`);
@@ -93,7 +93,7 @@ export async function generateImageRendition(payload: DSLActivityExecutionPayloa
 
 
     log.info(`Creating rendition for ${objectId} with max_hw: ${params.max_hw} and format: ${params.format}`);
-    const rendition = await zeno.objects.create({
+    const rendition = await client.objects.create({
         name: inputObject.name + ` [Rendition ${params.max_hw}]`,
         type: renditionType.id,
         parent: inputObject.id,

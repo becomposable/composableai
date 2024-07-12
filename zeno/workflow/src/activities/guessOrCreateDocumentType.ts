@@ -25,12 +25,12 @@ export interface GuessOrCreateDocumentType extends DSLActivitySpec<GuessOrCreate
 
 export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPayload) {
     const context = await setupActivity<GuessOrCreateDocumentTypeParams>(payload);
-    const { params, studio, zeno, objectId } = context;
+    const { params, client, objectId } = context;
 
 
     log.info("SelectDocumentType for object: " + objectId, { payload });
 
-    const object = await zeno.objects.retrieve(objectId, "+text");
+    const object = await client.objects.retrieve(objectId, "+text");
     if (object.type) {
         log.warn(`Object ${objectId} has already a type. Skipping type creation.`);
         return null;
@@ -50,7 +50,7 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
         };
     }
 
-    const types = await zeno.types.list();
+    const types = await client.types.list();
 
     //make a list of all existing types, and add hints if any
     const existing_types = types.map(t => t.name);
@@ -65,7 +65,7 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
         if (!object.content?.type?.startsWith("image/")) {
             return undefined;
         }
-        const res = await zeno.objects.getRendition(objectId, { max_hw: 1024, format: "image/jpeg", generate_if_missing: true });
+        const res = await client.objects.getRendition(objectId, { max_hw: 1024, format: "image/jpeg", generate_if_missing: true });
         if (!res.rendition && res.status === "generating") {
             //throw to try again
             throw new Error(`Rendition for object ${objectId} is in progress`);
@@ -78,7 +78,7 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
 
     log.info("Execute SelectDocumentType interaction on content with \nexisting types: " + existing_types.join(","));
 
-    const res = await executeInteractionFromActivity(studio, "SelectDocumentType", params, {
+    const res = await executeInteractionFromActivity(client, "SelectDocumentType", params, {
         existing_types, content, image: fileRef
     });
 
@@ -102,7 +102,7 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
     }
 
     //update object with selected type
-    await zeno.objects.update(objectId, {
+    await client.objects.update(objectId, {
         type: selectedType.id,
     });
 
@@ -114,11 +114,11 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
 }
 
 async function generateNewType(context: ActivityContext, existing_types: string[], content?: string, fileRef?: string) {
-    const { studio, zeno, params } = context;
+    const { client, params } = context;
 
     const project = await context.fetchProject();
 
-    const genTypeRes = await executeInteractionFromActivity(studio, "GenerateMetadataModel", params, {
+    const genTypeRes = await executeInteractionFromActivity(client, "GenerateMetadataModel", params, {
         existing_types: existing_types,
         content: content,
         human_context: project?.configuration?.human_context ?? undefined,
@@ -138,7 +138,7 @@ async function generateNewType(context: ActivityContext, existing_types: string[
         is_chunkable: genTypeRes.result.is_chunkable,
     }
 
-    const type = await zeno.types.create(typeData);
+    const type = await client.types.create(typeData);
 
     return type;
 

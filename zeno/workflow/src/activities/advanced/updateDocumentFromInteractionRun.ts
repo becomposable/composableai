@@ -1,5 +1,4 @@
-import { ExecutionRun } from "@composableai/common";
-import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
+import { DSLActivityExecutionPayload, DSLActivitySpec, ExecutionRun } from "@composableai/common";
 import { setupActivity } from "../../dsl/setup/ActivityContext.js";
 import { ActivityParamNotFound } from "../../errors.js";
 
@@ -17,7 +16,7 @@ export interface UpdateDocumentFromInteractionRun extends DSLActivitySpec<Update
 }
 
 export async function updateDocumentFromInteractionRun(payload: DSLActivityExecutionPayload) {
-    const { params, zeno, objectId } = await setupActivity<UpdateDocumentFromInteractionRunParams>(payload);
+    const { params, client, objectId } = await setupActivity<UpdateDocumentFromInteractionRunParams>(payload);
 
     if (!params.run) {
         throw new ActivityParamNotFound("run", payload.activity);
@@ -29,7 +28,7 @@ export async function updateDocumentFromInteractionRun(payload: DSLActivityExecu
         return { status: "failed", error: "no-props" };
     }
 
-    await zeno.objects.update(objectId, docProps);
+    await client.objects.update(objectId, docProps);
 
     return { status: "success" };
 }

@@ -8,7 +8,6 @@
         "./studio/cloud",
         "./studio/client",
         "./studio/react",
-        "./zeno/client",
         "./zeno/blobs",
         "./zeno/workflow",
         "./studio/cli"

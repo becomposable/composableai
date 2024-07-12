@@ -1,6 +1,6 @@
-import { Blobs } from "@composableai/zeno-blobs";
-import { StreamSource } from "@composableai/zeno-client";
 import { DSLActivityExecutionPayload, DSLActivitySpec, DocumentPartProperties } from "@composableai/common";
+import { StreamSource } from "@composableai/studio-client";
+import { Blobs } from "@composableai/zeno-blobs";
 import { log } from "@temporalio/activity";
 import fs from 'fs';
 import { createReadableStreamFromReadable } from "node-web-stream-adapters";
@@ -26,9 +26,9 @@ export interface extractImagesFromPdf extends DSLActivitySpec<ExtractImagesFromP
 
 
 export async function extractImagesFromPdf(payload: DSLActivityExecutionPayload) {
-    const { zeno, objectId, params } = await setupActivity<ExtractImagesFromPdfParams>(payload);
-    const inputObject = await zeno.objects.retrieve(objectId);
-    const docPartType = await zeno.types.getTypeByName('DocPart');
+    const { client, objectId, params } = await setupActivity<ExtractImagesFromPdfParams>(payload);
+    const inputObject = await client.objects.retrieve(objectId);
+    const docPartType = await client.types.getTypeByName('DocPart');
 
     if (!docPartType) {
         log.error(`DocPart type type not found`);
@@ -68,7 +68,7 @@ export async function extractImagesFromPdf(payload: DSLActivityExecutionPayload)
         const stream = createReadableStreamFromReadable(resized);
         const metadata = await sharp(resized).metadata();
         const partName = `[ImagePart] ${inputObject.name}: ${image.page}-${image.imgCount}`;
-        const imagePart = await zeno.objects.create({
+        const imagePart = await client.objects.create({
             name: partName,
             type: docPartType.id,
             parent: inputObject.id,

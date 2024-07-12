@@ -1,5 +1,5 @@
-import { UploadContentObjectPayload } from "@composableai/zeno-client";
 import { ContentObjectStatus, DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
+import { UploadContentObjectPayload } from "@composableai/studio-client";
 import { log } from "@temporalio/activity";
 import { setupActivity } from "../../dsl/setup/ActivityContext.js";
 import { ActivityParamNotFound, NoDocumentFound } from "../../errors.js";
@@ -28,7 +28,7 @@ export interface CreateOrUpdateObjectFromInteractionRun extends DSLActivitySpec<
 
 export async function createOrUpdateDocumentFromInteractionRun(payload: DSLActivityExecutionPayload) {
 
-    const { params, zeno, studio } = await setupActivity<CreateOrUpdateObjectFromInteractionRunParams>(payload);
+    const { params, client } = await setupActivity<CreateOrUpdateObjectFromInteractionRunParams>(payload);
 
     const runId = params.run_id;
     const objectTypeName = params.object_type;
@@ -42,12 +42,12 @@ export async function createOrUpdateDocumentFromInteractionRun(payload: DSLActiv
 
     log.info("Creating document from interaction result", { runId, objectTypeName });
 
-    const run = await studio.runs.retrieve(runId).catch((e) => {
+    const run = await client.runs.retrieve(runId).catch((e) => {
         throw new NoDocumentFound(`Error fetching run ${runId}: ${e.message}`);
     });
 
     const type = objectTypeName ?
-        await zeno.types.getTypeByName(objectTypeName).catch((e) => {
+        await client.types.getTypeByName(objectTypeName).catch((e) => {
             throw new NoDocumentFound(`Error fetching type ${objectTypeName}: ${e.message}`);
         })
         : undefined;
@@ -79,9 +79,9 @@ export async function createOrUpdateDocumentFromInteractionRun(payload: DSLActiv
     let newDoc: boolean = false;
     let doc = undefined;
     if (params.updateExistingId) {
-        doc = await zeno.objects.update(params.updateExistingId, docPayload);
+        doc = await client.objects.update(params.updateExistingId, docPayload);
     } else {
-        doc = await zeno.objects.create(docPayload);
+        doc = await client.objects.create(docPayload);
         newDoc = true;
     }
 

@@ -1,5 +1,5 @@
-import { Blobs, md5 } from '@composableai/zeno-blobs';
 import { ContentObject, CreateContentObjectPayload, DSLActivityExecutionPayload, DSLActivitySpec } from '@composableai/common';
+import { Blobs, md5 } from '@composableai/zeno-blobs';
 import { log } from "@temporalio/activity";
 import { manyToMarkdown } from '../conversion/pandoc.js';
 import { trasformPdfToMarkdown } from '../conversion/pdf.js';
@@ -21,9 +21,9 @@ export interface ExtractDocumentText extends DSLActivitySpec<ExtractDocumentText
 }
 
 export async function extractDocumentText(payload: DSLActivityExecutionPayload) {
-    const { zeno, objectId } = await setupActivity(payload);
+    const { client, objectId } = await setupActivity(payload);
 
-    const r = await zeno.objects.find({
+    const r = await client.objects.find({
         query: { _id: objectId },
         limit: 1,
         select: "+text"
@@ -113,7 +113,7 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload) 
         }
     }
 
-    await zeno.objects.update(doc.id, updateData);
+    await client.objects.update(doc.id, updateData);
 
     return createResponse(doc, txt, 'text-extracted');
 }

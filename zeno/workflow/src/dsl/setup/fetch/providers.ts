@@ -1,8 +1,6 @@
-import { StudioClient } from "@composableai/studio-client";
-import { ZenoClient } from "@composableai/zeno-client";
 import { FindPayload } from "@composableai/common";
+import { StudioClient } from "@composableai/studio-client";
 import { DataProvider } from "./DataProvider.js";
-import { FetchContext } from "./index.js";
 
 function useMongoId(query: Record<string, any>) {
     if (query.id) {
@@ -15,7 +13,7 @@ function useMongoId(query: Record<string, any>) {
 
 export class DocumentProvider extends DataProvider {
     static ID = "document";
-    constructor(public client: ZenoClient) {
+    constructor(public client: StudioClient) {
         super(DocumentProvider.ID, true);
     }
 
@@ -26,14 +24,14 @@ export class DocumentProvider extends DataProvider {
         });
     }
 
-    static factory(context: FetchContext) {
-        return new DocumentProvider(context.zeno);
+    static factory(client: StudioClient) {
+        return new DocumentProvider(client);
     }
 }
 
 export class DocumentTypeProvider extends DataProvider {
     static ID = "document_type";
-    constructor(public client: ZenoClient) {
+    constructor(public client: StudioClient) {
         super(DocumentTypeProvider.ID, true);
     }
 
@@ -44,8 +42,8 @@ export class DocumentTypeProvider extends DataProvider {
         });
     }
 
-    static factory(context: FetchContext) {
-        return new DocumentTypeProvider(context.zeno);
+    static factory(client: StudioClient) {
+        return new DocumentTypeProvider(client);
     }
 }
 
@@ -62,8 +60,8 @@ export class InteractionRunProvider extends DataProvider {
         });
     }
 
-    static factory(context: FetchContext) {
-        return new InteractionRunProvider(context.studio);
+    static factory(client: StudioClient) {
+        return new InteractionRunProvider(client);
     }
 
 }

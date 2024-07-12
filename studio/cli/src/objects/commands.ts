@@ -1,11 +1,11 @@
-import { StreamSource } from "@composableai/zeno-client";
+import { StreamSource } from "@composableai/studio-client";
 import { Command } from "commander";
 import { Dirent, Stats, createReadStream } from "fs";
 import { readdir, stat } from "fs/promises";
 import { glob } from 'glob';
 import { createReadableStreamFromReadable } from "node-web-stream-adapters";
 import { basename, join, resolve } from "path";
-import { getStore } from "../client.js";
+import { getClient } from "../client.js";
 
 function splitInChunksWithSize<T>(arr: Array<T>, size: number): T[][] {
     if (size < 1) {
@@ -91,7 +91,7 @@ export async function createObjectFromFiles(program: Command, files: string[], o
 
 export async function createObjectFromFile(program: Command, file: string, options: Record<string, any>) {
     const fileName = basename(file);
-    const client = getStore(program);
+    const client = getClient(program);
     const stream = createReadStream(file);
 
     const res = await client.objects.create({
@@ -105,16 +105,16 @@ export async function createObjectFromFile(program: Command, file: string, optio
 }
 
 export async function deleteObject(program: Command, objectId: string, _options: Record<string, any>) {
-    await getStore(program).objects.delete(objectId);
+    await getClient(program).objects.delete(objectId);
 }
 
 export async function getObject(program: Command, objectId: string, _options: Record<string, any>) {
-    const object = await getStore(program).objects.retrieve(objectId);
+    const object = await getClient(program).objects.retrieve(objectId);
     console.log(object);
 }
 
 //@ts-ignore
 export async function listObjects(program: Command, folderPath: string | undefined, _options: Record<string, any>) {
-    const objects = await getStore(program).objects.list();
+    const objects = await getClient(program).objects.list();
     console.log(objects.map(o => `${o.id}\t ${o.name}`).join('\n'));
 }

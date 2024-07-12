@@ -1,6 +1,5 @@
+import { DSLActivityExecutionPayload, DSLActivitySpec, ExecutionRun, ExecutionRunStatus, InteractionExecutionConfiguration } from "@composableai/common";
 import { StudioClient } from "@composableai/studio-client";
-import { ExecutionRun, ExecutionRunStatus, InteractionExecutionConfiguration } from "@composableai/common";
-import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
 import { activityInfo, log } from "@temporalio/activity";
 import { projectResult } from "../dsl/projections.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
@@ -106,7 +105,7 @@ export interface ExecuteInteraction extends DSLActivitySpec<ExecuteInteractionPa
 
 export async function executeInteraction(payload: DSLActivityExecutionPayload) {
     const {
-        studio, params
+        client, params
     } = await setupActivity<ExecuteInteractionParams>(payload);
 
     const { interactionName, prompt_data } = params;
@@ -118,7 +117,7 @@ export async function executeInteraction(payload: DSLActivityExecutionPayload) {
         }
     }
 
-    const res = await executeInteractionFromActivity(studio, interactionName, params, prompt_data, payload.debug_mode);
+    const res = await executeInteractionFromActivity(client, interactionName, params, prompt_data, payload.debug_mode);
 
     return projectResult(payload, params, res, {
         runId: res.id,

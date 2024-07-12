@@ -30,14 +30,14 @@ export interface ChunkDocument extends DSLActivitySpec<ChunkDocumentParams> {
 
 
 export async function chunkDocument(payload: DSLActivityExecutionPayload): Promise<ChunkDocumentResult> {
-    const { params, studio, zeno, objectId } = await setupActivity<ChunkDocumentParams>(payload);
+    const { params, client, objectId } = await setupActivity<ChunkDocumentParams>(payload);
 
     const { force } = params;
     log.info(`Object ${objectId} chunking started`);
 
-    const document = await zeno.objects.retrieve(objectId, "+text");
+    const document = await client.objects.retrieve(objectId, "+text");
 
-    const type = document.type ? await zeno.types.retrieve(document.type.id) : undefined;
+    const type = document.type ? await client.types.retrieve(document.type.id) : undefined;
 
     if (!type?.is_chunkable) {
         log.warn('Type is not chunkable for object ID: ' + objectId);
@@ -59,7 +59,7 @@ export async function chunkDocument(payload: DSLActivityExecutionPayload): Promi
     const lines = document.text.split('\n')
     const instrumented = lines.map((l, i) => `{%${i}%}${l}`).join('\n')
 
-    const res = await executeInteractionFromActivity(studio, "ChunkDocument", params, {
+    const res = await executeInteractionFromActivity(client, "ChunkDocument", params, {
         objectId: objectId,
         content: instrumented
     });
@@ -83,7 +83,7 @@ export async function chunkDocument(payload: DSLActivityExecutionPayload): Promi
             return location;
         }
 
-        const docPart = await zeno.objects.create({
+        const docPart = await client.objects.create({
             name: part.name,
             parent: objectId,
             text: text,
@@ -103,11 +103,11 @@ export async function chunkDocument(payload: DSLActivityExecutionPayload): Promi
     if (document.parts && document.parts.length > 0) {
         log.info('Deleting previous parts for object ID: ' + objectId, { parts: document.parts });
         await Promise.all(document.parts.map(async (partId) => {
-            await zeno.objects.delete(partId);
+            await client.objects.delete(partId);
         }));
     }
 
-    await zeno.objects.update(objectId, {
+    await client.objects.update(objectId, {
         parts: partDocs.map(p => p.id),
         parts_etag: document.text_etag
     });

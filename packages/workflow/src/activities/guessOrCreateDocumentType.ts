@@ -53,7 +53,7 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
     const types = await client.types.list();
 
     //make a list of all existing types, and add hints if any
-    const existing_types = types.map(t => t.name);
+    const existing_types = types.map(t => t.name).filter(n => !["DocumentPart", "Rendition"].includes(n));
     if (params.typesHint) {
         const newHints = params.typesHint.filter((t: string) => !existing_types.includes(t));
         existing_types.push(...newHints);
@@ -122,7 +122,7 @@ async function generateNewType(context: ActivityContext, existing_types: string[
         existing_types: existing_types,
         content: content,
         human_context: project?.configuration?.human_context ?? undefined,
-        files: fileRef ? [fileRef] : []
+        image: fileRef ? fileRef : undefined
     });
 
 

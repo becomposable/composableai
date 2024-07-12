@@ -1,5 +1,5 @@
 {
-    "name": "@composableai/studio-client",
+    "name": "@composableai/client",
     "version": "0.28.0",
     "type": "module",
     "types": "./lib/types/index.d.ts",

@@ -1,4 +1,4 @@
-import { StreamSource } from "@composableai/studio-client";
+import { StreamSource } from "@composableai/client";
 import { Command } from "commander";
 import { Dirent, Stats, createReadStream } from "fs";
 import { readdir, stat } from "fs/promises";

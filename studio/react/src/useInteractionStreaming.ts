@@ -1,4 +1,4 @@
-import { InteractionBase } from "@composableai/studio-client";
+import { InteractionBase } from "@composableai/client";
 import { ExecutionRun, InteractionExecutionPayload } from "@composableai/common";
 import { useMemo, useState } from "react";
 

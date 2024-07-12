@@ -1,5 +1,5 @@
 import { ActivityFetchSpec } from "@composableai/common";
-import { StudioClient } from "@composableai/studio-client";
+import { StudioClient } from "@composableai/client";
 import { DataProvider } from "./DataProvider.js";
 
 

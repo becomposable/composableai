@@ -1,5 +1,5 @@
 import { ContentObjectStatus, DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
-import { UploadContentObjectPayload } from "@composableai/studio-client";
+import { UploadContentObjectPayload } from "@composableai/client";
 import { log } from "@temporalio/activity";
 import { setupActivity } from "../../dsl/setup/ActivityContext.js";
 import { ActivityParamNotFound, NoDocumentFound } from "../../errors.js";

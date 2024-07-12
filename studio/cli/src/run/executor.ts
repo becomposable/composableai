@@ -1,4 +1,4 @@
-import { StudioClient } from "@composableai/studio-client";
+import { StudioClient } from "@composableai/client";
 import { ExecutionRun } from "@composableai/common";
 
 export class ExecutionQueue {

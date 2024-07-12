@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@composableai/cloud-client": "^0.28.0",
-    "@composableai/studio-client": "^0.28.0",
+    "@composableai/client": "^0.28.0",
     "@composableai/common": "^0.28.0",
     "@composableai/zeno-blobs": "^0.28.0",
     "@opendocsg/pdf2md": "^0.1.29",

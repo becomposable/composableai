@@ -1,5 +1,5 @@
 import { DSLActivityExecutionPayload, DSLActivitySpec, ExecutionRun, ExecutionRunStatus, InteractionExecutionConfiguration } from "@composableai/common";
-import { StudioClient } from "@composableai/studio-client";
+import { StudioClient } from "@composableai/client";
 import { activityInfo, log } from "@temporalio/activity";
 import { projectResult } from "../dsl/projections.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";

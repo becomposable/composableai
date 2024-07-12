@@ -3,7 +3,7 @@
  */
 
 import { WorkflowExecutionPayload } from "@composableai/common";
-import { StudioClient } from "@composableai/studio-client";
+import { StudioClient } from "@composableai/client";
 
 
 export function getClient(payload: WorkflowExecutionPayload) {

@@ -1,5 +1,5 @@
 import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
-import { StudioClient } from "@composableai/studio-client";
+import { StudioClient } from "@composableai/client";
 import { md5 } from '@composableai/zeno-blobs';
 import { EmbeddingsResult } from "@llumiverse/core";
 import { log } from "@temporalio/activity";

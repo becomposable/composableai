@@ -30,7 +30,7 @@
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
     },
     "dependencies": {
-        "@composableai/studio-client": "^0.28.0",
+        "@composableai/client": "^0.28.0",
         "@composableai/common": "^0.28.0",
         "@composableai/workflow": "^0.28.0",
         "ansi-colors": "^4.1.3",

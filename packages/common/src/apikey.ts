@@ -15,6 +15,8 @@ export interface ApiKey {
     account: string; // the account id
     project: string; // the project id if any
     enabled: boolean;
+    created_by: string,
+    updated_by: string,
     created_at: Date;
     updated_at: Date;
     expires_at?: Date; // in case of public key only
@@ -47,7 +49,7 @@ export interface AuthTokenPayload {
     picture?: string;
 
     type: PrincipalType
-    account:  AccountRef;
+    account: AccountRef;
     accounts: AccountRef[];
     project?: ProjectRef;
     projects: ProjectRef[];

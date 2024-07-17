@@ -73,6 +73,8 @@ export interface PromptTemplate {
     tags?: string[];
     // only for drafts - when it was last published
     last_published_at?: Date;
+    created_by: string,
+    updated_by: string,
     created_at: Date;
     updated_at: Date;
 }

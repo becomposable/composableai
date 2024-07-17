@@ -21,6 +21,8 @@ export interface TrainingSession {
     runs: string[],
     dataset: string, //the name of the file dataset which was generated in GCS
     job: TrainingJob,
+    created_by: string,
+    updated_by: string,
     created_at: Date,
     updated_at: Date,
 }

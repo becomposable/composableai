@@ -9,7 +9,7 @@ export enum ProjectRoles {
     application = "application", // executor + request_pk
     executor = "executor", // can only read and execute interactions
     reader = "reader", // can only read (browse)
-    billing = "billing", // can only manage billings  
+    billing = "billing", // can only manage billings
 }
 
 export function isRoleIncludedIn(role: string, includingRole: string) {
@@ -56,6 +56,8 @@ export interface Project {
     description?: string;
     account: string;
     configuration: ProjectConfiguration;
+    created_by: string,
+    updated_by: string,
     created_at: Date;
     updated_at: Date;
 }

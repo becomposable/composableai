@@ -28,7 +28,6 @@ export const UserRefPopulate = "id name email picture";
 export interface Account {
     id: string;
     name: string;
-    owner: string;
 
     email_domains: string[];
     members: {
@@ -41,7 +40,8 @@ export interface Account {
         completed_at: Date,
     };
 
-
+    created_by: string,
+    updated_by: string,
     created_at: string;
     updated_at: string;
 }

@@ -95,6 +95,8 @@ export interface Interaction {
     project: string | ProjectRef;
     // only for drafts - when it was last published
     last_published_at?: Date;
+    created_by: string,
+    updated_by: string,
     created_at: Date;
     updated_at: Date;
 }
@@ -200,6 +202,8 @@ export interface ExecutionRun<P = any, R = any> {
     config: InteractionExecutionConfiguration;
     error?: InteractionExecutionError;
     source: RunSource;
+    created_by: string,
+    updated_by: string,
 }
 
 export interface ExecutionRunRef

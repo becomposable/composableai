@@ -1,54 +1,54 @@
-import { Bucket, File, Storage } from '@google-cloud/storage';
-import { AbstractBlob, FileStorage } from './storage.js';
+import { Bucket as GBucket, File as GFile, Storage as GStorage } from '@google-cloud/storage';
+import { AbstractBlob, Blob, BlobStorage, Bucket, CreateBucketOptions } from './storage.js';
 
 
-export class GoogleFileStorage implements FileStorage {
-    readonly name: string = "GoogleCloudStorage";
-    storage: Storage;
-    bucket: Bucket;
-
-    constructor(bucketName: string) {
-        this.storage = new Storage();
-        this.bucket = this.storage.bucket(bucketName);
+export class GoogleStorage implements BlobStorage {
+    storage: GStorage;
+    scheme = "gs";
+    constructor() {
+        this.storage = new GStorage();
     }
 
-    validateUri(uri: string): boolean {
-
-        if (!uri.startsWith("gs://")) {
-            return false;
-        }
-
-        const path = uri.substring(5);
-        const i = path.indexOf("/");
-        if (i < 0) {
-            return false;
-        }
-
-        return true;
+    bucket(name: string) {
+        return new GoogleBucket(this.storage, name);
     }
 
-    async resolve(uri: string): Promise<GoogleBlob> {
-        if (!this.validateUri(uri)) {
-            throw new Error(`Invalid file URI for ${this.name}: ${uri}`);
-        }
-
-        const path = uri.substring(5);
-        const i = path.indexOf("/");
-        const bucket = path.substring(0, i);
-        const file = path.substring(i + 1);
-        return new GoogleBlob(this.storage.bucket(bucket).file(file));
-    }
-
-    async getByPath(name: string): Promise<GoogleBlob> {
-        return new GoogleBlob(this.bucket.file(name));
-    }
 }
 
+export class GoogleBucket implements Bucket {
+    bucket: GBucket;
+    constructor(public storage: GStorage, name: string) {
+        this.bucket = this.storage.bucket(name);
+    }
+    get name() {
+        return this.bucket.name;
+    }
+    get uri() {
+        return `gs://${this.name}`;
+    }
+    async file(name: string): Promise<Blob> {
+        if (!name) throw new Error(`Invalid file URI: ${this.uri}/. Trying to get a file with no name`);
+        return new GoogleBlob(this.bucket.file(name));
+    }
+    exists(): Promise<boolean> {
+        return this.bucket.exists().then(r => r[0]);
+    }
+    async create(opts?: CreateBucketOptions): Promise<void> {
+        const cors = opts?.cors;
+        await this.bucket.create({
+            cors: cors ? [cors] : undefined
+        });
+        if (cors) {
+            // set cors if needed
+            await this.bucket.setCorsConfiguration([cors]);
+        }
+    }
+}
 export class GoogleBlob extends AbstractBlob {
 
-    file: File;
+    file: GFile;
 
-    constructor(file: File) {
+    constructor(file: GFile) {
         super();
         this.file = file;
     }
@@ -95,6 +95,15 @@ export class GoogleBlob extends AbstractBlob {
 
     getPublicUrl(): Promise<string> {
         return Promise.resolve(`https://storage.googleapis.com/storage/v1/${this.file.bucket.name}/${this.file.name}`);
+    }
+
+    async setFileNameAndType(fileName?: string, mimeType?: string) {
+        if (mimeType || fileName) {
+            await this.file.setMetadata({
+                contentType: mimeType,
+                contentDisposition: fileName ? `attachment; filename="${fileName}"` : undefined,
+            });
+        }
     }
 
     async setContentDisposition(value: string) {

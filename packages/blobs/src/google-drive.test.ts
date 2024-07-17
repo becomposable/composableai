@@ -1,12 +1,13 @@
 import { expect, test, describe } from 'vitest';
-import { GoogleDriveFileStorage, defaultTargetServiceAccount } from './google-drive';
-
+import { GoogleDriveStorage, defaultTargetServiceAccount } from './google-drive.js';
+import { Blobs } from './index.js';
 
 describe('GoogleDriveFileStorage', async () => {
-    const fileStorage = await GoogleDriveFileStorage.connectImpersonated();
+    const fileStorage = await GoogleDriveStorage.connectImpersonated();
 
     test("Fetch test.txt file", async () => {
-        const blob = await fileStorage.resolve("gdrive://1dZixEpTEjD7FAMitgyEa6QtBnSF0C_cA");
+        //const blob = await fileStorage.resolve("gdrive://1dZixEpTEjD7FAMitgyEa6QtBnSF0C_cA");
+        const blob = await Blobs.getFile("gdrive://1dZixEpTEjD7FAMitgyEa6QtBnSF0C_cA");
         const itExists = await blob.exists();
         expect(itExists).toBe(true);
 
@@ -15,7 +16,8 @@ describe('GoogleDriveFileStorage', async () => {
     });
 
     test("Fetch inexistent file", async () => {
-        const blob = await fileStorage.resolve("gdrive://1dZixEpTEjD7FAMitgyEa6QtBnSF0C_FAKE");
+        //const blob = await fileStorage.resolve("gdrive://1dZixEpTEjD7FAMitgyEa6QtBnSF0C_FAKE");
+        const blob = await Blobs.getFile("gdrive://1dZixEpTEjD7FAMitgyEa6QtBnSF0C_FAKE");
         const itExists = await blob.exists();
         expect(itExists).toBe(false);
 

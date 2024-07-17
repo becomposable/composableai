@@ -2,6 +2,7 @@ import fs from "fs";
 import { Readable } from "stream";
 import { UnsupportedBlobOperationError } from "./UnsupportedOperationError.js";
 
+
 interface WriteStreamOptions {
     flags?: string | undefined;
     encoding?: BufferEncoding | undefined;
@@ -14,14 +15,10 @@ interface WriteStreamOptions {
     highWaterMark?: number | undefined;
     flush?: boolean | undefined;
 }
-export interface FileStorage {
 
-    validateUri(uri: string): boolean;
-
-    resolve(uri: string): Promise<Blob>;
-
-    getByPath(name: string): Promise<Blob>;
-
+export interface BlobStorage {
+    scheme: string;
+    bucket(name: string): Bucket;
 }
 
 export interface Blob {
@@ -39,9 +36,26 @@ export interface Blob {
     saveToFile(file: string, options?: BufferEncoding | WriteStreamOptions | undefined): Promise<fs.WriteStream>;
     // writable methods
     getUploadUrl(opts?: { mimeType?: string | undefined; ttl?: number | undefined; } | undefined): Promise<string>;
-    setContentDisposition(value: string): Promise<void>;
+    setFileNameAndType(fileName?: string, mimeType?: string): Promise<void>;
     setMetadata(meta: Record<string, any>): Promise<void>;
     delete(): Promise<void>;
+}
+
+export interface CreateBucketOptions {
+    // if defined it will set an origin policy for the bucket
+    cors?: {
+        origin?: string[],
+        method?: string[],
+        responseHeader?: string[],
+        maxAgeSeconds?: number
+    }
+}
+
+export interface Bucket {
+    name: string;
+    file(name: string): Promise<Blob>;
+    exists(): Promise<boolean>;
+    create(opts?: CreateBucketOptions): Promise<void>;
 }
 
 export abstract class AbstractBlob implements Blob {
@@ -79,7 +93,7 @@ export abstract class AbstractBlob implements Blob {
     }
     //writeable methods
     abstract getUploadUrl(opts?: { mimeType?: string | undefined; ttl?: number | undefined; } | undefined): Promise<string>;
-    abstract setContentDisposition(value: string): Promise<void>;
+    abstract setFileNameAndType(fileName?: string, mimeType?: string): Promise<void>;
     abstract setMetadata(meta: Record<string, any>): Promise<void>;
     abstract delete(): Promise<void>;
 
@@ -90,7 +104,7 @@ export abstract class AbstractReadableBlob extends AbstractBlob {
     getUploadUrl(): Promise<string> {
         throw new UnsupportedBlobOperationError("getUploadUrl");
     }
-    setContentDisposition(): Promise<void> {
+    setFileNameAndType(): Promise<void> {
         throw new UnsupportedBlobOperationError("setContentDisposition");
     }
     setMetadata(): Promise<void> {

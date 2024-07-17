@@ -1,4 +1,4 @@
-import { AuthTokenPayload } from '@composableai/common';
+import { AuthTokenPayload, ProjectRef } from '@composableai/common';
 import jwt from 'jsonwebtoken';
 import { VaultClient } from './vault.js';
 
@@ -18,6 +18,34 @@ export async function verifyAuthToken(token: string): Promise<AuthTokenPayload> 
     return getCertificate().then(key => jwt.verify(token, key, { algorithms: ['RS256'] }) as AuthTokenPayload);
 }
 
+export function decodeAuthToken(token: string): AuthTokenPayload {
+    return jwt.decode(token, { json: true }) as AuthTokenPayload;
+}
+
+export function getProjectFromToken(token: string): ProjectRef | undefined {
+    return decodeAuthToken(token)?.project;
+}
+
+export function getTenantIdFromToken(token: string): string | undefined {
+    const project = getProjectFromToken(token);
+    if (project) {
+        return getTenantIdFromProject(project);
+    } else {
+        return undefined;
+    }
+}
+
+export function getTenantIdFromProject(project: ProjectRef): string {
+    return getTenantId(project.account, project.id);
+}
+
+export function getTenantId(accountId: string, projectId: string): string {
+    //use the last 6 characters of the accountId as the db name
+    //as in mongo the last 6 char are an incrementing counter
+    const accountLast6 = accountId.slice(-6);
+    const projectLast6 = projectId.slice(-6);
+    return accountLast6 + '_' + projectLast6;
+}
 
 export async function getSigningKey() {
 

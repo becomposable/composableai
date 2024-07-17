@@ -1,8 +1,7 @@
 import { Auth, drive_v3 } from 'googleapis';
-import { basename } from "path";
 import { Readable } from 'stream';
 import { UnsupportedBlobOperationError } from './UnsupportedOperationError.js';
-import { AbstractReadableBlob, Blob, FileStorage } from "./storage.js";
+import { AbstractReadableBlob, Blob, Bucket, BlobStorage } from "./storage.js";
 
 export const defaultTargetServiceAccount = 'google-drive-reader@dengenlabs.iam.gserviceaccount.com';
 const defaultScopes = ['https://www.googleapis.com/auth/drive.readonly'];
@@ -27,10 +26,10 @@ export async function getImpersonatedGoogleAuth(
 
 }
 
-export class GoogleDriveFileStorage implements FileStorage {
-    readonly name: string = "GoogleDrive";
-
+export class GoogleDriveStorage implements BlobStorage {
+    scheme = "gdrive";
     drive: drive_v3.Drive;
+
     constructor(driveOrAuth?: drive_v3.Drive | string | Auth.BaseExternalAccountClient | Auth.OAuth2Client | Auth.GoogleAuth | undefined) {
         if (driveOrAuth instanceof drive_v3.Drive) {
             this.drive = driveOrAuth;
@@ -41,57 +40,59 @@ export class GoogleDriveFileStorage implements FileStorage {
         }
     }
 
+    bucket(name: string): Bucket {
+        return new GDriveBucket(this.drive, name);
+    }
+
     static async connectImpersonated(
         targetServiceAccount = 'google-drive-reader@dengenlabs.iam.gserviceaccount.com',
         scopes = ['https://www.googleapis.com/auth/drive.readonly']) {
         console.log("Connecting to google drive as", targetServiceAccount);
         const auth = await getImpersonatedGoogleAuth(targetServiceAccount, scopes);
-        return new GoogleDriveFileStorage(auth);
+        return new GoogleDriveStorage(auth);
     }
 
-    validateUri(uri: string): boolean {
-        return uri.startsWith("gdrive://");
-    }
+}
 
-    async resolve(uri: string): Promise<Blob> {
-        if (!this.validateUri(uri)) {
-            throw new Error(`Invalid file URI for ${this.name}: ${uri}`);
+/**
+ *  A fake bucket since gdrive has no buckets
+*/
+export class GDriveBucket implements Bucket {
+    constructor(public drive: drive_v3.Drive, public name: string) {
+    }
+    async file(name: string): Promise<Blob> {
+        if (name) {
+            throw new Error(`Invalid file uri for google drive: gdrive://${this.name}/${name}`);
         }
-        const fileId = uri.substring(9);
-        if (!fileId) {
-            throw new Error("Invalid google drive URI: " + uri);
-        }
+        const fileId = this.name;
         try {
             const resp = await this.drive.files.get({
                 supportsAllDrives: true,
                 fileId,
                 fields: 'id, name, mimeType, version, webContentLink, createdTime, modifiedTime, description, md5Checksum, originalFilename',
             });
-            return new GoogleDriveBlob(this, resp.data);
+            return new GoogleDriveBlob(this.drive, resp.data);
         } catch (err: any) {
             console.log("Error fetching file", err);
             if (err.code === 404) {
-                return new GoogleDriveMissingBlob(this, fileId, uri);
+                return new GoogleDriveMissingBlob(this.drive, name);
             } else {
                 throw err;
             }
         }
-    }
 
-    async getByPath(path: string): Promise<Blob> {
-        let url;
-        if (path.startsWith('/')) {
-            url = "https://drive.google.com" + path;
-        } else {
-            url = "https://drive.google.com/" + path
-        }
-        return this.resolve(url);
+    }
+    async exists(): Promise<boolean> {
+        return true;
+    }
+    async create(): Promise<void> {
+        // do nothing
     }
 }
 
 export class GoogleDriveBlob extends AbstractReadableBlob {
 
-    constructor(public storage: GoogleDriveFileStorage, public file: drive_v3.Schema$File) {
+    constructor(public drive: drive_v3.Drive, public file: drive_v3.Schema$File) {
         super();
     }
 
@@ -146,7 +147,7 @@ export class GoogleDriveBlob extends AbstractReadableBlob {
 
         //if document, we are going to download a word representation
         if (this.file.mimeType === 'application/vnd.google-apps.document') {
-            const r = await this.storage.drive.files.export({
+            const r = await this.drive.files.export({
                 fileId: this.id,
                 mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
             }, {
@@ -155,7 +156,7 @@ export class GoogleDriveBlob extends AbstractReadableBlob {
             return r.data;
         }
 
-        const r = await this.storage.drive.files.get({
+        const r = await this.drive.files.get({
             supportsAllDrives: true,
             fileId: this.id,
             alt: 'media'
@@ -169,12 +170,12 @@ export class GoogleDriveBlob extends AbstractReadableBlob {
 
 
 export class GoogleDriveMissingBlob extends AbstractReadableBlob {
-    constructor(public storage: GoogleDriveFileStorage, public id: string, public uri: string) {
+    constructor(public drive: drive_v3.Drive, public id: string) {
         super();
     }
 
     get name() {
-        return basename(this.uri);
+        return this.id;
     }
     get metadata() {
         return {};
@@ -186,6 +187,10 @@ export class GoogleDriveMissingBlob extends AbstractReadableBlob {
 
     get md5Hash() {
         return undefined;
+    }
+
+    get uri() {
+        return `gdrive://${this.id}`;
     }
 
     getDownloadUrl(): Promise<string> {

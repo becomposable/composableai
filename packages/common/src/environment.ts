@@ -181,11 +181,13 @@ export interface ExecutionEnvironmentRef {
     endpoint_url?: string;
     allowed_projects?: string[];
     account: string;
+    created_by: string;
+    updated_by: string;
     created_at: string;
     updated_at: string;
 }
 
 export const ExecutionEnvironmentRefPopulate = "id name provider enabled_models default_model endpoint_url allowed_projects account created_at updated_at";
 
-export interface ExecutionEnvironmentCreatePayload extends Omit<ExecutionEnvironment, 'id' | 'account' | 'created_at' | 'updated_at' | 'project'> { }
-export interface ExecutionEnvironmentUpdatePayload extends Partial<Omit<ExecutionEnvironment, 'id' | 'account' | 'created_at' | 'updated_at'>> { }
+export interface ExecutionEnvironmentCreatePayload extends Omit<ExecutionEnvironment, 'id' | 'account' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by' | 'project'> { }
+export interface ExecutionEnvironmentUpdatePayload extends Partial<Omit<ExecutionEnvironment, 'id' | 'account' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by'>> { }

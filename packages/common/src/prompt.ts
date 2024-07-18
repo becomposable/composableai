@@ -82,10 +82,10 @@ export interface PromptTemplate {
 export interface PromptTemplateCreatePayload
     extends Omit<
         PromptTemplate,
-        "id" | "created_at" | "updated_at" | "project" | "status" | "version"
+        "id" | "created_at" | "updated_at" | "created_by" | "updated_by" | "project" | "status" | "version"
     > { }
 
 export interface PromptTemplateUpdatePayload
     extends Partial<
-        Omit<PromptTemplate, "id" | "created_at" | "updated_at" | "project">
+        Omit<PromptTemplate, "id" | "created_at" | "updated_at" | "created_by" | "updated_by" | "project">
     > { }

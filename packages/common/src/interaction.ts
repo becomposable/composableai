@@ -109,7 +109,7 @@ export interface PopulatedInteraction
 export interface InteractionCreatePayload
     extends Omit<
         Interaction,
-        "id" | "created_at" | "updated_at" | "project" | "formatter" | "tags" | "parent" | "version" | "visibility" | "endpoint"
+        "id" | "created_at" | "updated_at" | "created_by" | "updated_by" | "project" | "formatter" | "tags" | "parent" | "version" | "visibility" | "endpoint"
     > {
     visibility?: InteractionVisibility;
 }
@@ -118,7 +118,7 @@ export interface InteractionUpdatePayload
     extends Partial<
         Omit<
             Interaction,
-            "result_schema" | "id" | "created_at" | "updated_at" | "project"
+            "result_schema" | "id" | "created_at" | "updated_at" | "created_by" | "updated_by" | "project"
         >
     > {
     result_schema?: JSONSchema4 | null;

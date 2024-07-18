@@ -9,8 +9,9 @@ import InteractionsApi from "./InteractionsApi.js";
 import ProjectsApi from "./ProjectsApi.js";
 import PromptsApi from "./PromptsApi.js";
 import { RunsApi } from "./RunsApi.js";
-import TrainingApi from "./TrainingApi.js";
 import { ZenoClient } from "./store/client.js";
+import TrainingApi from "./TrainingApi.js";
+import UsersApi from "./UsersApi.js";
 
 export interface StudioClientProps {
     serverUrl: string;
@@ -139,5 +140,5 @@ export class StudioClient extends AbstractFetchClient<StudioClient> {
     apikeys = new ApiKeysApi(this);
     analytics = new AnalyticsApi(this);
     training = new TrainingApi(this);
-
+    users = new UsersApi(this);
 }

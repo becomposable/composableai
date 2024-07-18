@@ -46,7 +46,6 @@ export interface ContentObjectItem<T = any> extends BaseObject {
     parent: string; // the id of the direct parent object. The root object doesn't have the parent field set.
     location: string; // the path of the parent object
     status: ContentObjectStatus;
-    owner: string;
     // A ref to the object type
     type?: ContentObjectTypeRef;
     // the content source URL and type
@@ -131,14 +130,8 @@ export interface ContentObjectType extends ContentObjectTypeItem {
     object_schema?: Record<string, any>; // an optional JSON schema for the object properties.
     table_layout?: ColumnLayout[]; // an optional table layout for the object properties.
 }
-export interface ContentObjectTypeItem {
-    id: string;
-    name: string;
-    description?: string;
-    owner: string;
+export interface ContentObjectTypeItem extends BaseObject {
     is_chunkable?: boolean;
-    created_at: string;
-    updated_at: string;
 }
 /**
  * Used to list types with their table layout if any
@@ -150,7 +143,7 @@ export interface ContentObjectTypeLayout {
     table_layout?: ColumnLayout[];
 }
 
-export interface CreateContentObjectTypePayload extends Omit<ContentObjectType, 'id' | 'created_at' | 'updated_at' | 'owner'> {
+export interface CreateContentObjectTypePayload extends Omit<ContentObjectType, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by'> {
 }
 
 export enum WorkflowRuleInputType {
@@ -161,7 +154,6 @@ export enum WorkflowRuleInputType {
 export interface WorkflowRuleItem extends BaseObject {
     // the name of the workflow function
     endpoint: string;
-    owner: string;
     input_type: WorkflowRuleInputType;
 }
 export interface WorkflowRule extends WorkflowRuleItem {

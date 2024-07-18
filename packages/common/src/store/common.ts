@@ -3,6 +3,8 @@ export interface BaseObject {
     name: string;
     description?: string;
     tags?: string[];
-    created_at: Date;
-    updated_at: Date;
+    updated_by: string;
+    created_by: string;
+    created_at: string;
+    updated_at: string;
 }

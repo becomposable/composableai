@@ -1,5 +1,5 @@
 import { Bucket as GBucket, File as GFile, Storage as GStorage } from '@google-cloud/storage';
-import { AbstractBlob, Blob, BlobStorage, Bucket, CreateBucketOptions } from './storage.js';
+import { AbstractBlob, Blob, BlobStorage, Bucket, CreateBucketOptions, getContentDispositionType } from './storage.js';
 
 
 export class GoogleStorage implements BlobStorage {
@@ -108,9 +108,10 @@ export class GoogleBlob extends AbstractBlob {
 
     async setFileNameAndType(fileName?: string, mimeType?: string) {
         if (mimeType || fileName) {
+            const type = getContentDispositionType(mimeType);
             await this.file.setMetadata({
                 contentType: mimeType,
-                contentDisposition: fileName ? `attachment; filename="${fileName}"` : undefined,
+                contentDisposition: fileName ? `${type}; filename="${fileName}"` : undefined,
             });
         }
     }

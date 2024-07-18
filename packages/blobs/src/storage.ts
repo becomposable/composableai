@@ -2,6 +2,19 @@ import fs from "fs";
 import { Readable } from "stream";
 import { UnsupportedBlobOperationError } from "./UnsupportedOperationError.js";
 
+const INLINE_MIME_TYPES = new Set([
+    "application/json",
+    "application/xml",
+    "application/pdf",
+]);
+
+export function getContentDispositionType(mimeType: string | undefined) {
+    if (!mimeType) return "attachment";
+    if (mimeType.startsWith("text/")
+        || mimeType.startsWith("image/")
+        || INLINE_MIME_TYPES.has(mimeType)) return "inline";
+    return "attachment";
+}
 
 interface WriteStreamOptions {
     flags?: string | undefined;

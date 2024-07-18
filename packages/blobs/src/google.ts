@@ -38,12 +38,21 @@ export class GoogleBucket implements Bucket {
         await this.bucket.create({
             cors: cors ? [cors] : undefined
         });
+        // enable uniformBucketLevelAccess for the worker auth to work
+        await this.bucket.setMetadata({
+            iamConfiguration: {
+                uniformBucketLevelAccess: {
+                    enabled: true,
+                },
+            },
+        });
         if (cors) {
             // set cors if needed
             await this.bucket.setCorsConfiguration([cors]);
         }
     }
 }
+
 export class GoogleBlob extends AbstractBlob {
 
     file: GFile;

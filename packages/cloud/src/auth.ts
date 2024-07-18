@@ -1,4 +1,4 @@
-import { getTenantId, AuthTokenPayload, ProjectRef } from '@composableai/common';
+import { AuthTokenPayload, ProjectRef, getTenantIdFromProject } from '@composableai/common';
 import jwt from 'jsonwebtoken';
 import { VaultClient } from './vault.js';
 
@@ -33,10 +33,6 @@ export function getTenantIdFromToken(token: string): string | undefined {
     } else {
         return undefined;
     }
-}
-
-export function getTenantIdFromProject(project: ProjectRef): string {
-    return getTenantId(project.account, project.id);
 }
 
 export async function getSigningKey() {

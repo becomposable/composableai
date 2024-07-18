@@ -13,4 +13,5 @@ export * from "./store/index.js";
 export * from "./training.js";
 export * from './transient-tokens.js';
 export * from './user.js';
-export * from './utils/index.js';
+export * from './utils/auth.js';
+export * from './utils/schemas.js';

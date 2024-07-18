@@ -40,5 +40,9 @@
     "lib",
     "test"
   ],
-  "references": []
+  "references": [
+    {
+      "path": "../common/tsconfig.json"
+    }
+  ]
 }

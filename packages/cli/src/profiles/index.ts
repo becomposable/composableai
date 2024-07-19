@@ -14,17 +14,17 @@ export function getConfigFile(path?: string) {
     }
 }
 
-export type ConfigUrlRef = "local" | "dev" | "staging" | "prod" | string;
+export type ConfigUrlRef = "local" | "staging" | "preview" | "prod" | string;
 export function getConfigUrl(value: ConfigUrlRef) {
     switch (value) {
         case "local":
             return "https://localhost:5173/cli";
-        case "dev":
-            return "https://console.composableprompts.dev/cli";
         case "staging":
-            throw new Error("Staging env. not yet supported");
+            return "https://staging.cloud.becomposable.com/cli";
+        case "preview":
+            return "https://preview.cloud.becomposable.com/cli";
         case "prod":
-            return "https://console.composableprompts.com/cli";
+            return "https://cloud.becomposable.com/cli";
         default:
             if (value.startsWith("http://") || value.startsWith("https://")) {
                 return value;

@@ -81,8 +81,8 @@ export async function createProfile(name?: string, target?: string) {
             type: 'select',
             name: 'target',
             message: "Target environment",
-            choices: ['local', 'dev', 'staging (not yet impl)', 'prod', 'custom'],
-            initial: 'dev',
+            choices: ['local', 'staging', 'preview', 'prod', 'custom'],
+            initial: 'staging',
         });
     }
 

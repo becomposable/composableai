@@ -1,8 +1,9 @@
 
+// this is the mongo definition of a facet. see https://www.mongodb.com/docs/atlas/atlas-search/facet/
 export interface StringFacet {
     type: "string",
     path: string,
-    num_buckets?: number,
+    numBuckets?: number,
 }
 
 export interface NumericFacet {

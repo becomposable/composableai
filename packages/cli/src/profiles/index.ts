@@ -6,7 +6,7 @@ import { ConfigPayload, ConfigResult, startConfigSession } from "./server/index.
 
 
 export function getConfigFile(path?: string) {
-    const dir = join(os.homedir(), '.cpcli');
+    const dir = join(os.homedir(), '.composable');
     if (!path || path === '/') {
         return dir;
     } else {

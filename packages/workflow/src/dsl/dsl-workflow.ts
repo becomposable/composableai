@@ -8,7 +8,7 @@ interface BaseActivityPayload extends WorkflowExecutionPayload {
     debug_mode?: boolean;
 }
 
-export function dslActivityPayload(basePayload: BaseActivityPayload, activity: DSLActivitySpec, params: Record<string, any> = {}) {
+function dslActivityPayload(basePayload: BaseActivityPayload, activity: DSLActivitySpec, params: Record<string, any> = {}) {
     return {
         ...basePayload,
         activity,

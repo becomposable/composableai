@@ -47,8 +47,8 @@
     "exports": {
       "activities": "./activities",
       "workflows": "./workflows",
-      "vars": "./vars",
-      "dsl-workflow": "./dsl-workflow"
+      "workflows-bundle": "./workflows-bundle.js",
+      "vars": "./vars"
     }
   },
   "exports": {
@@ -67,12 +67,12 @@
       "import": "./lib/esm/activities/index.js",
       "require": "./lib/cjs/activities/index.js"
     },
-    "./dsl-workflow": {
-      "types": "./lib/types/dsl/dsl-workflow.d.ts",
-      "import": "./lib/esm/dsl/dsl-workflow.js",
-      "require": "./lib/cjs/dsl/dsl-workflow.js"
-    },
     "./workflows": {
+      "types": "./lib/types/workflows.d.ts",
+      "import": "./lib/esm/workflows.js",
+      "require": "./lib/cjs/workflows.js"
+    },
+    "./workflows-bundle": {
       "import": "./lib/workflows-bundle.js"
     }
   },
@@ -82,8 +82,11 @@
       "activities": [
         "./lib/types/activities/index.d.ts"
       ],
-      "dsl-workflow": [
-        "./lib/types/dsl/dsl-workflow.d.ts"
+      "workflows": [
+        "./lib/types/workflows.d.ts"
+      ],
+      "vars": [
+        "./lib/types/dsl/vars.d.ts"
       ]
     }
   }

@@ -1,6 +1,6 @@
-import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
-import { StudioClient } from "@composableai/client";
 import { md5 } from '@composableai/blobs';
+import { StudioClient } from "@composableai/client";
+import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
 import { EmbeddingsResult } from "@llumiverse/core";
 import { log } from "@temporalio/activity";
 import * as tf from '@tensorflow/tfjs-node';
@@ -147,9 +147,8 @@ async function generateEmbeddingsFromStudio(text: string, env: string, client: S
 
     return client.environments.embeddings(env, {
         content: text,
-        model: "amazon.titan-embed-text-v2:0"
     }).then(res => res).catch(e => {
-        log.error('Error generating embeddings for text', e)
+        log.error('Error generating embeddings for text', { error: e })
         throw e;
     });
 

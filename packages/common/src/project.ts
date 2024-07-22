@@ -46,8 +46,18 @@ export interface ProjectConfiguration {
 
     default_environment?: string;
     default_model?: string;
-    default_visibility: ResourceVisibility;
 
+    generate_embeddings: boolean;
+
+    embeddings?: ProjectConfigurationEmbeddings
+
+}
+
+export interface ProjectConfigurationEmbeddings {
+        environment: string;
+        max_tokens: number;
+        dimensions: number;
+        model?: string;
 }
 
 export interface Project {
@@ -67,9 +77,17 @@ export interface ProjectCreatePayload {
     description?: string;
 }
 
-export interface ProjectUpdatePayload {
-    name?: string;
-    description?: string;
-}
+export interface ProjectUpdatePayload extends Partial<Project> { }
+
 
 export const ProjectRefPopulate = "id name account";
+
+
+export interface EmbeddingsStatusResponse {
+    status: string;
+    embeddingRunsInProgress: number;
+    totalRunsInProgress: number;
+    totalIndexableObjects: number;
+    embeddingsModels: string[];
+    objectsWithEmbeddings: number;
+}

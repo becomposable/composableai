@@ -3,3 +3,11 @@ export interface FindPayload {
     limit?: number;
     select?: string;
 }
+
+
+export interface GenericCommandResponse {
+    status: string;
+    message: string;
+    err?: any;
+    details?: any;
+}

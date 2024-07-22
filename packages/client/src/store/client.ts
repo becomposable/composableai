@@ -1,8 +1,9 @@
 import { AbstractFetchClient, RequestError } from "api-fetch-client";
+import { CommandsApi } from "./CommandsApi.js";
+import { ZenoClientNotFoundError } from "./errors.js";
 import { ObjectsApi } from "./ObjectsApi.js";
 import { TypesApi } from "./TypesApi.js";
 import { WorkflowsApi } from "./WorkflowsApi.js";
-import { ZenoClientNotFoundError } from "./errors.js";
 
 export interface ZenoClientProps {
     serverUrl?: string;
@@ -47,4 +48,5 @@ export class ZenoClient extends AbstractFetchClient<ZenoClient> {
     objects = new ObjectsApi(this);
     types = new TypesApi(this);
     workflows = new WorkflowsApi(this);
+    commands = new CommandsApi(this);
 }

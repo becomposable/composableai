@@ -5,6 +5,7 @@ import { EmbeddingsResult } from "@llumiverse/core";
 import { log } from "@temporalio/activity";
 import * as tf from '@tensorflow/tfjs-node';
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
+import { NoDocumentFound } from '../errors.js';
 import { countTokens } from "../utils/tokens.js";
 
 
@@ -22,13 +23,23 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
     const { params, client, objectId, fetchProject } = await setupActivity<GenerateEmbeddingsParams>(payload);
     const force = params.force;
     const projectData = await fetchProject();
+    const embeddingsConfig = projectData?.configuration.embeddings;
+    const maxTokens = embeddingsConfig?.max_tokens ?? 4000;
 
-    log.info(`Object ${objectId} embedding generation starting`);
+    if (!projectData) {
+        throw new NoDocumentFound('Project not found', [payload.project_id]);
+    }
 
-    const env = params.environment ?? projectData?.configuration.default_environment;
+    if (!projectData?.configuration.generate_embeddings) {
+        log.info(`Embeddings generation disabled for project: ${projectData?.id}`);
+        return { id: objectId, status: "skipped", message: "Embeddings generation is disabled (generated_embeddings is false)" }
+    }
+
+    log.info(`Object ${objectId} embedding generation starting`, { force, config: embeddingsConfig });
+
+    const env = embeddingsConfig?.environment;
     if (!env) {
-        log.error('No environment ID provided');
-        return { id: objectId, status: "failed", message: "no environment ID" }
+        throw new Error('No environment found in project configuration. Set environment in project configuration to generate embeddings.');
     }
 
     const document = await client.objects.retrieve(objectId, "+text +parts +embedding +tokens");
@@ -61,7 +72,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
     //if too large, we'll just generate embeddings for the parts
     //then we can generate embeddings for the main document by averaging the tensors
     log.info(`Generating embeddings for document ${objectId} - ${document.tokens?.count} tokens - ${document.text.length} chars`);
-    if (document.tokens?.count && document.tokens.count > 7000) {
+    if (document.tokens?.count && document.tokens.count > maxTokens) {
         log.info('Document too large, generating embeddings for parts');
 
         if (!document.parts || document.parts.length === 0) {

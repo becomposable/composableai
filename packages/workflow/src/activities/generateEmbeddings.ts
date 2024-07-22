@@ -58,7 +58,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
 
     // Count tokens if not already done
     if (!document.tokens?.count) {
-        log.warn('Updating token count for document: ' + objectId);
+        log.debug('Updating token count for document: ' + objectId);
         const tokensData = countTokens(document.text);
         await client.objects.update(document.id, {
             tokens: {
@@ -66,6 +66,10 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
                 etag: document.text_etag ?? md5(document.text)
             }
         });
+        document.tokens = {
+            ...tokensData,
+            etag: document.text_etag ?? md5(document.text)
+        };
     }
 
     //generate embeddings for the main doc if document isn't too large
@@ -83,8 +87,14 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
 
         const res = await Promise.all(docParts.map(async (part, i) => {
             if (!part.text) {
-                return { id: part.id, number: i, result: null }
+                return { id: part.id, number: i, result: null, message: "no text found"}
             }
+
+            if (part.tokens?.count && part.tokens.count > maxTokens) {
+                log.info('Part too large, skipping embeddings generation for part', { part: part.id, tokens: part.tokens.count });
+                return { id: part.id, number: i, result: null, message: "part too large" }
+            }
+
 
             if (!force && part.embedding?.etag === (part.text_etag ?? md5(part.text))) {
                 return { id: part.id, number: i, result: part.embedding }
@@ -96,7 +106,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
             });
 
             if (!e || !e.values) {
-                return { id: part.id, number: i, result: null }
+                return { id: part.id, number: i, result: null, message: "no embeddings generated" }
             }
 
             const updated = await client.objects.update(part.id, {

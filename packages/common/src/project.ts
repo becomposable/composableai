@@ -90,4 +90,5 @@ export interface EmbeddingsStatusResponse {
     totalIndexableObjects: number;
     embeddingsModels: string[];
     objectsWithEmbeddings: number;
+    [string: string]: any;
 }

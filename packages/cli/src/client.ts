@@ -1,9 +1,9 @@
-import { StudioClient } from "@composableai/client";
+import { ComposableClient } from "@composableai/client";
 import { Command } from "commander";
 import { config } from "./profiles/index.js";
 
 
-let _client: StudioClient | undefined;
+let _client: ComposableClient | undefined;
 export function getClient(program: Command) {
     if (!_client) {
         _client = createClient(program);
@@ -22,6 +22,6 @@ function createClient(_program: Command) {
         sessionTags: profile?.session_tags ? profile.session_tags.split(/\s*,\s*/) : 'cli',
     }
 
-    return new StudioClient(env)
+    return new ComposableClient(env)
 
 }

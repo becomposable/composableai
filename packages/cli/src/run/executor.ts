@@ -1,4 +1,4 @@
-import { StudioClient } from "@composableai/client";
+import { ComposableClient } from "@composableai/client";
 import { ExecutionRun } from "@composableai/common";
 
 export class ExecutionQueue {
@@ -32,7 +32,7 @@ export class ExecutionRequest {
     runNumber?: number;
 
     constructor(
-        public readonly client: StudioClient,
+        public readonly client: ComposableClient,
         public interactionId: string,
         public data: any,
         public options: Record<string, any>) {

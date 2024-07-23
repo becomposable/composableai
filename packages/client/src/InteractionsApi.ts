@@ -1,6 +1,6 @@
 import { ExecutionRun, GenerateTestDataPayload, ImprovePromptPayload, Interaction, InteractionCreatePayload, InteractionExecutionPayload, InteractionForkPayload, InteractionPublishPayload, InteractionRef, InteractionRefWithSchema, InteractionUpdatePayload, InteractionsExportPayload } from "@composableai/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
-import { StudioClient } from "./client.js";
+import { ComposableClient } from "./client.js";
 import { executeInteraction, executeInteractionByName } from "./execute.js";
 
 export default class InteractionsApi extends ApiTopic {
@@ -94,7 +94,7 @@ export default class InteractionsApi extends ApiTopic {
      **/
     execute<P = any, R = any>(id: string, payload: InteractionExecutionPayload = {},
         onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
-        return executeInteraction(this.client as StudioClient, id, payload, onChunk);
+        return executeInteraction(this.client as ComposableClient, id, payload, onChunk);
     }
 
     /**
@@ -114,7 +114,7 @@ export default class InteractionsApi extends ApiTopic {
      */
     executeByName<P = any, R = any>(nameWithTag: string, payload: InteractionExecutionPayload = {},
         onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
-        return executeInteractionByName(this.client as StudioClient, nameWithTag, payload, onChunk);
+        return executeInteractionByName(this.client as ComposableClient, nameWithTag, payload, onChunk);
     }
 
     publish(id: string, payload: InteractionPublishPayload): Promise<Interaction> {

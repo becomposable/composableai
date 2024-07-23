@@ -1,5 +1,5 @@
 import { FindPayload } from "@composableai/common";
-import { StudioClient } from "@composableai/client";
+import { ComposableClient } from "@composableai/client";
 import { DataProvider } from "./DataProvider.js";
 
 function useMongoId(query: Record<string, any>) {
@@ -13,7 +13,7 @@ function useMongoId(query: Record<string, any>) {
 
 export class DocumentProvider extends DataProvider {
     static ID = "document";
-    constructor(public client: StudioClient) {
+    constructor(public client: ComposableClient) {
         super(DocumentProvider.ID, true);
     }
 
@@ -24,14 +24,14 @@ export class DocumentProvider extends DataProvider {
         });
     }
 
-    static factory(client: StudioClient) {
+    static factory(client: ComposableClient) {
         return new DocumentProvider(client);
     }
 }
 
 export class DocumentTypeProvider extends DataProvider {
     static ID = "document_type";
-    constructor(public client: StudioClient) {
+    constructor(public client: ComposableClient) {
         super(DocumentTypeProvider.ID, true);
     }
 
@@ -42,14 +42,14 @@ export class DocumentTypeProvider extends DataProvider {
         });
     }
 
-    static factory(client: StudioClient) {
+    static factory(client: ComposableClient) {
         return new DocumentTypeProvider(client);
     }
 }
 
 export class InteractionRunProvider extends DataProvider {
     static ID = "interaction_run";
-    constructor(public client: StudioClient) {
+    constructor(public client: ComposableClient) {
         super(DocumentProvider.ID, true);
     }
 
@@ -60,7 +60,7 @@ export class InteractionRunProvider extends DataProvider {
         });
     }
 
-    static factory(client: StudioClient) {
+    static factory(client: ComposableClient) {
         return new InteractionRunProvider(client);
     }
 

@@ -1,15 +1,15 @@
 import { ExecutionRun, InteractionUpdatePayload, InteractionExecutionPayload } from "@composableai/common";
-import { StudioClient, StudioClientProps } from "./client.js";
+import { ComposableClient, ComposableClientProps } from "./client.js";
 import { executeInteraction } from "./execute.js";
 
 export class InteractionBase<P = any, R = any> {
-    client: StudioClient;
+    client: ComposableClient;
 
-    constructor(public id: string, clientOrOpts: StudioClient | StudioClientProps) {
-        if (clientOrOpts instanceof StudioClient) {
+    constructor(public id: string, clientOrOpts: ComposableClient | ComposableClientProps) {
+        if (clientOrOpts instanceof ComposableClient) {
             this.client = clientOrOpts;
         } else {
-            this.client = new StudioClient(clientOrOpts);
+            this.client = new ComposableClient(clientOrOpts);
         }
     }
 

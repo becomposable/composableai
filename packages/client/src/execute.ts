@@ -1,5 +1,5 @@
 import { ExecutionRun, ExecutionRunStatus, InteractionExecutionPayload } from '@composableai/common';
-import { StudioClient } from './client.js';
+import { ComposableClient } from './client.js';
 
 export function EventSourceProvider(): Promise<typeof EventSource> {
     if (typeof globalThis.EventSource === 'function') {
@@ -19,7 +19,7 @@ export function EventSourceProvider(): Promise<typeof EventSource> {
  * @param payload InteractionExecutionPayload
  * @param onChunk callback to be called when the next chunk of the response is available
  */
-export async function executeInteraction<P = any, R = any>(client: StudioClient,
+export async function executeInteraction<P = any, R = any>(client: ComposableClient,
     interactionId: string,
     payload: InteractionExecutionPayload<P> = {},
     onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
@@ -52,7 +52,7 @@ export async function executeInteraction<P = any, R = any>(client: StudioClient,
  * @param onChunk
  * @returns
  */
-export async function executeInteractionByName<P = any, R = any>(client: StudioClient,
+export async function executeInteractionByName<P = any, R = any>(client: ComposableClient,
     interaction: string,
     payload: InteractionExecutionPayload<P> = {},
     onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
@@ -73,7 +73,7 @@ export async function executeInteractionByName<P = any, R = any>(client: StudioC
     return response;
 }
 
-function handleStreaming(client: StudioClient, runId: string, onChunk: (chunk: string) => void) {
+function handleStreaming(client: ComposableClient, runId: string, onChunk: (chunk: string) => void) {
     return new Promise(async (resolve, reject) => {
         try {
             const EventSourceImpl = await EventSourceProvider();

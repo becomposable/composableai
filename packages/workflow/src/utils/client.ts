@@ -3,7 +3,7 @@
  */
 
 import { WorkflowExecutionPayload } from "@composableai/common";
-import { StudioClient } from "@composableai/client";
+import { ComposableClient } from "@composableai/client";
 
 
 export function getClient(payload: WorkflowExecutionPayload) {
@@ -21,7 +21,7 @@ export function getClient(payload: WorkflowExecutionPayload) {
     }
 
     console.log(`Connecting to studio at ${payload.config.studio_url}`);
-    const client = new StudioClient({
+    const client = new ComposableClient({
         serverUrl: payload.config.studio_url,
         storeUrl: payload.config.store_url,
         apikey: payload.auth_token

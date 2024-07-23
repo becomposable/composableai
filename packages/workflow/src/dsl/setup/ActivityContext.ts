@@ -1,6 +1,6 @@
 import { verifyAuthToken } from "@composableai/cloud";
 import { DSLActivityExecutionPayload, DSLWorkflowExecutionPayload, Project, WorkflowExecutionPayload } from "@composableai/common";
-import { StudioClient } from "@composableai/client";
+import { ComposableClient } from "@composableai/client";
 import { log } from "@temporalio/activity";
 import { NoDocumentFound, WorkflowParamNotFound } from "../../errors.js";
 import { getClient } from "../../utils/client.js";
@@ -14,10 +14,10 @@ registerFetchProviderFactory(DocumentTypeProvider.ID, DocumentTypeProvider.facto
 registerFetchProviderFactory(InteractionRunProvider.ID, InteractionRunProvider.factory);
 
 export class ActivityContext<T extends Record<string, any> = Record<string, any>> {
-    client: StudioClient;
+    client: ComposableClient;
     _project?: Promise<Project | undefined>;
 
-    constructor(public payload: DSLActivityExecutionPayload, client: StudioClient, public params: T) {
+    constructor(public payload: DSLActivityExecutionPayload, client: ComposableClient, public params: T) {
         this.client = client;
         this.fetchProject = this.fetchProject.bind(this);
     }
@@ -100,8 +100,8 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
 }
 
 
-async function _fetchProject(studio: StudioClient, payload: WorkflowExecutionPayload) {
+async function _fetchProject(client: ComposableClient, payload: WorkflowExecutionPayload) {
     const { project } = await verifyAuthToken(payload.auth_token);
     console.log(`Getting project data for ${project?.id}`);
-    return project ? await studio.projects.retrieve(project.id) : undefined;
+    return project ? await client.projects.retrieve(project.id) : undefined;
 }

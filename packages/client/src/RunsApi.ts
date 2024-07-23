@@ -1,6 +1,6 @@
 import { ExecutionRun, ExecutionRunRef, FindPayload, RunCreatePayload, RunListingFilters, RunListingQueryOptions, RunSearchPayload, RunSearchResponse } from "@composableai/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
-import { StudioClient } from "./client.js";
+import { ComposableClient } from "./client.js";
 
 
 export interface FilterOption {
@@ -62,7 +62,7 @@ export class RunsApi extends ApiTopic {
     }
 
     create(payload: RunCreatePayload): Promise<ExecutionRun> {
-        const sessionTags = (this.client as StudioClient).sessionTags;
+        const sessionTags = (this.client as ComposableClient).sessionTags;
         if (sessionTags) {
             let tags = Array.isArray(sessionTags) ? sessionTags : [sessionTags];
             if (Array.isArray(payload.tags)) {

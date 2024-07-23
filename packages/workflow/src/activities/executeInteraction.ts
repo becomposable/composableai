@@ -1,5 +1,5 @@
 import { DSLActivityExecutionPayload, DSLActivitySpec, ExecutionRun, ExecutionRunStatus, InteractionExecutionConfiguration } from "@composableai/common";
-import { StudioClient } from "@composableai/client";
+import { ComposableClient } from "@composableai/client";
 import { activityInfo, log } from "@temporalio/activity";
 import { projectResult } from "../dsl/projections.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
@@ -126,7 +126,7 @@ export async function executeInteraction(payload: DSLActivityExecutionPayload) {
 
 }
 
-export async function executeInteractionFromActivity(studio: StudioClient, interactionName: string, params: InteractionExecutionParams, prompt_data: any, debug?: boolean) {
+export async function executeInteractionFromActivity(client: ComposableClient, interactionName: string, params: InteractionExecutionParams, prompt_data: any, debug?: boolean) {
     const userTags = params.tags;
     const info = activityInfo();
     const runId = info.workflowExecution.runId;
@@ -140,7 +140,7 @@ export async function executeInteractionFromActivity(studio: StudioClient, inter
         //retrieve last failed run if any
         if (info.attempt > 1) {
             log.info("Retrying, searching for previous run", { tags: ["tmpRunId:" + runId] });
-            const previousRun = await studio.runs.search({
+            const previousRun = await client.runs.search({
                 filters: { tags: ["tmpRunId:" + info.workflowExecution.runId] },
                 limit: 1,
             }).then((res) => {
@@ -150,7 +150,7 @@ export async function executeInteractionFromActivity(studio: StudioClient, inter
 
             if (previousRun) {
                 log.info("Found previous run", { previousRun });
-                previousStudioExecutionRun = await studio.runs.retrieve(previousRun.id);
+                previousStudioExecutionRun = await client.runs.retrieve(previousRun.id);
             }
         }
     }
@@ -175,7 +175,7 @@ export async function executeInteractionFromActivity(studio: StudioClient, inter
         log.info(`About to execute interaction ${interactionName}`, { config, data, result_schema, tags });
     }
 
-    const res = await studio.interactions.executeByName(interactionName, {
+    const res = await client.interactions.executeByName(interactionName, {
         config,
         data,
         result_schema,

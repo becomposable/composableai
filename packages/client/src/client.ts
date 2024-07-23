@@ -13,7 +13,7 @@ import { ZenoClient } from "./store/client.js";
 import TrainingApi from "./TrainingApi.js";
 import UsersApi from "./UsersApi.js";
 
-export interface StudioClientProps {
+export interface ComposableClientProps {
     serverUrl: string;
     storeUrl: string;
     apikey?: string;
@@ -23,7 +23,7 @@ export interface StudioClientProps {
     onResponse?: (response: Response) => void;
 }
 
-export class StudioClient extends AbstractFetchClient<StudioClient> {
+export class ComposableClient extends AbstractFetchClient<ComposableClient> {
 
     /**
      * The store client
@@ -36,14 +36,14 @@ export class StudioClient extends AbstractFetchClient<StudioClient> {
     sessionTags?: string | string[];
 
     constructor(
-        opts: StudioClientProps = {} as any
+        opts: ComposableClientProps = {} as any
     ) {
         super(opts.serverUrl);
         if (!opts.serverUrl) {
-            throw new Error("storeUrl is required for StudioClient");
+            throw new Error("storeUrl is required for ComposableClient");
         }
         if (!opts.storeUrl) {
-            throw new Error("storeUrl is required for StudioClient");
+            throw new Error("storeUrl is required for ComposableClient");
         }
         this.store = new ZenoClient({
             serverUrl: opts.storeUrl,
@@ -65,7 +65,7 @@ export class StudioClient extends AbstractFetchClient<StudioClient> {
 
 
     /**
-     * Overwrite to keep zeno and studio clients synchronized on the auth callback
+     * Overwrite to keep store and composable clients synchronized on the auth callback
      * @param authCb
      * @returns
      */

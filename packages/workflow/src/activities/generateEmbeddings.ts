@@ -1,5 +1,5 @@
 import { md5 } from '@composableai/blobs';
-import { StudioClient } from "@composableai/client";
+import { ComposableClient } from "@composableai/client";
 import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
 import { EmbeddingsResult } from "@llumiverse/core";
 import { log } from "@temporalio/activity";
@@ -87,7 +87,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
 
         const res = await Promise.all(docParts.map(async (part, i) => {
             if (!part.text) {
-                return { id: part.id, number: i, result: null, message: "no text found"}
+                return { id: part.id, number: i, result: null, message: "no text found" }
             }
 
             if (part.tokens?.count && part.tokens.count > maxTokens) {
@@ -162,7 +162,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
 
 
 
-async function generateEmbeddingsFromStudio(text: string, env: string, client: StudioClient): Promise<EmbeddingsResult> {
+async function generateEmbeddingsFromStudio(text: string, env: string, client: ComposableClient): Promise<EmbeddingsResult> {
 
     log.info(`Generating embeddings for text of ${text.length} chars with environment ${env}`);
 

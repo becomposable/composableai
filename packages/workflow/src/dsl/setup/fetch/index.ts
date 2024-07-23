@@ -1,16 +1,16 @@
 import { ActivityFetchSpec } from "@composableai/common";
-import { StudioClient } from "@composableai/client";
+import { ComposableClient } from "@composableai/client";
 import { DataProvider } from "./DataProvider.js";
 
 
-const factories: Record<string, ((client: StudioClient, source?: string) => DataProvider)> = {};
+const factories: Record<string, ((client: ComposableClient, source?: string) => DataProvider)> = {};
 
 
-export function registerFetchProviderFactory(name: string, factory: ((client: StudioClient) => DataProvider)) {
+export function registerFetchProviderFactory(name: string, factory: ((client: ComposableClient) => DataProvider)) {
     factories[name] = factory;
 }
 
-export function getFetchProvider(client: StudioClient, fetchSpec: ActivityFetchSpec) {
+export function getFetchProvider(client: ComposableClient, fetchSpec: ActivityFetchSpec) {
     const factory = factories[fetchSpec.type];
     if (!factory) {
         throw new Error("Unknown data provider: " + fetchSpec.source);

@@ -1,8 +1,8 @@
 {
-  "name": "@composableai/cloud-client",
+  "name": "@composableai/cloud",
   "version": "0.30.0",
   "type": "module",
-  "description": "Composable Cloud Client",
+  "description": "Composable cloud utilities",
   "main": "./lib/index.js",
   "files": [
     "lib",

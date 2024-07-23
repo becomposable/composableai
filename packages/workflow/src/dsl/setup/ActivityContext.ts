@@ -1,4 +1,4 @@
-import { verifyAuthToken } from "@composableai/cloud-client";
+import { verifyAuthToken } from "@composableai/cloud";
 import { DSLActivityExecutionPayload, DSLWorkflowExecutionPayload, Project, WorkflowExecutionPayload } from "@composableai/common";
 import { StudioClient } from "@composableai/client";
 import { log } from "@temporalio/activity";

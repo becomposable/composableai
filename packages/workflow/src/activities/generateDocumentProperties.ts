@@ -60,6 +60,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
         "ExtractInformation",
         {
             ...params,
+            include_previous_error: true,
             result_schema: type.object_schema,
         },
         promptData,

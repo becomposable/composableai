@@ -56,7 +56,7 @@ export abstract class MultiTenantRepository<ModelT extends Record<string, any>, 
         conn.set('strictQuery', false);
         this.logger?.info(`Connected to database: ${name} on ${this.url} as ${this.connectOptions.user}`);
 
-        const db = this.createDatabase(conn, dbName);
+        const db = this.createDatabase(conn, name, dbName);
 
         this.initDbContent(db).catch((err) => {
             this.logger?.info(`Error initializing database ${name}: ${err}`);
@@ -98,8 +98,8 @@ export abstract class MultiTenantRepository<ModelT extends Record<string, any>, 
         return Promise.all(promises);
     }
 
-    createDatabase(connection: mongoose.Connection, dbName: DbNameT): MultiTenantDatabase & ModelT {
-        const db: MultiTenantDatabase & ModelT = new MultiTenantDatabase(this as any, connection) as any;
+    createDatabase(connection: mongoose.Connection, name: string, dbName: DbNameT): MultiTenantDatabase & ModelT {
+        const db: MultiTenantDatabase & ModelT = new MultiTenantDatabase(this as any, connection, name) as any;
         const model = this.createModel(connection, dbName);
         Object.assign(db, model);
         return db;
@@ -117,16 +117,12 @@ export abstract class MultiTenantRepository<ModelT extends Record<string, any>, 
 
 export class MultiTenantDatabase {
     logger?: { info: (msg: string) => void };
-    constructor(public service: MultiTenantRepository<any>, public connection: mongoose.Connection) {
+    constructor(public service: MultiTenantRepository<any>, public connection: mongoose.Connection, public name: string) {
         this.logger = service.logger;
     }
 
-    get name() {
-        return this.connection.db.databaseName;
-    }
-
     close() {
-        return this.service.close(this.connection.db.databaseName);
+        return this.service.close(this.name);
     }
 
 }

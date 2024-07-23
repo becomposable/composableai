@@ -5,9 +5,11 @@ import AccountsApi from "./AccountsApi.js";
 import AnalyticsApi from "./AnalyticsApi.js";
 import { ApiKeysApi } from "./ApiKeysApi.js";
 import EnvironmentsApi from "./EnvironmentsApi.js";
+import { IamApi } from "./IamApi.js";
 import InteractionsApi from "./InteractionsApi.js";
 import ProjectsApi from "./ProjectsApi.js";
 import PromptsApi from "./PromptsApi.js";
+import { RefsApi } from "./RefsApi.js";
 import { RunsApi } from "./RunsApi.js";
 import { ZenoClient } from "./store/client.js";
 import TrainingApi from "./TrainingApi.js";
@@ -141,4 +143,7 @@ export class ComposableClient extends AbstractFetchClient<ComposableClient> {
     analytics = new AnalyticsApi(this);
     training = new TrainingApi(this);
     users = new UsersApi(this);
+    iam = new IamApi(this);
+    refs = new RefsApi(this);
+
 }

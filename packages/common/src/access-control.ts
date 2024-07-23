@@ -21,14 +21,26 @@ export interface AccessControlEntry {
     principal: string; //objectId
     type: AccessControlledResource;
     tags?: string[];
-    expires_at?: Date;
-    created_at?: Date;
-    updated_at?: Date;
+    expires_at?: string;
+    created_at?: string;
+    updated_at?: string;
+    id: string;
 }
 
 export interface ACECreatePayload extends
-    Omit<AccessControlEntry, "created_at" | "updated_at"> {
+    Omit<AccessControlEntry, "created_at" | "updated_at" | "id" > {
 }
 
 export interface ACEUpdatePayload extends Partial<ACECreatePayload> {
+}
+
+
+export interface AcesQueryOptions {
+
+    level?: 'resource' | 'project' | 'account'
+    resource?: string
+    principal?: string
+    role?: string
+    type?: AccessControlledResource
+    
 }

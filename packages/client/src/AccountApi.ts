@@ -1,4 +1,4 @@
-import { Account, InviteUserRequestPayload, InviteUserResponsePayload, OnboardingProgress, ProjectRef, TransientToken, UpdateAccountPayload, UserInviteTokenData } from "@composableai/common";
+import { Account, InviteUserRequestPayload, InviteUserResponsePayload, OnboardingProgress, ProjectRef, TransientToken, UpdateAccountPayload, User, UserInviteTokenData } from "@composableai/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export default class AccountApi extends ApiTopic {
@@ -28,6 +28,10 @@ export default class AccountApi extends ApiTopic {
     */
     projects(): Promise<ProjectRef[]> {
         return this.get('/projects').then(res => res.data);
+    }
+
+    members(): Promise<User[]> {
+        return this.get('/members')
     }
 
     /**

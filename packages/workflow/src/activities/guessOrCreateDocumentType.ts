@@ -82,7 +82,7 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
         existing_types, content, image: fileRef
     });
 
-    log.info("Selected Document Type Result: " + JSON.stringify(res.result));
+    log.info("Selected Content Type Result: " + JSON.stringify(res.result));
 
     //if type is not identified or not present in the database, generate a new type
     let selectedType: { id: string, name: string } | undefined = undefined;

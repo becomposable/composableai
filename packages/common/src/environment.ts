@@ -4,6 +4,7 @@ import { AIModel } from "@llumiverse/core";
 export enum SupportedProviders {
     // from llumiverse
     openai = 'openai',
+    azure_openai = 'azure_openai',
     huggingface_ie = 'huggingface_ie',
     replicate = 'replicate',
     bedrock = 'bedrock',
@@ -33,6 +34,14 @@ export const SupportedProvidersList: Record<SupportedProviders, SupportedProvide
         name: SupportedProviders.openai,
         requiresApiKey: true,
         requiresEndpointUrl: false,
+        supportSearch: false,
+    },
+    'azure_openai':
+    {
+        id: 'azure_openai',
+        name: SupportedProviders.azure_openai,
+        requiresApiKey: false,
+        requiresEndpointUrl: true,
         supportSearch: false,
     },
     'huggingface_ie':

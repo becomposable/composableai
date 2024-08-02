@@ -74,10 +74,21 @@ export async function executeInteractionByName<P = any, R = any>(client: Composa
 }
 
 function handleStreaming(client: ComposableClient, runId: string, onChunk: (chunk: string) => void) {
+    console.log('handleStreaming', runId);
     return new Promise(async (resolve, reject) => {
         try {
             const EventSourceImpl = await EventSourceProvider();
-            const sse = new EventSourceImpl(client.runs.baseUrl + '/' + runId + '/stream');
+            const streamUrl = new URL(client.runs.baseUrl + '/' + runId + '/stream');
+            const bearerToken = client._auth ? await client._auth() : undefined;
+
+            if (bearerToken) {
+                const token = bearerToken.split(' ')[1];
+                streamUrl.searchParams.set('access_token', token);
+            } else {
+                throw new Error('No auth token available');
+            }
+
+            const sse = new EventSourceImpl(streamUrl);
             sse.addEventListener("message", ev => {
                 const data = JSON.parse(ev.data);
                 if (data) {

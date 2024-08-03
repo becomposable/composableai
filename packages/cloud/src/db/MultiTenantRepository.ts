@@ -87,6 +87,18 @@ export abstract class MultiTenantRepository<ModelT extends Record<string, any>, 
         return false;
     }
 
+    /**
+     * Close all oped db connections
+     */
+    closeAll() {
+        this.logger?.info("Closing all db connections");
+        const dbs = Object.values(this.databases);
+        this.databases = {};
+        for (const db of dbs) {
+            db.connection.close();
+        }
+    }
+
     shutdown() {
         this.logger?.info("Shutting down all db connections ...");
         const dbs = this.databases;

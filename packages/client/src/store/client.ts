@@ -1,3 +1,4 @@
+import { BulkOperationPayload, BulkOperationResult } from "@composableai/common";
 import { AbstractFetchClient, RequestError } from "api-fetch-client";
 import { CommandsApi } from "./CommandsApi.js";
 import { ZenoClientNotFoundError } from "./errors.js";
@@ -43,6 +44,12 @@ export class ZenoClient extends AbstractFetchClient<ZenoClient> {
         return this.withAuthCallback(
             apiKey ? () => Promise.resolve(`Bearer ${apiKey}`) : undefined
         );
+    }
+
+    runOperation(payload: BulkOperationPayload): Promise<BulkOperationResult> {
+        return this.post("/api/v1/operations", {
+            payload
+        });
     }
 
     objects = new ObjectsApi(this);

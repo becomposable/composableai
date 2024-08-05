@@ -18,13 +18,13 @@ A TTY terminal and Node.js version 18 or higher is required.
 ## Installation
 
 ```bash
-npm -g install @composableai/studio-cli
+npm -g install @becomposable/cli
 ```
 
 ## Basic Usage
 
 ```bash
-cpcli help
+composable help
 ```
 
 ## Documentation

@@ -29,4 +29,4 @@ composable help
 
 ## Documentation
 
-See https://docs.composableprompts.com/cli
+See https://docs.becomposable.com/cli

@@ -1,4 +1,4 @@
-import { DSLActivitySpec, DSLWorkflowSpec } from "@composableai/common";
+import { DSLActivitySpec, DSLWorkflowSpec } from "@becomposable/common";
 import { Vars, splitPath } from "./vars.js";
 
 export function validateWorkflow(workflow: DSLWorkflowSpec, vars: string[] = []) {

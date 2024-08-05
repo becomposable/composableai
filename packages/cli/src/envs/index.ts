@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import { getClient } from "../client.js";
-import { ExecutionEnvironment } from "@composableai/common";
+import { ExecutionEnvironment } from "@becomposable/common";
 import colors from "ansi-colors";
 
 

@@ -1,5 +1,5 @@
-import { ActivityFetchSpec } from "@composableai/common";
-import { ComposableClient } from "@composableai/client";
+import { ActivityFetchSpec } from "@becomposable/common";
+import { ComposableClient } from "@becomposable/client";
 import { DataProvider } from "./DataProvider.js";
 
 

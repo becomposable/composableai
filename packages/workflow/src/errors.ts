@@ -1,4 +1,4 @@
-import { DSLActivitySpec, DSLWorkflowSpec } from "@composableai/common";
+import { DSLActivitySpec, DSLWorkflowSpec } from "@becomposable/common";
 
 
 export class NoDocumentFound extends Error {

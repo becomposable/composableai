@@ -1,4 +1,4 @@
-import { getTenantId } from "@composableai/common";
+import { getTenantId } from "@becomposable/common";
 import mongoose from "mongoose";
 import { VaultClient } from "../vault.js";
 import { DbName, MultiTenantDatabase, MultiTenantRepository, MultiTenantRepositoryOptions, RepositoryLogger } from "./MultiTenantRepository.js";

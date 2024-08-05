@@ -1,4 +1,4 @@
-import { BulkOperationPayload, BulkOperationResult } from "@composableai/common";
+import { BulkOperationPayload, BulkOperationResult } from "@becomposable/common";
 import { AbstractFetchClient, RequestError } from "api-fetch-client";
 import { CommandsApi } from "./CommandsApi.js";
 import { ZenoClientNotFoundError } from "./errors.js";

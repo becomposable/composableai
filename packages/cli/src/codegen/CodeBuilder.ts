@@ -1,4 +1,4 @@
-import { InteractionRefWithSchema } from "@composableai/common";
+import { InteractionRefWithSchema } from "@becomposable/common";
 import { join, resolve } from "path";
 import { makeDir, writeFile } from "../utils/stdio.js";
 import { InteractionVersion, InteractionsExportOptions } from "./InteractionVersion.js";

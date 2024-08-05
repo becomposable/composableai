@@ -1,6 +1,6 @@
-import { md5 } from '@composableai/blobs';
-import { ComposableClient } from "@composableai/client";
-import { DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
+import { md5 } from '@becomposable/blobs';
+import { ComposableClient } from "@becomposable/client";
+import { DSLActivityExecutionPayload, DSLActivitySpec } from "@becomposable/common";
 import { EmbeddingsResult } from "@llumiverse/core";
 import { log } from "@temporalio/activity";
 import * as tf from '@tensorflow/tfjs-node';

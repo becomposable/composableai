@@ -2,8 +2,8 @@
  * get a zeno client for a given token
  */
 
-import { WorkflowExecutionPayload } from "@composableai/common";
-import { ComposableClient } from "@composableai/client";
+import { WorkflowExecutionPayload } from "@becomposable/common";
+import { ComposableClient } from "@becomposable/client";
 
 
 export function getClient(payload: WorkflowExecutionPayload) {

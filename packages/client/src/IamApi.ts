@@ -1,4 +1,4 @@
-import { AccessControlEntry, ACECreatePayload, AcesQueryOptions } from "@composableai/common";
+import { AccessControlEntry, ACECreatePayload, AcesQueryOptions } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 

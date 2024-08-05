@@ -1,4 +1,4 @@
-import { ICreateProjectPayload, Project, ProjectRef } from "@composableai/common";
+import { ICreateProjectPayload, Project, ProjectRef } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export default class ProjectsApi extends ApiTopic {

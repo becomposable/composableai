@@ -1,4 +1,4 @@
-import { AuthTokenPayload, ProjectRef, getTenantIdFromProject } from '@composableai/common';
+import { AuthTokenPayload, ProjectRef, getTenantIdFromProject } from '@becomposable/common';
 import jwt from 'jsonwebtoken';
 import { VaultClient } from './vault.js';
 

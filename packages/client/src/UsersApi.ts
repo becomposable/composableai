@@ -1,4 +1,4 @@
-import { User } from "@composableai/common";
+import { User } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 

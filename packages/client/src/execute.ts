@@ -1,4 +1,4 @@
-import { ExecutionRun, ExecutionRunStatus, InteractionExecutionPayload } from '@composableai/common';
+import { ExecutionRun, ExecutionRunStatus, InteractionExecutionPayload } from '@becomposable/common';
 import { ComposableClient } from './client.js';
 
 export function EventSourceProvider(): Promise<typeof EventSource> {

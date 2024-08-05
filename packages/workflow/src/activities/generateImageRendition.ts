@@ -1,6 +1,6 @@
-import { DSLActivityExecutionPayload, DSLActivitySpec, RenditionProperties } from "@composableai/common";
-import { StreamSource } from "@composableai/client";
-import { Blobs } from "@composableai/blobs";
+import { DSLActivityExecutionPayload, DSLActivitySpec, RenditionProperties } from "@becomposable/common";
+import { StreamSource } from "@becomposable/client";
+import { Blobs } from "@becomposable/blobs";
 import { log } from "@temporalio/activity";
 import { createReadableStreamFromReadable } from "node-web-stream-adapters";
 import sharp from "sharp";

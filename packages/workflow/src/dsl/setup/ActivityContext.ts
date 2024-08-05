@@ -1,6 +1,6 @@
-import { verifyAuthToken } from "@composableai/cloud";
-import { DSLActivityExecutionPayload, DSLWorkflowExecutionPayload, Project, WorkflowExecutionPayload } from "@composableai/common";
-import { ComposableClient } from "@composableai/client";
+import { verifyAuthToken } from "@becomposable/cloud";
+import { DSLActivityExecutionPayload, DSLWorkflowExecutionPayload, Project, WorkflowExecutionPayload } from "@becomposable/common";
+import { ComposableClient } from "@becomposable/client";
 import { log } from "@temporalio/activity";
 import { NoDocumentFound, WorkflowParamNotFound } from "../../errors.js";
 import { getClient } from "../../utils/client.js";

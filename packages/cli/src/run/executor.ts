@@ -1,5 +1,5 @@
-import { ComposableClient } from "@composableai/client";
-import { ExecutionRun } from "@composableai/common";
+import { ComposableClient } from "@becomposable/client";
+import { ExecutionRun } from "@becomposable/common";
 
 export class ExecutionQueue {
     requests: ExecutionRequest[] = [];

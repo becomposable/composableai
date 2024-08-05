@@ -1,4 +1,4 @@
-import { EmbeddingsStatusResponse, GenericCommandResponse, ProjectConfigurationEmbeddings } from "@composableai/common";
+import { EmbeddingsStatusResponse, GenericCommandResponse, ProjectConfigurationEmbeddings } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 

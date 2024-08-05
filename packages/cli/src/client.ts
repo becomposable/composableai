@@ -1,4 +1,4 @@
-import { ComposableClient } from "@composableai/client";
+import { ComposableClient } from "@becomposable/client";
 import { Command } from "commander";
 import { config } from "./profiles/index.js";
 

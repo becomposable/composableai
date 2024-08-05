@@ -1,4 +1,4 @@
-import { CreateContentObjectTypePayload, DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
+import { CreateContentObjectTypePayload, DSLActivityExecutionPayload, DSLActivitySpec } from "@becomposable/common";
 import { log } from "@temporalio/activity";
 import { ActivityContext, setupActivity } from "../dsl/setup/ActivityContext.js";
 import { TruncateSpec, truncByMaxTokens } from "../utils/tokens.js";

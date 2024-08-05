@@ -1,4 +1,4 @@
-import { WorkflowRuleInputType } from "@composableai/common";
+import { WorkflowRuleInputType } from "@becomposable/common";
 import { Command } from "commander";
 import fs from 'fs';
 import { resolve, join, basename } from "path";

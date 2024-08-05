@@ -1,4 +1,4 @@
-import { Account, InviteUserRequestPayload, InviteUserResponsePayload, OnboardingProgress, ProjectRef, TransientToken, UpdateAccountPayload, User, UserInviteTokenData } from "@composableai/common";
+import { Account, InviteUserRequestPayload, InviteUserResponsePayload, OnboardingProgress, ProjectRef, TransientToken, UpdateAccountPayload, User, UserInviteTokenData } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 export default class AccountApi extends ApiTopic {

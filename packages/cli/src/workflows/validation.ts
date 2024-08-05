@@ -1,5 +1,5 @@
-import { validateWorkflow as validate } from "@composableai/workflow/vars";
-import { DSLWorkflowSpec } from "@composableai/common";
+import { validateWorkflow as validate } from "@becomposable/workflow/vars";
+import { DSLWorkflowSpec } from "@becomposable/common";
 export class ValidationError extends Error {
     constructor(message: string) {
         super("Invalid workflow definition: " + message);

@@ -1,4 +1,4 @@
-import { FindPayload } from "@composableai/common";
+import { FindPayload } from "@becomposable/common";
 
 function parseSelector(selector: string) {
     const parts = selector.split(/\s+/);

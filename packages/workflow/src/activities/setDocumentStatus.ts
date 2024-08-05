@@ -1,4 +1,4 @@
-import { ContentObjectStatus, DSLActivityExecutionPayload, DSLActivitySpec } from "@composableai/common";
+import { ContentObjectStatus, DSLActivityExecutionPayload, DSLActivitySpec } from "@becomposable/common";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 
 //@ts-ignore

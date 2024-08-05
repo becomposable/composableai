@@ -1,4 +1,4 @@
-import { DSLActivityExecutionPayload } from "@composableai/common";
+import { DSLActivityExecutionPayload } from "@becomposable/common";
 import { matchCondition } from "./conditions.js";
 import { Vars } from "./vars.js";
 

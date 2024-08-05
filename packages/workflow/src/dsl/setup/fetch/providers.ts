@@ -1,5 +1,5 @@
-import { FindPayload } from "@composableai/common";
-import { ComposableClient } from "@composableai/client";
+import { FindPayload } from "@becomposable/common";
+import { ComposableClient } from "@becomposable/client";
 import { DataProvider } from "./DataProvider.js";
 
 function useMongoId(query: Record<string, any>) {

@@ -1,6 +1,6 @@
 import { proxyActivities } from "@temporalio/workflow";
 
-import { DSLActivitySpec, DSLWorkflowExecutionPayload } from "@composableai/common";
+import { DSLActivitySpec, DSLWorkflowExecutionPayload } from "@becomposable/common";
 import * as activities from "../activities/index.js";
 
 const {
@@ -24,7 +24,7 @@ export async function recalculateEmbeddingsWorkflow(payload: DSLWorkflowExecutio
             force: true,
         },
     };
-    
+
     const res = generateEmbeddings({
         ...payload,
         params: {},

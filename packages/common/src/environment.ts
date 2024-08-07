@@ -39,7 +39,7 @@ export const SupportedProvidersList: Record<SupportedProviders, SupportedProvide
     'azure_openai':
     {
         id: 'azure_openai',
-        name: SupportedProviders.openai,
+        name: SupportedProviders.azure_openai,
         requiresApiKey: true,
         requiresEndpointUrl: false,
         supportSearch: false,

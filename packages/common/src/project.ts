@@ -3,13 +3,13 @@ export interface ICreateProjectPayload {
     description?: string;
 }
 export enum ProjectRoles {
-    //owner = "owner", // all permissions
+    owner = "owner", // all permissions
     admin = "admin", // all permissions but manage_account
     developer = "developer", // all permissions but manage_account, manage_billing, manage_roles, delete
-    //application = "application", // executor + request_pk
-    //executor = "executor", // can only read and execute interactions
-    //reader = "reader", // can only read (browse)
-    //billing = "billing", // can only manage billings
+    application = "application", // executor + request_pk
+    executor = "executor", // can only read and execute interactions
+    reader = "reader", // can only read (browse)
+    billing = "billing", // can only manage billings
 }
 
 export function isRoleIncludedIn(role: string, includingRole: string) {

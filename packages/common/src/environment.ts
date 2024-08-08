@@ -20,8 +20,8 @@ export enum SupportedProviders {
 }
 
 export interface SupportedProviderParams {
-    id: string;
-    name: SupportedProviders;
+    id: SupportedProviders;
+    name: string;
     requiresApiKey: boolean;
     requiresEndpointUrl: boolean;
     supportSearch?: boolean;
@@ -30,104 +30,97 @@ export interface SupportedProviderParams {
 export const SupportedProvidersList: Record<SupportedProviders, SupportedProviderParams> = {
     'openai':
     {
-        id: 'openai',
-        name: SupportedProviders.openai,
+        id: SupportedProviders.openai,
+        name: "OpenAI",
         requiresApiKey: true,
         requiresEndpointUrl: false,
         supportSearch: false,
     },
     'azure_openai':
     {
-        id: 'azure_openai',
-        name: SupportedProviders.azure_openai,
+        id: SupportedProviders.azure_openai,
+        name: "Azure OpenAI",
         requiresApiKey: false,
         requiresEndpointUrl: true,
         supportSearch: false,
     },
     'huggingface_ie':
     {
-        id: 'huggingface_ie',
-        name: SupportedProviders.huggingface_ie,
+        id: SupportedProviders.huggingface_ie,
+        name: "HuggingFace Inference Endpoint",
         requiresApiKey: true,
         requiresEndpointUrl: true,
     },
     'replicate':
     {
-        id: 'replicate',
-        name: SupportedProviders.replicate,
+        id: SupportedProviders.replicate,
+        name: "Repicate",
         requiresApiKey: true,
         requiresEndpointUrl: false,
         supportSearch: true,
     },
     'bedrock':
     {
-        id: 'bedrock',
-        name: SupportedProviders.bedrock,
+        id: SupportedProviders.bedrock,
+        name: "AWS Bedrock",
         requiresApiKey: false,
         requiresEndpointUrl: false,
         supportSearch: false,
     },
     vertexai: {
-        id: 'vertexai',
-        name: SupportedProviders.vertexai,
+        id: SupportedProviders.vertexai,
+        name: "Google Vertex AI",
         requiresApiKey: false,
         requiresEndpointUrl: false,
         supportSearch: false,
     },
     togetherai: {
-        id: 'togetherai',
-        name: SupportedProviders.togetherai,
+        id:  SupportedProviders.togetherai,
+        name: "Together AI",
         requiresApiKey: false,
         requiresEndpointUrl: false,
         supportSearch: false,
     },
     mistralai: {
-        id: 'mistralai',
-        name: SupportedProviders.mistralai,
+        id: SupportedProviders.mistralai,
+        name: "Mistral AI",
         requiresApiKey: false,
         requiresEndpointUrl: false,
         supportSearch: false,
     },
     groq: {
-        id: 'groq',
-        name: SupportedProviders.groq,
+        id: SupportedProviders.groq,
+        name: "Groq Cloud",
         requiresApiKey: false,
         requiresEndpointUrl: false,
         supportSearch: false,
     },
     watsonx: {
-        id: 'watsonx',
-        name: SupportedProviders.watsonx,
+        id: SupportedProviders.watsonx,
+        name: "IBM WatsonX",
         requiresApiKey: true,
         requiresEndpointUrl: true,
         supportSearch: false
     },
-    /*'cohere': {
-        id: 'cohere',
-        name: SupportedProviders.cohere,
-        requiresApiKey: true,
-        requiresEndpointUrl: false,
-        supportSearch: false,
-    },*/
     'virtual_lb':
     {
-        id: 'virtual_lb',
-        name: SupportedProviders.virtual_lb,
+        id: SupportedProviders.virtual_lb,
+        name: "Virtual - Load Balancer",
         requiresApiKey: false,
         requiresEndpointUrl: false,
         supportSearch: false,
     },
     'virtual_mediator':
     {
-        id: 'virtual_mediator',
-        name: SupportedProviders.virtual_mediator,
+        id: SupportedProviders.virtual_mediator,
+        name: "Virtual - Mediator",
         requiresApiKey: false,
         requiresEndpointUrl: false,
         supportSearch: false,
     },
     'test': {
-        id: 'test',
-        name: SupportedProviders.test,
+        id: SupportedProviders.test,
+        name: "Test LLM",
         requiresApiKey: false,
         requiresEndpointUrl: false,
         supportSearch: false,

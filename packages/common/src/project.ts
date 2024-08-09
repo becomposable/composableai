@@ -63,6 +63,7 @@ export interface ProjectConfigurationEmbeddings {
 export interface Project {
     id: string;
     name: string;
+    namespace: string;
     description?: string;
     account: string;
     configuration: ProjectConfiguration;

@@ -4,6 +4,7 @@ import AccountApi from "./AccountApi.js";
 import AccountsApi from "./AccountsApi.js";
 import AnalyticsApi from "./AnalyticsApi.js";
 import { ApiKeysApi } from "./ApiKeysApi.js";
+import CommandsApi from "./CommandsApi.js";
 import EnvironmentsApi from "./EnvironmentsApi.js";
 import { IamApi } from "./IamApi.js";
 import InteractionsApi from "./InteractionsApi.js";
@@ -145,5 +146,6 @@ export class ComposableClient extends AbstractFetchClient<ComposableClient> {
     users = new UsersApi(this);
     iam = new IamApi(this);
     refs = new RefsApi(this);
+    commands = new CommandsApi(this);
 
 }

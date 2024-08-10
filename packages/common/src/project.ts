@@ -1,5 +1,6 @@
 export interface ICreateProjectPayload {
     name: string;
+    namespace: string;
     description?: string;
 }
 export enum ProjectRoles {

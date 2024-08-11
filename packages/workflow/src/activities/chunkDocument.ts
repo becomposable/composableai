@@ -3,6 +3,7 @@ import { log } from "@temporalio/activity";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { InteractionExecutionParams, executeInteractionFromActivity } from "./executeInteraction.js";
 
+const INT_CHUNK_DOCUMENT = "sys:ChunkDocument"
 
 interface DocPart {
 
@@ -22,6 +23,8 @@ export interface ChunkDocumentResult {
 
 export interface ChunkDocumentParams extends InteractionExecutionParams {
     force?: boolean;
+    interactionName?: string;
+    docPartType?: string;
 }
 
 export interface ChunkDocument extends DSLActivitySpec<ChunkDocumentParams> {
@@ -33,6 +36,8 @@ export async function chunkDocument(payload: DSLActivityExecutionPayload): Promi
     const { params, client, objectId } = await setupActivity<ChunkDocumentParams>(payload);
 
     const { force } = params;
+    const interactionName = params.interactionName ?? INT_CHUNK_DOCUMENT;
+
     log.info(`Object ${objectId} chunking started`);
 
     const document = await client.objects.retrieve(objectId, "+text");
@@ -59,7 +64,7 @@ export async function chunkDocument(payload: DSLActivityExecutionPayload): Promi
     const lines = document.text.split('\n')
     const instrumented = lines.map((l, i) => `{%${i}%}${l}`).join('\n')
 
-    const res = await executeInteractionFromActivity(client, "ChunkDocument", params, {
+    const res = await executeInteractionFromActivity(client, interactionName, params, {
         objectId: objectId,
         content: instrumented
     });

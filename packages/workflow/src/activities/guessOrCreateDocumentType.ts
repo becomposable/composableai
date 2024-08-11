@@ -4,6 +4,8 @@ import { ActivityContext, setupActivity } from "../dsl/setup/ActivityContext.js"
 import { TruncateSpec, truncByMaxTokens } from "../utils/tokens.js";
 import { InteractionExecutionParams, executeInteractionFromActivity } from "./executeInteraction.js";
 
+const INT_SELECT_DOCUMENT_TYPE = "sys:SelectDocumentType"
+const INT_GENERATE_METADATA_MODEL = "sys:GenerateMetadataModel"
 
 export interface GuessOrCreateDocumentTypeParams extends InteractionExecutionParams {
     typesHint?: string[];
@@ -16,7 +18,10 @@ export interface GuessOrCreateDocumentTypeParams extends InteractionExecutionPar
      * The name of the interaction to execute
      * @default SelectDocumentType
      */
-    interactionName?: string;
+    interactionNames?: {
+        selectDocumentType?: string;
+        generateMetadataModel?: string;
+    }
 }
 
 export interface GuessOrCreateDocumentType extends DSLActivitySpec<GuessOrCreateDocumentTypeParams> {
@@ -26,6 +31,8 @@ export interface GuessOrCreateDocumentType extends DSLActivitySpec<GuessOrCreate
 export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPayload) {
     const context = await setupActivity<GuessOrCreateDocumentTypeParams>(payload);
     const { params, client, objectId } = context;
+
+    const interactionName = params.interactionNames?.selectDocumentType ?? INT_SELECT_DOCUMENT_TYPE;
 
 
     log.info("SelectDocumentType for object: " + objectId, { payload });
@@ -78,7 +85,7 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
 
     log.info("Execute SelectDocumentType interaction on content with \nexisting types: " + existing_types.join(","));
 
-    const res = await executeInteractionFromActivity(client, "SelectDocumentType", params, {
+    const res = await executeInteractionFromActivity(client, interactionName, params, {
         existing_types, content, image: fileRef
     });
 
@@ -117,8 +124,9 @@ async function generateNewType(context: ActivityContext, existing_types: string[
     const { client, params } = context;
 
     const project = await context.fetchProject();
+    const interactionName = params.interactionNames?.generateMetadataModel ?? INT_GENERATE_METADATA_MODEL;
 
-    const genTypeRes = await executeInteractionFromActivity(client, "GenerateMetadataModel", params, {
+    const genTypeRes = await executeInteractionFromActivity(client, interactionName, params, {
         existing_types: existing_types,
         content: content,
         human_context: project?.configuration?.human_context ?? undefined,

@@ -4,12 +4,14 @@ import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { TruncateSpec } from "../utils/tokens.js";
 import { InteractionExecutionParams, executeInteractionFromActivity } from "./executeInteraction.js";
 
+const INT_EXTRACT_INFORMATION = "sys:ExtractInformation"
 export interface GenerateDocumentPropertiesParams extends InteractionExecutionParams {
     typesHint?: string[];
     /**
      * truncate the input doc text to the specified max_tokens
      */
     truncate?: TruncateSpec;
+    interactionName?: string;
 }
 export interface GenerateDocumentProperties extends DSLActivitySpec<GenerateDocumentPropertiesParams> {
     name: 'generateDocumentProperties';
@@ -18,6 +20,7 @@ export interface GenerateDocumentProperties extends DSLActivitySpec<GenerateDocu
 export async function generateDocumentProperties(payload: DSLActivityExecutionPayload) {
     const context = await setupActivity<GenerateDocumentPropertiesParams>(payload);
     const { params, client, objectId } = context;
+    const interactionName = params.interactionName ?? INT_EXTRACT_INFORMATION;
 
     const project = await context.fetchProject();
 
@@ -57,7 +60,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
 
     const infoRes = await executeInteractionFromActivity(
         client,
-        "ExtractInformation",
+        interactionName,
         {
             ...params,
             include_previous_error: true,

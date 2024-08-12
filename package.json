@@ -5,6 +5,7 @@
     "workspaces": [
         "./llumiverse/core",
         "./packages/common",
+        "./packages/json",
         "./packages/cloud",
         "./packages/client",
         "./packages/react",

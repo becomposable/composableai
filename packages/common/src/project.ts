@@ -11,6 +11,7 @@ export enum ProjectRoles {
     executor = "executor", // can only read and execute interactions
     reader = "reader", // can only read (browse)
     billing = "billing", // can only manage billings
+    member = "member", // can only access, but no specific permissions
 }
 
 export function isRoleIncludedIn(role: string, includingRole: string) {
@@ -49,8 +50,10 @@ export interface ProjectConfiguration {
     default_model?: string;
 
     generate_embeddings: boolean;
-
     embeddings?: ProjectConfigurationEmbeddings
+
+    datacenter?: string;
+    storage_bucket?: string;
 
 }
 

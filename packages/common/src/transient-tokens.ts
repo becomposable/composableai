@@ -1,3 +1,4 @@
+import { ProjectRoles } from "./project.js";
 import { AccountRef } from "./user.js";
 
 
@@ -22,7 +23,8 @@ export interface CreateOrUpdateTransientTokenPayload<T> extends Partial<Transien
 
 export interface UserInviteTokenData {
     email: string;
-    role: string;
+    role: ProjectRoles;
     account: AccountRef;
+    projects?: string[];
     invitedBy: { name: string, email: string; };
 }

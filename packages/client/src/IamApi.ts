@@ -16,7 +16,7 @@ export class IamApi extends ApiTopic {
     }
 
     aces = new AcesApi(this)
-
+    roles = new RolesApi(this)
 }
 
 export class RolesApi extends ApiTopic {
@@ -45,7 +45,7 @@ export class AcesApi extends ApiTopic {
      * @returns InteractionResult[]
      **/
     list(options: AcesQueryOptions): Promise<AccessControlEntry[]> {
-        return this.get('/', { query: {...options} });
+        return this.get('/', { query: { ...options } });
     }
 
     /**
@@ -61,7 +61,7 @@ export class AcesApi extends ApiTopic {
         return this.post('/', { payload })
     }
 
-    delete(id: string): Promise< {id: string }> {
+    delete(id: string): Promise<{ id: string }> {
         return this.del('/' + id)
     }
 

@@ -6,6 +6,20 @@
 
 import { ProjectRoles } from "./project.js";
 
+export enum Permission {
+    read = "read",
+    execute = "execute",
+    create = "create",
+    update = "update",
+    delete = "delete",
+    invite = "invite",
+    request_pk = "request_pk",
+    manage_billing = "manage_billing",
+    manage_account = "manage_account",
+    manage_roles = "manage_roles",
+    manage_apikeys = "manage_apikeys",
+    access_protected = "access_protected", // can access protected endpoints like apikeys, account data, user info (i.e. emails) etc
+}
 
 export enum AccessControlledResource {
     project = "project",

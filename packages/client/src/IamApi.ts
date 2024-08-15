@@ -25,7 +25,7 @@ export class RolesApi extends ApiTopic {
         super(parent, "/roles")
     }
 
-    list(): Promise<{ name: ProjectRoles, permissions: Permissions[] }> {
+    list(): Promise<{ name: ProjectRoles, permissions: Permissions[] }[]> {
         return this.get('/');
     }
 

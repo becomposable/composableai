@@ -1,4 +1,4 @@
-import { AccessControlEntry, ACECreatePayload, AcesQueryOptions } from "@becomposable/common";
+import { AccessControlEntry, ACECreatePayload, AcesQueryOptions, ProjectRoles } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 
@@ -16,6 +16,18 @@ export class IamApi extends ApiTopic {
     }
 
     aces = new AcesApi(this)
+
+}
+
+export class RolesApi extends ApiTopic {
+
+    constructor(parent: ClientBase) {
+        super(parent, "/roles")
+    }
+
+    list(): Promise<{ name: ProjectRoles, permissions: Permissions[] }> {
+        return this.get('/');
+    }
 
 }
 

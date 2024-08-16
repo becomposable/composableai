@@ -5,7 +5,8 @@ export interface ICreateProjectPayload {
 }
 export enum ProjectRoles {
     owner = "owner", // all permissions
-    admin = "admin", // all permissions but manage_account
+    admin = "admin", // all permissions
+    project_admin = "project_admin", // all permissions but manage_account, manage_billing
     developer = "developer", // all permissions but manage_account, manage_billing, manage_roles, delete
     application = "application", // executor + request_pk
     executor = "executor", // can only read and execute interactions
@@ -58,10 +59,10 @@ export interface ProjectConfiguration {
 }
 
 export interface ProjectConfigurationEmbeddings {
-        environment: string;
-        max_tokens: number;
-        dimensions: number;
-        model?: string;
+    environment: string;
+    max_tokens: number;
+    dimensions: number;
+    model?: string;
 }
 
 export interface Project {

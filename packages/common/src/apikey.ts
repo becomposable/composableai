@@ -50,10 +50,10 @@ export interface AuthTokenPayload {
 
     type: PrincipalType
     account: AccountRef;
+    account_roles: ProjectRoles[];
     accounts: AccountRef[];
     project?: ProjectRef;
-    projects: ProjectRef[];
-    role?: string;
+    project_roles?: ProjectRoles[];
 
     iss: string; //issuer
     aud: string; //audience

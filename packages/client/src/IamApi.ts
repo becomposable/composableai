@@ -1,4 +1,4 @@
-import { AccessControlEntry, ACECreatePayload, AcesQueryOptions } from "@becomposable/common";
+import { AccessControlEntry, ACECreatePayload, AcesQueryOptions, Permission, ProjectRoles } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 
 
@@ -16,6 +16,18 @@ export class IamApi extends ApiTopic {
     }
 
     aces = new AcesApi(this)
+    roles = new RolesApi(this)
+}
+
+export class RolesApi extends ApiTopic {
+
+    constructor(parent: ClientBase) {
+        super(parent, "/roles")
+    }
+
+    list(): Promise<{ name: ProjectRoles, permissions: Permission[] }[]> {
+        return this.get('/');
+    }
 
 }
 
@@ -33,7 +45,7 @@ export class AcesApi extends ApiTopic {
      * @returns InteractionResult[]
      **/
     list(options: AcesQueryOptions): Promise<AccessControlEntry[]> {
-        return this.get('/', { query: {...options} });
+        return this.get('/', { query: { ...options } });
     }
 
     /**
@@ -49,7 +61,7 @@ export class AcesApi extends ApiTopic {
         return this.post('/', { payload })
     }
 
-    delete(id: string): Promise< {id: string }> {
+    delete(id: string): Promise<{ id: string }> {
         return this.del('/' + id)
     }
 

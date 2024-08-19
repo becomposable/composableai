@@ -5,12 +5,14 @@ export interface ICreateProjectPayload {
 }
 export enum ProjectRoles {
     owner = "owner", // all permissions
-    admin = "admin", // all permissions but manage_account
+    admin = "admin", // all permissions
+    project_admin = "project_admin", // all permissions but manage_account, manage_billing
     developer = "developer", // all permissions but manage_account, manage_billing, manage_roles, delete
     application = "application", // executor + request_pk
     executor = "executor", // can only read and execute interactions
     reader = "reader", // can only read (browse)
     billing = "billing", // can only manage billings
+    member = "member", // can only access, but no specific permissions
 }
 
 export function isRoleIncludedIn(role: string, includingRole: string) {
@@ -49,16 +51,18 @@ export interface ProjectConfiguration {
     default_model?: string;
 
     generate_embeddings: boolean;
-
     embeddings?: ProjectConfigurationEmbeddings
+
+    datacenter?: string;
+    storage_bucket?: string;
 
 }
 
 export interface ProjectConfigurationEmbeddings {
-        environment: string;
-        max_tokens: number;
-        dimensions: number;
-        model?: string;
+    environment: string;
+    max_tokens: number;
+    dimensions: number;
+    model?: string;
 }
 
 export interface Project {

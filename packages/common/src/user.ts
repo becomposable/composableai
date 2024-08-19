@@ -25,6 +25,12 @@ export interface UserRef {
 }
 export const UserRefPopulate = "id name email picture";
 
+export enum Datacenters {
+    aws = 'aws',
+    gcp = 'gcp',
+    azure = 'azure'
+}
+
 export interface Account {
     id: string;
     name: string;
@@ -40,8 +46,10 @@ export interface Account {
         completed_at: Date,
     };
 
-    created_by: string,
-    updated_by: string,
+    datacenter: string;
+
+    created_by: string;
+    updated_by: string;
     created_at: string;
     updated_at: string;
 }
@@ -61,6 +69,7 @@ export const AccountRefPopulate = "id name";
 export interface InviteUserRequestPayload {
     email: string;
     role: ProjectRoles;
+    projects?: string[];
 }
 
 export interface InviteUserResponsePayload {

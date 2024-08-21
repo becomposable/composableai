@@ -1,12 +1,12 @@
 # Composable Workflow DSL
 
-The Zeno Workflow DSL is a domain-specific language (DSL) used to define workflows that are executed by the Zeno platform. The DSL is based on JSON and is designed to be easy to read and write.
+The Composable Workflow DSL is a domain-specific language (DSL) used to define workflows that are executed by the Composable platform. The DSL is based on JSON and is designed to be easy to read and write.
 
-A Zeno workflow is a sequence of activities that are executed in a specific order. Activities are individual units of work that can be executed by the Zeno platform. Activities can be anything from simple tasks, such as sending an email, to more complex tasks, such as generating a report.
+A Composable workflow is a sequence of activities that are executed in a specific order. Activities are individual units of work that can be executed by the Composable platform. Activities can be anything from simple tasks, such as sending an email, to more complex tasks, such as generating a report.
 
 ### Workflow Definition
 
-A Zeno workflow is defined by a JSON object that contains the following properties:
+A Composable workflow is defined by a JSON object that contains the following properties:
 
 * **name**: The name of the workflow.
 * **vars**: A map of variables that can be used in the workflow.
@@ -20,7 +20,7 @@ An activity is defined by a JSON object that contains the following properties:
 * **name**: The name of the activity.
 * **import**: An array of variables that will be imported into the activity.
 * **params**: A map of parameters that will be passed to the activity.
-* **fetch**: A map of data that will be fetched from the Zeno platform before the activity is executed.
+* **fetch**: A map of data that will be fetched from the Composable platform before the activity is executed.
 * **condition**: A condition that must be met before the activity is executed.
 * **parallel**: A boolean value that indicates whether the activity should be executed in parallel with other activities.
 * **output**: The name of the variable that will contain the result of the activity.
@@ -43,14 +43,14 @@ ${config.name}
 
 ### Data Fetching
 
-The `fetch` property of an activity definition can be used to fetch data from the Zeno platform before the activity is executed. The `fetch` property is a map of data sources. Each data source is defined by a JSON object that contains the following properties:
+The `fetch` property of an activity definition can be used to fetch data from the Composable platform before the activity is executed. The `fetch` property is a map of data sources. Each data source is defined by a JSON object that contains the following properties:
 
 * **type**: The type of data source.
 * **query**: A query that will be used to fetch the data.
 * **limit**: The maximum number of records to fetch.
 * **select**: A list of fields to select.
 
-The following example shows how to fetch a document from the Zeno platform:
+The following example shows how to fetch a document from the Composable platform:
 
 ```json
 {
@@ -67,7 +67,7 @@ The following example shows how to fetch a document from the Zeno platform:
 }
 ```
 
-The `document` data source will fetch a document from the Zeno platform that has an `_id` property that matches the value of the `objectId` variable. The `limit` property specifies that only one document should be fetched.
+The `document` data source will fetch a document from the Composable platform that has an `_id` property that matches the value of the `objectId` variable. The `limit` property specifies that only one document should be fetched.
 
 ### Conditions
 
@@ -124,7 +124,7 @@ The result of the `processDocument` activity will be stored in the `result` vari
 
 ### Example Workflow
 
-The following example shows a complete Zeno workflow definition:
+The following example shows a complete Composable workflow definition:
 
 ```json
 {
@@ -175,7 +175,7 @@ The following example shows a complete Zeno workflow definition:
 }
 ```
 
-This workflow will fetch a document from the Zeno platform, process the document, and then send an email with the result of the processing.
+This workflow will fetch a document from the Composable platform, process the document, and then send an email with the result of the processing.
 
 ### Creating New Activities
 
@@ -193,11 +193,11 @@ export class LogMessageActivity implements DSLActivity {
 }
 ```
 
-This activity can be registered with the Zeno platform and then used in a workflow.
+This activity can be registered with the Composable platform and then used in a workflow.
 
 ### Business Use Cases
 
-The Zeno Workflow DSL can be used to automate a wide variety of business processes. Some common use cases include:
+The Composable Workflow DSL can be used to automate a wide variety of business processes. Some common use cases include:
 
 * **Document processing**: Automating the processing of documents, such as invoices, contracts, and reports.
 * **Data analysis**: Automating the analysis of data, such as customer data, sales data, and financial data.
@@ -206,7 +206,7 @@ The Zeno Workflow DSL can be used to automate a wide variety of business process
 
 ### Conclusion
 
-The Zeno Workflow DSL is a powerful tool that can be used to automate a wide variety of business processes. The DSL is easy to use and can be used to create complex workflows that can be executed by the Zeno platform.
+The Composable Workflow DSL is a powerful tool that can be used to automate a wide variety of business processes. The DSL is easy to use and can be used to create complex workflows that can be executed by the Composable platform.
 
 
 ## Build Content Workflow Definition

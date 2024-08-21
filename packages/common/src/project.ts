@@ -1,3 +1,5 @@
+import { AccountRef } from "./user";
+
 export interface ICreateProjectPayload {
     name: string;
     namespace: string;
@@ -30,6 +32,12 @@ export function isRoleIncludedIn(role: string, includingRole: string) {
     }
 }
 
+
+export interface PopulatedProjectRef {
+    id: string;
+    name: string;
+    account: AccountRef
+}
 export interface ProjectRef {
     id: string;
     name: string;

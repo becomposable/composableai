@@ -1,4 +1,4 @@
-import { ExecutionRun, GenerateTestDataPayload, ImprovePromptPayload, Interaction, InteractionCreatePayload, InteractionExecutionPayload, InteractionForkPayload, InteractionPublishPayload, InteractionRef, InteractionRefWithSchema, InteractionUpdatePayload, InteractionsExportPayload } from "@becomposable/common";
+import { ExecutionRun, GenerateInteractionPayload, GenerateTestDataPayload, ImprovePromptPayload, Interaction, InteractionCreatePayload, InteractionExecutionPayload, InteractionForkPayload, InteractionPublishPayload, InteractionRef, InteractionRefWithSchema, InteractionUpdatePayload, InteractionsExportPayload } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "api-fetch-client";
 import { ComposableClient } from "./client.js";
 import { executeInteraction, executeInteractionByName } from "./execute.js";
@@ -30,7 +30,7 @@ export default class InteractionsApi extends ApiTopic {
     }
 
     /**
-     * Get the list of all interactions in rthe current project. Schemas will be returned too.
+     * Get the list of all interactions in the current project. Schemas will be returned too.
      * @returns InteractionRefWithSchema[]
      **/
     export(payload: InteractionsExportPayload): Promise<InteractionRefWithSchema[]> {
@@ -130,6 +130,17 @@ export default class InteractionsApi extends ApiTopic {
     }
 
     /**
+     * Generate Composable definition of an interaction
+     **/
+    generateInteraction(id: string, payload: GenerateInteractionPayload): Promise<any[]> {
+
+        return this.post(`${id}/generate-interaction`, {
+            payload
+        });
+
+    }
+
+    /**
      * Generate Test Data for an interaction
      **/
     generateTestData(id: string, payload: GenerateTestDataPayload): Promise<any[]> {
@@ -137,7 +148,6 @@ export default class InteractionsApi extends ApiTopic {
         return this.post(`${id}/generate-test-data`, {
             payload
         });
-
     }
 
     /**
@@ -150,7 +160,7 @@ export default class InteractionsApi extends ApiTopic {
     }
 
     /**
-     * List the versions of the interaxction. Returns an empty array if no versions are found
+     * List the versions of the interaction. Returns an empty array if no versions are found
      * @param id
      * @returns the versions list or an empty array if no versions are found
      */
@@ -159,7 +169,7 @@ export default class InteractionsApi extends ApiTopic {
     }
 
     /**
-     * List the forks of the interaxction. Returns an empty array if no forks are found
+     * List the forks of the interaction. Returns an empty array if no forks are found
      * @param id
      * @returns the versions list or an empty array if no forks are found
      */

@@ -221,6 +221,11 @@ export interface InteractionExecutionConfiguration {
     do_validate?: boolean;
 }
 
+export interface GenerateInteractionPayload {
+    description: string;
+    config: InteractionExecutionConfiguration;
+}
+
 export interface GenerateTestDataPayload {
     message?: string;
     count?: number;

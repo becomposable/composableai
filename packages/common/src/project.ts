@@ -1,4 +1,4 @@
-import { AccountRef } from "./user";
+import { AccountRef } from "./user.js";
 
 export interface ICreateProjectPayload {
     name: string;

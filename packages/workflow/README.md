@@ -1,12 +1,4 @@
-export const metadata = {
-    title: 'Zeno Workflows',
-    model: 'gemini-1.5-pro',
-    generated_at: '2024-08-21T17:33:36.610Z',
-    }
-    
-
-
-    ## Zeno Workflow DSL
+# Composable Workflow DSL
 
 The Zeno Workflow DSL is a domain-specific language (DSL) used to define workflows that are executed by the Zeno platform. The DSL is based on JSON and is designed to be easy to read and write.
 

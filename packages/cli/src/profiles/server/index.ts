@@ -49,7 +49,7 @@ export async function startConfigSession(config_url: string, payload: ConfigPayl
     });
     const port = (server.address() as net.AddressInfo).port;
     const params = new URLSearchParams();
-    params.append('redirect_uri', `http://localhost:${port}`);
+    params.append('redirect_uri', `http://127.0.0.1:${port}`);
     params.append('code', String(code));
     if (payload.profile) params.append('profile', payload.profile);
     if (payload.account) params.append('account', payload.account);

@@ -20,8 +20,8 @@
         "vitest": "^1.4.0"
     },
     "dependencies": {
-        "@becomposable/common": "^0.30.1",
-        "@llumiverse/core": "^0.13.0",
+        "@becomposable/common": "workspace:*",
+        "@llumiverse/core": "workspace:*",
         "api-fetch-client": "0.12.0",
         "eventsource": "^2.0.2"
     },

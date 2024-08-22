@@ -2,9 +2,6 @@
  * IMPORTANT: DO NOT RUN IN VITEST, VITEST DOESN'T WORK WITH APRYSE
  */
 
-
-
-import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { extractImagesFromPdfWithApryse } from "./pdf.js";
@@ -21,5 +18,4 @@ const main = async () => {
 
 }   
 
-dotenv.config();
 main();

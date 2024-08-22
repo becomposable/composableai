@@ -25,6 +25,7 @@
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
     },
     "devDependencies": {
+        "@types/react": "^18.3.4",
         "typescript": "^5.0.2"
     },
     "peerDependencies": {
@@ -32,6 +33,8 @@
     },
     "dependencies": {
         "@becomposable/client": "^0.30.1",
-        "@becomposable/common": "^0.30.1"
+        "@becomposable/common": "^0.30.1",
+        "@types/json-schema": "^7.0.15",
+        "json-schema": "^0.4.0"
     }
 }

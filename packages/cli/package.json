@@ -45,6 +45,7 @@
         "node-web-stream-adapters": "^0.1.0",
         "open": "^10.1.0",
         "signal-exit": "^4.1.0",
-        "typescript": "^5.5.3"
+        "typescript": "^5.5.3",
+        "seedrandom": "^3.0.5"
     }
 }

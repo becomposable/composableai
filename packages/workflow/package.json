@@ -8,9 +8,12 @@
     "lib",
     "src"
   ],
+  "bin": {
+    "bundle-workflows": "./bin/bundle-workflows.mjs"
+  },
   "scripts": {
     "test": "vitest run",
-    "build": "tsmod build && bundle-workflows lib/esm/workflows.js lib/workflows-bundle.js",
+    "build": "tsmod build && npx bundle-workflows lib/esm/workflows.js lib/workflows-bundle.js",
     "clean": "rm -rf ./lib tsconfig.tsbuildinfo"
   },
   "repository": {
@@ -22,7 +25,8 @@
   "devDependencies": {
     "@types/tmp": "^0.2.6",
     "ts-dual-module": "^0.6.3",
-    "vitest": "^1.6.0"
+    "vitest": "^1.6.0",
+    "@temporalio/worker": "^1.9.0"
   },
   "dependencies": {
     "@becomposable/cloud": "^0.30.1",
@@ -30,6 +34,7 @@
     "@becomposable/common": "^0.30.1",
     "@becomposable/blobs": "^0.30.1",
     "@opendocsg/pdf2md": "^0.1.29",
+    "@llumiverse/core": "workspace:*",
     "@pdftron/pdfnet-node": "^10.10.0",
     "@temporalio/activity": "^1.9.3",
     "@temporalio/workflow": "^1.9.3",
@@ -40,7 +45,8 @@
     "node-web-stream-adapters": "^0.1.0",
     "pdf2pic": "^3.1.1",
     "sharp": "^0.33.4",
-    "tiktoken": "^1.0.15"
+    "tiktoken": "^1.0.15",
+    "seedrandom": "^3.0.5"
   },
   "ts_dual_module": {
     "outDir": "lib",

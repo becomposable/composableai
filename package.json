@@ -3,10 +3,10 @@
     "version": "0.30.1",
     "private": true,
     "scripts": {
-        "release": "npm publish --ws --access public",
-        "build": "npm run build --ws",
-        "test": "npm run test --ws",
-        "clean": "rimraf ./node_modules && npm run clean --ws"
+        "release": "pnpm -r publish --access public",
+        "build": "pnpm -r build",
+        "test": "pnpm -r test",
+        "clean": "rimraf ./node_modules && pnpm -r clean"
     },
     "devDependencies": {
         "npm-ws-tools": "^0.2.0",

@@ -1,22 +1,19 @@
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
-import { GoogleAuth } from 'google-auth-library';
-
+import { Auth } from 'googleapis';
 
 export class VaultClient {
 
 
     async getSecret(secretName: string) {
-        0
+        
         console.log(`Getting secret ${secretName} from vault`);
-        const auth = new GoogleAuth({
-            scopes: ['https://www.googleapis.com/auth/cloud-platform']
+        const auth = new Auth.GoogleAuth();
+
+        console.log('Creating secret manager client');
+        const client = new SecretManagerServiceClient({
+            auth: auth
         });
-        const authClient = await auth.getClient();
-        console.log('Credential type:', authClient.constructor.name);
-        console.log('Credential token:', authClient.credentials.id_token);
-
-        const client = new SecretManagerServiceClient();
-
+            
         console.log('Getting secret version');
         const [version] = await client.accessSecretVersion({
             name: `projects/${process.env.GOOGLE_PROJECT_ID}/secrets/${secretName}/versions/latest`,

@@ -1,7 +1,7 @@
 import { Auth, drive_v3 } from 'googleapis';
 import { Readable } from 'stream';
 import { UnsupportedBlobOperationError } from './UnsupportedOperationError.js';
-import { AbstractReadableBlob, Blob, Bucket, BlobStorage } from "./storage.js";
+import { AbstractReadableBlob, Blob, BlobStorage, Bucket } from "./storage.js";
 
 export const defaultTargetServiceAccount = 'google-drive-reader@dengenlabs.iam.gserviceaccount.com';
 const defaultScopes = ['https://www.googleapis.com/auth/drive.readonly'];

@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "test": "vitest run",
-    "build": "tsmod build",
+    "build": "npx tsmod build",
     "clean": "rm -rf ./lib tsconfig.tsbuildinfo"
   },
   "license": "Apache-2.0",

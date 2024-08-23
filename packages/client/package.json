@@ -9,7 +9,7 @@
     ],
     "scripts": {
         "eslint": "eslint './src/**/*.{jsx,js,tsx,ts}'",
-        "build": "tsmod build",
+        "build": "npx tsmod build",
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
     },
     "devDependencies": {

@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "test": "vitest run",
-    "build": "tsmod build",
+    "build": "npx tsmod build",
     "clean": "rm -rf ./lib ./node_modules tsconfig.tsbuildinfo"
   },
   "license": "MIT",

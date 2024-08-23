@@ -23,18 +23,19 @@
   },
   "license": "Apache-2.0",
   "devDependencies": {
+    "@temporalio/worker": "^1.9.0",
     "@types/tmp": "^0.2.6",
     "ts-dual-module": "^0.6.3",
     "vitest": "^1.6.0",
-    "@temporalio/worker": "^1.9.0"
+    "@temporalio/testing": "^1.9.0"
   },
   "dependencies": {
-    "@becomposable/cloud": "^0.30.1",
-    "@becomposable/client": "^0.30.1",
-    "@becomposable/common": "^0.30.1",
     "@becomposable/blobs": "^0.30.1",
-    "@opendocsg/pdf2md": "^0.1.29",
+    "@becomposable/client": "^0.30.1",
+    "@becomposable/cloud": "^0.30.1",
+    "@becomposable/common": "^0.30.1",
     "@llumiverse/core": "workspace:*",
+    "@opendocsg/pdf2md": "^0.1.29",
     "@pdftron/pdfnet-node": "^10.10.0",
     "@temporalio/activity": "^1.9.3",
     "@temporalio/workflow": "^1.9.3",
@@ -44,9 +45,10 @@
     "fast-deep-equal": "^3.1.3",
     "node-web-stream-adapters": "^0.1.0",
     "pdf2pic": "^3.1.1",
+    "seedrandom": "^3.0.5",
     "sharp": "^0.33.4",
     "tiktoken": "^1.0.15",
-    "seedrandom": "^3.0.5"
+    "tmp": "^0.2.3"
   },
   "ts_dual_module": {
     "outDir": "lib",

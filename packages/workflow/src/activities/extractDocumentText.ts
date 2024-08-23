@@ -1,6 +1,7 @@
 import { Blobs, md5 } from '@becomposable/blobs';
 import { ContentObject, CreateContentObjectPayload, DSLActivityExecutionPayload, DSLActivitySpec } from '@becomposable/common';
 import { log } from "@temporalio/activity";
+import { mutoolPdfToText } from '../conversion/mutool.js';
 import { manyToMarkdown } from '../conversion/pandoc.js';
 import { trasformPdfToMarkdown } from '../conversion/pdf.js';
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
@@ -65,7 +66,12 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload) 
     switch (doc.content.type) {
 
         case 'application/pdf':
-            txt = await trasformPdfToMarkdown(fileBuffer);
+            //if pdf is more than 2MB, use mutool
+            if (fileBuffer.length > 2 * 1024 * 1024) {
+                txt = await trasformPdfToMarkdown(fileBuffer);
+            } else {
+                txt = await mutoolPdfToText(fileBuffer);
+            }   
             break;
 
         case 'text/plain':

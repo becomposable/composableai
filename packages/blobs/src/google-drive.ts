@@ -47,7 +47,6 @@ export class GoogleDriveStorage implements BlobStorage {
     static async connectImpersonated(
         targetServiceAccount = 'google-drive-reader@dengenlabs.iam.gserviceaccount.com',
         scopes = ['https://www.googleapis.com/auth/drive.readonly']) {
-        console.log("Connecting to google drive as", targetServiceAccount);
         const auth = await getImpersonatedGoogleAuth(targetServiceAccount, scopes);
         return new GoogleDriveStorage(auth);
     }
@@ -73,7 +72,6 @@ export class GDriveBucket implements Bucket {
             });
             return new GoogleDriveBlob(this.drive, resp.data);
         } catch (err: any) {
-            console.log("Error fetching file", err);
             if (err.code === 404) {
                 return new GoogleDriveMissingBlob(this.drive, name);
             } else {

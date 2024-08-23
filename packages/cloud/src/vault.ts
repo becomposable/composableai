@@ -1,20 +1,13 @@
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
-import { Auth } from 'googleapis';
 
 export class VaultClient {
 
 
     async getSecret(secretName: string) {
         
-        console.log(`Getting secret ${secretName} from vault`);
-        const auth = new Auth.GoogleAuth();
-
-        console.log('Creating secret manager client');
-        const client = new SecretManagerServiceClient({
-            auth: auth
-        });
+        const client = new SecretManagerServiceClient();
             
-        console.log('Getting secret version');
+        console.log('Getting secret from vault: ' + secretName);
         const [version] = await client.accessSecretVersion({
             name: `projects/${process.env.GOOGLE_PROJECT_ID}/secrets/${secretName}/versions/latest`,
         });

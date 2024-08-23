@@ -79,6 +79,10 @@ export class ConfigureProfile {
             this.config.use(this.data.name!);
         }
         this.config.save();
+        // force exit to close last prompt
+        console.log('\n');
+        console.log('Authentication completed.');
+        process.exit(0);
     }
 
     start() {

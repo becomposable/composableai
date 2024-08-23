@@ -9,7 +9,6 @@ const corsHeaders = {
 };
 
 export function handleCors(req: IncomingMessage, res: ServerResponse) {
-    console.log('##HANDLE CORS', req.method);
     if (req.method === 'OPTIONS') {
         res.writeHead(204, corsHeaders);
         res.end();

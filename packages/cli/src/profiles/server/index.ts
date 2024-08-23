@@ -1,8 +1,11 @@
 import { randomInt } from "crypto";
+import enquirer from "enquirer";
 import net from "net";
 import open from "open";
 import { handleCors } from "./cors.js";
 import { readRequestBody, startServer } from "./server.js";
+
+const { prompt } = enquirer;
 
 export interface ConfigPayload {
     profile?: string;
@@ -58,6 +61,26 @@ export async function startConfigSession(config_url: string, payload: ConfigPayl
     console.log("Opening browser to", url);
     open(url);
     console.log(`The session code is ${code}`);
+    try {
+        const answer: any = await prompt({
+            name: 'result',
+            type: 'input',
+            message: "The browser failed to send the token? Copy the token here",
+        });
+        const resultText = answer.result?.trim();
+        if (resultText) {
+            try {
+                const result = JSON.parse(answer.result.trim());
+                callback(result);
+                console.log('Authentication completed.');
+            } catch (e) {
+                console.error("Invalid token");
+                process.exit(1);
+            }
+        }
+    } catch (err: any) {
+        // do nothing
+    }
 }
 
 //startConfigSession("https://localhost:5173/cli", {}, (result: ConfigResult) => console.log("Logged in", result));

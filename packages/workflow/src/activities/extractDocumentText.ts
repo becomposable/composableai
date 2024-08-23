@@ -68,9 +68,9 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload) 
         case 'application/pdf':
             //if pdf is more than 2MB, use mutool
             if (fileBuffer.length > 2 * 1024 * 1024) {
-                txt = await trasformPdfToMarkdown(fileBuffer);
-            } else {
                 txt = await mutoolPdfToText(fileBuffer);
+            } else {
+                txt = await trasformPdfToMarkdown(fileBuffer);
             }   
             break;
 
@@ -105,6 +105,21 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload) 
 
         //csv
         case 'text/csv':
+            txt = fileBuffer.toString('utf8');
+            break;
+        
+        //typescript
+        case 'application/typescript':
+            txt = fileBuffer.toString('utf8');
+            break;
+
+        //javascript
+        case 'application/javascript':
+            txt = fileBuffer.toString('utf8');
+            break;
+        
+        //json
+        case 'application/json':
             txt = fileBuffer.toString('utf8');
             break;
 

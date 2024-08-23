@@ -42,10 +42,14 @@
         "glob": "^11.0.0",
         "json-schema": "^0.4.0",
         "json-schema-to-typescript": "^13.1.1",
+        "jsonwebtoken": "^9.0.2",
         "node-web-stream-adapters": "^0.1.0",
         "open": "^10.1.0",
+        "seedrandom": "^3.0.5",
         "signal-exit": "^4.1.0",
-        "typescript": "^5.5.3",
-        "seedrandom": "^3.0.5"
+        "typescript": "^5.5.3"
+    },
+    "devDependencies": {
+        "@types/jsonwebtoken": "^9.0.6"
     }
 }

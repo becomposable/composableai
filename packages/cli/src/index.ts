@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { requestJWT, requestPublicKey } from './auth/index.js';
 import runExport from './codegen/index.js';
-import { createProfile, deleteProfile, listProfiles, showProfile, updateCurrentProfile, updateProfile, useProfile } from './profiles/commands.js';
+import { createProfile, deleteProfile, listProfiles, showProfile, tryRrefreshToken, updateCurrentProfile, updateProfile, useProfile } from './profiles/commands.js';
 import { getConfigFile } from './profiles/index.js';
 import { genTestData } from './datagen/index.js';
 import { listEnvirnments } from './envs/index.js';
@@ -164,3 +164,9 @@ registerObjectsCommand(program);
 registerWorkflowsCommand(program);
 
 program.parse(process.argv);
+
+process.on("unhandledRejection", (err: any) => {
+    if (err.status === 401) { // token expired?
+        tryRrefreshToken();
+    }
+})

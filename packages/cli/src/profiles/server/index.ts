@@ -79,7 +79,7 @@ export async function startConfigSession(config_url: string, payload: ConfigPayl
             }
         }
     } catch (err: any) {
-        // do nothing
+        throw err;
     }
 }
 

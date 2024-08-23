@@ -2,6 +2,7 @@ import colors from 'ansi-colors';
 import enquirer from "enquirer";
 import { config } from "./index.js";
 const { prompt } = enquirer;
+import jwt from 'jsonwebtoken';
 
 export async function listProfiles() {
     const selected = config.current?.name;
@@ -128,4 +129,24 @@ async function selectProfile(message = "Select the profile") {
         choices: config.profiles.map(p => p.name)
     })
     return response.name as string;
+}
+
+export async function tryRrefreshToken() {
+    if (config.current?.apikey) {
+        const token = jwt.decode(config.current.apikey, { json: true });
+        if (token?.exp && token.exp * 1000 < Date.now()) {
+            console.log();
+            console.log(colors.bold("Operation Failed:"), colors.red("Authentication token expired!"));
+            console.log();
+            const r: any = await prompt({
+                name: 'refresh',
+                type: "confirm",
+                message: "Do you want to refresh the token for the current profile?",
+                initial: true,
+            })
+            if (r.refresh) {
+                config.updateProfile(config.current.name).start();
+            }
+        }
+    }
 }

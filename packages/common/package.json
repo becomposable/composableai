@@ -8,6 +8,7 @@
         "src"
     ],
     "scripts": {
+        "preinstall": "npx only-allow pnpm",
         "test": "vitest run",
         "build": "npx tsmod build",
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"

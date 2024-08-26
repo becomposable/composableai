@@ -3,6 +3,7 @@
     "version": "0.30.1",
     "private": true,
     "scripts": {
+        "preinstall": "npx only-allow pnpm",
         "release": "pnpm -r publish --access public",
         "build": "pnpm -r build",
         "test": "pnpm -r test",

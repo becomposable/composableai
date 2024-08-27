@@ -1,5 +1,5 @@
-import { DSLActivityExecutionPayload, DSLActivitySpec, ExecutionRun, ExecutionRunStatus, InteractionExecutionConfiguration } from "@becomposable/common";
 import { ComposableClient } from "@becomposable/client";
+import { DSLActivityExecutionPayload, DSLActivitySpec, ExecutionRun, ExecutionRunStatus, InteractionExecutionConfiguration } from "@becomposable/common";
 import { activityInfo, log } from "@temporalio/activity";
 import { projectResult } from "../dsl/projections.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
@@ -191,7 +191,7 @@ export async function executeInteractionFromActivity(client: ComposableClient, i
     }
 
     if (res.error || res.status === ExecutionRunStatus.failed) {
-        log.error(`Error executing interaction ${interactionName}`, res.error);
+        log.error(`Error executing interaction ${interactionName}`, {error: res.error });
         throw new Error(`Interaction Execution failed ${interactionName}: ${res.error}`);
     }
 

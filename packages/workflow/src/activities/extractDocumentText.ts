@@ -124,8 +124,13 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload) 
             break;
 
         default:
+            if (sniffIfText(fileBuffer)) {
+                txt = fileBuffer.toString('utf8'); //TODO: add charset detection
+                break;
+            }
             return createResponse(doc, "", 'text-extract-failed', `Unsupported mime type: ${doc.content.type}`);
     }
+
 
     const tokensData = countTokens(txt);
     const etag = doc.content.etag ?? md5(txt);
@@ -154,4 +159,16 @@ function createResponse(doc: ContentObject, text: string, status: string, error?
         error
     }
 
+}
+
+
+//if file is less than 100KB, check if it looks like text
+function sniffIfText(buf: Buffer) {
+    if (buf.length < 100 * 1024) {
+        const s = buf.toString('utf8');
+        if (s.length > 0) {
+            return true;
+        }
+    }
+    return false;
 }

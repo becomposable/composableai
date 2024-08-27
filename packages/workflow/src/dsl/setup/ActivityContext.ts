@@ -1,6 +1,6 @@
+import { ComposableClient } from "@becomposable/client";
 import { verifyAuthToken } from "@becomposable/cloud";
 import { DSLActivityExecutionPayload, DSLWorkflowExecutionPayload, Project, WorkflowExecutionPayload } from "@becomposable/common";
-import { ComposableClient } from "@becomposable/client";
 import { log } from "@temporalio/activity";
 import { NoDocumentFound, WorkflowParamNotFound } from "../../errors.js";
 import { getClient } from "../../utils/client.js";
@@ -102,6 +102,5 @@ export async function setupActivity<T extends Record<string, any> = Record<strin
 
 async function _fetchProject(client: ComposableClient, payload: WorkflowExecutionPayload) {
     const { project } = await verifyAuthToken(payload.auth_token);
-    console.log(`Getting project data for ${project?.id}`);
     return project ? await client.projects.retrieve(project.id) : undefined;
 }

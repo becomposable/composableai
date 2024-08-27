@@ -4,6 +4,7 @@ import fs from 'fs';
 import os from 'os';
 
 import pkg from '@pdftron/pdfnet-node';
+import { log } from "@temporalio/activity";
 const { PDFNet } = pkg;
 
 
@@ -21,7 +22,7 @@ async function extractImages(buffer: Buffer, minHw: number = 300) {
     const reader = await PDFNet.ElementReader.create();
     const tmpDir = os.tmpdir()
     const workingDir = fs.mkdtempSync(`${tmpDir}/pdfextract_`);
-    console.log(`Extracting images to ${workingDir}`);
+    log.info(`Extracting images to ${workingDir}`);
 
     // Read page content on every page in the document
     const itr = await doc.getPageIterator();
@@ -52,7 +53,7 @@ async function extractImages(buffer: Buffer, minHw: number = 300) {
                         //do not extract if image is too small, likely not relevant
                         //TODO: use LLM to decide if it matters?
                         if (w < minHw && h < minHw ) {
-                            console.log(`Skipping small image: width=${w}, height=${h} on page ${pageNumber}`);
+                            log.info(`Skipping small image: width=${w}, height=${h} on page ${pageNumber}`);
                             break;
                         }
                         const imgName = `${workingDir}/img_${pageNumber}_${imgCount++}.png`;

@@ -1,3 +1,4 @@
+import { logger } from '@dglabs/logger';
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager';
 
 export class VaultClient {
@@ -7,7 +8,7 @@ export class VaultClient {
         
         const client = new SecretManagerServiceClient();
             
-        console.log('Getting secret from vault: ' + secretName);
+        logger.info('Getting secret from vault: ' + secretName);
         const [version] = await client.accessSecretVersion({
             name: `projects/${process.env.GOOGLE_PROJECT_ID}/secrets/${secretName}/versions/latest`,
         });

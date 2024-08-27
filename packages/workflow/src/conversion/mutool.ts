@@ -17,11 +17,9 @@ export function mutoolPdfToText(buffer: Buffer): Promise<string> {
 
     log.info("Converting pdf to text", { inputFile: inputFile.name, targetFileName });
     
-    console.log("Spawning mutool")
     const command = spawn("mutool", ["convert", "-o", targetFileName, inputFile.name]);
 
     command.on('exit', function (code) {
-      console.log("Command exit")
       if (code) {
         reject(new Error(`mutool exited with code ${code}`));
       }
@@ -29,7 +27,6 @@ export function mutoolPdfToText(buffer: Buffer): Promise<string> {
 
 
     command.on('close', function (code) {
-      console.log("Command close")
       if (code) {
         reject(new Error(`mutool exited with code ${code}`));
       } else {

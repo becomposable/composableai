@@ -31,6 +31,7 @@
     },
     "dependencies": {
         "@becomposable/memory": "workspace:*",
+        "@becomposable/memory-commands": "workspace:*",
         "commander": "^12.1.0"
     },
     "devDependencies": {

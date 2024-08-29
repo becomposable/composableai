@@ -1,0 +1,1 @@
+{"msg":"hello","code":"//@ts-ignore\nimport { tmpdir, text, json, docx, media, pdf, exec, from } from \"@becomposable/memory-commands\";\n\nexec(\"ls -al\", { quiet: true });\n\nconsole.log(\"Temporary dir is: \", tmpdir);\n\nexport default {\n    msg: \"hello\",\n    //images: media('./images/*.jpg'),\n    code: text('./src/example1.ts'),\n};\n"}

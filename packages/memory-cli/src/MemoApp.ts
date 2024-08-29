@@ -1,12 +1,14 @@
 import { resolve } from "path";
 import { Builder, BuildOptions } from "@becomposable/memory";
+import { mkdtempSync, rmSync } from "fs";
 
 class App {
     builder?: Builder;
 
     async run(script: string, options: BuildOptions): Promise<void> {
+        const tmpdir = mkdtempSync('becomposable-memo-');
         try {
-            this.builder = new Builder(options);
+            this.builder = new Builder({ ...options, tmpdir: tmpdir });
             const module = await import(resolve(script));
             const output = module.default;
             if (!output) {
@@ -15,6 +17,7 @@ class App {
             await this.builder.build(output);
         } finally {
             this.builder = undefined;
+            rmSync(tmpdir, { recursive: true });
         }
     }
 }

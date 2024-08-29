@@ -1,7 +1,6 @@
-import { mkdtempSync, rmSync } from "fs";
 import { writeFile } from "fs/promises";
 import { tmpdir } from "os";
-import { join, resolve } from "path";
+import { resolve } from "path";
 import { ContentRef, DocxOptions, DocxRef, JsonRef, PdfOptions, PdfRef, RefConstructor, TextOptions, TextRef } from "./content.js";
 import { exec, ExecOptions } from "./exec.js";
 import { fetchMemoryImage } from "./image.js";
@@ -49,6 +48,11 @@ export interface BuildOptions {
      * If set, suppress logs. Defaults to false.
      */
     quiet?: boolean;
+
+    /**
+     * A te,porary directory to use for the build. If not set, the system tmp dir will be used
+     */
+    tmpdir?: string;
 }
 
 export interface Commands {
@@ -72,8 +76,9 @@ export class Builder implements Commands {
     files: MediaFile[] = [];
 
     constructor(public options: BuildOptions = {}) {
-        this.tmpdir = join(tmpdir(), 'becomposable-memo-')
+        this.tmpdir = options.tmpdir || tmpdir();
     }
+
     extends(base: Record<string, any>, projection?: ProjectionProperties) {
         this.baseObject = projection ? getProjection(base, projection) : base;
     }
@@ -146,30 +151,26 @@ export class Builder implements Commands {
     async build(object: Record<string, any>) {
         const hasFiles = this.files.length > 0;
         const out = resolve((this.options.out || 'memo') + (hasFiles ? '.tar' : '.json'));
-        await mkdtempSync(this.tmpdir);
-        try {
-            // wait for the preparation to finish
-            await Promise.all(this.preTasks);
-            // wait for the content to be built
-            await Promise.all(this.tasks);
-            // merge the object with the base object if any
-            if (this.baseObject) {
-                object = Object.assign({}, this.baseObject, object);
-            }
-            // save the object
-            const json = JSON.stringify(object, undefined, this.options.indent || undefined);
-            const content = new JsonContextFile(json);
-            if (this.files.length > 0) {
-                // build a tar
-                await buildTar(out, [content as MemoryFile].concat(this.files));
-            } else {
-                // save the content to a file
-                await content.writeToFile(out);
-            }
-            this.options.quiet || console.log(`Memory saved to ${out}`);
-        } finally {
-            rmSync(this.tmpdir, { recursive: true });
+
+        // wait for the preparation to finish
+        await Promise.all(this.preTasks);
+        // wait for the content to be built
+        await Promise.all(this.tasks);
+        // merge the object with the base object if any
+        if (this.baseObject) {
+            object = Object.assign({}, this.baseObject, object);
         }
+        // save the object
+        const json = JSON.stringify(object, undefined, this.options.indent || undefined);
+        const content = new JsonContextFile(json);
+        if (this.files.length > 0) {
+            // build a tar
+            await buildTar(out, [content as MemoryFile].concat(this.files));
+        } else {
+            // save the content to a file
+            await content.writeToFile(out);
+        }
+        this.options.quiet || console.log(`Memory saved to ${out}`);
     }
 
 }

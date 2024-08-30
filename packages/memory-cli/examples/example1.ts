@@ -5,6 +5,6 @@ exec("ls -al", { quiet: true });
 
 export default {
     msg: "hello",
-    //images: media('./images/*.jpg'),
+    images: media('/Users/bogdan/work/js/memory/images/*.jpg'),
     code: text('./examples/example1.ts'),
 };

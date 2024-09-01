@@ -8,7 +8,7 @@ import { TruncateSpec, truncByMaxTokens } from "../utils/tokens.js";
 
 //Example:
 //@ts-ignore
-const JSON: DSLActivitySpec = {
+const example: DSLActivitySpec = {
     name: 'executeInteraction',
     import: ["defaultModel", "guidlineId", "docTypeId"],
     params: {
@@ -191,8 +191,8 @@ export async function executeInteractionFromActivity(client: ComposableClient, i
     }
 
     if (res.error || res.status === ExecutionRunStatus.failed) {
-        log.error(`Error executing interaction ${interactionName}`, {error: res.error });
-        throw new Error(`Interaction Execution failed ${interactionName}: ${res.error}`);
+        log.error(`Error executing interaction ${interactionName}`, {error: res.error, run_id: res.id});
+        throw new Error(`Interaction ${interactionName} execution failed in run ${res.id}: ${JSON.stringify(res.error)}`);
     }
 
     return res;

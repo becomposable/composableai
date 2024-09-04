@@ -68,6 +68,22 @@ export async function createObject(program: Command, files: string[], options: R
                 process.exit(2);
             }
             if (stats.isFile()) {
+                const questions: any[] = [];
+                questions.push({
+                    type: 'select',
+                    name: 'type',
+                    message: "Target environment",
+                    choices: ['local', 'staging', 'preview', 'prod', 'custom'],
+                    initial: 'staging',
+                });
+
+                if (questions.length > 0) {
+                    const response: any = await prompt(questions)
+                    if (!type) {
+                        type = response.type;
+                    }
+                }
+
                 createObjectFromFile(program, file, options);
             } else if (stats.isDirectory()) {
                 const files = await listFilesInDirectory(file, options.recursive || false);

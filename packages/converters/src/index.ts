@@ -1,9 +1,10 @@
-import { mutoolPdfToText } from './mutool.js';
-import { imageResizer } from './image.js';
+import { transformImage, transformImageFile } from './image.js';
+import { pdfFileToText, pdfToText } from './mutool.js';
 import { manyToMarkdown } from './pandoc.js';
 
 export {
-    mutoolPdfToText as pdfTotext,
-    imageResizer as transformImage,
-    manyToMarkdown
-}
+    manyToMarkdown,
+    pdfFileToText, pdfToText,
+    transformImage,
+    transformImageFile
+};

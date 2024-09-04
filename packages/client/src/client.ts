@@ -34,6 +34,11 @@ export interface ComposableClientProps {
 export class ComposableClient extends AbstractFetchClient<ComposableClient> {
 
     /**
+     * The JWT token linked to the API KEY (sk or pk)
+     */
+    _jwt: string | null = null;
+
+    /**
      * The store client
      */
     store: ZenoClient;
@@ -162,7 +167,7 @@ export class ComposableClient extends AbstractFetchClient<ComposableClient> {
             token
         };
 
-        return this.get('/auth/token', { query: query });
+        return this.get('/auth/token', { query: query, headers: { "authorization": undefined } as any });
     }
 
     projects = new ProjectsApi(this);

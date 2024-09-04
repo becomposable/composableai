@@ -8,10 +8,11 @@ export function registerObjectsCommand(program: Command) {
     store.command("post <file...>")
         .description("Post a new object to the store")
         .option('--name [name]', 'The name of the object to create. If not specified the file name will be used.')
-        .option('--type [type]', 'The type of the object to create. If not specified the type will be inferred from the file content.')
+        .option('--type [type]', 'The type of the object to create. If not specified, one can be selected from the list of existing types.')
         .option('--mime [mime]', 'The mime-type of the file content. If not specified the mime type will be inferred from the file name extension.')
         .option('--path [parentPath]', 'The path of the parent folder where the object is created. If not specified the object will be created in the root of the store.')
-        .option('-r,--recursive', 'Recurse directory if the file argument is a directory. The defualt is to not recurse.')
+        .option('-r, --recursive', 'Recurse directory if the file argument is a directory. The default is to not recurse.')
+        .option('-a, --auto', 'The type will be inferred from the file content. The default is to select one from the list of existing types.')
         .action((files: string[], options: Record<string, any>) => {
             createObject(program, files, options);
         });

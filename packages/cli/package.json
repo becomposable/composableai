@@ -31,7 +31,7 @@
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
     },
     "dependencies": {
-        "@becomposable/client": "^0.30.1",
+        "@becomposable/client": "workspace:*",
         "@becomposable/common": "^0.30.1",
         "@becomposable/workflow": "^0.30.1",
         "ansi-colors": "^4.1.3",

@@ -42,9 +42,4 @@
     "lib",
     "test"
   ],
-  "references": [
-    {
-      "path": "../../llumiverse/core/tsconfig.json"
-    },
-  ]
 }

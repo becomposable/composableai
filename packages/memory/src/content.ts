@@ -74,6 +74,7 @@ export function loadText(file: string, options: TextOptions = {}): Promise<any> 
 
 //@ts-ignore
 export function loadPdf(file: string, options: PdfOptions = {}) {
+    //pdfFileToText(file);
     //TODO: implement
     return Promise.resolve();
 }

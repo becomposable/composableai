@@ -1,44 +1,42 @@
 import { spawn } from 'child_process';
 import fs from 'fs';
+import { readFile } from "fs/promises";
 import tmp from 'tmp';
 tmp.setGracefulCleanup();
 
+export function pdfFileToText(input: string, output: string) {
+    return new Promise((resolve, reject) => {
 
-export function mutoolPdfToText(buffer: Buffer): Promise<string> {
+        const command = spawn("mutool", ["convert", "-o", output, input]);
 
-  const inputFile = tmp.fileSync({ postfix: '.pdf' });
-  const targetFileName = tmp.tmpNameSync({ postfix: '.txt' });
-
-  fs.writeSync(inputFile.fd, buffer);
-
-  return new Promise((resolve, reject) => {
-
-    const command = spawn("mutool", ["convert", "-o", targetFileName, inputFile.name]);
-
-    command.on('exit', function (code) {
-      if (code) {
-        reject(new Error(`mutool exited with code ${code}`));
-      }
-    });
-
-
-    command.on('close', function (code) {
-      if (code) {
-        reject(new Error(`mutool exited with code ${code}`));
-      } else {
-        return fs.readFile(targetFileName, 'utf8', (err, data) => {
-          if (err) {
-            reject(err);
-          }
-          return resolve(data);
+        command.on('exit', function (code) {
+            if (code) {
+                reject(new Error(`mutool exited with code ${code}`));
+            }
         });
-      };
+
+        command.on('close', function (code) {
+            if (code) {
+                reject(new Error(`mutool exited with code ${code}`));
+            } else {
+                return resolve(output);
+            };
+        });
+
+        command.on('error', (err) => {
+            reject(err);
+        });
+
     });
 
-    command.on('error', (err) => {
-      reject(err);
+}
+export function pdfToText(buffer: Buffer): Promise<string> {
+    const inputFile = tmp.fileSync({ postfix: '.pdf' });
+    const targetFileName = tmp.tmpNameSync({ postfix: '.txt' });
+
+    fs.writeSync(inputFile.fd, buffer);
+
+    return pdfFileToText(inputFile.name, targetFileName).then(() => {
+        return readFile(targetFileName, 'utf-8');
     });
-
-  });
-
 }

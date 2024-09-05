@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { createObject, deleteObject, getObject, listObjects } from "./commands.js";
+import { createObject, deleteObject, getObject, listObjects, updateObject } from "./commands.js";
 
 export function registerObjectsCommand(program: Command) {
 
@@ -15,6 +15,11 @@ export function registerObjectsCommand(program: Command) {
         .option('-a, --auto', 'The type will be inferred from the file content. The default is to select one from the list of existing types.')
         .action((files: string[], options: Record<string, any>) => {
             createObject(program, files, options);
+        });
+    store.command("update <objectId> <type>")
+        .description("Update an existing object type given its ID")
+        .action((objectId: string, type: string, options: Record<string, any>) => {
+            updateObject(program, objectId, type, options);
         });
     store.command('delete <objectId>')
         .description("Delete an existing object given its ID")

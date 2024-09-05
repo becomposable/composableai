@@ -72,10 +72,11 @@ export async function createObject(program: Command, files: string[], options: R
                 console.error(err);
                 process.exit(2);
             }
+
+            const types: any[] = await listTypes(program);
+            const questions: any[] = [];
             if (stats.isFile()) {
-                const types: any[] = await listTypes(program);
                 if (!options.type) {
-                    const questions: any[] = [];
                     questions.push({
                         type: 'select',
                         name: 'type',
@@ -103,6 +104,23 @@ export async function createObject(program: Command, files: string[], options: R
 
                 return createObjectFromFile(program, file, options);
             } else if (stats.isDirectory()) {
+                questions.push({
+                    type: 'select',
+                    name: 'type',
+                    message: "Select a Type (the type will be used for all the files in the directory)",
+                    choices: types,
+                    limit: 10,
+                    result() {
+                        return this.focused.value;
+                    }
+                });
+                const response: any = await prompt(questions);
+                options.type = response.type;
+
+                if (options.type === AUTOMATIC_TYPE_SELECTION) {
+                    delete options.type;
+                }
+
                 const files = await listFilesInDirectory(file, options.recursive || false);
                 return createObjectFromFiles(program, files, options);
             }

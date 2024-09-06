@@ -1,5 +1,5 @@
 import { BulkOperationPayload, BulkOperationResult } from "@becomposable/common";
-import { AbstractFetchClient, RequestError } from "api-fetch-client";
+import { AbstractFetchClient, RequestError } from "@becomposable/api-fetch-client";
 import { CommandsApi } from "./CommandsApi.js";
 import { ZenoClientNotFoundError } from "./errors.js";
 import { ObjectsApi } from "./ObjectsApi.js";

@@ -22,8 +22,8 @@
     },
     "dependencies": {
         "@becomposable/common": "workspace:*",
+        "@becomposable/api-fetch-client": "workspace:*",
         "@llumiverse/core": "workspace:*",
-        "api-fetch-client": "^0.13.0",
         "eventsource": "^2.0.2"
     },
     "ts_dual_module": {

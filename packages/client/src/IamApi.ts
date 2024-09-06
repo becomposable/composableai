@@ -1,5 +1,5 @@
 import { AccessControlEntry, ACECreatePayload, AcesQueryOptions, Permission, ProjectRoles } from "@becomposable/common";
-import { ApiTopic, ClientBase } from "api-fetch-client";
+import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
 
 
 export interface FilterOption {

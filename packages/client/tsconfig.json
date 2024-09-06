@@ -49,5 +49,8 @@
     {
       "path": "../common/tsconfig.json"
     },
+    {
+      "path": "../api-fetch-client/tsconfig.json"
+    },
   ]
 }

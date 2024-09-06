@@ -1,5 +1,5 @@
 import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@becomposable/common";
-import { ApiTopic, ClientBase } from "api-fetch-client";
+import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
 
 export class StreamSource {
     constructor(public stream: ReadableStream, public name: string, public type?: string) { }

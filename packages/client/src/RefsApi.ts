@@ -1,5 +1,5 @@
 import { ResolvableRef, ResourceRef } from "@becomposable/common"
-import { ApiTopic, ClientBase } from "api-fetch-client"
+import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client"
 
 
 export class RefsApi extends ApiTopic {
@@ -11,7 +11,7 @@ export class RefsApi extends ApiTopic {
 
     resolve(refs: ResolvableRef[]): Promise<ResourceRef[]> {
 
-        return this.post('/resolve', { payload: { refs }})
+        return this.post('/resolve', { payload: { refs } })
 
     }
 

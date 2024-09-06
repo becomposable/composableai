@@ -1,4 +1,4 @@
-import { ApiTopic, ClientBase } from "api-fetch-client";
+import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
 
 
 /**

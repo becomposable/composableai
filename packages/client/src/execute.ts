@@ -74,7 +74,6 @@ export async function executeInteractionByName<P = any, R = any>(client: Composa
 }
 
 function handleStreaming(client: ComposableClient, runId: string, onChunk: (chunk: string) => void) {
-    console.log('handleStreaming', runId);
     return new Promise(async (resolve, reject) => {
         try {
             const EventSourceImpl = await EventSourceProvider();

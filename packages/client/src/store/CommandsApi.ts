@@ -1,5 +1,5 @@
 import { EmbeddingsStatusResponse, GenericCommandResponse, ProjectConfigurationEmbeddings } from "@becomposable/common";
-import { ApiTopic, ClientBase } from "api-fetch-client";
+import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
 
 
 export class CommandsApi extends ApiTopic {
@@ -22,7 +22,7 @@ export class EmbeddingsApi extends ApiTopic {
         return this.get("/status");
     }
 
-    async activate( config: Partial<ProjectConfigurationEmbeddings>): Promise<GenericCommandResponse> {
+    async activate(config: Partial<ProjectConfigurationEmbeddings>): Promise<GenericCommandResponse> {
 
         if (!config.environment) {
             throw new Error("Invalid configuration: select environment");

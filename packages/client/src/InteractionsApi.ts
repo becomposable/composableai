@@ -1,5 +1,5 @@
 import { ExecutionRun, GenerateInteractionPayload, GenerateTestDataPayload, ImprovePromptPayload, Interaction, InteractionCreatePayload, InteractionExecutionPayload, InteractionForkPayload, InteractionPublishPayload, InteractionRef, InteractionRefWithSchema, InteractionUpdatePayload, InteractionsExportPayload } from "@becomposable/common";
-import { ApiTopic, ClientBase } from "api-fetch-client";
+import { ApiTopic, ClientBase, ServerError } from "@becomposable/api-fetch-client";
 import { ComposableClient } from "./client.js";
 import { executeInteraction, executeInteractionByName } from "./execute.js";
 
@@ -94,7 +94,13 @@ export default class InteractionsApi extends ApiTopic {
      **/
     execute<P = any, R = any>(id: string, payload: InteractionExecutionPayload = {},
         onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
-        return executeInteraction(this.client as ComposableClient, id, payload, onChunk);
+        return executeInteraction(this.client as ComposableClient, id, payload, onChunk).catch(err => {
+            if (err instanceof ServerError && err.payload?.id) {
+                throw err.updateDetails({ run_id: err.payload.id });
+            } else {
+                throw err;
+            }
+        });
     }
 
     /**
@@ -114,7 +120,13 @@ export default class InteractionsApi extends ApiTopic {
      */
     executeByName<P = any, R = any>(nameWithTag: string, payload: InteractionExecutionPayload = {},
         onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
-        return executeInteractionByName(this.client as ComposableClient, nameWithTag, payload, onChunk);
+        return executeInteractionByName(this.client as ComposableClient, nameWithTag, payload, onChunk).catch(err => {
+            if (err instanceof ServerError && err.payload?.id) {
+                throw err.updateDetails({ run_id: err.payload.id });
+            } else {
+                throw err;
+            }
+        });
     }
 
     publish(id: string, payload: InteractionPublishPayload): Promise<Interaction> {

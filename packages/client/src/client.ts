@@ -1,5 +1,5 @@
 import { AuthTokenResponse } from "@becomposable/common";
-import { AbstractFetchClient } from "api-fetch-client";
+import { AbstractFetchClient } from "@becomposable/api-fetch-client";
 import AccountApi from "./AccountApi.js";
 import AccountsApi from "./AccountsApi.js";
 import AnalyticsApi from "./AnalyticsApi.js";

@@ -1,6 +1,6 @@
 import { TrainingJob } from "@llumiverse/core";
 import { ExecutionRunRef, ListTrainingSessionsQuery, TrainingSession, TrainingSessionCreatePayload, TrainingSessionRef } from "@becomposable/common";
-import { ApiTopic, ClientBase } from "api-fetch-client";
+import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
 
 
 export default class TrainingApi extends ApiTopic {

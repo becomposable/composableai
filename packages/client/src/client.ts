@@ -19,7 +19,7 @@ import UsersApi from "./UsersApi.js";
 /**
  * 1 min threshold constant in ms
  */
-const THRESHOLD = 60000;
+const EXPIRATION_THRESHOLD = 60000;
 
 export interface ComposableClientProps {
     serverUrl: string;
@@ -90,34 +90,17 @@ export class ComposableClient extends AbstractFetchClient<ComposableClient> {
     async withApiKey(apiKey: string | null) {
         return this.withAuthCallback(
             apiKey ? async () => {
-                if (!this.isApiKey(apiKey)) {
+                if (!isApiKey(apiKey)) {
                     return `Bearer ${apiKey}`
                 }
 
-                if (this.isTokenExpired(this._jwt)) {
+                if (isTokenExpired(this._jwt)) {
                     const jwt = await this.getAuthToken(apiKey);
                     this._jwt = jwt.token;
                 }
                 return `Bearer ${this._jwt}`
             } : undefined
         );
-    }
-
-    isApiKey(apiKey: string) {
-        return (apiKey.startsWith('pk-') || apiKey.startsWith('sk-'));
-    }
-
-    isTokenExpired(token: string | null) {
-        if (!token) {
-            return true;
-        }
-
-        const payloadBase64 = token.split('.')[1];
-        const decodedJson = Buffer.from(payloadBase64, 'base64').toString();
-        const decoded = JSON.parse(decodedJson)
-        const exp = decoded.exp;
-        const currentTime = Date.now();
-        return (currentTime >= exp * 1000) || (currentTime >= exp * 1000 + THRESHOLD);
     }
 
     /**
@@ -185,4 +168,21 @@ export class ComposableClient extends AbstractFetchClient<ComposableClient> {
     refs = new RefsApi(this);
     commands = new CommandsApi(this);
 
+}
+
+function isApiKey(apiKey: string) {
+    return (apiKey.startsWith('pk-') || apiKey.startsWith('sk-'));
+}
+
+function isTokenExpired(token: string | null) {
+    if (!token) {
+        return true;
+    }
+
+    const payloadBase64 = token.split('.')[1];
+    const decodedJson = Buffer.from(payloadBase64, 'base64').toString();
+    const decoded = JSON.parse(decodedJson)
+    const exp = decoded.exp;
+    const currentTime = Date.now();
+    return (exp * 1000 + EXPIRATION_THRESHOLD >= currentTime);
 }

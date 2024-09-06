@@ -184,5 +184,5 @@ function isTokenExpired(token: string | null) {
     const decoded = JSON.parse(decodedJson)
     const exp = decoded.exp;
     const currentTime = Date.now();
-    return (exp * 1000 + EXPIRATION_THRESHOLD >= currentTime);
+    return (currentTime <= exp * 1000 - EXPIRATION_THRESHOLD);
 }

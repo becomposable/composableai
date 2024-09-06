@@ -1,3 +1,4 @@
+import { ContentObjectTypeItem, CreateContentObjectPayload } from "@becomposable/common";
 import { StreamSource } from "@becomposable/client";
 import { Command } from "commander";
 import { Dirent, Stats, createReadStream } from "fs";
@@ -6,6 +7,11 @@ import { glob } from 'glob';
 import { createReadableStreamFromReadable } from "node-web-stream-adapters";
 import { basename, join, resolve } from "path";
 import { getClient } from "../client.js";
+import enquirer from "enquirer";
+const { prompt } = enquirer;
+
+const AUTOMATIC_TYPE_SELECTION = "AutomaticTypeSelection";
+const TYPE_SELECTION_ERROR = "TypeSelectionError";
 
 function splitInChunksWithSize<T>(arr: Array<T>, size: number): T[][] {
     if (size < 1) {
@@ -43,7 +49,6 @@ async function listFilesInDirectory(dir: string, recursive = false): Promise<str
     }).map(ent => join(ent.path || '', ent.name)));
 }
 
-
 export async function createObject(program: Command, files: string[], options: Record<string, any>) {
     if (files.length === 0) {
         return "No files specified"
@@ -67,16 +72,61 @@ export async function createObject(program: Command, files: string[], options: R
                 console.error(err);
                 process.exit(2);
             }
+
+            const types: any[] = await listTypes(program);
+            const questions: any[] = [];
             if (stats.isFile()) {
-                createObjectFromFile(program, file, options);
+                if (!options.type) {
+                    questions.push({
+                        type: 'select',
+                        name: 'type',
+                        message: "Select a Type",
+                        choices: types,
+                        limit: 10,
+                        result() {
+                            return this.focused.value;
+                        }
+                    });
+                    const response: any = await prompt(questions);
+                    options.type = response.type;
+                } else {
+                    const searchedType = findTypeValue(types, options.type);
+                    if (searchedType === TYPE_SELECTION_ERROR) {
+                        console.error(`${options.type} is not an existing type`);
+                        process.exit(2);
+                    }
+                    options.type = searchedType;
+                }
+
+                if (options.type === AUTOMATIC_TYPE_SELECTION) {
+                    delete options.type;
+                }
+
+                return createObjectFromFile(program, file, options);
             } else if (stats.isDirectory()) {
+                questions.push({
+                    type: 'select',
+                    name: 'type',
+                    message: "Select a Type (the type will be used for all the files in the directory)",
+                    choices: types,
+                    limit: 10,
+                    result() {
+                        return this.focused.value;
+                    }
+                });
+                const response: any = await prompt(questions);
+                options.type = response.type;
+
+                if (options.type === AUTOMATIC_TYPE_SELECTION) {
+                    delete options.type;
+                }
+
                 const files = await listFilesInDirectory(file, options.recursive || false);
                 return createObjectFromFiles(program, files, options);
             }
         }
     }
 }
-
 
 export async function createObjectFromFiles(program: Command, files: string[], options: Record<string, any>) {
     if (!options) options = {};
@@ -104,6 +154,20 @@ export async function createObjectFromFile(program: Command, file: string, optio
     console.log('Created object', res.id);
 }
 
+export async function updateObject(program: Command, objectId: string, type: string, _options: Record<string, any>) {
+    const types: any[] = await listTypes(program);
+    var searchedType = findTypeValue(types, type);
+    if (searchedType === TYPE_SELECTION_ERROR) {
+        console.error(`${type} is not an existing type`);
+        process.exit(2);
+    }
+    if (searchedType === AUTOMATIC_TYPE_SELECTION) {
+        searchedType = undefined;
+    }
+    const payload: Partial<CreateContentObjectPayload> = { type: searchedType };
+    console.log(await getClient(program).objects.update(objectId, payload));
+}
+
 export async function deleteObject(program: Command, objectId: string, _options: Record<string, any>) {
     await getClient(program).objects.delete(objectId);
 }
@@ -117,4 +181,20 @@ export async function getObject(program: Command, objectId: string, _options: Re
 export async function listObjects(program: Command, folderPath: string | undefined, _options: Record<string, any>) {
     const objects = await getClient(program).objects.list();
     console.log(objects.map(o => `${o.id}\t ${o.name}`).join('\n'));
+}
+
+export async function listTypes(program: Command) {
+    var types: any[] = []
+    types.push({ name: AUTOMATIC_TYPE_SELECTION, value: AUTOMATIC_TYPE_SELECTION })
+
+    const platformTypes: ContentObjectTypeItem[] = await getClient(program).types.list();
+    for (const type of platformTypes) {
+        types.push({ name: type.name, value: type.id });
+    }
+    return types;
+}
+
+export function findTypeValue(types: any[], name: string) {
+    const type = types.find(type => type.name === name || type.id === name);
+    return type ? type.value : TYPE_SELECTION_ERROR;
 }

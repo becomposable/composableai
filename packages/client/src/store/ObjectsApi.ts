@@ -161,8 +161,6 @@ export class ObjectsApi extends ApiTopic {
         if (payload.content instanceof StreamSource || payload.content instanceof File) {
             createPayload.content = await this.upload(payload.content);
         }
-        // create the object
-        console.log('Creating object with payload', createPayload);
         return await this.post('/', {
             payload: createPayload
         });

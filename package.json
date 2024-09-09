@@ -4,6 +4,7 @@
     "private": true,
     "scripts": {
         "preinstall": "npx only-allow pnpm",
+        "bump": "npx npm-ws-tools bump minor -x llumiverse",
         "release": "pnpm -r publish --access public",
         "build": "pnpm -r build",
         "test": "pnpm -r test",

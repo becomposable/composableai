@@ -64,7 +64,7 @@ export const SupportedProvidersList: Record<SupportedProviders, SupportedProvide
         id: SupportedProviders.bedrock,
         name: "AWS Bedrock",
         requiresApiKey: false,
-        requiresEndpointUrl: false,
+        requiresEndpointUrl: true,
         supportSearch: false,
     },
     vertexai: {
@@ -75,7 +75,7 @@ export const SupportedProvidersList: Record<SupportedProviders, SupportedProvide
         supportSearch: false,
     },
     togetherai: {
-        id:  SupportedProviders.togetherai,
+        id: SupportedProviders.togetherai,
         name: "Together AI",
         requiresApiKey: false,
         requiresEndpointUrl: false,

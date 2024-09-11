@@ -80,6 +80,7 @@ export interface PromptTemplate {
 }
 
 export interface PromptTemplateForkPayload {
+    keepTags?: boolean;
     targetProject?: string;
 }
 

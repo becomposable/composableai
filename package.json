@@ -1,16 +1,17 @@
 {
     "name": "@becomposable/studio",
-    "version": "0.30.1",
+    "version": "0.31.0",
     "private": true,
     "scripts": {
         "preinstall": "npx only-allow pnpm",
+        "bump": "npx npm-ws-tools bump minor -x llumiverse",
         "release": "pnpm -r publish --access public",
         "build": "pnpm -r build",
         "test": "pnpm -r test",
         "clean": "rimraf ./node_modules && pnpm -r clean"
     },
     "devDependencies": {
-        "npm-ws-tools": "^0.2.0",
+        "npm-ws-tools": "^0.3.0",
         "rimraf": "^5.0.5",
         "typescript": "^5.3.3"
     }

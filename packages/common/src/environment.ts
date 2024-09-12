@@ -24,6 +24,7 @@ export interface SupportedProviderParams {
     name: string;
     requiresApiKey: boolean;
     requiresEndpointUrl: boolean;
+    endpointPlaceholder?: string;
     supportSearch?: boolean;
 }
 
@@ -64,7 +65,8 @@ export const SupportedProvidersList: Record<SupportedProviders, SupportedProvide
         id: SupportedProviders.bedrock,
         name: "AWS Bedrock",
         requiresApiKey: false,
-        requiresEndpointUrl: true,
+        requiresEndpointUrl: false,
+        endpointPlaceholder: "region name (eg. us-east-1)",
         supportSearch: false,
     },
     vertexai: {

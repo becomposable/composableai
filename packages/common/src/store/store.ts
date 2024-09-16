@@ -167,6 +167,18 @@ export interface WorkflowRule extends WorkflowRuleItem {
      * Activities configuration if any.
      */
     config?: Record<string, any>;
+
+    /**
+     * Debug mode for the rule
+     * @default false
+     */
+    debug?: boolean;
+
+    /**
+     * Customer override for the rule
+     * When set to true the rule will not be updated by the system
+     */
+    customer_override?: boolean;
 }
 
 

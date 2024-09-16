@@ -7,6 +7,8 @@ export interface RenditionProperties {
     source_etag?: string,
     height?: number,
     width?: number,
+    multipart?: boolean,
+    total_parts?: number,
 }
 
 export const RenditionSchema: JSONSchemaType<RenditionProperties> = {
@@ -33,6 +35,17 @@ export const RenditionSchema: JSONSchemaType<RenditionProperties> = {
             description: "The width of the rendition",
             nullable: true
         },
+        multipart: {
+            type: "boolean",
+            description: "If the rendition is a multi-part rendition",
+            nullable: true,
+            default: false
+        },
+        total_parts: {
+            type: "integer",
+            description: "The total number of parts in the rendition",
+            nullable: true
+        }
     },
     required: ["mime_type"],
 }
@@ -51,6 +64,7 @@ export interface DocumentPartProperties {
     description?: string,
     height?: number,
     width?: number,
+    
 }
 
 

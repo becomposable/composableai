@@ -86,12 +86,14 @@ export interface SearchPayload {
 }
 
 export interface ComplexSearchQuery extends SimpleSearchQuery {
-    vector?: {
-        objectId?: string;
-        values?: number[];
-        text?: string;
-        threshold?: number;
-    }
+    vector?: VectorSearchQuery;
+}
+
+export interface VectorSearchQuery {
+    objectId?: string;
+    values?: number[];
+    text?: string;
+    threshold?: number;
 }
 
 export interface ComplexSearchPayload extends Omit<SearchPayload, 'query'> {
@@ -184,6 +186,7 @@ export interface GetRenditionResponse {
 
 export interface GetUploadUrlPayload {
     name: string;
+    id?: string;
     mime_type?: string;
     ttl?: number;
 }

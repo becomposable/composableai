@@ -1,6 +1,5 @@
 import { ExecutionRunStatus } from "./interaction.js";
 
-
 export interface RunListingQueryOptions {
     project?: string;
     interaction?: string;
@@ -18,4 +17,14 @@ export interface RunListingFilters {
     fromDate?: string,
     toDate?: string,
     parent?: string | false,
+}
+
+export interface SimpleSearchQuery {
+    location?: string;
+    status?: string;
+    type?: string;
+    parent?: string;
+    similarTo?: string;
+    name?: string;
+    role?: string;
 }

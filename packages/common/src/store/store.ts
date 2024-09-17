@@ -1,6 +1,7 @@
 import { FacetSpec } from "../facets.js";
 import { BaseObject } from "./common.js";
 import { RenditionProperties } from "./index.js";
+import { SimpleSearchQuery } from "../query.js";
 
 export enum ContentObjectStatus {
     created = 'created',
@@ -68,16 +69,6 @@ export interface CreateContentObjectPayload<T = any> extends Partial<Omit<Conten
 export interface ContentObjectTypeRef {
     id: string;
     name: string;
-}
-
-export interface SimpleSearchQuery {
-    location?: string;
-    status?: string;
-    type?: string;
-    parent?: string;
-    similarTo?: string;
-    name?: string;
-    role?: string;
 }
 
 export interface SearchPayload {

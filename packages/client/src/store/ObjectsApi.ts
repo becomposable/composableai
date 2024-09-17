@@ -17,7 +17,7 @@ export interface UploadContentObjectPayload extends Omit<CreateContentObjectPayl
 
         // the target id in the content store
         id?: string
-        
+
     }
 }
 

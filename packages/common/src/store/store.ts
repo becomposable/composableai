@@ -77,6 +77,7 @@ export interface SimpleSearchQuery {
     parent?: string;
     similarTo?: string;
     name?: string;
+    role?: string;
 }
 
 export interface SearchPayload {

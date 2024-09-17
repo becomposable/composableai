@@ -1,0 +1,9 @@
+{
+
+    "targetObjectIds": ["665c38212c49a196fad32de1"],
+    "config": {
+        "someTestFromAPI": "someValue"
+    }
+
+
+}

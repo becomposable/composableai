@@ -4,7 +4,6 @@
 
 import { ComposableClient } from "@becomposable/client";
 import { WorkflowExecutionPayload } from "@becomposable/common";
-import { logger } from "@dglabs/logger";
 
 
 export function getClient(payload: WorkflowExecutionPayload) {
@@ -21,7 +20,6 @@ export function getClient(payload: WorkflowExecutionPayload) {
         throw new Error("Content Store URL is missing from WorkflowExecutionPayload.servers.storeUrl");
     }
 
-    logger.info(`Connecting to studio at ${payload.config.studio_url}`);
     const client = new ComposableClient({
         serverUrl: payload.config.studio_url,
         storeUrl: payload.config.store_url,

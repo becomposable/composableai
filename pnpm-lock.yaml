@@ -11,6 +11,9 @@ importers:
       npm-ws-tools:
         specifier: ^0.3.0
         version: 0.3.0
+      only-allow:
+        specifier: ^1.2.1
+        version: 1.2.1
       rimraf:
         specifier: ^5.0.5
         version: 5.0.10
@@ -76,6 +79,9 @@ importers:
       mocha:
         specifier: ^10.2.0
         version: 10.7.3
+      ts-dual-module:
+        specifier: ^0.6.3
+        version: 0.6.3
       ts-node:
         specifier: ^10.9.1
         version: 10.9.2(@swc/core@1.7.26)(@types/node@22.5.1)(typescript@5.5.4)
@@ -85,6 +91,9 @@ importers:
       typescript:
         specifier: ^5.2.2
         version: 5.5.4
+      vitest:
+        specifier: ^1.4.0
+        version: 1.6.0(@types/node@22.5.1)(terser@5.31.6)
 
   packages/blobs:
     dependencies:
@@ -113,6 +122,9 @@ importers:
       '@becomposable/common':
         specifier: workspace:*
         version: link:../common
+      '@becomposable/workflow':
+        specifier: workspace:*
+        version: link:../workflow
       ansi-colors:
         specifier: ^4.1.3
         version: 4.1.3
@@ -2635,6 +2647,10 @@ packages:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
 
+  only-allow@1.2.1:
+    resolution: {integrity: sha512-M7CJbmv7UCopc0neRKdzfoGWaVZC+xC1925GitKH9EAqYFzX9//25Q7oX4+jw0tiCCj+t5l6VZh8UPH23NZkMA==}
+    hasBin: true
+
   only@0.0.2:
     resolution: {integrity: sha512-Fvw+Jemq5fjjyWz6CpKx6w9s7xxqo3+JCyM0WXWeCSOboZ8ABkyvP8ID4CZuChA/wxSx+XSJmdOm8rGVyJ1hdQ==}
 
@@ -3265,6 +3281,10 @@ packages:
 
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
+
+  which-pm-runs@1.1.0:
+    resolution: {integrity: sha512-n1brCuqClxfFfq/Rb0ICg9giSZqCS+pLtccdag6C2HyufBrh3fBOiy9nb6ggRMvWOVH5GrdJskj5iGTZNxd7SA==}
+    engines: {node: '>=4'}
 
   which@1.3.1:
     resolution: {integrity: sha512-HxJdYWq1MTIQbJ3nw0cqssHoTNU267KlrDuGZ1WYlxDStUtKUhOaJmh112/TZmHxxUfuJqPXSOm7tDyas0OSIQ==}
@@ -5651,6 +5671,10 @@ snapshots:
     dependencies:
       mimic-fn: 4.0.0
 
+  only-allow@1.2.1:
+    dependencies:
+      which-pm-runs: 1.1.0
+
   only@0.0.2: {}
 
   open@10.1.0:
@@ -6447,6 +6471,8 @@ snapshots:
     dependencies:
       tr46: 0.0.3
       webidl-conversions: 3.0.1
+
+  which-pm-runs@1.1.0: {}
 
   which@1.3.1:
     dependencies:

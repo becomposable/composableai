@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/workflow",
-    "version": "0.32.0",
+    "version": "0.33.0",
     "type": "module",
     "description": "Composable prompts workflow dsl",
     "main": "./lib/esm/index.js",
@@ -12,9 +12,9 @@
         "bundle-workflows": "./bin/bundle-workflows.mjs"
     },
     "scripts": {
-        "preinstall": "npx only-allow pnpm",
+        "preinstall": "pnpm exec only-allow pnpm",
         "test": "vitest run",
-        "build": "npx tsmod build && npx bundle-workflows lib/esm/workflows.js lib/workflows-bundle.js",
+        "build": "pnpm exec tsmod build && node ./bin/bundle-workflows.mjs lib/esm/workflows.js lib/workflows-bundle.js",
         "clean": "rm -rf ./lib tsconfig.tsbuildinfo"
     },
     "repository": {

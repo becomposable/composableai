@@ -1,7 +1,7 @@
 {
     "name": "@becomposable/memory",
     "description": "Manipulate memory images for LLMs",
-    "version": "0.32.0",
+    "version": "0.33.0",
     "type": "module",
     "types": "./lib/types/index.d.ts",
     "files": [
@@ -10,9 +10,9 @@
     ],
     "license": "Apache-2.0",
     "scripts": {
-        "preinstall": "npx only-allow pnpm",
+        "preinstall": "pnpm exec only-allow pnpm",
         "eslint": "eslint './src/**/*.{jsx,js,tsx,ts}'",
-        "build": "npx tsmod build",
+        "build": "pnpm exec tsmod build",
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
     },
     "devDependencies": {

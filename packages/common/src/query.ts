@@ -21,10 +21,13 @@ export interface RunListingFilters {
 
 export interface SimpleSearchQuery {
     location?: string;
-    status?: string;
-    type?: string;
-    parent?: string;
-    similarTo?: string;
     name?: string;
+    parent?: string;
+    prompt?: string;
     role?: string;
+    similarTo?: string;
+    status?: string;
+    tags?: string[];
+    type?: string;
+    version?: number;
 }

@@ -1,0 +1,8 @@
+# generated files
+lib/
+
+
+.mailing
+.react-email
+# Sentry Config File
+.sentryclirc

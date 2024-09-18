@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/cli",
-    "version": "0.31.0",
+    "version": "0.32.0",
     "description": "Code generation for the interaction defined with Composable AI Studio",
     "type": "module",
     "bin": {
@@ -33,6 +33,7 @@
     "dependencies": {
         "@becomposable/client": "workspace:*",
         "@becomposable/common": "workspace:*",
+        "@becomposable/workflow": "workspace:*",
         "ansi-colors": "^4.1.3",
         "ansi-escapes": "^6.2.0",
         "cli-spinners": "^2.9.1",

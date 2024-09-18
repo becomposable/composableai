@@ -1,5 +1,10 @@
-import { PromptTemplate, PromptTemplateForkPayload, PromptTemplateCreatePayload, PromptTemplateRef, PromptTemplateUpdatePayload } from "@becomposable/common";
+import { ComputeFacetPayload, PromptTemplate, PromptTemplateForkPayload, PromptTemplateCreatePayload, PromptTemplateRef, PromptTemplateUpdatePayload, SearchPayload, SimpleSearchQuery } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
+
+export interface ComputePromptFacetsResponse {
+    role?: { _id: string, count: number }[];
+    total?: { count: number }[];
+}
 
 export default class PromptsApi extends ApiTopic {
     constructor(parent: ClientBase) {
@@ -8,12 +13,28 @@ export default class PromptsApi extends ApiTopic {
 
     /**
      * Get the list of all prompt templates
-     * @param project optional project id to filter by
-     * @returns PromptTemplate[]
+     * @param payload query payload to filter search
+     * @returns PromptTemplateRef[]
      **/
-    list(project?: string): Promise<PromptTemplateRef[]> {
-        const query = project ? `?project=${project}` : '';
-        return this.get('/' + query);
+    list(payload: SearchPayload = {}): Promise<PromptTemplateRef[]> {
+        const query = payload.query || {} as SimpleSearchQuery;
+
+        return this.get("/", {
+            query: {
+                ...query
+            }
+        });
+    }
+
+    /**
+     * Get the list of all prompt facets
+     * @param payload query payload to filter facet search
+     * @returns ComputePromptFacetsResponse[]
+     **/
+    computeFacets(query: ComputeFacetPayload): Promise<ComputePromptFacetsResponse> {
+        return this.post("/facets", {
+            payload: query
+        });
     }
 
     /**

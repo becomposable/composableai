@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/studio",
-    "version": "0.31.0",
+    "version": "0.32.0",
     "private": true,
     "scripts": {
         "preinstall": "npx only-allow pnpm",

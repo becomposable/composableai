@@ -1,0 +1,100 @@
+{
+    "name": "@becomposable/workflow",
+    "version": "0.32.0",
+    "type": "module",
+    "description": "Composable prompts workflow dsl",
+    "main": "./lib/esm/index.js",
+    "files": [
+        "lib",
+        "src"
+    ],
+    "bin": {
+        "bundle-workflows": "./bin/bundle-workflows.mjs"
+    },
+    "scripts": {
+        "preinstall": "npx only-allow pnpm",
+        "test": "vitest run",
+        "build": "npx tsmod build && npx bundle-workflows lib/esm/workflows.js lib/workflows-bundle.js",
+        "clean": "rm -rf ./lib tsconfig.tsbuildinfo"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/becomposable/composableai.git",
+        "directory": "zeno/workflow"
+    },
+    "license": "Apache-2.0",
+    "devDependencies": {
+        "@temporalio/testing": "^1.9.0",
+        "@temporalio/worker": "^1.9.0",
+        "@types/jsonwebtoken": "^9.0.7",
+        "@types/tmp": "^0.2.6",
+        "ts-dual-module": "^0.6.3",
+        "vitest": "^1.6.0"
+    },
+    "dependencies": {
+        "@becomposable/blobs": "workspace:*",
+        "@becomposable/client": "workspace:*",
+        "@becomposable/common": "workspace:*",
+        "@llumiverse/core": "workspace:*",
+        "@opendocsg/pdf2md": "^0.1.29",
+        "@temporalio/activity": "^1.9.3",
+        "@temporalio/workflow": "^1.9.3",
+        "@tensorflow/tfjs-node": "^4.19.0",
+        "@types/json-schema": "^7.0.15",
+        "fast-deep-equal": "^3.1.3",
+        "jsonwebtoken": "^9.0.2",
+        "node-web-stream-adapters": "^0.1.0",
+        "seedrandom": "^3.0.5",
+        "sharp": "^0.33.4",
+        "tiktoken": "^1.0.15",
+        "tmp": "^0.2.3"
+    },
+    "ts_dual_module": {
+        "outDir": "lib",
+        "exports": {
+            "activities": "./activities",
+            "workflows": "./workflows",
+            "workflows-bundle": "./workflows-bundle.js",
+            "vars": "./vars"
+        }
+    },
+    "exports": {
+        ".": {
+            "types": "./lib/types/index.d.ts",
+            "import": "./lib/esm/index.js",
+            "require": "./lib/cjs/index.js"
+        },
+        "./vars": {
+            "types": "./lib/types/vars.d.ts",
+            "import": "./lib/esm/vars.js",
+            "require": "./lib/cjs/vars.js"
+        },
+        "./activities": {
+            "types": "./lib/types/activities/index.d.ts",
+            "import": "./lib/esm/activities/index.js",
+            "require": "./lib/cjs/activities/index.js"
+        },
+        "./workflows": {
+            "types": "./lib/types/workflows.d.ts",
+            "import": "./lib/esm/workflows.js",
+            "require": "./lib/cjs/workflows.js"
+        },
+        "./workflows-bundle": {
+            "import": "./lib/workflows-bundle.js"
+        }
+    },
+    "types": "./lib/types/index.d.ts",
+    "typesVersions": {
+        "*": {
+            "activities": [
+                "./lib/types/activities/index.d.ts"
+            ],
+            "workflows": [
+                "./lib/types/workflows.d.ts"
+            ],
+            "vars": [
+                "./lib/types/dsl/vars.d.ts"
+            ]
+        }
+    }
+}

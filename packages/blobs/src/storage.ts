@@ -102,7 +102,9 @@ export abstract class AbstractBlob implements Blob {
     }
     async saveToFile(file: string, options?: BufferEncoding | WriteStreamOptions | undefined) {
         const stream = await this.read();
-        return stream.pipe(fs.createWriteStream(file, options));
+        const w = stream.pipe(fs.createWriteStream(file, options));
+        await new Promise(resolve => w.on("finish", resolve));
+        return w;
     }
     //writeable methods
     abstract getUploadUrl(opts?: { mimeType?: string | undefined; ttl?: number | undefined; } | undefined): Promise<string>;

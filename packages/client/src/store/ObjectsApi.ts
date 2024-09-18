@@ -1,18 +1,23 @@
-import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
+import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@becomposable/common";
 
 export class StreamSource {
-    constructor(public stream: ReadableStream, public name: string, public type?: string) { }
+    constructor(public stream: ReadableStream, public name: string, public type?: string, public id?: string) { }
 }
 
 export interface UploadContentObjectPayload extends Omit<CreateContentObjectPayload, 'content'> {
     content?: StreamSource | File | {
+
         // the source URI
         source: string,
         // the original name of the input file if any
         name?: string,
         // the mime type of the content source.
         type?: string
+
+        // the target id in the content store
+        id?: string
+
     }
 }
 
@@ -100,6 +105,7 @@ export class ObjectsApi extends ApiTopic {
         const isStream = source instanceof StreamSource;
         // get a signed URL to upload the file a computed mimeType and the file object id.
         const { url, id, mime_type } = await this.getUploadUrl({
+            id: isStream ? source.id : undefined,
             name: source.name,
             mime_type: source.type
         });

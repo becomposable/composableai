@@ -1,6 +1,7 @@
 import { FacetSpec } from "../facets.js";
 import { BaseObject } from "./common.js";
 import { RenditionProperties } from "./index.js";
+import { SimpleSearchQuery } from "../query.js";
 
 export enum ContentObjectStatus {
     created = 'created',
@@ -70,15 +71,6 @@ export interface ContentObjectTypeRef {
     name: string;
 }
 
-export interface SimpleSearchQuery {
-    location?: string;
-    status?: string;
-    type?: string;
-    parent?: string;
-    similarTo?: string;
-    name?: string;
-}
-
 export interface SearchPayload {
     query?: SimpleSearchQuery;
     limit?: number;
@@ -86,12 +78,14 @@ export interface SearchPayload {
 }
 
 export interface ComplexSearchQuery extends SimpleSearchQuery {
-    vector?: {
-        objectId?: string;
-        values?: number[];
-        text?: string;
-        threshold?: number;
-    }
+    vector?: VectorSearchQuery;
+}
+
+export interface VectorSearchQuery {
+    objectId?: string;
+    values?: number[];
+    text?: string;
+    threshold?: number;
 }
 
 export interface ComplexSearchPayload extends Omit<SearchPayload, 'query'> {
@@ -165,6 +159,18 @@ export interface WorkflowRule extends WorkflowRuleItem {
      * Activities configuration if any.
      */
     config?: Record<string, any>;
+
+    /**
+     * Debug mode for the rule
+     * @default false
+     */
+    debug?: boolean;
+
+    /**
+     * Customer override for the rule
+     * When set to true the rule will not be updated by the system
+     */
+    customer_override?: boolean;
 }
 
 
@@ -184,6 +190,7 @@ export interface GetRenditionResponse {
 
 export interface GetUploadUrlPayload {
     name: string;
+    id?: string;
     mime_type?: string;
     ttl?: number;
 }

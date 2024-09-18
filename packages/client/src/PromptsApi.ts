@@ -1,4 +1,4 @@
-import { ComputeFacetPayload, PromptTemplate, PromptTemplateCreatePayload, PromptTemplateRef, PromptTemplateUpdatePayload, SearchPayload, SimpleSearchQuery } from "@becomposable/common";
+import { ComputeFacetPayload, PromptTemplate, PromptTemplateForkPayload, PromptTemplateCreatePayload, PromptTemplateRef, PromptTemplateUpdatePayload, SearchPayload, SimpleSearchQuery } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
 
 export interface ComputePromptFacetsResponse {
@@ -86,6 +86,18 @@ export default class PromptsApi extends ApiTopic {
     }
 
     /**
+     * Fork an existing prompt template
+     * @param id of the prompt template to fork
+     * @param payload PromptTemplateForkPayload
+     * @returns Forked PromptTemplate
+     */
+    fork(id: string, payload: PromptTemplateForkPayload): Promise<PromptTemplate> {
+        return this.post(`/${id}/fork`, {
+            payload
+        });
+    }
+
+    /**
      * Render a prompt template
      * @param id of the prompt template to render
      * @param payload that will be passed to the prompt template to generate the prompts
@@ -125,6 +137,15 @@ export default class PromptsApi extends ApiTopic {
      */
     listInteractions(id: string): Promise<ListInteractionsResponse> {
         return this.get(`/${id}/interactions`);
+    }
+
+    /**
+     * List the forks of the prompt. Returns an empty array if no forks are found
+     * @param id of the prompt to search forks
+     * @returns the versions list or an empty array if no forks are found
+     */
+    listForks(id: string): Promise<PromptTemplateRef[]> {
+        return this.get(`/${id}/forks`);
     }
 
 }

@@ -79,6 +79,11 @@ export interface PromptTemplate {
     updated_at: Date;
 }
 
+export interface PromptTemplateForkPayload {
+    keepTags?: boolean;
+    targetProject?: string;
+}
+
 export interface PromptTemplateCreatePayload
     extends Omit<
         PromptTemplate,

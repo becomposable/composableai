@@ -1,7 +1,13 @@
-import { ExecutionRun, GenerateInteractionPayload, GenerateTestDataPayload, ImprovePromptPayload, Interaction, InteractionCreatePayload, InteractionExecutionPayload, InteractionForkPayload, InteractionPublishPayload, InteractionRef, InteractionRefWithSchema, InteractionUpdatePayload, InteractionsExportPayload } from "@becomposable/common";
+import { ComputeInteractionFacetPayload, ExecutionRun, GenerateInteractionPayload, GenerateTestDataPayload, ImprovePromptPayload, Interaction, InteractionCreatePayload, InteractionExecutionPayload, InteractionForkPayload, InteractionPublishPayload, InteractionRef, InteractionRefWithSchema, InteractionUpdatePayload, InteractionsExportPayload, InteractionSearchPayload, InteractionSearchQuery } from "@becomposable/common";
 import { ApiTopic, ClientBase, ServerError } from "@becomposable/api-fetch-client";
 import { ComposableClient } from "./client.js";
 import { executeInteraction, executeInteractionByName } from "./execute.js";
+
+export interface ComputeInteractionFacetsResponse {
+    tags?: { _id: string, count: number }[];
+    status?: { _id: string, count: number }[];
+    total?: { count: number }[];
+}
 
 export default class InteractionsApi extends ApiTopic {
     constructor(parent: ClientBase) {
@@ -10,15 +16,27 @@ export default class InteractionsApi extends ApiTopic {
 
     /**
      * Get the list of all interactions in the current project
-     * @returns IInteractionRef[]
+     * @returns InteractionRef[]
      **/
-    list({ name, tags, version }: { name?: string, tags?: string[], version?: number } = {}): Promise<InteractionRef[]> {
-        const searchParams = {
-            name,
-            tags,
-            version
-        };
-        return this.get('/', { query: searchParams });
+    list(payload: InteractionSearchPayload = {}): Promise<InteractionRef[]> {
+        const query = payload.query || {} as InteractionSearchQuery;
+
+        return this.get("/", {
+            query: {
+                ...query
+            }
+        });
+    }
+
+    /**
+     * Get the list of all interactions facets
+     * @param payload query payload to filter facet search
+     * @returns ComputeInteractionFacetsResponse[]
+     **/
+    computeFacets(query: ComputeInteractionFacetPayload): Promise<ComputeInteractionFacetsResponse> {
+        return this.post("/facets", {
+            payload: query
+        });
     }
 
     /**

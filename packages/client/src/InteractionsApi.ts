@@ -1,4 +1,4 @@
-import { ComputeFacetPayload, ExecutionRun, GenerateInteractionPayload, GenerateTestDataPayload, ImprovePromptPayload, Interaction, InteractionCreatePayload, InteractionExecutionPayload, InteractionForkPayload, InteractionPublishPayload, InteractionRef, InteractionRefWithSchema, InteractionUpdatePayload, InteractionsExportPayload, SearchPayload, SimpleSearchQuery } from "@becomposable/common";
+import { ComputeInteractionFacetPayload, ExecutionRun, GenerateInteractionPayload, GenerateTestDataPayload, ImprovePromptPayload, Interaction, InteractionCreatePayload, InteractionExecutionPayload, InteractionForkPayload, InteractionPublishPayload, InteractionRef, InteractionRefWithSchema, InteractionUpdatePayload, InteractionsExportPayload, InteractionSearchPayload, InteractionSearchQuery } from "@becomposable/common";
 import { ApiTopic, ClientBase, ServerError } from "@becomposable/api-fetch-client";
 import { ComposableClient } from "./client.js";
 import { executeInteraction, executeInteractionByName } from "./execute.js";
@@ -18,8 +18,8 @@ export default class InteractionsApi extends ApiTopic {
      * Get the list of all interactions in the current project
      * @returns InteractionRef[]
      **/
-    list(payload: SearchPayload = {}): Promise<InteractionRef[]> {
-        const query = payload.query || {} as SimpleSearchQuery;
+    list(payload: InteractionSearchPayload = {}): Promise<InteractionRef[]> {
+        const query = payload.query || {} as InteractionSearchQuery;
 
         return this.get("/", {
             query: {
@@ -33,7 +33,7 @@ export default class InteractionsApi extends ApiTopic {
      * @param payload query payload to filter facet search
      * @returns ComputeInteractionFacetsResponse[]
      **/
-    computeFacets(query: ComputeFacetPayload): Promise<ComputeInteractionFacetsResponse> {
+    computeFacets(query: ComputeInteractionFacetPayload): Promise<ComputeInteractionFacetsResponse> {
         return this.post("/facets", {
             payload: query
         });

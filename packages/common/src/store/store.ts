@@ -1,7 +1,7 @@
-import { FacetSpec } from "../facets.js";
 import { BaseObject } from "./common.js";
 import { RenditionProperties } from "./index.js";
 import { SimpleSearchQuery } from "../query.js";
+import { SearchPayload } from "../payload.js";
 
 export enum ContentObjectStatus {
     created = 'created',
@@ -71,12 +71,6 @@ export interface ContentObjectTypeRef {
     name: string;
 }
 
-export interface SearchPayload {
-    query?: SimpleSearchQuery;
-    limit?: number;
-    offset?: number;
-}
-
 export interface ComplexSearchQuery extends SimpleSearchQuery {
     vector?: VectorSearchQuery;
 }
@@ -90,11 +84,6 @@ export interface VectorSearchQuery {
 
 export interface ComplexSearchPayload extends Omit<SearchPayload, 'query'> {
     query?: ComplexSearchQuery;
-}
-
-export interface ComputeFacetPayload {
-    facets: FacetSpec[];
-    query?: SimpleSearchQuery;
 }
 
 export interface ColumnLayout {

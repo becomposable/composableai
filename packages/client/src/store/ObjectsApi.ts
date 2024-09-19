@@ -1,5 +1,5 @@
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
-import { ComplexSearchPayload, ComputeFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, SearchPayload, SimpleSearchQuery } from "@becomposable/common";
+import { ComplexSearchPayload, ComputeObjectFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, ObjectSearchPayload, ObjectSearchQuery } from "@becomposable/common";
 
 export class StreamSource {
     constructor(public stream: ReadableStream, public name: string, public type?: string, public id?: string) { }
@@ -26,7 +26,6 @@ export interface ComputeFacetsResponse {
     location?: { _id: string, count: number }[];
     status?: { _id: string, count: number }[];
     total?: { count: number }[];
-    //[key: string]: { _id: string, count: number }[];
 }
 
 export class ObjectsApi extends ApiTopic {
@@ -53,10 +52,10 @@ export class ObjectsApi extends ApiTopic {
         return this.get(`/${objectId}/content-source`);
     }
 
-    list(payload: SearchPayload = {}): Promise<ContentObjectItem[]> {
+    list(payload: ObjectSearchPayload = {}): Promise<ContentObjectItem[]> {
         const limit = payload.limit || 100;
         const offset = payload.offset || 0;
-        const query = payload.query || {} as SimpleSearchQuery;
+        const query = payload.query || {} as ObjectSearchQuery;
 
         return this.get("/", {
             query: {
@@ -67,7 +66,7 @@ export class ObjectsApi extends ApiTopic {
         });
     }
 
-    computeFacets(query: ComputeFacetPayload): Promise<ComputeFacetsResponse> {
+    computeFacets(query: ComputeObjectFacetPayload): Promise<ComputeFacetsResponse> {
         return this.post("/facets", {
             payload: query
         });

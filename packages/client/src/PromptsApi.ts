@@ -1,4 +1,4 @@
-import { ComputeFacetPayload, PromptTemplate, PromptTemplateForkPayload, PromptTemplateCreatePayload, PromptTemplateRef, PromptTemplateUpdatePayload, SearchPayload, SimpleSearchQuery } from "@becomposable/common";
+import { ComputePromptFacetPayload, PromptSearchPayload, PromptSearchQuery, PromptTemplate, PromptTemplateForkPayload, PromptTemplateCreatePayload, PromptTemplateRef, PromptTemplateUpdatePayload } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
 
 export interface ComputePromptFacetsResponse {
@@ -16,8 +16,8 @@ export default class PromptsApi extends ApiTopic {
      * @param payload query payload to filter search
      * @returns PromptTemplateRef[]
      **/
-    list(payload: SearchPayload = {}): Promise<PromptTemplateRef[]> {
-        const query = payload.query || {} as SimpleSearchQuery;
+    list(payload: PromptSearchPayload = {}): Promise<PromptTemplateRef[]> {
+        const query = payload.query || {} as PromptSearchQuery;
 
         return this.get("/", {
             query: {
@@ -31,7 +31,7 @@ export default class PromptsApi extends ApiTopic {
      * @param payload query payload to filter facet search
      * @returns ComputePromptFacetsResponse[]
      **/
-    computeFacets(query: ComputeFacetPayload): Promise<ComputePromptFacetsResponse> {
+    computeFacets(query: ComputePromptFacetPayload): Promise<ComputePromptFacetsResponse> {
         return this.post("/facets", {
             payload: query
         });

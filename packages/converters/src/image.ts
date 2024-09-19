@@ -1,6 +1,5 @@
 import { fromBuffer } from 'pdf2pic';
 import sharp from "sharp";
-import { Readable } from "stream";
 
 export interface TransformOptions {
     max_hw?: number,
@@ -29,17 +28,24 @@ export function createImageTransformer(opts: TransformOptions, file?: string) {
  * @param format
  * @returns
  */
-export function transformImage(input: Readable, opts: TransformOptions) {
+export function transformImage(input: NodeJS.ReadableStream, opts: TransformOptions): Promise<sharp.Sharp> {
     const sh = createImageTransformer(opts);
-    sh.on('error', (err) => {
-        console.error('Failed to transform', err);
-        input.destroy(); // Forcefully close the readable stream
+    input.pipe(sh);
+    return new Promise((resolve, reject) => {
+        const handleError = (err: any) => {
+            console.error('Failed to transform', err);
+            try {
+                sh.destroy();
+            } finally {
+                reject(err);
+            }
+        }
+        sh.on('error', handleError);
+        input.on('error', handleError);
+        sh.on("finish", () => {
+            resolve(sh);
+        });
     });
-    input.on('error', (err) => {
-        console.error('Error reading stream', err);
-        input.destroy(); // Forcefully close the readable stream
-    });
-    return input.pipe(sh);
 }
 
 export function transformImageFile(source: string, dest: string, opts: TransformOptions): Promise<{ width: number, height: number } | undefined> {

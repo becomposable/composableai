@@ -7,6 +7,7 @@ import { fetchMemoryImage } from "./image.js";
 import { resolveLocation } from "./location.js";
 import { MediaFile, MediaOptions } from "./media.js";
 import { buildTar, MemoryFile } from "./tar.js";
+import { MemoryPackBuilder } from "./MemoryPackBuilder.js";
 
 export interface ProjectionProperties {
     [key: string]: boolean | 0 | 1;
@@ -74,9 +75,13 @@ export class Builder implements Commands {
     baseObject?: Record<string, any>;
     object?: Record<string, any>;
     files: MediaFile[] = [];
+    memoryBuilder: MemoryPackBuilder;
+
+    exntries: MemoryEntry[] = [];
 
     constructor(public options: BuildOptions = {}) {
         this.tmpdir = options.tmpdir || tmpdir();
+        this.memoryBuilder = new MemoryPackBuilder(this);
     }
 
     extends(base: Record<string, any>, projection?: ProjectionProperties) {

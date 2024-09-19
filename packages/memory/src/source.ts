@@ -4,8 +4,13 @@ import { globSync } from 'glob';
 import { basename, extname, resolve } from "path";
 import { Readable } from "stream";
 
+export interface ContentSource {
+    getContent(): Promise<Buffer>;
+    getStream(): Promise<NodeJS.ReadableStream>;
+}
+
 export type SourceSpec = string | ContentSource | Buffer;
-export abstract class ContentSource {
+export abstract class AbstractContentSource implements ContentSource {
     abstract getContent(): Promise<Buffer>
 
     async getStream(): Promise<NodeJS.ReadableStream> {
@@ -15,18 +20,18 @@ export abstract class ContentSource {
     static resolve(source: SourceSpec): ContentSource | ContentSource[] {
         if (typeof source === 'string') {
             return FileSource.resolve(source);
-        } else if (source instanceof ContentSource) {
+        } else if (source instanceof AbstractContentSource) {
             return source;
         }
         throw new Error("Unsupported content source: " + source);
     }
 }
 
-export abstract class MemoryFile extends ContentSource {
+export abstract class MemoryFile extends AbstractContentSource {
     abstract name: string;
 }
 
-export class BufferSource extends ContentSource {
+export class BufferSource extends AbstractContentSource {
     constructor(public buffer: Buffer) {
         super()
     }
@@ -35,7 +40,7 @@ export class BufferSource extends ContentSource {
     }
 }
 
-export class Text extends ContentSource {
+export class Text extends AbstractContentSource {
     constructor(public value: string, public encoding: BufferEncoding = "utf-8") {
         super();
     }
@@ -45,7 +50,7 @@ export class Text extends ContentSource {
     }
 }
 
-export class FileSource extends ContentSource {
+export class FileSource extends AbstractContentSource {
     file: string;
     constructor(file: string, resolvePath = true) {
         super();

@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/converters",
-    "version": "0.32.0",
+    "version": "0.33.0",
     "description": "Image and content converters",
     "type": "module",
     "types": "./lib/types/index.d.ts",
@@ -10,9 +10,9 @@
     ],
     "license": "Apache-2.0",
     "scripts": {
-        "preinstall": "npx only-allow pnpm",
+        "preinstall": "pnpm exec only-allow pnpm",
         "test": "vitest run",
-        "build": "npx tsmod build --esm",
+        "build": "pnpm exec tsmod build --esm",
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
     },
     "exports": {

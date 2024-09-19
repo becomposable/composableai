@@ -1,6 +1,6 @@
 import { BaseObject } from "./common.js";
 import { RenditionProperties } from "./index.js";
-import { SimpleSearchQuery } from "../query.js";
+import { ObjectSearchQuery } from "../query.js";
 import { SearchPayload } from "../payload.js";
 
 export enum ContentObjectStatus {
@@ -71,7 +71,7 @@ export interface ContentObjectTypeRef {
     name: string;
 }
 
-export interface ComplexSearchQuery extends SimpleSearchQuery {
+export interface ComplexSearchQuery extends ObjectSearchQuery {
     vector?: VectorSearchQuery;
 }
 

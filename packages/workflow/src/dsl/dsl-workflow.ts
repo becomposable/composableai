@@ -30,7 +30,7 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
     }
     delete (basePayload as any).workflow;
 
-    const options: ActivityOptions = {
+    const defaultOptions: ActivityOptions = {
         ...definition.options,
         startToCloseTimeout: "5 minute",
         retry: {
@@ -45,7 +45,6 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
             ],
         },
     };
-    const proxy = proxyActivities(options as any);
     // merge default vars with the payload vars and add objectIds and obejctId
     const vars = new Vars({
         ...definition.vars,
@@ -66,6 +65,17 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
         }
         const importParams = vars.createImportVars(activity.import);
         const executionPayload = dslActivityPayload(basePayload, activity, importParams);
+
+        const options: ActivityOptions = {
+            ...defaultOptions,
+            ...activity.options,
+            retry: {
+                ...defaultOptions.retry,
+                ...activity.options?.retry,
+            },
+        }
+        const proxy = proxyActivities(options);
+
         log.info("Executing activity: " + activity.name, { payload: executionPayload });
         const fn = proxy[activity.name];
         if (activity.parallel) {

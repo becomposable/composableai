@@ -142,9 +142,9 @@ export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<str
 
 export interface DSLActivityOptions {
     /**
-     * The timeout for the activity
+     * Maximum time of a single Activity execution attempt.
      */
-    timeout?: string;
+    startToCloseTimeout?: string;
     /**
      * The retry policy for the activity
      */
@@ -155,7 +155,7 @@ export interface DSLActivityRetryPolicy {
     initialInterval?: string;
     backoffCoefficient?: number;
     maximumAttempts?: number;
-    maximumInterval?: number;
+    maximumInterval?: string;
     nonRetryableErrorTypes?: string[];
 }
 

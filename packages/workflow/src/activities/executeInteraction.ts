@@ -50,6 +50,14 @@ const JSON: DSLActivitySpec = {
             },
             select: "+object_schema",
         }
+    },
+    options: {
+        startToCloseTimeout: "10m",
+        retry: {
+            initialInterval: "30s",
+            backoffCoefficient: 2,
+            maximumAttempts: 3,
+        }
     }
 }
 

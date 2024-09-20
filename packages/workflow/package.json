@@ -38,6 +38,7 @@
         "@llumiverse/core": "workspace:*",
         "@opendocsg/pdf2md": "^0.1.29",
         "@temporalio/activity": "^1.9.3",
+        "@temporalio/common": "^1.9.3",
         "@temporalio/workflow": "^1.9.3",
         "@tensorflow/tfjs-node": "^4.19.0",
         "@types/json-schema": "^7.0.15",

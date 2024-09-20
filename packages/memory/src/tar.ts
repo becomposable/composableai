@@ -7,6 +7,11 @@ export interface TarEntry {
     getContent(): Promise<Buffer>;
 }
 
+/**
+ * @deprecated use TarBuilder instead
+ * @param file
+ * @param inputFiles
+ */
 export async function buildTar(file: string, inputFiles: TarEntry[]) {
     const pack = tar.pack(); // Create a new tar stream
     const indexData = [];
@@ -58,13 +63,28 @@ export class TarBuilder {
     pack: tar.Pack;
     indexData: string[] = [];
     currentOffset = 0;
-    outputStream: fs.WriteStream;
+    tarPromise: Promise<unknown>;
 
     constructor(file: string) {
-        this.pack = tar.pack(); // Create a new tar stream
+        const pack = tar.pack(); // Create a new tar stream
+        this.pack = pack;
         // Open the output file as a write stream
-        this.outputStream = fs.createWriteStream(file);
-        this.pack.pipe(this.outputStream);
+        const outputStream = fs.createWriteStream(file);
+        pack.pipe(outputStream);
+        // Wait for the stream to finish
+        this.tarPromise = new Promise((resolve, reject) => {
+            outputStream.on('finish', resolve)
+            outputStream.on('error', (err: any) => {
+                pack.destroy();
+                outputStream.close();
+                reject(err);
+            })
+            pack.on('error', (err: any) => {
+                pack.destroy();
+                outputStream.close();
+                reject(err);
+            })
+        });
     }
 
     private _addDirs(dir: string) {
@@ -109,7 +129,6 @@ export class TarBuilder {
 
     async build() {
         const pack = this.pack;
-        const outputStream = this.outputStream;
         // Convert index data to string and calculate its size
         const indexContent = this.indexData.join('\n') + '\n';
         const indexContentSize = Buffer.byteLength(indexContent);
@@ -119,8 +138,11 @@ export class TarBuilder {
 
         pack.finalize(); // Finalize the tar stream
 
-        // Wait for the stream to finish
-        await new Promise((resolve) => outputStream.on('finish', resolve));
+        await this.tarPromise;
+    }
+
+    destroy() {
+        this.pack.destroy();
     }
 
 }
@@ -169,12 +191,12 @@ async function readTarIndex(fd: FileHandle) {
     return null;
 }
 
-export interface EntryIndex {
+export interface TarEntryIndex {
     offset: number,
     size: number
 }
 export class TarIndex {
-    entries: Record<string, EntryIndex> = {};
+    entries: Record<string, TarEntryIndex> = {};
     headerBuffer = Buffer.alloc(512);
     /**
      * @param fd the tar file descriptor

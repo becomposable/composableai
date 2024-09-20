@@ -1,41 +1,14 @@
-import { writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { resolve } from "path";
+import { copy, CopyOptions } from "./commands/copy.js";
+import { exec, ExecOptions } from "./commands/exec.js";
 import { ContentRef, DocxOptions, DocxRef, JsonRef, PdfOptions, PdfRef, RefConstructor, TextOptions, TextRef } from "./content.js";
-import { exec, ExecOptions } from "./exec.js";
-import { fetchMemoryImage } from "./image.js";
+import { ContentSource, SourceSpec } from "./ContentSource.js";
 import { resolveLocation } from "./location.js";
-import { MediaFile, MediaOptions } from "./media.js";
-import { buildTar, MemoryFile } from "./tar.js";
-import { MemoryPackBuilder } from "./MemoryPackBuilder.js";
+import { loadMemoryPack } from "./MemoryPack.js";
+import { FromOptions, MemoryPackBuilder } from "./MemoryPackBuilder.js";
+//import { MediaOptions } from "./ContentObject.js";
 
-export interface ProjectionProperties {
-    [key: string]: boolean | 0 | 1;
-}
-
-function getProjection(base: Record<string, any>, projection: ProjectionProperties): Record<string, any> {
-    const keys = Object.keys(projection);
-    if (keys.length > 0) {
-        if (!projection[keys[0]]) { // exclude keys
-            const baseProjection = { ...base };
-            for (const key of keys) {
-                if (!projection[key]) {
-                    delete baseProjection[key];
-                }
-            }
-            return baseProjection;
-        } else { // include keys
-            const baseProjection: Record<string, any> = {};
-            for (const key of keys) {
-                if (projection[key]) {
-                    baseProjection[key] = base[key];
-                }
-            }
-            return baseProjection;
-        }
-    }
-    return base;
-}
 
 export interface BuildOptions {
     indent?: number;
@@ -58,12 +31,12 @@ export interface BuildOptions {
 
 export interface Commands {
     exec: (cmd: string, options?: ExecOptions) => void;
-    from: (location: string, projection?: ProjectionProperties) => void;
+    from: (location: string, options?: FromOptions) => void;
     text: (location: string, options?: TextOptions) => TextRef | TextRef[];
     json: (location: string, options?: TextOptions) => JsonRef | JsonRef[];
     pdf: (location: string, options?: PdfOptions) => PdfRef | PdfRef[];
     docx: (location: string, options?: DocxOptions) => DocxRef | DocxRef[];
-    media: (location: string, options?: MediaOptions) => MediaFile | MediaFile[];
+    //media: (location: string, options?: MediaOptions) => MediaFile | MediaFile[];
 }
 
 export class Builder implements Commands {
@@ -72,27 +45,26 @@ export class Builder implements Commands {
     preTasks: Promise<void>[] = [];
     // async tasks building the content
     tasks: Promise<void>[] = [];
-    baseObject?: Record<string, any>;
-    object?: Record<string, any>;
-    files: MediaFile[] = [];
-    memoryBuilder: MemoryPackBuilder;
-
-    exntries: MemoryEntry[] = [];
+    memory: MemoryPackBuilder;
 
     constructor(public options: BuildOptions = {}) {
         this.tmpdir = options.tmpdir || tmpdir();
-        this.memoryBuilder = new MemoryPackBuilder(this);
+        this.memory = new MemoryPackBuilder(this);
     }
 
-    extends(base: Record<string, any>, projection?: ProjectionProperties) {
-        this.baseObject = projection ? getProjection(base, projection) : base;
+    from(location: string, options?: FromOptions) {
+        const promise = loadMemoryPack(location).then((memory) => {
+            return this.memory.load(memory, options);
+        });
+        this.tasks.push(promise);
     }
 
-    from(location: string, projection?: ProjectionProperties) {
-        const promise = fetchMemoryImage(location);
-        this.tasks.push(promise.then(object => {
-            this.extends(object, projection);
-        }));
+    addEntry(path: string, source: ContentSource) {
+        this.memory.add(path, source);
+    }
+
+    copy(location: SourceSpec, path: string, options: CopyOptions = {}) {
+        copy(this, location, path, options);
     }
 
     exec(cmd: string, options?: ExecOptions) {
@@ -119,6 +91,7 @@ export class Builder implements Commands {
     }
 
     text(location: string, options: TextOptions = {}) {
+
         return this.loadContent(location, TextRef, options);
     }
 
@@ -134,65 +107,34 @@ export class Builder implements Commands {
         return this.loadContent(location, DocxRef, options);
     }
 
-    media(location: string, options: MediaOptions = {}) {
-        const file = resolveLocation(location);
-        if (Array.isArray(file)) {
-            const mediaFiles: MediaFile[] = [];
-            for (const f of file) {
-                const media = new MediaFile(f, options)
-                mediaFiles.push(media);
-                this.files.push(media);
-                this.tasks.push(media.transform());
-            }
-            return mediaFiles;
-        } else {
-            const media = new MediaFile(file, options);
-            this.files.push(media);
-            this.tasks.push(media.transform());
-            return media;
-        }
-    }
+    // media(location: string, options: MediaOptions = {}) {
+    //     const file = resolveLocation(location);
+    //     if (Array.isArray(file)) {
+    //         const mediaFiles: MediaFile[] = [];
+    //         for (const f of file) {
+    //             const media = new MediaFile(f, options)
+    //             mediaFiles.push(media);
+    //             this.files.push(media);
+    //             this.tasks.push(media.transform());
+    //         }
+    //         return mediaFiles;
+    //     } else {
+    //         const media = new MediaFile(file, options);
+    //         this.files.push(media);
+    //         this.tasks.push(media.transform());
+    //         return media;
+    //     }
+    // }
 
     async build(object: Record<string, any>) {
-        const hasFiles = this.files.length > 0;
-        const out = resolve((this.options.out || 'memo') + (hasFiles ? '.tar' : '.json'));
-
+        const baseName = resolve(this.options.out || 'memory');
         // wait for the preparation to finish
         await Promise.all(this.preTasks);
         // wait for the content to be built
         await Promise.all(this.tasks);
-        // merge the object with the base object if any
-        if (this.baseObject) {
-            object = Object.assign({}, this.baseObject, object);
-        }
-        // save the object
-        const json = JSON.stringify(object, undefined, this.options.indent || undefined);
-        const content = new JsonContextFile(json);
-        if (this.files.length > 0) {
-            // build a tar
-            await buildTar(out, [content as MemoryFile].concat(this.files));
-        } else {
-            // save the content to a file
-            await content.writeToFile(out);
-        }
-        this.options.quiet || console.log(`Memory saved to ${out}`);
+        // write the memory to a file
+        const file = await this.memory.build(baseName, object);
+        this.options.quiet || console.log(`Memory saved to ${file}`);
     }
 
-}
-
-
-class JsonContextFile implements MemoryFile {
-    name = "context.json";
-    content: Buffer;
-    constructor(json: string) {
-        this.content = Buffer.from(json, 'utf-8');
-    }
-
-    getContent() {
-        return Promise.resolve(this.content);
-    }
-
-    writeToFile(file: string) {
-        return writeFile(file, this.content);
-    }
 }

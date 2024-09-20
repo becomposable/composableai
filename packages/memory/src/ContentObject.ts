@@ -1,17 +1,13 @@
 import { manyToMarkdown, pdfToText, transformImage } from "@becomposable/converters";
 import fs from "fs";
-import { Builder } from "../Builder";
-import { ContentSource } from "../source";
+import { Builder } from "./Builder.js";
+import { ContentSource, TextSource } from "./ContentSource.js";
 
-export class ContentObject {
-    content?: Buffer;
+export class ContentObject implements ContentSource {
     constructor(public builder: Builder, public source: ContentSource) { }
 
-    async getContent(): Promise<Buffer> {
-        if (!this.content) {
-            this.content = await this.source.getContent();
-        }
-        return this.content;
+    getContent(): Promise<Buffer> {
+        return this.source.getContent();
     }
 
     getStream(): Promise<NodeJS.ReadableStream> {
@@ -19,7 +15,7 @@ export class ContentObject {
     }
 
     copyTo(entry: string) {
-        this.builder.en
+        this.builder.addEntry(entry, this);
     }
 
     async copyToFile(file: string): Promise<fs.WriteStream> {
@@ -67,7 +63,7 @@ export interface MediaOptions {
     max_hw?: number;
     format?: "jpeg" | "png";
 }
-export class ImageObject extends ContentObject {
+export class MediaObject extends ContentObject {
     constructor(builder: Builder, source: ContentSource, public options: MediaOptions = {}) {
         super(builder, source);
     }
@@ -102,6 +98,17 @@ export class DocxObject extends ContentObject {
     }
     async getText(): Promise<string> {
         return await manyToMarkdown(await this.getContent(), "docx");
+    }
+
+}
+
+
+export class TextObject extends ContentObject {
+    constructor(builder: Builder, text: string) {
+        super(builder, new TextSource(text));
+    }
+    async getText(): Promise<string> {
+        return (this.source as TextSource).value;
     }
 
 }

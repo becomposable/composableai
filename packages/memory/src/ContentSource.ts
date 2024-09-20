@@ -40,7 +40,7 @@ export class BufferSource extends AbstractContentSource {
     }
 }
 
-export class Text extends AbstractContentSource {
+export class TextSource extends AbstractContentSource {
     constructor(public value: string, public encoding: BufferEncoding = "utf-8") {
         super();
     }

@@ -31,6 +31,10 @@ export interface ObjectSearchQuery extends SimpleSearchQuery {
     type?: string;
 }
 
+export interface ObjectTypeSearchQuery extends SimpleSearchQuery {
+    chunckable?: boolean;
+}
+
 export interface PromptSearchQuery extends SimpleSearchQuery {
     role?: string;
 }

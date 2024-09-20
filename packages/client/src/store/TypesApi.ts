@@ -1,4 +1,4 @@
-import { ContentObjectType, ContentObjectTypeItem, ContentObjectTypeLayout, CreateContentObjectTypePayload, FindPayload } from "@becomposable/common";
+import { ContentObjectType, ContentObjectTypeItem, ContentObjectTypeLayout, CreateContentObjectTypePayload, FindPayload, ObjectTypeSearchQuery, ObjectTypeSearchPayload } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
 
 
@@ -8,8 +8,18 @@ export class TypesApi extends ApiTopic {
         super(parent, "/api/v1/types");
     }
 
-    list(): Promise<ContentObjectTypeItem[]> {
-        return this.get('/');
+    list(payload: ObjectTypeSearchPayload = {}): Promise<ContentObjectTypeItem[]> {
+        const limit = payload.limit || 100;
+        const offset = payload.offset || 0;
+        const query = payload.query || {} as ObjectTypeSearchQuery;
+
+        return this.get("/", {
+            query: {
+                limit,
+                offset,
+                ...query
+            }
+        });
     }
 
     find(payload: FindPayload): Promise<ContentObjectType[]> {

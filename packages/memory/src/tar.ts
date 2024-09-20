@@ -2,12 +2,12 @@ import fs from "fs";
 import { FileHandle, open } from "fs/promises";
 import tar from "tar-stream";
 
-export interface MemoryFile {
+export interface TarEntry {
     name: string;
     getContent(): Promise<Buffer>;
 }
 
-export async function buildTar(file: string, inputFiles: MemoryFile[]) {
+export async function buildTar(file: string, inputFiles: TarEntry[]) {
     const pack = tar.pack(); // Create a new tar stream
     const indexData = [];
     let currentOffset = 0;
@@ -51,6 +51,78 @@ export async function buildTar(file: string, inputFiles: MemoryFile[]) {
 
     // Wait for the stream to finish
     await new Promise((resolve) => outputStream.on('finish', resolve));
+}
+
+export class TarBuilder {
+    dirs: Set<string> = new Set<string>();
+    pack: tar.Pack;
+    indexData: string[] = [];
+    currentOffset = 0;
+    outputStream: fs.WriteStream;
+
+    constructor(file: string) {
+        this.pack = tar.pack(); // Create a new tar stream
+        // Open the output file as a write stream
+        this.outputStream = fs.createWriteStream(file);
+        this.pack.pipe(this.outputStream);
+    }
+
+    private _addDirs(dir: string) {
+        if (this.dirs.has(dir)) {
+            return false;
+        }
+        const i = dir.lastIndexOf('/');
+        if (i > 0) {
+            this._addDirs(dir.slice(0, i));
+        }
+        this.add(dir);
+        this.dirs.add(dir);
+        return true;
+    }
+
+    async add(name: string, content?: Buffer) {
+        const [dir, path] = getEntryDir(name);
+        if (dir) {
+            this._addDirs(dir);
+        }
+        // Calculate header size, 512 bytes for tar headers
+        const headerSize = 512;
+        const contentSize = content ? Buffer.byteLength(content) : 0;
+        const entryHeaderOffset = this.currentOffset;
+
+        // Store the index entry
+        // entry data offset is always at header offset + 512 bytes
+        if (contentSize > 0) { // do not index directories
+            this.indexData.push(`${path}:${entryHeaderOffset},${contentSize}`);
+        }
+
+        // Add the file entry to the tar stream
+        this.pack.entry({ name: path, size: contentSize }, content);
+
+        // Update the offset
+        this.currentOffset += headerSize + contentSize;
+        // Tar files are padded to 512-byte boundaries
+        if (contentSize % 512 !== 0) {
+            this.currentOffset += 512 - (contentSize % 512);
+        }
+    }
+
+    async build() {
+        const pack = this.pack;
+        const outputStream = this.outputStream;
+        // Convert index data to string and calculate its size
+        const indexContent = this.indexData.join('\n') + '\n';
+        const indexContentSize = Buffer.byteLength(indexContent);
+
+        // Add the .index entry to the tar
+        pack.entry({ name: '.index', size: indexContentSize }, indexContent);
+
+        pack.finalize(); // Finalize the tar stream
+
+        // Wait for the stream to finish
+        await new Promise((resolve) => outputStream.on('finish', resolve));
+    }
+
 }
 
 export async function loadTarIndex(tarFile: string) {
@@ -97,8 +169,12 @@ async function readTarIndex(fd: FileHandle) {
     return null;
 }
 
-class TarIndex {
-    entries: Record<string, { offset: number, size: number }> = {};
+export interface EntryIndex {
+    offset: number,
+    size: number
+}
+export class TarIndex {
+    entries: Record<string, EntryIndex> = {};
     headerBuffer = Buffer.alloc(512);
     /**
      * @param fd the tar file descriptor
@@ -117,17 +193,27 @@ class TarIndex {
         }
     }
 
+    getPaths() {
+        return Object.keys(this.entries);
+    }
+
+    getSortedPaths() {
+        return Object.keys(this.entries).sort();
+    }
+
     get(name: string) {
         return this.entries[name];
     }
 
+    async getContentAt(offset: number, size: number) {
+        const buffer = Buffer.alloc(size);
+        await this.fd.read(buffer, 0, size, offset + 512);
+        return buffer;
+    }
     async getContent(name: string) {
         const entry = this.entries[name];
         if (entry) {
-            const offset = entry.offset + 512;
-            const buffer = Buffer.alloc(entry.size);
-            await this.fd.read(buffer, 0, entry.size, offset);
-            return buffer;
+            return this.getContentAt(entry.offset, entry.size);
         } else {
             return null;
         }
@@ -157,6 +243,25 @@ class TarIndex {
 function getHeaderFileSize(buffer: Buffer) {
     const octalSize = buffer.toString('ascii', 124, 136).trim();
     return parseInt(octalSize, 8);
+}
+
+export function normalizePath(path: string) {
+    if (path.startsWith('/')) {
+        path = path.slice(1);
+    }
+    if (path.endsWith('/')) {
+        path = path.slice(-1);
+    }
+    return path;
+}
+
+function getEntryDir(path: string): [string | null, string] {
+    path = normalizePath(path);
+    const i = path.lastIndexOf('/');
+    if (i > -1 && i < path.length - 1) {
+        return [path.slice(0, i), path];
+    }
+    return [null, path];
 }
 
 // async function test() {

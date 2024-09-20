@@ -132,6 +132,31 @@ export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<str
      */
     await?: string; //the activity name to await
 
+    /**
+     * The activity options to be used for the activity execution.
+     *
+     * If not specified, the default activity options will be used.
+     */
+    options?: DSLActivityOptions;
+}
+
+export interface DSLActivityOptions {
+    /**
+     * The timeout for the activity
+     */
+    timeout?: string;
+    /**
+     * The retry policy for the activity
+     */
+    retry?: DSLActivityRetryPolicy;
+}
+
+export interface DSLActivityRetryPolicy {
+    initialInterval?: string;
+    backoffCoefficient?: number;
+    maximumAttempts?: number;
+    maximumInterval?: number;
+    nonRetryableErrorTypes?: string[];
 }
 
 export interface DSLWorkflowSpec {

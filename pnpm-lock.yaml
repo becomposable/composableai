@@ -391,6 +391,9 @@ importers:
       '@temporalio/activity':
         specifier: ^1.9.3
         version: 1.11.1
+      '@temporalio/common':
+        specifier: ^1.9.3
+        version: 1.11.1
       '@temporalio/workflow':
         specifier: ^1.9.3
         version: 1.11.1

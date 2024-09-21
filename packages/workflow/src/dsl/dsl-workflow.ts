@@ -1,7 +1,9 @@
-import { DSLActivityExecutionPayload, DSLActivitySpec, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@becomposable/common";
-import { ActivityOptions, log, proxyActivities } from "@temporalio/workflow";
+import { DSLActivityExecutionPayload, DSLActivityOptions, DSLActivitySpec, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@becomposable/common";
+import { ActivityOptions, log, proxyActivities, RetryPolicy } from "@temporalio/workflow";
 import { ActivityParamNotFound, NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
 import { Vars } from "./vars.js";
+// @ts-ignore
+import ms, { StringValue } from "ms";
 
 interface BaseActivityPayload extends WorkflowExecutionPayload {
     workflow_name: string;
@@ -66,12 +68,13 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
         const importParams = vars.createImportVars(activity.import);
         const executionPayload = dslActivityPayload(basePayload, activity, importParams);
 
+        const activityOptions = convertActivityOptions(activity.options);
         const options: ActivityOptions = {
             ...defaultOptions,
-            ...activity.options,
+            ...activityOptions,
             retry: {
                 ...defaultOptions.retry,
-                ...activity.options?.retry,
+                ...activityOptions?.retry,
             },
         }
         const proxy = proxyActivities(options);
@@ -94,4 +97,34 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
 
     }
     return vars.getValue(definition.result || 'result');
+}
+
+function convertActivityOptions(opts?: DSLActivityOptions): Partial<ActivityOptions> | undefined {
+    if (!opts) return undefined;
+
+    const policy = opts.retry
+    let convertedPolicy: RetryPolicy | undefined;
+    if (!policy) {
+        convertedPolicy = undefined;
+    } else {
+        convertedPolicy = {
+            // @ts-ignore
+            initialInterval: policy.initialInterval ? toMs(policy.initialInterval) : undefined,
+            // @ts-ignore
+            maximumInterval: policy.maximumInterval ? toMs(policy.maximumInterval) : undefined,
+            backoffCoefficient: policy.backoffCoefficient,
+            maximumAttempts: policy.maximumAttempts,
+            nonRetryableErrorTypes: policy.nonRetryableErrorTypes,
+        }
+    }
+
+    return {
+        // @ts-ignore
+        startToCloseTimeout: opts.startToCloseTimeout ? toMs(opts.startToCloseTimeout) : undefined,
+        retry: convertedPolicy,
+    }
+}
+
+function toMs(value: StringValue) {
+    ms(value);
 }

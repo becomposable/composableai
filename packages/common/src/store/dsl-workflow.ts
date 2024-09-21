@@ -30,7 +30,6 @@ export interface DSLActivityExecutionPayload extends WorkflowExecutionPayload {
     debug_mode?: boolean;
 }
 
-
 export type ImportSpec = (string | Record<string, string>)[];
 export interface ActivityFetchSpec {
     /**

@@ -59,7 +59,6 @@ export async function buildTar(file: string, inputFiles: TarEntry[]) {
 }
 
 export class TarBuilder {
-    dirs: Set<string> = new Set<string>();
     pack: tar.Pack;
     indexData: string[] = [];
     currentOffset = 0;
@@ -87,24 +86,9 @@ export class TarBuilder {
         });
     }
 
-    private _addDirs(dir: string) {
-        if (this.dirs.has(dir)) {
-            return false;
-        }
-        const i = dir.lastIndexOf('/');
-        if (i > 0) {
-            this._addDirs(dir.slice(0, i));
-        }
-        this.add(dir);
-        this.dirs.add(dir);
-        return true;
-    }
 
     async add(name: string, content?: Buffer) {
-        const [dir, path] = getEntryDir(name);
-        if (dir) {
-            this._addDirs(dir);
-        }
+        name = normalizePath(name);
         // Calculate header size, 512 bytes for tar headers
         const headerSize = 512;
         const contentSize = content ? Buffer.byteLength(content) : 0;
@@ -113,11 +97,11 @@ export class TarBuilder {
         // Store the index entry
         // entry data offset is always at header offset + 512 bytes
         if (contentSize > 0) { // do not index directories
-            this.indexData.push(`${path}:${entryHeaderOffset},${contentSize}`);
+            this.indexData.push(`${name}:${entryHeaderOffset},${contentSize}`);
         }
 
         // Add the file entry to the tar stream
-        this.pack.entry({ name: path, size: contentSize }, content);
+        this.pack.entry({ name, size: contentSize }, content);
 
         // Update the offset
         this.currentOffset += headerSize + contentSize;
@@ -276,29 +260,3 @@ export function normalizePath(path: string) {
     }
     return path;
 }
-
-function getEntryDir(path: string): [string | null, string] {
-    path = normalizePath(path);
-    const i = path.lastIndexOf('/');
-    if (i > -1 && i < path.length - 1) {
-        return [path.slice(0, i), path];
-    }
-    return [null, path];
-}
-
-// async function test() {
-//     const index = await loadTarIndex('../memory-cli/memo.tar');
-//     if (!index) {
-//         throw new Error('Index not found');
-//     }
-//     try {
-//         const buffer = await index.getContent("L1009972.jpg")
-//         if (!buffer) {
-//             throw new Error('Entry not found');
-//         }
-//         fs.writeFileSync('extracted_L1009972.jpg', buffer);
-//     } finally {
-//         index.close();
-//     }
-// }
-// test();

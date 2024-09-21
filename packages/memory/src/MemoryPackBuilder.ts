@@ -3,7 +3,7 @@ import { join } from "path";
 import { Builder } from "./Builder.js";
 import { ContentSource } from "./ContentSource.js";
 import { MEMORY_CONTEXT_ENTRY, MemoryPack, ProjectionProperties } from "./MemoryPack.js";
-import { normalizePath, TarBuilder } from "./tar.js";
+import { normalizePath, TarBuilder } from "./utils/tar.js";
 
 export interface FromOptions {
     files?: string[];

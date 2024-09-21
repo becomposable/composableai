@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import micromatch from 'micromatch';
 import { AbstractContentSource } from "./ContentSource.js";
-import { TarEntryIndex, loadTarIndex, TarIndex } from "./tar.js";
+import { TarEntryIndex, loadTarIndex, TarIndex } from "./utils/tar.js";
 
 export const MEMORY_CONTEXT_ENTRY = "context.json";
 

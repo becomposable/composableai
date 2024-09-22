@@ -38,7 +38,6 @@
         "@llumiverse/core": "workspace:*",
         "@opendocsg/pdf2md": "^0.1.29",
         "@temporalio/activity": "^1.9.3",
-        "@temporalio/common": "^1.9.3",
         "@temporalio/workflow": "^1.9.3",
         "@tensorflow/tfjs-node": "^4.19.0",
         "@types/json-schema": "^7.0.15",
@@ -48,7 +47,7 @@
         "node-web-stream-adapters": "^0.1.0",
         "seedrandom": "^3.0.5",
         "sharp": "^0.33.4",
-        "tiktoken": "^1.0.15",
+        "tiktoken": "1.0.15",
         "tmp": "^0.2.3"
     },
     "ts_dual_module": {

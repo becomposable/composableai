@@ -391,9 +391,6 @@ importers:
       '@temporalio/activity':
         specifier: ^1.9.3
         version: 1.11.1
-      '@temporalio/common':
-        specifier: ^1.9.3
-        version: 1.11.1
       '@temporalio/workflow':
         specifier: ^1.9.3
         version: 1.11.1
@@ -409,6 +406,9 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
+      ms:
+        specifier: ^3.0.0-canary.0
+        version: 3.0.0-canary.1
       node-web-stream-adapters:
         specifier: ^0.1.0
         version: 0.1.0
@@ -419,8 +419,8 @@ importers:
         specifier: ^0.33.4
         version: 0.33.5
       tiktoken:
-        specifier: ^1.0.15
-        version: 1.0.16
+        specifier: 1.0.15
+        version: 1.0.15
       tmp:
         specifier: ^0.2.3
         version: 0.2.3
@@ -3070,8 +3070,8 @@ packages:
     peerDependencies:
       tslib: ^2
 
-  tiktoken@1.0.16:
-    resolution: {integrity: sha512-hRcORIGF2YlAgWx3nzrGJOrKSJwLoc81HpXmMQk89632XAgURc7IeV2FgQ2iXo9z/J96fCvpsHg2kWoHcbj9fg==}
+  tiktoken@1.0.15:
+    resolution: {integrity: sha512-sCsrq/vMWUSEW29CJLNmPvWxlVp7yh2tlkAjpJltIKqp5CKf98ZNpdeHRmAlPVFlGEbswDc6SmI8vz64W/qErw==}
 
   timers-ext@0.1.8:
     resolution: {integrity: sha512-wFH7+SEAcKfJpfLPkrgMPvvwnEtj8W4IurvEyrKsDleXnKLCDw71w8jltvfLa8Rm4qQxxT4jmDBYbJG/z7qoww==}
@@ -6137,7 +6137,7 @@ snapshots:
     dependencies:
       tslib: 2.6.3
 
-  tiktoken@1.0.16: {}
+  tiktoken@1.0.15: {}
 
   timers-ext@0.1.8:
     dependencies:

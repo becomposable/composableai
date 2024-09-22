@@ -4,6 +4,7 @@ import { activityInfo, log } from "@temporalio/activity";
 import { projectResult } from "../dsl/projections.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { TruncateSpec, truncByMaxTokens } from "../utils/tokens.js";
+import { ActivityOptionsWrapper } from "./types.js";
 
 
 //Example:
@@ -109,6 +110,18 @@ export interface ExecuteInteractionParams extends InteractionExecutionParams {
 
 export interface ExecuteInteraction extends DSLActivitySpec<ExecuteInteractionParams> {
     name: 'executeInteraction';
+}
+
+export const executeInteractionActivityOptions: ActivityOptionsWrapper =  {
+    name: 'executeInteraction',
+    options: {
+        startToCloseTimeout: "10m",
+        retry: {
+            initialInterval: "30s",
+            backoffCoefficient: 2,
+            maximumAttempts: 3,
+        }
+    }
 }
 
 export async function executeInteraction(payload: DSLActivityExecutionPayload) {

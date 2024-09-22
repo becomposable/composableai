@@ -3,6 +3,7 @@ import { log } from "@temporalio/activity";
 import { ActivityContext, setupActivity } from "../dsl/setup/ActivityContext.js";
 import { TruncateSpec, truncByMaxTokens } from "../utils/tokens.js";
 import { InteractionExecutionParams, executeInteractionFromActivity } from "./executeInteraction.js";
+import { ActivityOptionsWrapper } from "./types.js";
 
 const INT_SELECT_DOCUMENT_TYPE = "sys:SelectDocumentType"
 const INT_GENERATE_METADATA_MODEL = "sys:GenerateMetadataModel"
@@ -26,6 +27,18 @@ export interface GuessOrCreateDocumentTypeParams extends InteractionExecutionPar
 
 export interface GuessOrCreateDocumentType extends DSLActivitySpec<GuessOrCreateDocumentTypeParams> {
     name: 'guessOrCreateDocumentType';
+}
+
+export const guessOrCreateDocumentTypeActivityOptions: ActivityOptionsWrapper = {
+    name: 'guessOrCreateDocumentType',
+    options: {
+        startToCloseTimeout: "10m",
+        retry: {
+            initialInterval: "30s",
+            backoffCoefficient: 2,
+            maximumAttempts: 2,
+        }
+    }
 }
 
 export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPayload) {

@@ -14,3 +14,5 @@ export { generateImageRendition } from "./generateImageRendition.js";
 export { guessOrCreateDocumentType } from "./guessOrCreateDocumentType.js";
 export { setDocumentStatus } from "./setDocumentStatus.js";
 
+// TODO: is it necessary to export this?
+export { getActivityOptionsOrDefault } from "./activityOptionsRegistry.js";

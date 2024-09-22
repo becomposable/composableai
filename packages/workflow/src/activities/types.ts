@@ -1,4 +1,4 @@
-import { ActivityOptions } from "@temporalio/common";
+import { ActivityOptions } from "@temporalio/workflow";
 
 export type ActivityOptionsWrapper = {
     name: string;

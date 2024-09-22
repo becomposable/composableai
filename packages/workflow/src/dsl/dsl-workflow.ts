@@ -1,7 +1,7 @@
 import { DSLActivityExecutionPayload, DSLActivitySpec, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@becomposable/common";
 import { ActivityOptions, log, proxyActivities } from "@temporalio/workflow";
 import { ActivityParamNotFound, NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
-// import { getActivityOptionsOrDefault } from "../activities/activityOptionsRegistry.js";
+import { getActivityOptionsOrDefault } from "../activities/activityOptionsRegistry.js";
 import { Vars } from "./vars.js";
 
 interface BaseActivityPayload extends WorkflowExecutionPayload {
@@ -67,8 +67,8 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
         const importParams = vars.createImportVars(activity.import);
         const executionPayload = dslActivityPayload(basePayload, activity, importParams);
 
-        // const options = getActivityOptionsOrDefault(activity.name, defaultOptions);
-        const options = defaultOptions;
+        const options = getActivityOptionsOrDefault(activity.name, defaultOptions);
+        // const options = defaultOptions;
         const proxy = proxyActivities(options);
 
         log.info("Executing activity: " + activity.name, { payload: executionPayload });

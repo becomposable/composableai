@@ -15,4 +15,5 @@ jobs:
           cache: "pnpm"
       - run: |
           pnpm install
-          pnpm run build
+          # issue-266: enable "memory" related packages when they are ready
+          pnpm --filter='!./packages/memory*' -r build

@@ -1,8 +1,11 @@
 import { DSLActivityExecutionPayload, DSLActivitySpec, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@becomposable/common";
 import { ActivityOptions, log, proxyActivities } from "@temporalio/workflow";
 import { ActivityParamNotFound, NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
-import { getActivityOptionsOrDefault } from "../activities/activityOptionsRegistry.js";
+import { getOptionalActivityOptions } from "../activities/activityOptionsRegistry.js";
 import { Vars } from "./vars.js";
+// @ts-ignore
+import ms, {StringValue} from "ms";
+
 
 interface BaseActivityPayload extends WorkflowExecutionPayload {
     workflow_name: string;
@@ -67,8 +70,7 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
         const importParams = vars.createImportVars(activity.import);
         const executionPayload = dslActivityPayload(basePayload, activity, importParams);
 
-        const options = getActivityOptionsOrDefault(activity.name, defaultOptions);
-        // const options = defaultOptions;
+        const options = computeActivityOptions(activity.name, defaultOptions);
         const proxy = proxyActivities(options);
 
         log.info("Executing activity: " + activity.name, { payload: executionPayload });
@@ -89,4 +91,30 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
 
     }
     return vars.getValue(definition.result || 'result');
+}
+
+
+function computeActivityOptions(activityName: string, defaultOptions: ActivityOptions): ActivityOptions {
+    const opts = getOptionalActivityOptions(activityName);
+
+    if (opts) {
+        const activityOptions: ActivityOptions = {
+            startToCloseTimeout: opts.startToCloseTimeout ? ms(opts.startToCloseTimeout as StringValue) : undefined,
+            // TODO Convert other fields
+        }
+        // merge default options with the activity-specific options
+        const result = {
+            ...defaultOptions,
+            ...activityOptions,
+            retry: {
+                ...defaultOptions.retry,
+                // ...opts.retry,
+            },
+        };
+        console.log(`Options exist. Using activity options for "${activityName}"`, { options: result });
+        return result;
+    } else {
+        console.log(`Options do not exist. Using default activity options for "${activityName}"`, { options: defaultOptions });
+        return defaultOptions;
+    }
 }

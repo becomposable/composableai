@@ -6,9 +6,19 @@ import { Vars } from "./vars.js";
 import ms, { StringValue } from "ms";
 
 
-const activityOptionsRegistry: Record<string, StringValue> = {
-    ["guessOrCreateDocumentType"]: "6m",
-    ["executeInteraction"]: "5m",
+const activityOptionsRegistry: Record<string, ActivityOptions> = {
+    // TODO adjust the options
+    ["guessOrCreateDocumentType"]: {
+        startToCloseTimeout: "3m",
+        retry: {
+            maximumAttempts: 3,
+        },
+    },
+    ["executeInteraction"]: {
+        retry: {
+            maximumAttempts: 3,
+        },
+    }
 };
 
 interface BaseActivityPayload extends WorkflowExecutionPayload {
@@ -99,26 +109,26 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
 
 
 function computeActivityOptions(activityName: string, defaultOptions: ActivityOptions): ActivityOptions {
-    const opts: StringValue = activityOptionsRegistry[activityName];
+    const options = activityOptionsRegistry[activityName];
 
-    if (opts) {
-        const activityOptions: ActivityOptions = {
-            startToCloseTimeout: opts ? ms(opts) : undefined,
-            // TODO Convert other fields
-        }
+    if (options) {
         // merge default options with the activity-specific options
         const result = {
             ...defaultOptions,
-            ...activityOptions,
+            ...options,
             retry: {
                 ...defaultOptions.retry,
-                // ...opts.retry,
+                ...options.retry,
             },
         };
-        console.log(`Options exist. Using activity options for "${activityName}"`, { options: result });
+        console.log(`Options exist: true. Using activity options for "${activityName}"`, {
+            activityOptions: options,
+            defaultOptions,
+            mergedOptions: result,
+        });
         return result;
     } else {
-        console.log(`Options do not exist. Using default activity options for "${activityName}"`, { options: defaultOptions });
+        console.log(`Options exist: false. Using default activity options for "${activityName}"`, { options: defaultOptions });
         return defaultOptions;
     }
 }

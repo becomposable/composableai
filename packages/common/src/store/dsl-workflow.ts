@@ -132,6 +132,12 @@ export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<str
      */
     await?: string; //the activity name to await
 
+    /**
+     * Acitity options for configuring the activity execution.
+     *
+     * This must be an ActivityOptions from @temporalio/common //TODO: why not type it this way?
+     */
+    options?: Record<string, any>;
 }
 
 export interface DSLWorkflowSpec {

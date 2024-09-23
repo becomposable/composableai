@@ -1,6 +1,5 @@
 import { CreateContentObjectTypePayload, DSLActivityExecutionPayload, DSLActivitySpec } from "@becomposable/common";
 import { log } from "@temporalio/activity";
-import { ActivityOptions } from "@temporalio/workflow";
 import { ActivityContext, setupActivity } from "../dsl/setup/ActivityContext.js";
 import { TruncateSpec, truncByMaxTokens } from "../utils/tokens.js";
 import { InteractionExecutionParams, executeInteractionFromActivity } from "./executeInteraction.js";
@@ -151,11 +150,4 @@ async function generateNewType(context: ActivityContext, existing_types: string[
 
     return type;
 
-}
-
-export const guessOrCreateDocumentTypeActivityOptions: ActivityOptions = {
-    startToCloseTimeout: "3m",
-    retry: {
-        maximumAttempts: 3,
-    },
 }

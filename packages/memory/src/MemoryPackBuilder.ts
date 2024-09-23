@@ -1,5 +1,4 @@
 import { writeFile } from "fs/promises";
-import { join } from "path";
 import { Builder } from "./Builder.js";
 import { ContentSource } from "./ContentSource.js";
 import { MEMORY_CONTEXT_ENTRY, MemoryPack, ProjectionProperties } from "./MemoryPack.js";
@@ -59,9 +58,9 @@ export class MemoryPackBuilder {
             context = Object.assign({}, this.baseContext, context);
         }
         if (!this.entries.length) {
-            return this._buildJson(join(this.builder.tmpdir, baseName + '.json'), context);
+            return this._buildJson(baseName + '.json', context);
         } else {
-            return this._buildTar(join(this.builder.tmpdir, baseName + '.tar'), context);
+            return this._buildTar(baseName + '.tar', context);
         }
     }
 }

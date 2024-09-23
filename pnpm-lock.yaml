@@ -282,6 +282,9 @@ importers:
       '@becomposable/converters':
         specifier: workspace:*
         version: link:../converters
+      '@becomposable/json':
+        specifier: workspace:*
+        version: link:../json
       glob:
         specifier: ^11.0.0
         version: 11.0.0

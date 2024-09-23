@@ -8,7 +8,7 @@ export interface ExecOptions {
     quiet?: boolean;
 }
 
-export async function exec(commandLine: string, options: ExecOptions = {}) {
+export async function exec(commandLine: string, options: ExecOptions = {}): Promise<string | undefined> {
     const verbose = !options.quiet;
     commandLine = commandLine.trim();
     const { commands, out } = splitPipeCommands(commandLine);

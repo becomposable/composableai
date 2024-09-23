@@ -1,10 +1,13 @@
 //@ts-ignore
-import { text, json, docx, media, pdf, exec, from } from "@becomposable/memory-commands";
+import { exec, media, content, tmpdir, pdf } from "@becomposable/memory-commands";
 
-exec("ls -al", { quiet: true });
+const r = await exec("ls -al");
+
+console.log('#######', r)
 
 export default {
     msg: "hello",
-    images: media('/Users/bogdan/work/js/memory/images/*.jpg'),
-    code: text('./examples/example1.ts'),
+    pdf: pdf('./fixtures/test.pdf'),
+    images: media('/Users/bogdan/work/js/memory/images/L1009972.jpg'),
+    code: content('./examples/example1.ts'),
 };

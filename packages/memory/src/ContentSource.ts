@@ -27,10 +27,6 @@ export abstract class AbstractContentSource implements ContentSource {
     }
 }
 
-export abstract class MemoryFile extends AbstractContentSource {
-    abstract name: string;
-}
-
 export class BufferSource extends AbstractContentSource {
     constructor(public buffer: Buffer) {
         super()

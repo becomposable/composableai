@@ -30,7 +30,7 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
     }
     delete (basePayload as any).workflow;
 
-    const options: ActivityOptions = {
+    const defaultOptions: ActivityOptions = {
         ...definition.options,
         startToCloseTimeout: "5 minute",
         retry: {
@@ -45,7 +45,7 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
             ],
         },
     };
-    const proxy = proxyActivities(options as any);
+    const defaultProxy = proxyActivities(defaultOptions);
     // merge default vars with the payload vars and add objectIds and obejctId
     const vars = new Vars({
         ...definition.vars,
@@ -67,6 +67,22 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
         const importParams = vars.createImportVars(activity.import);
         const executionPayload = dslActivityPayload(basePayload, activity, importParams);
         log.info("Executing activity: " + activity.name, { payload: executionPayload });
+
+        let proxy = defaultProxy;
+        if (activity.options) {
+            const options = computeActivityOptions(activity.options, defaultOptions);
+            proxy = proxyActivities(options)
+            log.debug("Use custom activity options", {
+                activityName: activity.name,
+                activityOptions: activity.options,
+            });
+        } else {
+            log.debug("Use default activity options", {
+                activityName: activity.name,
+                activityOptions: defaultOptions,
+            });
+        }
+
         const fn = proxy[activity.name];
         if (activity.parallel) {
             //TODO execute in parallel
@@ -84,4 +100,15 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
 
     }
     return vars.getValue(definition.result || 'result');
+}
+
+function computeActivityOptions(customOptions: Record<string, any>, defaultOptions: ActivityOptions): ActivityOptions {
+    return {
+        ...defaultOptions,
+        ...customOptions,
+        retry: {
+            ...defaultOptions.retry,
+            ...customOptions.retry,
+        }
+    }
 }

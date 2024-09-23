@@ -1,5 +1,6 @@
 import { DSLActivityExecutionPayload, DSLActivitySpec, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@becomposable/common";
 import { ActivityOptions, log, proxyActivities } from "@temporalio/workflow";
+import { guessOrCreateDocumentTypeActivityOptions } from "../activities/guessOrCreateDocumentType.js";
 import { ActivityParamNotFound, NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
 import { Vars } from "./vars.js";
 // @ts-ignore
@@ -8,12 +9,7 @@ import ms, { StringValue } from "ms";
 
 const activityOptionsRegistry: Record<string, ActivityOptions> = {
     // TODO adjust the options
-    ["guessOrCreateDocumentType"]: {
-        startToCloseTimeout: "3m",
-        retry: {
-            maximumAttempts: 3,
-        },
-    },
+    ["guessOrCreateDocumentType"]: guessOrCreateDocumentTypeActivityOptions,
     ["executeInteraction"]: {
         retry: {
             maximumAttempts: 3,

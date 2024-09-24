@@ -10,10 +10,10 @@ console.log(`Retrieving issues between ${start}and ${end}...`)
 // Get list of commit logs containing '#' between the two tags and extract unique issue numbers
 const issue_numbers = await exec(`git log ${start}..${end} --oneline | grep -o '#[0-9]\\+' | sed 's/#//' | sort -u`) as string;
 
-for (const issue of issue_numbers!.trim().split("\n")) {
+for (const issue of issue_numbers.trim().split("\n")) {
     console.log(`Processing issue #${issue}`)
     const issue_content = await exec(`gh issue view ${issue}`) as string;
-    copyText(issue_content!, `issues/${issue}.txt`);
+    copyText(issue_content, `issues/${issue}.txt`);
 }
 
 console.log("Generating diff");

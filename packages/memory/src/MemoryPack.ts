@@ -3,7 +3,7 @@ import micromatch from 'micromatch';
 import { AbstractContentSource } from "./ContentSource.js";
 import { TarEntryIndex, loadTarIndex, TarIndex } from "./utils/tar.js";
 
-export const MEMORY_CONTEXT_ENTRY = "context.json";
+export const MEMORY_METADATA_ENTRY = "metadata.json";
 
 /**
  * Projection cannot contains both include and exclude keys
@@ -38,7 +38,7 @@ function applyProjection(projection: ProjectionProperties, object: any) {
 
 
 export interface MemoryPack {
-    getContext(projection?: ProjectionProperties): Promise<any>;
+    getMetadata(projection?: ProjectionProperties): Promise<any>;
     getEntry(path: string): MemoryEntry | null;
     getEntries(filters?: string[]): MemoryEntry[];
 }
@@ -55,18 +55,18 @@ export class MemoryEntry extends AbstractContentSource {
 
 export class TarMemoryPack implements MemoryPack {
     constructor(public index: TarIndex) {
-        if (!index.get(MEMORY_CONTEXT_ENTRY)) {
+        if (!index.get(MEMORY_METADATA_ENTRY)) {
             throw new Error("Invalid memory tar file. Context entry not found");
         }
     }
-    async getContext(projection?: ProjectionProperties) {
-        const content = await this.index.getContent(MEMORY_CONTEXT_ENTRY);
+    async getMetadata(projection?: ProjectionProperties) {
+        const content = await this.index.getContent(MEMORY_METADATA_ENTRY);
         if (content) {
-            let context = JSON.parse(content.toString('utf-8'));
+            let metadata = JSON.parse(content.toString('utf-8'));
             if (projection) {
-                context = applyProjection(projection, context);
+                metadata = applyProjection(projection, metadata);
             }
-            return context;
+            return metadata;
         } else {
             throw new Error("Invalid memory tar file. Context entry not found");
         }
@@ -109,7 +109,7 @@ export class JsonMemoryPack implements MemoryPack {
     constructor(public context: any) {
     }
 
-    getContext() {
+    getMetadata() {
         return Promise.resolve(this.context);
     }
 

@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, statSync } from "fs";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { Builder } from "./Builder";
 import { loadTarIndex } from "./utils/tar";
-import { loadMemoryPack, MEMORY_CONTEXT_ENTRY } from "./MemoryPack";
+import { loadMemoryPack, MEMORY_METADATA_ENTRY } from "./MemoryPack";
 
 const memoryBaseName = "test-base-memory";
 const memoryBaseFile = memoryBaseName + '.tar';
@@ -68,7 +68,7 @@ describe("Builder", () => {
         const memory = await loadMemoryPack(memoryFile);
         const entries = memory.getEntries();
         expect(entries.length).toBe(4);
-        expect(entries.map(e => e.name).sort()).toStrictEqual([MEMORY_CONTEXT_ENTRY, "file2.txt", "file3.txt", "file4.txt"]);
+        expect(entries.map(e => e.name).sort()).toStrictEqual([MEMORY_METADATA_ENTRY, "file2.txt", "file3.txt", "file4.txt"]);
 
         const entry1 = memory.getEntry("file1.txt");
         expect(entry1).toBeNull();
@@ -87,7 +87,7 @@ describe("Builder", () => {
         expect(content3).toBe("file3 from base memory");
         expect(content4).toBe("file4 from new memory");
 
-        const context = await memory.getContext();
+        const context = await memory.getMetadata();
         expect(context).toStrictEqual({
             baseProp2: "baseProp2",
             baseProp3: "baseProp3",

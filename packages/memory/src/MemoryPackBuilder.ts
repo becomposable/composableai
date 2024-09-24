@@ -57,7 +57,7 @@ export class MemoryPackBuilder {
         if (this.baseContext) {
             context = Object.assign({}, this.baseContext, context);
         }
-        if (!this.entries.length) {
+        if (!Object.keys(this.entries).length) {
             return this._buildJson(baseName + '.json', context);
         } else {
             return this._buildTar(baseName + '.tar', context);

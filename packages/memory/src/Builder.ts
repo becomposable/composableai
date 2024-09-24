@@ -25,6 +25,11 @@ export interface BuildOptions {
      * A temporary directory to use for the build. If not set, the system tmp dir will be used
      */
     tmpdir?: string;
+
+    /**
+     * Vars to be injected into the script context as the vars object
+     */
+    vars?: Record<string, any>;
 }
 
 export interface Commands {
@@ -42,12 +47,14 @@ export interface Commands {
 export class Builder implements Commands {
     static instance?: Builder;
 
+    vars: Record<string, any>;
     tmpdir: string;
     memory: MemoryPackBuilder;
 
     constructor(public options: BuildOptions = {}) {
         this.tmpdir = options.tmpdir || tmpdir();
         this.memory = new MemoryPackBuilder(this);
+        this.vars = options.vars || {};
     }
 
     from(location: string, options?: FromOptions) {

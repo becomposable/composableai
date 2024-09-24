@@ -1,9 +1,11 @@
 //@ts-ignore
-import { exec, media, content, tmpdir, pdf } from "@becomposable/memory-commands";
+import { vars, exec, media, content, tmpdir, pdf } from "@becomposable/memory-commands";
+
+console.log('!!!!!!', vars);
 
 const r = await exec("ls -al");
 
-console.log('#######', r)
+console.log('#######', r);
 
 export default {
     msg: "hello",

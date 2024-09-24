@@ -9,7 +9,6 @@
         "src"
     ],
     "scripts": {
-        "preinstall": "pnpm exec only-allow pnpm",
         "test": "vitest run",
         "build": "pnpm exec tsmod build",
         "clean": "rm -rf ./lib ./node_modules tsconfig.tsbuildinfo"

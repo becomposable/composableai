@@ -12,7 +12,6 @@
         "bundle-workflows": "./bin/bundle-workflows.mjs"
     },
     "scripts": {
-        "preinstall": "pnpm exec only-allow pnpm",
         "test": "vitest run",
         "build": "pnpm exec tsmod build && node ./bin/bundle-workflows.mjs lib/esm/workflows.js lib/workflows-bundle.js",
         "clean": "rm -rf ./lib tsconfig.tsbuildinfo"

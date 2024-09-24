@@ -8,7 +8,6 @@
         "src"
     ],
     "scripts": {
-        "preinstall": "pnpm exec only-allow pnpm",
         "test": "vitest run",
         "build": "pnpm exec tsmod build",
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"

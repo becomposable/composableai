@@ -18,7 +18,6 @@
   },
   "scripts": {
     "test": "ESBK_TSCONFIG_PATH=./test/tsconfig.json pnpm exec mocha -r tsx --exit ./test/**/*.ts",
-    "preinstall": "pnpm exec only-allow pnpm",
     "eslint": "eslint './src/**/*.{jsx,js,tsx,ts}'",
     "build": "pnpm exec tsmod build",
     "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"

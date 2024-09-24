@@ -3,7 +3,7 @@
     "version": "0.33.0",
     "private": true,
     "scripts": {
-        "bump": "pnpm exec npm-ws-tools bump minor -x llumiverse",
+        "bump": "pnpm exec wst bump minor -x llumiverse",
         "release": "pnpm -r publish --access public",
         "build": "pnpm -r build",
         "test": "pnpm -r test",

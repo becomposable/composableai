@@ -20,5 +20,7 @@ console.log("Generating diff");
 await exec(`git diff --submodule=diff ${start}...${end} > ${tmpdir}/range_diff.txt`)
 copy(`${tmpdir}/range_diff.txt`, "range_diff.txt");
 
-// no metadata to export
-export default {}
+export default {
+    from_version: start,
+    release_version: end,
+}

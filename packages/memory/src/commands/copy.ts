@@ -1,6 +1,12 @@
 import { Builder } from "../Builder.js";
 import { DocxObject, MediaObject, MediaOptions, PdfObject } from "../ContentObject.js";
 import { AbstractContentSource, ContentSource, FileSource, SourceSpec } from "../ContentSource.js";
+import { createPathRewrite, PathMapperFn } from "../utils/rewrite.js";
+
+function rewritePath(source: ContentSource, index: number, mapper: PathMapperFn) {
+    const path = source instanceof FileSource ? source.file : '';
+    return mapper(path, index);
+}
 
 export interface CopyOptions {
     media?: MediaOptions;
@@ -8,12 +14,14 @@ export interface CopyOptions {
 }
 export function copy(builder: Builder, source: SourceSpec, toPath: string, options: CopyOptions = {}) {
     const resolved = AbstractContentSource.resolve(source);
+    const mapperFn = createPathRewrite(toPath);
     if (Array.isArray(resolved)) {
-        for (const cs of resolved) {
-            copyOne(builder, cs, toPath, options);
+        for (let i = 0, l = resolved.length; i < l; i++) {
+            const cs = resolved[i];
+            copyOne(builder, cs, rewritePath(cs, i, mapperFn), options);
         }
     } else {
-        return copyOne(builder, resolved, toPath, options);
+        return copyOne(builder, resolved, rewritePath(resolved, 0, mapperFn), options);
     }
 }
 

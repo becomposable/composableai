@@ -1,25 +1,30 @@
-import { join } from "path";
-import { Builder } from "./Builder";
 import { writeFile } from "fs/promises";
-import { MEMORY_CONTEXT_ENTRY, MemoryPack } from "./MemoryPack";
-import { ContentSource } from "./source";
-import { normalizePath, TarBuilder } from "./tar";
+import { Builder } from "./Builder.js";
+import { ContentSource } from "./ContentSource.js";
+import { MEMORY_CONTEXT_ENTRY, MemoryPack, ProjectionProperties } from "./MemoryPack.js";
+import { normalizePath, TarBuilder } from "./utils/tar.js";
 
+export interface FromOptions {
+    files?: string[];
+    projection?: ProjectionProperties;
+}
 
 export class MemoryPackBuilder {
-    context: any;
+    baseContext: any;
     entries: { [path: string]: ContentSource } = {};
 
     constructor(public builder: Builder) {
     }
 
-    async load(memory: MemoryPack, filters: string[] = []) {
-        // do not fetch the context entry
-        filters.push(`!${MEMORY_CONTEXT_ENTRY}`);
-        const entries = memory.getEntries(filters);
+    async load(memory: MemoryPack, options: FromOptions = {}) {
+        const files = options.files || [];
+        // do not fetch the context entry an the .index file
+        files.push(`!${MEMORY_CONTEXT_ENTRY}`);
+        const entries = memory.getEntries(files);
         for (const entry of entries) {
             this.add(entry.name, entry);
         }
+        this.baseContext = await memory.getContext(options.projection);
     }
 
     add(path: string, content: ContentSource) {
@@ -27,26 +32,35 @@ export class MemoryPackBuilder {
         this.entries[path] = content;
     }
 
-    private async _buildTar(file: string) {
+    stringifyContext(context: object) {
+        return JSON.stringify(context, undefined, this.builder.options.indent || undefined);
+    }
+
+    private async _buildTar(file: string, context: object) {
         const tar = new TarBuilder(file);
         const keys = Object.keys(this.entries).sort();
         for (const key of keys) {
             const source = this.entries[key];
             tar.add(key, await source.getContent());
         }
-        tar.add(MEMORY_CONTEXT_ENTRY, Buffer.from(JSON.stringify(this.context), "utf-8"));
+        tar.add(MEMORY_CONTEXT_ENTRY, Buffer.from(this.stringifyContext(context), "utf-8"));
         await tar.build();
+        return file;
     }
 
-    private async _buildJson(file: string) {
-        await writeFile(file, JSON.stringify(this.context), "utf-8");
+    private async _buildJson(file: string, context: object) {
+        await writeFile(file, this.stringifyContext(context), "utf-8");
+        return file;
     }
 
-    build() {
-        if (!this.entries.length) {
-            return this._buildJson(join(this.builder.tmpdir, '.memory.json'));
+    build(baseName: string, context: Record<string, any> = {}) {
+        if (this.baseContext) {
+            context = Object.assign({}, this.baseContext, context);
+        }
+        if (!Object.keys(this.entries).length) {
+            return this._buildJson(baseName + '.json', context);
         } else {
-            return this._buildTar(join(this.builder.tmpdir, '.memory.tar'));
+            return this._buildTar(baseName + '.tar', context);
         }
     }
 }

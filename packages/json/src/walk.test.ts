@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { ObjectWalker } from "./walk.ts";
+import { ObjectWalker, AsyncObjectWalker } from "./walk.ts";
 
 describe('walk object', () => {
 
@@ -76,6 +76,30 @@ describe('walk object', () => {
         expect(r[1].x).toBe("1");
         expect(r[2].y).toBe("2");
         expect(r[3].z).toBe("3");
+    })
+
+    test('async map', async () => {
+        const obj = { ar: [123, { x: 1 }, { y: { a: 1, b: [2] } }] };
+        const r: any = await new AsyncObjectWalker().map(obj, async (_key, value) => {
+            if (typeof value === "number") {
+                return new Promise((resolve) => {
+                    return setTimeout(() => {
+                        resolve(String(value));
+                    }, 50);
+                });
+            }
+            return value;
+        });
+        expect(Array.isArray(r.ar)).toBe(true);
+        expect(r.ar.length).toBe(obj.ar.length);
+        expect(r.ar[0]).toBe("123");
+        expect(r.ar[1].x).toBe("1");
+        const y: any = r.ar[2].y;
+        expect(y.a).toBe("1");
+        console.log(y.b);
+        expect(Array.isArray(y.b)).toBe(true);
+        expect(y.b.length).toBe(1);
+        expect(y.b[0]).toBe("2");
     })
 
 })

@@ -27,10 +27,6 @@ export abstract class AbstractContentSource implements ContentSource {
     }
 }
 
-export abstract class MemoryFile extends AbstractContentSource {
-    abstract name: string;
-}
-
 export class BufferSource extends AbstractContentSource {
     constructor(public buffer: Buffer) {
         super()
@@ -40,7 +36,7 @@ export class BufferSource extends AbstractContentSource {
     }
 }
 
-export class Text extends AbstractContentSource {
+export class TextSource extends AbstractContentSource {
     constructor(public value: string, public encoding: BufferEncoding = "utf-8") {
         super();
     }

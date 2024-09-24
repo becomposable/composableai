@@ -6,8 +6,22 @@ export interface TransformOptions {
     format?: keyof sharp.FormatEnum
 }
 
-export function createImageTransformer(opts: TransformOptions, file?: string) {
-    let sh = sharp(file);
+type SharpInputType = Buffer
+    | ArrayBuffer
+    | Uint8Array
+    | Uint8ClampedArray
+    | Int8Array
+    | Uint16Array
+    | Int16Array
+    | Uint32Array
+    | Int32Array
+    | Float32Array
+    | Float64Array
+    | string
+    | NodeJS.ReadableStream
+export function createImageTransformer(input: SharpInputType, opts: TransformOptions) {
+    const isInputStream = !!(input as NodeJS.ReadableStream).pipe;
+    let sh = isInputStream ? (input as NodeJS.ReadableStream).pipe(sharp()) : sharp(input as any);
     if (opts.max_hw) {
         sh = sh.resize({
             width: opts.max_hw,
@@ -23,46 +37,45 @@ export function createImageTransformer(opts: TransformOptions, file?: string) {
 }
 
 /**
- * Return a duplex stream that resizes the image to fit within the max_hw and convert it to the target format.
  * @param max_hw
  * @param format
  * @returns
  */
-export function transformImage(input: NodeJS.ReadableStream, opts: TransformOptions): Promise<sharp.Sharp> {
-    const sh = createImageTransformer(opts);
-    input.pipe(sh);
+export async function transformImage(input: SharpInputType, output: NodeJS.WritableStream, opts: TransformOptions): Promise<sharp.Sharp> {
+    const sh = createImageTransformer(input, opts);
+    sh.pipe(output);
+
     return new Promise((resolve, reject) => {
         const handleError = (err: any) => {
             console.error('Failed to transform', err);
             try {
+                if ((input as any).pipe && (input as any).destroy) {
+                    (input as any).destroy();
+                }
+                if ((output as any).destroy) {
+                    (output as any).destroy();
+                }
                 sh.destroy();
             } finally {
                 reject(err);
             }
         }
-        sh.on('error', handleError);
-        input.on('error', handleError);
-        sh.on("finish", () => {
+        output.on('error', handleError);
+        (input as any).pipe && (input as any).on && (input as any).on('error', handleError);
+        output.on("finish", () => {
             resolve(sh);
         });
     });
 }
 
-export function transformImageFile(source: string, dest: string, opts: TransformOptions): Promise<{ width: number, height: number } | undefined> {
-    return new Promise((resolve, reject) => {
-        let result: { width: number, height: number } | undefined;
-        const sh = createImageTransformer(opts, source);
-        sh.on('info', (info) => {
-            result = info;
-        });
-        sh.toFile(dest, (err) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(result);
-            }
-        });
-    });
+export function transformImageToBuffer(input: SharpInputType, opts: TransformOptions): Promise<Buffer> {
+    const sh = createImageTransformer(input, opts);
+    return sh.toBuffer();
+}
+
+export async function transformImageToFile(input: SharpInputType, output: string, opts: TransformOptions): Promise<void> {
+    const sh = createImageTransformer(input, opts);
+    await sh.toFile(output);
 }
 
 export interface PdfToImageParams {

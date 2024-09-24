@@ -26,7 +26,6 @@ function parseArgs(args: string[]) {
         console.error("No recipe script was provided.");
         process.exit(1);
     }
-    console.log('####', args);
     let script: string | undefined;
     const vars: Record<string, any> = {};
     let lastKey: string | undefined;

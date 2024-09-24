@@ -35,3 +35,14 @@ export interface ComputeObjectFacetPayload extends ComputeFacetPayload {
 export interface ComputePromptFacetPayload extends ComputeFacetPayload {
     query?: PromptSearchQuery;
 }
+
+export interface ExportPropertiesPayload {
+    objectIds: string[];
+    type: string;
+}
+
+export interface ExportPropertiesResponse {
+    type: string;
+    name: string;
+    data: Blob;
+}

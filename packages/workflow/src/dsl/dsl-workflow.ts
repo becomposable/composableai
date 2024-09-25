@@ -85,7 +85,7 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
             const options = computeActivityOptions(activity.options, defaultOptions);
             log.debug("Use custom activity options", {
                 activityName: activity.name,
-                activityOptions: activity.options,
+                activityOptions: options,
             });
             proxy = proxyActivities(options)
         } else {
@@ -114,6 +114,7 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
     return vars.getValue(definition.result || 'result');
 }
 
+// TODO add tests
 function computeActivityOptions(customOptions: DSLActivityOptions, defaultOptions: ActivityOptions): ActivityOptions {
     const options = convertDSLActivityOptions(customOptions);
     return {
@@ -130,18 +131,35 @@ function convertDSLActivityOptions(options?: DSLActivityOptions): ActivityOption
     if (!options) {
         return {};
     }
-    return {
-        startToCloseTimeout: options?.startToCloseTimeout ? ms(options?.startToCloseTimeout as StringValue) : undefined,
-        scheduleToCloseTimeout: options?.scheduleToCloseTimeout ? ms(options?.scheduleToCloseTimeout as StringValue) : undefined,
-        scheduleToStartTimeout: options?.scheduleToStartTimeout ? ms(options?.scheduleToStartTimeout as StringValue) : undefined,
-        retry: {
-            initialInterval: options?.retry?.initialInterval ? ms(options?.retry?.initialInterval as StringValue) : undefined,
-            maximumInterval: options?.retry?.maximumInterval ? ms(options?.retry?.maximumInterval as StringValue) : undefined,
-            maximumAttempts: options?.retry?.maximumAttempts,
-            backoffCoefficient: options?.retry?.backoffCoefficient,
-            nonRetryableErrorTypes: options?.retry?.nonRetryableErrorTypes,
+    let result: ActivityOptions = {};
+    if (options.startToCloseTimeout) {
+        result.startToCloseTimeout = ms(options.startToCloseTimeout as StringValue);
+    }
+    if (options.scheduleToCloseTimeout) {
+        result.scheduleToCloseTimeout = ms(options.scheduleToCloseTimeout as StringValue);
+    }
+    if (options.scheduleToStartTimeout) {
+        result.scheduleToStartTimeout = ms(options.scheduleToStartTimeout as StringValue);
+    }
+    if (options.retry) {
+        result.retry = {};
+        if (options.retry.initialInterval) {
+            result.retry.initialInterval = ms(options.retry.initialInterval as StringValue);
+        }
+        if (options.retry.maximumInterval) {
+            result.retry.maximumInterval = ms(options.retry.maximumInterval as StringValue);
+        }
+        if (options.retry.maximumAttempts) {
+            result.retry.maximumAttempts = options.retry.maximumAttempts;
+        }
+        if (options.retry.backoffCoefficient) {
+            result.retry.backoffCoefficient = options.retry.backoffCoefficient;
+        }
+        if (options.retry.nonRetryableErrorTypes) {
+            result.retry.nonRetryableErrorTypes = options.retry.nonRetryableErrorTypes;
         }
     }
+    return result;
 }
 
   

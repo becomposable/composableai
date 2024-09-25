@@ -114,8 +114,7 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
     return vars.getValue(definition.result || 'result');
 }
 
-// TODO add tests
-function computeActivityOptions(customOptions: DSLActivityOptions, defaultOptions: ActivityOptions): ActivityOptions {
+export function computeActivityOptions(customOptions: DSLActivityOptions, defaultOptions: ActivityOptions): ActivityOptions {
     const options = convertDSLActivityOptions(customOptions);
     return {
         ...defaultOptions,

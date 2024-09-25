@@ -1,9 +1,9 @@
 import { readFile } from "fs/promises";
 import micromatch from 'micromatch';
 import { AbstractContentSource } from "./ContentSource.js";
-import { TarEntryIndex, loadTarIndex, TarIndex } from "./utils/tar.js";
+import { loadTarIndex, TarEntryIndex, TarIndex } from "./utils/tar.js";
 
-export const MEMORY_CONTEXT_ENTRY = "context.json";
+export const MEMORY_METADATA_ENTRY = "metadata.json";
 
 /**
  * Projection cannot contains both include and exclude keys
@@ -38,9 +38,13 @@ function applyProjection(projection: ProjectionProperties, object: any) {
 
 
 export interface MemoryPack {
-    getContext(projection?: ProjectionProperties): Promise<any>;
+    getMetadata(projection?: ProjectionProperties): Promise<any>;
     getEntry(path: string): MemoryEntry | null;
     getEntries(filters?: string[]): MemoryEntry[];
+    getEntryContent(path: string): Promise<Buffer | null>;
+    getEntryText(path: string, encoding?: BufferEncoding): Promise<string | null>;
+    getEntriesContent(filters?: string[]): Promise<Buffer[]>;
+    getEntriesText(filters?: string[], encoding?: BufferEncoding): Promise<string[]>;
 }
 
 
@@ -51,33 +55,40 @@ export class MemoryEntry extends AbstractContentSource {
     getContent(): Promise<Buffer> {
         return this.index.getContentAt(this.offset, this.size);
     }
+    getText(encoding: BufferEncoding = "utf-8"): Promise<string> {
+        return this.getContent().then((b) => b.toString(encoding));
+    }
 }
 
 export class TarMemoryPack implements MemoryPack {
     constructor(public index: TarIndex) {
-        if (!index.get(MEMORY_CONTEXT_ENTRY)) {
+        if (!index.get(MEMORY_METADATA_ENTRY)) {
             throw new Error("Invalid memory tar file. Context entry not found");
         }
     }
-    async getContext(projection?: ProjectionProperties) {
-        const content = await this.index.getContent(MEMORY_CONTEXT_ENTRY);
+    async getMetadata(projection?: ProjectionProperties) {
+        const content = await this.index.getContent(MEMORY_METADATA_ENTRY);
         if (content) {
-            let context = JSON.parse(content.toString('utf-8'));
+            let metadata = JSON.parse(content.toString('utf-8'));
             if (projection) {
-                context = applyProjection(projection, context);
+                metadata = applyProjection(projection, metadata);
             }
-            return context;
+            return metadata;
         } else {
             throw new Error("Invalid memory tar file. Context entry not found");
         }
     }
 
-    getEntries(filters?: string[]) {
+    getPaths(filters?: string[]) {
         let paths = this.index.getSortedPaths();
         if (filters && filters.length > 0) {
             paths = micromatch(paths, filters);
         }
-        return this._getEntries(paths);
+        return paths;
+    }
+
+    getEntries(filters?: string[]) {
+        return this._getEntries(this.getPaths(filters));
     }
 
     private _getEntries(paths: string[]) {
@@ -90,9 +101,40 @@ export class TarMemoryPack implements MemoryPack {
         return entries;
     }
 
+    getEntriesContent(filters?: string[]) {
+        const paths = this.getPaths(filters);
+        const promises: Promise<Buffer>[] = [];
+        for (const path of paths) {
+            promises.push(this.getEntryContent(path) as Promise<Buffer>);
+        }
+        return Promise.all(promises);
+    }
+
+    getEntriesText(filters?: string[], encoding: BufferEncoding = "utf-8") {
+        const paths = this.getPaths(filters);
+        const promises: Promise<string>[] = [];
+        for (const path of paths) {
+            promises.push(this.getEntryText(path, encoding) as Promise<string>);
+        }
+        return Promise.all(promises);
+    }
+
     getEntry(path: string) {
         const entry = this.index.get(path);
         return entry ? new MemoryEntry(this.index, path, entry.offset, entry.size) : null;
+    }
+
+    getEntryContent(path: string): Promise<Buffer | null> {
+        const entry = this.index.get(path);
+        if (!entry) {
+            return Promise.resolve(null);
+        } else {
+            return this.index.getContentAt(entry.offset, entry.size);
+        }
+    }
+
+    getEntryText(path: string, encoding: BufferEncoding = "utf-8"): Promise<string | null> {
+        return this.getEntryContent(path).then((b) => b?.toString(encoding) || null);
     }
 
     static async loadFile(file: string) {
@@ -109,7 +151,7 @@ export class JsonMemoryPack implements MemoryPack {
     constructor(public context: any) {
     }
 
-    getContext() {
+    getMetadata() {
         return Promise.resolve(this.context);
     }
 
@@ -121,6 +163,19 @@ export class JsonMemoryPack implements MemoryPack {
         return [];
     }
 
+    getEntryContent(): Promise<Buffer | null> {
+        return Promise.resolve(null);
+    }
+
+    getEntryText(): Promise<string | null> {
+        return Promise.resolve(null);
+    }
+    getEntriesContent(_filters?: string[]): Promise<Buffer[]> {
+        return Promise.resolve([]);
+    }
+    getEntriesText(_filters?: string[]): Promise<string[]> {
+        return Promise.resolve([]);
+    }
     static async loadFile(file: string) {
         return new JsonMemoryPack(JSON.parse(await readFile(file, 'utf-8')));
     }

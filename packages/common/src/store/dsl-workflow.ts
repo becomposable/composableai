@@ -158,7 +158,7 @@ export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<str
     await?: string; //the activity name to await
 
     /**
-     * Acitity options for configuring the activity execution, which overrides the activity options
+     * Activity options for configuring the activity execution, which overrides the activity options
      * defined at workflow level.
      */
     options?: DSLActivityOptions;

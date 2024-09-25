@@ -21,6 +21,31 @@ export interface DSLWorkflowExecutionPayload extends WorkflowExecutionPayload {
 }
 
 /**
+ * The payload for a DSL acitivty options.
+ *
+ * @see ActivityOptions in @temporalio/common
+ */
+export interface DSLActivityOptions {
+    startToCloseTimeout?: string | number;
+    scheduleToStartTimeout?: string | number;
+    scheduleToCloseTimeout?: string | number;
+    retry?: DSLRetryPolicy;
+}
+
+/**
+ * The payload for a DSL retry policy.
+ *
+ * @see RetryPolicy in @temporalio/common
+ */
+export interface DSLRetryPolicy {
+    backoffCoefficient?: number;
+    initialInterval?: string | number;
+    maximumAttempts?: number;
+    maximumInterval?: string | number;
+    nonRetryableErrorTypes?: string[];
+}
+
+/**
  * The payload for a DSL activity execution.
  */
 export interface DSLActivityExecutionPayload extends WorkflowExecutionPayload {
@@ -133,11 +158,10 @@ export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<str
     await?: string; //the activity name to await
 
     /**
-     * Acitity options for configuring the activity execution.
-     *
-     * This must be an ActivityOptions from @temporalio/common //TODO: why not type it this way?
+     * Acitity options for configuring the activity execution, which overrides the activity options
+     * defined at workflow level.
      */
-    options?: Record<string, any>;
+    options?: DSLActivityOptions;
 }
 
 export interface DSLWorkflowSpec {
@@ -149,8 +173,8 @@ export interface DSLWorkflowSpec {
     // a dictionary of vars to initialize the workflow execution vars
     // Initial vars cannot contains references to other vars
     vars: Record<string, any>;
-    // this must be an ActivityOptions from @temporalio/common //TODO: why not type it this way?
-    options?: Record<string, any>;
+    // activity options that apply to all activities within the workflow
+    options?: DSLActivityOptions;
     // the name of the variable that will hold the workflow result
     // if not specified "result" will be assumed
     result?: string;

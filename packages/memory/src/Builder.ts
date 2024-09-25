@@ -27,6 +27,11 @@ export interface BuildOptions {
     tmpdir?: string;
 
     /**
+     * If true, compress the output (tar or json) with gzip. Defaults to false.
+     */
+    gzip?: boolean;
+
+    /**
      * Vars to be injected into the script context as the vars object
      */
     vars?: Record<string, any>;

@@ -1,6 +1,8 @@
 import fs from "fs";
 import { FileHandle, open } from "fs/promises";
+import { pipeline } from "stream/promises";
 import tar from "tar-stream";
+import zlib from "zlib";
 
 export interface TarEntry {
     name: string;
@@ -18,21 +20,11 @@ export class TarBuilder {
         this.pack = pack;
         // Open the output file as a write stream
         const outputStream = fs.createWriteStream(file);
-        pack.pipe(outputStream);
-        // Wait for the stream to finish
-        this.tarPromise = new Promise((resolve, reject) => {
-            outputStream.on('finish', resolve)
-            outputStream.on('error', (err: any) => {
-                pack.destroy();
-                outputStream.close();
-                reject(err);
-            })
-            pack.on('error', (err: any) => {
-                pack.destroy();
-                outputStream.close();
-                reject(err);
-            })
-        });
+        if (file.endsWith('.gz')) {
+            this.tarPromise = pipeline(pack, zlib.createGzip(), outputStream);
+        } else {
+            this.tarPromise = pipeline(pack, outputStream);
+        }
     }
 
 

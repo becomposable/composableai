@@ -3,6 +3,10 @@ import { Builder } from "./Builder.js";
 import { ContentSource } from "./ContentSource.js";
 import { MEMORY_METADATA_ENTRY, MemoryPack, ProjectionProperties } from "./MemoryPack.js";
 import { normalizePath, TarBuilder } from "./utils/tar.js";
+import { createWriteStream } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
+import zlib from 'node:zlib';
+import { Readable } from "stream";
 
 export interface FromOptions {
     files?: string[];
@@ -37,6 +41,9 @@ export class MemoryPackBuilder {
     }
 
     private async _buildTar(file: string, context: object) {
+        if (this.builder.options.gzip) {
+            file += ".gz";
+        }
         const tar = new TarBuilder(file);
         const keys = Object.keys(this.entries).sort();
         for (const key of keys) {
@@ -49,7 +56,17 @@ export class MemoryPackBuilder {
     }
 
     private async _buildJson(file: string, context: object) {
-        await writeFile(file, this.stringifyContext(context), "utf-8");
+        const buffer = Buffer.from(this.stringifyContext(context), "utf-8");
+        if (this.builder.options.gzip) {
+            file += ".gz";
+            await pipeline(
+                Readable.from(buffer),
+                zlib.createGzip(),
+                createWriteStream(file)
+            );
+        } else {
+            await writeFile(file, buffer);
+        }
         return file;
     }
 

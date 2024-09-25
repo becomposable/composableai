@@ -68,7 +68,7 @@ describe("Builder", () => {
         const memory = await loadMemoryPack(memoryFile);
         const entries = memory.getEntries();
         expect(entries.length).toBe(4);
-        expect(entries.map(e => e.name).sort()).toStrictEqual([MEMORY_METADATA_ENTRY, "file2.txt", "file3.txt", "file4.txt"]);
+        expect(entries.map(e => e.name).sort()).toStrictEqual(["file2.txt", "file3.txt", "file4.txt", MEMORY_METADATA_ENTRY].sort());
 
         const entry1 = memory.getEntry("file1.txt");
         expect(entry1).toBeNull();

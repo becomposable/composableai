@@ -6,6 +6,7 @@ program.version("1.0.0")
     .allowUnknownOption()
     .option('-i, --indent <spaces>', 'The number of spaces to indent the JSON result. No identation is done by default.')
     .option('-q, --quiet', 'Do not log anything to the console.')
+    .option('-z, --gzip', 'Compress the output file using gzip.')
     .option('-o, --out <file>', 'The output file. Defaults to "memo.json" or "memo.tar" if media files are included.')
     .argument('<recipe>', 'The recipe script to build the memo from.')
     .action((_arg: string, options: Record<string, any>, command: Command) => {

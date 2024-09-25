@@ -1,7 +1,15 @@
-import { DSLActivityExecutionPayload, DSLActivitySpec, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@becomposable/common";
+import {
+    DSLActivityExecutionPayload,
+    DSLActivityOptions,
+    DSLActivitySpec,
+    DSLWorkflowExecutionPayload,
+    WorkflowExecutionPayload
+} from "@becomposable/common";
 import { ActivityOptions, log, proxyActivities } from "@temporalio/workflow";
 import { ActivityParamNotFound, NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
 import { Vars } from "./vars.js";
+// @ts-ignore
+import ms, { StringValue } from 'ms';
 
 interface BaseActivityPayload extends WorkflowExecutionPayload {
     workflow_name: string;
@@ -31,7 +39,7 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
     delete (basePayload as any).workflow;
 
     const defaultOptions: ActivityOptions = {
-        ...definition.options,
+        ...convertDSLActivityOptions(definition.options),
         startToCloseTimeout: "5 minute",
         retry: {
             initialInterval: '30s',
@@ -102,13 +110,34 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
     return vars.getValue(definition.result || 'result');
 }
 
-function computeActivityOptions(customOptions: Record<string, any>, defaultOptions: ActivityOptions): ActivityOptions {
+function computeActivityOptions(customOptions: DSLActivityOptions, defaultOptions: ActivityOptions): ActivityOptions {
+    const options = convertDSLActivityOptions(customOptions);
     return {
         ...defaultOptions,
-        ...customOptions,
+        ...options,
         retry: {
             ...defaultOptions.retry,
-            ...customOptions.retry,
+            ...options.retry,
         }
     }
 }
+
+function convertDSLActivityOptions(options?: DSLActivityOptions): ActivityOptions {
+    if (!options) {
+        return {};
+    }
+    return {
+        startToCloseTimeout: options?.startToCloseTimeout ? ms(options?.startToCloseTimeout as StringValue) : undefined,
+        scheduleToCloseTimeout: options?.scheduleToCloseTimeout ? ms(options?.scheduleToCloseTimeout as StringValue) : undefined,
+        scheduleToStartTimeout: options?.scheduleToStartTimeout ? ms(options?.scheduleToStartTimeout as StringValue) : undefined,
+        retry: {
+            initialInterval: options?.retry?.initialInterval ? ms(options?.retry?.initialInterval as StringValue) : undefined,
+            maximumInterval: options?.retry?.maximumInterval ? ms(options?.retry?.maximumInterval as StringValue) : undefined,
+            maximumAttempts: options?.retry?.maximumAttempts,
+            backoffCoefficient: options?.retry?.backoffCoefficient,
+            nonRetryableErrorTypes: options?.retry?.nonRetryableErrorTypes,
+        }
+    }
+}
+
+  

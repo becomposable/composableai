@@ -53,7 +53,11 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
             ],
         },
     };
+    log.debug("Global activity options", {
+        activityOptions: defaultOptions,
+    });
     const defaultProxy = proxyActivities(defaultOptions);
+    log.debug("Default activity proxy is ready");
     // merge default vars with the payload vars and add objectIds and obejctId
     const vars = new Vars({
         ...definition.vars,
@@ -79,11 +83,11 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
         let proxy = defaultProxy;
         if (activity.options) {
             const options = computeActivityOptions(activity.options, defaultOptions);
-            proxy = proxyActivities(options)
             log.debug("Use custom activity options", {
                 activityName: activity.name,
                 activityOptions: activity.options,
             });
+            proxy = proxyActivities(options)
         } else {
             log.debug("Use default activity options", {
                 activityName: activity.name,

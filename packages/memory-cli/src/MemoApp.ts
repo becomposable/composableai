@@ -1,6 +1,6 @@
-import { resolve } from "path";
 import { Builder, BuildOptions } from "@becomposable/memory";
 import { mkdtempSync, rmSync } from "fs";
+import { resolve } from "path";
 import { importTsFile } from "./ts-loader.js";
 
 class App {

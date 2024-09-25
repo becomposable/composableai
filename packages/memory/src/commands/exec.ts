@@ -8,7 +8,7 @@ export interface ExecOptions {
     quiet?: boolean;
 }
 
-export async function exec(commandLine: string, options: ExecOptions = {}) {
+export async function exec(commandLine: string, options: ExecOptions = {}): Promise<string | undefined> {
     const verbose = !options.quiet;
     commandLine = commandLine.trim();
     const { commands, out } = splitPipeCommands(commandLine);
@@ -35,7 +35,13 @@ export async function exec(commandLine: string, options: ExecOptions = {}) {
 
     const [status] = await Promise.all([pipePromise, outPromise]);
 
-    verbose && console.log(`Command: ${commandLine} exited with status ${status}`);
+    if (verbose) {
+        if (!status) {
+            console.log(`Command: ${commandLine} exited with status ${status}`);
+        } else {
+            console.error(`Command: ${commandLine} exited with status ${status}`);
+        }
+    }
 
     if (outStream instanceof BufferWritableStream) {
         return outStream.getText();

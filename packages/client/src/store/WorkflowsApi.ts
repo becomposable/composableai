@@ -19,6 +19,10 @@ export class WorkflowsApi extends ApiTopic {
         return this.post(`/runs/${workflowId}/${runId}/terminate`, { payload: { reason } });
     }
 
+    cancel(workflowId: string, runId: string, reason?: string): Promise<{ message: string }> {
+        return this.post(`/runs/${workflowId}/${runId}/cancel`, { payload: { reason } });
+    }
+
     rules = new WorkflowsRulesApi(this);
     definitions = new WorkflowsDefinitionApi(this);
 

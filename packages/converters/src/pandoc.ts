@@ -1,16 +1,19 @@
 import { spawn } from 'child_process';
 import { PassThrough } from 'stream';
 
+export function manyToMarkdownFromBuffer(buffer: Buffer, fromFormat: string): Promise<string> {
+  const input = new PassThrough();
+  input.end(buffer);
+  return manyToMarkdown(input, fromFormat);
+
+}
 /**
  * Requires pandoc to be installed on the system.
  * @param fromFormat is the format of the input buffer.
  */
-export function manyToMarkdown(buffer: Buffer, fromFormat: string): Promise<string> {
+export function manyToMarkdown(input: NodeJS.ReadableStream, fromFormat: string): Promise<string> {
 
   return new Promise((resolve, reject) => {
-    const input = new PassThrough();
-    input.end(buffer);
-
     let result: string[] = [];
 
     const command = spawn("pandoc", ["-t", "markdown", '-f', fromFormat], {

@@ -1,10 +1,11 @@
-import { manyToMarkdown, pdfToText, transformImage } from "@becomposable/converters";
+import { manyToMarkdown, pdfToText, pdfToTextBuffer, transformImage, transformImageToBuffer } from "@becomposable/converters";
 import fs from "fs";
+import { PassThrough, Readable } from "stream";
 import { Builder } from "./Builder.js";
-import { ContentSource, TextSource } from "./ContentSource.js";
+import { ContentSource } from "./ContentSource.js";
 
 export class ContentObject implements ContentSource {
-    constructor(public builder: Builder, public source: ContentSource) { }
+    constructor(public builder: Builder, public source: ContentSource, public encoding: BufferEncoding = "utf-8") { }
 
     getContent(): Promise<Buffer> {
         return this.source.getContent();
@@ -40,21 +41,18 @@ export class ContentObject implements ContentSource {
     /**
      * Get a text representation of the object
      */
-    async getText(encoding: BufferEncoding = "utf-8"): Promise<string> {
-        return (await this.getContent()).toString(encoding);
-
+    async getText(encoding?: BufferEncoding): Promise<string> {
+        const t = (await this.getContent()).toString(encoding || this.encoding);
+        return t;
     }
 
-    getJSONValue(): Promise<any> {
+    getJsonValue(): Promise<any> {
         return this.getText();
     }
 }
 
 export class JsonObject extends ContentObject {
-    async getText(encoding: BufferEncoding = "utf-8"): Promise<string> {
-        return (await this.getContent()).toString(encoding);
-    }
-    async getJSONValue(): Promise<any> {
+    async getJsonValue(): Promise<any> {
         return JSON.parse(await this.getText());
     }
 }
@@ -66,17 +64,17 @@ export interface MediaOptions {
 export class MediaObject extends ContentObject {
     constructor(builder: Builder, source: ContentSource, public options: MediaOptions = {}) {
         super(builder, source);
+        this.encoding = "base64";
     }
     async getStream(): Promise<NodeJS.ReadableStream> {
-        const stream = await this.getStream();
-        return await transformImage(stream, this.options);
+        const stream = await super.getStream();
+        const out = new PassThrough();
+        await transformImage(stream, out, this.options);
+        return out;
     }
     async getContent(): Promise<Buffer> {
-        const stream = await this.getStream();
-        return (await transformImage(stream, this.options)).toBuffer();
-    }
-    async getText(encoding: BufferEncoding = "base64"): Promise<string> {
-        return (await this.getContent()).toString(encoding);
+        const stream = await super.getStream();
+        return await transformImageToBuffer(stream, this.options);
     }
 }
 
@@ -85,10 +83,15 @@ export class PdfObject extends ContentObject {
     constructor(builder: Builder, source: ContentSource) {
         super(builder, source);
     }
-    async getText(): Promise<string> {
-        return await pdfToText(await this.getContent());
+    async getStream(): Promise<NodeJS.ReadableStream> {
+        return Readable.from(await this.getContent());
     }
-
+    async getContent(): Promise<Buffer> {
+        return pdfToTextBuffer(await super.getContent());
+    }
+    async getText(): Promise<string> {
+        return await pdfToText(await super.getContent());
+    }
 }
 
 
@@ -96,19 +99,16 @@ export class DocxObject extends ContentObject {
     constructor(builder: Builder, source: ContentSource) {
         super(builder, source);
     }
-    async getText(): Promise<string> {
-        return await manyToMarkdown(await this.getContent(), "docx");
+    async getBuffer(): Promise<Buffer> {
+        return Buffer.from(await manyToMarkdown(await this.getStream(), "docx"), "utf-8");
     }
-
-}
-
-
-export class TextObject extends ContentObject {
-    constructor(builder: Builder, text: string) {
-        super(builder, new TextSource(text));
+    async getStream(): Promise<NodeJS.ReadableStream> {
+        const stream = new PassThrough();
+        stream.end(await this.getBuffer());
+        return stream;
     }
     async getText(): Promise<string> {
-        return (this.source as TextSource).value;
+        return await manyToMarkdown(await this.getStream(), "docx");
     }
 
 }

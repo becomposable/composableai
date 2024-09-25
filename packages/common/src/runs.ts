@@ -88,4 +88,14 @@ export interface RunSearchPayload {
      * If not specified no parent filter is done (both parent and child runs are returned.)
      */
     parent?: string[] | false;
+
+    /**
+     * An ISO date string to use as an anchor start date for the search.
+     */
+    start?: string,
+
+    /**
+     * An ISO date string to use as an anchor end date for the search.
+     */
+    end?: string;
 }

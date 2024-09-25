@@ -1,7 +1,7 @@
 {
     "name": "@becomposable/memory-cli",
     "description": "becomposable memory builder CLI",
-    "version": "0.33.0",
+    "version": "0.35.0",
     "type": "module",
     "bin": {
         "composable": "./bin/app.js"
@@ -24,7 +24,6 @@
         "ai"
     ],
     "scripts": {
-        "preinstall": "pnpm exec only-allow pnpm",
         "eslint": "eslint './src/**/*.{jsx,js,tsx,ts}'",
         "build": "rm -rf ./lib ./tsconfig.tsbuildinfo && tsc --build",
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"

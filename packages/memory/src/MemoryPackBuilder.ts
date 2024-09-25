@@ -1,9 +1,12 @@
 import { writeFile } from "fs/promises";
-import { join } from "path";
 import { Builder } from "./Builder.js";
 import { ContentSource } from "./ContentSource.js";
-import { MEMORY_CONTEXT_ENTRY, MemoryPack, ProjectionProperties } from "./MemoryPack.js";
+import { MEMORY_METADATA_ENTRY, MemoryPack, ProjectionProperties } from "./MemoryPack.js";
 import { normalizePath, TarBuilder } from "./utils/tar.js";
+import { createWriteStream } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
+import zlib from 'node:zlib';
+import { Readable } from "stream";
 
 export interface FromOptions {
     files?: string[];
@@ -20,12 +23,12 @@ export class MemoryPackBuilder {
     async load(memory: MemoryPack, options: FromOptions = {}) {
         const files = options.files || [];
         // do not fetch the context entry an the .index file
-        files.push(`!${MEMORY_CONTEXT_ENTRY}`);
+        files.push(`!${MEMORY_METADATA_ENTRY}`);
         const entries = memory.getEntries(files);
         for (const entry of entries) {
             this.add(entry.name, entry);
         }
-        this.baseContext = await memory.getContext(options.projection);
+        this.baseContext = await memory.getMetadata(options.projection);
     }
 
     add(path: string, content: ContentSource) {
@@ -38,19 +41,32 @@ export class MemoryPackBuilder {
     }
 
     private async _buildTar(file: string, context: object) {
+        if (this.builder.options.gzip) {
+            file += ".gz";
+        }
         const tar = new TarBuilder(file);
         const keys = Object.keys(this.entries).sort();
         for (const key of keys) {
             const source = this.entries[key];
             tar.add(key, await source.getContent());
         }
-        tar.add(MEMORY_CONTEXT_ENTRY, Buffer.from(this.stringifyContext(context), "utf-8"));
+        tar.add(MEMORY_METADATA_ENTRY, Buffer.from(this.stringifyContext(context), "utf-8"));
         await tar.build();
         return file;
     }
 
     private async _buildJson(file: string, context: object) {
-        await writeFile(file, this.stringifyContext(context), "utf-8");
+        const buffer = Buffer.from(this.stringifyContext(context), "utf-8");
+        if (this.builder.options.gzip) {
+            file += ".gz";
+            await pipeline(
+                Readable.from(buffer),
+                zlib.createGzip(),
+                createWriteStream(file)
+            );
+        } else {
+            await writeFile(file, buffer);
+        }
         return file;
     }
 
@@ -58,10 +74,10 @@ export class MemoryPackBuilder {
         if (this.baseContext) {
             context = Object.assign({}, this.baseContext, context);
         }
-        if (!this.entries.length) {
-            return this._buildJson(join(this.builder.tmpdir, baseName + '.json'), context);
+        if (!Object.keys(this.entries).length) {
+            return this._buildJson(baseName + '.json', context);
         } else {
-            return this._buildTar(join(this.builder.tmpdir, baseName + '.tar'), context);
+            return this._buildTar(baseName + '.tar', context);
         }
     }
 }

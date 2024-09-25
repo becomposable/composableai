@@ -1,5 +1,5 @@
 import { FacetSpec } from "./facets.js";
-import { InteractionSearchQuery, ObjectSearchQuery, PromptSearchQuery, SimpleSearchQuery } from "./query.js";
+import { InteractionSearchQuery, ObjectSearchQuery, ObjectTypeSearchQuery, PromptSearchQuery, SimpleSearchQuery } from "./query.js";
 
 export interface SearchPayload {
     query?: SimpleSearchQuery;
@@ -18,6 +18,10 @@ export interface InteractionSearchPayload extends SearchPayload {
 
 export interface ObjectSearchPayload extends SearchPayload {
     query?: ObjectSearchQuery;
+}
+
+export interface ObjectTypeSearchPayload extends SearchPayload {
+    query?: ObjectTypeSearchQuery;
 }
 
 export interface PromptSearchPayload extends SearchPayload {

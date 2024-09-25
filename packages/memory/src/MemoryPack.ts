@@ -2,8 +2,13 @@ import { readFile } from "fs/promises";
 import micromatch from 'micromatch';
 import { AbstractContentSource } from "./ContentSource.js";
 import { loadTarIndex, TarEntryIndex, TarIndex } from "./utils/tar.js";
+import { extname } from "path";
 
 export const MEMORY_METADATA_ENTRY = "metadata.json";
+
+const EXPORT_CONTENT_KEY = 'content:';
+const EXPORT_ENTRY_KEY = 'file:';
+const mediaExtensions = new Set([".jpg", ".jpeg", ".png"])
 
 /**
  * Projection cannot contains both include and exclude keys
@@ -37,14 +42,55 @@ function applyProjection(projection: ProjectionProperties, object: any) {
 }
 
 
-export interface MemoryPack {
-    getMetadata(projection?: ProjectionProperties): Promise<any>;
-    getEntry(path: string): MemoryEntry | null;
-    getEntries(filters?: string[]): MemoryEntry[];
-    getEntryContent(path: string): Promise<Buffer | null>;
-    getEntryText(path: string, encoding?: BufferEncoding): Promise<string | null>;
-    getEntriesContent(filters?: string[]): Promise<Buffer[]>;
-    getEntriesText(filters?: string[], encoding?: BufferEncoding): Promise<string[]>;
+export abstract class MemoryPack {
+    abstract getMetadata(projection?: ProjectionProperties): Promise<any>;
+    abstract getEntry(path: string): MemoryEntry | null;
+    abstract getEntryContent(path: string): Promise<Buffer | null>;
+    abstract getEntryText(path: string, encoding?: BufferEncoding): Promise<string | null>;
+    abstract getPaths(filters?: string[]): string[];
+    abstract getEntries(filters?: string[]): MemoryEntry[];
+    abstract getEntriesContent(filters?: string[]): Promise<Buffer[]>;
+    abstract getEntriesText(filters?: string[], encoding?: BufferEncoding): Promise<string[]>;
+
+    async exportObject(mapping: Record<string, string>): Promise<Record<string, any>> {
+        let metadata: any;
+        const result: Record<string, any> = {};
+        for (const key of Object.keys(mapping)) {
+            const value = mapping[key];
+            if (value === '.') {
+                if (!metadata) {
+                    metadata = await this.getMetadata();
+                }
+                if (key === '.') {
+                    Object.assign(result, metadata);
+                } else {
+                    result[key] = metadata;
+                }
+            } else if (value.startsWith(EXPORT_CONTENT_KEY)) {
+                const selector = value.slice(EXPORT_CONTENT_KEY.length);
+                if (selector.includes('*')) {
+                    result[key] = await this.getEntriesText([selector]);
+                } else {
+                    result[key] = await this.getEntryText(selector);
+                }
+            } else if (value.startsWith(EXPORT_ENTRY_KEY)) {
+                const selector = value.slice(EXPORT_ENTRY_KEY.length);
+                if (selector.includes('*')) {
+                    const entries = this.getEntries([selector]);
+                    result[key] = await Promise.all(entries.map(entry => entry.getText().then(content => ({ name: entry.name, content }))));
+                } else {
+                    const entry = this.getEntry(selector);
+                    result[key] = entry ? { name: entry.name, content: await entry.getText() } : null;
+                }
+            } else {
+                if (!metadata) {
+                    metadata = await this.getMetadata();
+                }
+                result[key] = metadata[value];
+            }
+        }
+        return result;
+    }
 }
 
 
@@ -60,8 +106,9 @@ export class MemoryEntry extends AbstractContentSource {
     }
 }
 
-export class TarMemoryPack implements MemoryPack {
+export class TarMemoryPack extends MemoryPack {
     constructor(public index: TarIndex) {
+        super();
         if (!index.get(MEMORY_METADATA_ENTRY)) {
             throw new Error("Invalid memory tar file. Context entry not found");
         }
@@ -110,7 +157,7 @@ export class TarMemoryPack implements MemoryPack {
         return Promise.all(promises);
     }
 
-    getEntriesText(filters?: string[], encoding: BufferEncoding = "utf-8") {
+    getEntriesText(filters?: string[], encoding?: BufferEncoding) {
         const paths = this.getPaths(filters);
         const promises: Promise<string>[] = [];
         for (const path of paths) {
@@ -133,8 +180,8 @@ export class TarMemoryPack implements MemoryPack {
         }
     }
 
-    getEntryText(path: string, encoding: BufferEncoding = "utf-8"): Promise<string | null> {
-        return this.getEntryContent(path).then((b) => b?.toString(encoding) || null);
+    getEntryText(path: string, encoding?: BufferEncoding): Promise<string | null> {
+        return this.getEntryContent(path).then((b) => b?.toString(encoding || getTextEncodingForPath(path)) || null);
     }
 
     static async loadFile(file: string) {
@@ -147,8 +194,9 @@ export class TarMemoryPack implements MemoryPack {
 
 }
 
-export class JsonMemoryPack implements MemoryPack {
+export class JsonMemoryPack extends MemoryPack {
     constructor(public context: any) {
+        super();
     }
 
     getMetadata() {
@@ -157,6 +205,10 @@ export class JsonMemoryPack implements MemoryPack {
 
     getEntry(_path: string) {
         return null;
+    }
+
+    getPaths(_filters?: string[]): string[] {
+        return [];
     }
 
     getEntries(_filters?: string[]): MemoryEntry[] {
@@ -197,4 +249,9 @@ export function loadMemoryPack(location: string, type?: 'tar' | 'json'): Promise
     } else {
         return JsonMemoryPack.loadFile(location);
     }
+}
+
+function getTextEncodingForPath(path: string) {
+    const ext = extname(path);
+    return mediaExtensions.has(ext) ? "base64" : "utf-8";
 }

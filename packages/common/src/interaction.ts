@@ -86,6 +86,11 @@ export interface Interaction {
     tags: string[];
     test_data?: JSONObject;
     result_schema?: JSONSchema4;
+    /**
+     * A default mapping which maps a memory pack to the interaction params.
+     * If not defined the memory pack metadata will be used as the interaction params
+     */
+    memory_mapping?: Record<string, string>;
     cache_policy?: CachePolicy;
     model: string;
     temperature?: number;
@@ -135,16 +140,25 @@ export interface InteractionForkPayload {
     targetProject?: string;
 }
 
-export interface InteractionExecutionPayload<Input = any> {
-    data?: Input;
+export interface InteractionExecutionPayload {
+    /**
+     * If a `memory:uri` reference is given then the data (i.e. interaction params)
+     * will be constructed from the resolved memory pack and the specified memory_mapping.
+     */
+    data?: Record<string, any> | `memory:${string}`;
     config?: InteractionExecutionConfiguration;
+    /**
+     * A memory pack to itnercation params mapping to overwrite the default mapping.
+     * Only used in conjunction with a `data` field which points to a `memory:uri` reference.
+     */
+    memory_mapping?: Record<string, string>;
     result_schema?: JSONSchema4;
     stream?: boolean;
     do_validate?: boolean;
     tags?: string | string[]; // tags to be added to the execution run
 }
 
-export interface NamedInteractionExecutionPayload<Input = any> extends InteractionExecutionPayload<Input> {
+export interface NamedInteractionExecutionPayload extends InteractionExecutionPayload {
     /**
      * The interaction name and suffixed by an optional tag or version separated from the name using a @ character
      * If no version/tag part is specified then the latest version is used.

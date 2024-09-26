@@ -21,7 +21,7 @@ export function EventSourceProvider(): Promise<typeof EventSource> {
  */
 export async function executeInteraction<P = any, R = any>(client: ComposableClient,
     interactionId: string,
-    payload: InteractionExecutionPayload<P> = {},
+    payload: InteractionExecutionPayload = {},
     onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
     const stream = !!onChunk;
     const response = await client.runs.create({
@@ -54,7 +54,7 @@ export async function executeInteraction<P = any, R = any>(client: ComposableCli
  */
 export async function executeInteractionByName<P = any, R = any>(client: ComposableClient,
     interaction: string,
-    payload: InteractionExecutionPayload<P> = {},
+    payload: InteractionExecutionPayload = {},
     onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
     const stream = !!onChunk;
     const response = await client.post('/api/v1/execute', {

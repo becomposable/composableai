@@ -94,4 +94,54 @@ describe("Builder", () => {
             prop4: "prop4",
         });
     })
+
+    test("MemoryPack.exportObject", async () => {
+        const memory = await loadMemoryPack(memoryFile);
+        let obj = await memory.exportObject({
+            ".": ".",
+            "file2": "content:file2.txt",
+        });
+        expect(obj).toStrictEqual({
+            "file2": "file2 from new memory",
+            baseProp2: "baseProp2",
+            baseProp3: "baseProp3",
+            prop4: "prop4",
+        })
+        obj = await memory.exportObject({
+            "prop4": "prop4",
+            "file2": "content:file2.txt",
+            "manifest": "."
+        });
+        expect(obj).toStrictEqual({
+            prop4: "prop4",
+            "file2": "file2 from new memory",
+            manifest: {
+                baseProp2: "baseProp2",
+                baseProp3: "baseProp3",
+                prop4: "prop4",
+            }
+        })
+        obj = await memory.exportObject({
+            "content": "content:*.txt",
+        });
+        expect(obj).toStrictEqual({
+            content: [
+                "file2 from new memory",
+                "file3 from base memory",
+                "file4 from new memory"
+            ]
+        })
+
+        obj = await memory.exportObject({
+            "files": "file:*.txt",
+        });
+        expect(obj).toStrictEqual({
+            files: [
+                { name: "file2.txt", content: "file2 from new memory" },
+                { name: "file3.txt", content: "file3 from base memory" },
+                { name: "file4.txt", content: "file4 from new memory" }
+            ]
+        })
+
+    })
 });

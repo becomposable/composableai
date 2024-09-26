@@ -1,5 +1,6 @@
-import { WorkflowExecutionPayload } from "./index.js";
+import { StringValue } from "ms";
 import { BaseObject } from "./common.js";
+import { WorkflowExecutionPayload } from "./index.js";
 
 /**
  * The interface of a function that can be used as a DSL workflow activity.
@@ -26,9 +27,9 @@ export interface DSLWorkflowExecutionPayload extends WorkflowExecutionPayload {
  * @see ActivityOptions in @temporalio/common
  */
 export interface DSLActivityOptions {
-    startToCloseTimeout?: string | number;
-    scheduleToStartTimeout?: string | number;
-    scheduleToCloseTimeout?: string | number;
+    startToCloseTimeout?: StringValue | number;
+    scheduleToStartTimeout?: StringValue | number;
+    scheduleToCloseTimeout?: StringValue | number;
     retry?: DSLRetryPolicy;
 }
 
@@ -39,9 +40,9 @@ export interface DSLActivityOptions {
  */
 export interface DSLRetryPolicy {
     backoffCoefficient?: number;
-    initialInterval?: string | number;
+    initialInterval?: StringValue | number;
     maximumAttempts?: number;
-    maximumInterval?: string | number;
+    maximumInterval?: StringValue | number;
     nonRetryableErrorTypes?: string[];
 }
 

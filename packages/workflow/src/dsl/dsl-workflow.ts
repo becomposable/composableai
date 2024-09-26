@@ -8,7 +8,6 @@ import {
 import { ActivityOptions, log, proxyActivities } from "@temporalio/workflow";
 import { ActivityParamNotFound, NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
 import { Vars } from "./vars.js";
-// @ts-ignore
 import ms, { StringValue } from 'ms';
 
 interface BaseActivityPayload extends WorkflowExecutionPayload {

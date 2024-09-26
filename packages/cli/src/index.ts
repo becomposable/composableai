@@ -30,9 +30,6 @@ program.command("projects")
 
 const authRoot = program.command("auth")
     .description("Manage authentication")
-    .action(() => {
-        console.log("Use the subcommands to manage authentication");
-    });
 
 authRoot.command("token")
     .description("Show the auth token used by the current selected profile.")

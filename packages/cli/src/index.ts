@@ -1,16 +1,15 @@
 import { Command } from 'commander';
-import { requestJWT, requestPublicKey } from './auth/index.js';
 import runExport from './codegen/index.js';
-import { createProfile, deleteProfile, listProfiles, showProfile, tryRrefreshToken, updateCurrentProfile, updateProfile, useProfile } from './profiles/commands.js';
-import { getConfigFile } from './profiles/index.js';
 import { genTestData } from './datagen/index.js';
 import { listEnvirnments } from './envs/index.js';
 import { listInteractions } from './interactions/index.js';
+import { registerObjectsCommand } from './objects/index.js';
 import { getVersion, upgrade } from './package.js';
+import { createProfile, deleteProfile, listProfiles, showActiveAuthToken, showProfile, tryRrefreshToken, updateCurrentProfile, updateProfile, useProfile } from './profiles/commands.js';
+import { getConfigFile } from './profiles/index.js';
 import { listProjects } from './projects/index.js';
 import runInteraction from './run/index.js';
 import { runHistory } from './runs/index.js';
-import { registerObjectsCommand } from './objects/index.js';
 import { registerWorkflowsCommand } from './workflows/index.js';
 
 //warnIfNotLatest();
@@ -36,23 +35,15 @@ const authRoot = program.command("auth")
     });
 
 authRoot.command("token")
-    .description("Get a JWT token for the apikey used in the authentication.")
+    .description("Show the auth token used by the current selected profile.")
     .action(() => {
-        requestJWT(program);
+        showActiveAuthToken();
     })
 
-authRoot.command("pk <projectId>")
-    .description("Get or create a public API key associated with the account owning the current API key. The current API key must have at least the \"application\" role. The generated key will be associated with the given project")
-    .option('--name [name]', 'An optional name for the generated key. If not specified a name will be generated.')
-    .option('--ttl [ttl]', 'A ttl value in seconds to be used to expire the generated key. The default is 24h.')
-    .action((projectId: string, options: Record<string, any>) => {
-        requestPublicKey(program, projectId, options);
-    })
-
-program.command("auth-token")
-    .description("Get a JWT token for the apikey used in the authentication.")
+authRoot.command("refresh")
+    .description("Refresh the auth token used by the current profile. An alias to 'composable profiles refresh'.")
     .action(() => {
-        requestJWT(program);
+        updateCurrentProfile();
     })
 
 program.command("envs [envId]")

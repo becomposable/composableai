@@ -33,7 +33,7 @@ export async function useProfile(name?: string) {
 export function showProfile(name?: string) {
     if (!name) {
         if (config.profiles.length === 0) {
-            console.log('No profiles are defined. Run `cpcli config create` to add a new profile.');
+            console.log('No profiles are defined. Run `composable profiles create` to add a new profile.');
             return;
         } else {
             console.log(JSON.stringify({
@@ -48,6 +48,21 @@ export function showProfile(name?: string) {
         } else {
             console.error(`Profile ${name} not found`);
         }
+    }
+}
+
+export function showActiveAuthToken() {
+    if (config.profiles.length === 0) {
+        console.log('No profiles are defined. Run `composable profiles create` to add a new profile.');
+        return;
+    } else if (config.current) {
+        const token = jwt.decode(config.current.apikey, { json: true });
+        if (token?.exp && token.exp * 1000 < Date.now()) {
+            console.log("Authentication token expired. Create a new one ");
+        }
+        console.log(config.current.apikey);
+    } else {
+        console.log('No profile is selected. Run `composable auth refresh` to refrehs the token');
     }
 }
 

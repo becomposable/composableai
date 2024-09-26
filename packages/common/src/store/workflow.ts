@@ -11,8 +11,8 @@ export enum ContentEventName {
 
 export interface WorkflowExecutionPayload {
     /**
- * The event which started the workflow who created the activity.
- */
+     * The event which started the workflow who created the activity.
+     */
     event: ContentEventName;
 
     /**

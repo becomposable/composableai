@@ -43,6 +43,7 @@ export interface ComputePromptFacetPayload extends ComputeFacetPayload {
 export interface ExportPropertiesPayload {
     objectIds: string[];
     type: string;
+    layout?: string;
 }
 
 export interface ExportPropertiesResponse {

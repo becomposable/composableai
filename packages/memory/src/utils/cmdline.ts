@@ -46,3 +46,47 @@ export function splitCommandLine(text: string) {
     }
     return args;
 }
+
+export interface Command {
+    name: string;
+    args: string[];
+}
+export interface CommandPipe {
+    commands: Command[];
+    out?: string | undefined;
+}
+export function splitPipeCommands(text: string): CommandPipe {
+    const tokens = splitCommandLine(text);
+    const commands: Command[] = [];
+    let args: string[] = [];
+    for (const token of tokens) {
+        if (token === "|") {
+            if (args.length < 1) {
+                throw new Error("Invalid pipe character. Expecting a command first.");
+            }
+            const name = args.shift()!;
+            commands.push({
+                name,
+                args
+            });
+            args = [];
+        } else {
+            args.push(token);
+        }
+    }
+    let out: string | undefined;
+    if (args.length > 0) {
+        const name = args.shift()!;
+        if (args.length > 1 && args[args.length - 2] === ">") {
+            out = args.pop();
+            args.pop(); // remove the ">"
+        }
+        commands.push({
+            name,
+            args
+        });
+    }
+    return {
+        commands, out
+    };
+}

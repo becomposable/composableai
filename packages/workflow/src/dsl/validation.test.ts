@@ -107,6 +107,23 @@ describe('workflow validation', () => {
         expect(errors.length).toBe(0);
     })
 
+    test('detect self references', () => {
+        const workflow: any = {
+            name: "test",
+            vars: { "object_type": "thetype" },
+            activities: [{
+                name: "test",
+                import: ["object_type"],
+                params: {
+                    "object_type": "${object_type}"
+                }
+            }]
+        }
+        const errors = validateWorkflow(workflow);
+        expect(errors.length).toBe(1);
+        expect(errors[0].includes("Self referencing parameter")).toBe(true);
+    })
+
     test('reference known vars in fetch', () => {
         const workflow: any = {
             name: "test",
@@ -125,6 +142,8 @@ describe('workflow validation', () => {
             }]
         }
         const errors = validateWorkflow(workflow);
+        console.log('##############errors', errors);
+
         expect(errors.length).toBe(0);
     })
 
@@ -178,8 +197,7 @@ describe('workflow validation', () => {
                 name: "test",
                 import: ["foo"],
                 params: {
-                    foo: "${foo}",
-                    barLen: "${barLen}",
+                    barLength: "${barLen}",
                     doc: "${doc.text}"
                 }
             }]
@@ -196,8 +214,7 @@ describe('workflow validation', () => {
                 name: "test",
                 import: ["foo", { "barLen": "bar.length" }],
                 params: {
-                    foo: "${foo}",
-                    barLen: "${barLen}",
+                    barLength: "${barLen}",
                     doc: "${doc.text}"
                 }
             }]
@@ -226,8 +243,8 @@ describe('workflow validation', () => {
                         }
                     },
                     params: {
-                        foo: "${foo}",
-                        barLen: "${barLen}",
+                        fooParam: "${foo}",
+                        barLenParam: "${barLen}",
                         doc: "${doc.text}",
                         prev: "${previousResult}"
                     }

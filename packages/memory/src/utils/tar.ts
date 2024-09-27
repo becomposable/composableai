@@ -1,56 +1,75 @@
 import fs from "fs";
 import { FileHandle, open } from "fs/promises";
+import { pipeline } from "stream/promises";
 import tar from "tar-stream";
+import zlib from "zlib";
 
-export interface MemoryFile {
+export interface TarEntry {
     name: string;
     getContent(): Promise<Buffer>;
 }
 
-export async function buildTar(file: string, inputFiles: MemoryFile[]) {
-    const pack = tar.pack(); // Create a new tar stream
-    const indexData = [];
-    let currentOffset = 0;
+export class TarBuilder {
+    pack: tar.Pack;
+    indexData: string[] = [];
+    currentOffset = 0;
+    tarPromise: Promise<unknown>;
 
-    // Open the output file as a write stream
-    const outputStream = fs.createWriteStream(file);
-    pack.pipe(outputStream);
-
-    for (const memoFile of inputFiles) {
-        const name = memoFile.name;
-        const content = await memoFile.getContent();
-
-        // Calculate header size, 512 bytes for tar headers
-        const headerSize = 512;
-        const contentSize = Buffer.byteLength(content);
-        const entryHeaderOffset = currentOffset;
-
-        // Store the index entry
-        // entry data offset is always at header offset + 512 bytes
-        indexData.push(`${name}:${entryHeaderOffset},${contentSize}`);
-
-        // Add the file entry to the tar stream
-        pack.entry({ name, size: contentSize }, content);
-
-        // Update the offset
-        currentOffset += headerSize + contentSize;
-        // Tar files are padded to 512-byte boundaries
-        if (contentSize % 512 !== 0) {
-            currentOffset += 512 - (contentSize % 512);
+    constructor(file: string) {
+        const pack = tar.pack(); // Create a new tar stream
+        this.pack = pack;
+        // Open the output file as a write stream
+        const outputStream = fs.createWriteStream(file);
+        if (file.endsWith('.gz')) {
+            this.tarPromise = pipeline(pack, zlib.createGzip(), outputStream);
+        } else {
+            this.tarPromise = pipeline(pack, outputStream);
         }
     }
 
-    // Convert index data to string and calculate its size
-    const indexContent = indexData.join('\n') + '\n';
-    const indexContentSize = Buffer.byteLength(indexContent);
 
-    // Add the .index entry to the tar
-    pack.entry({ name: '.index', size: indexContentSize }, indexContent);
+    async add(name: string, content?: Buffer) {
+        name = normalizePath(name);
+        // Calculate header size, 512 bytes for tar headers
+        const headerSize = 512;
+        const contentSize = content ? Buffer.byteLength(content) : 0;
+        const entryHeaderOffset = this.currentOffset;
 
-    pack.finalize(); // Finalize the tar stream
+        // Store the index entry
+        // entry data offset is always at header offset + 512 bytes
+        if (contentSize > 0) { // do not index directories
+            this.indexData.push(`${name}:${entryHeaderOffset},${contentSize}`);
+        }
 
-    // Wait for the stream to finish
-    await new Promise((resolve) => outputStream.on('finish', resolve));
+        // Add the file entry to the tar stream
+        this.pack.entry({ name, size: contentSize }, content);
+
+        // Update the offset
+        this.currentOffset += headerSize + contentSize;
+        // Tar files are padded to 512-byte boundaries
+        if (contentSize % 512 !== 0) {
+            this.currentOffset += 512 - (contentSize % 512);
+        }
+    }
+
+    async build() {
+        const pack = this.pack;
+        // Convert index data to string and calculate its size
+        const indexContent = this.indexData.join('\n') + '\n';
+        const indexContentSize = Buffer.byteLength(indexContent);
+
+        // Add the .index entry to the tar
+        pack.entry({ name: '.index', size: indexContentSize }, indexContent);
+
+        pack.finalize(); // Finalize the tar stream
+
+        await this.tarPromise;
+    }
+
+    destroy() {
+        this.pack.destroy();
+    }
+
 }
 
 export async function loadTarIndex(tarFile: string) {
@@ -97,8 +116,12 @@ async function readTarIndex(fd: FileHandle) {
     return null;
 }
 
-class TarIndex {
-    entries: Record<string, { offset: number, size: number }> = {};
+export interface TarEntryIndex {
+    offset: number,
+    size: number
+}
+export class TarIndex {
+    entries: Record<string, TarEntryIndex> = {};
     headerBuffer = Buffer.alloc(512);
     /**
      * @param fd the tar file descriptor
@@ -117,17 +140,27 @@ class TarIndex {
         }
     }
 
+    getPaths() {
+        return Object.keys(this.entries);
+    }
+
+    getSortedPaths() {
+        return Object.keys(this.entries).sort();
+    }
+
     get(name: string) {
         return this.entries[name];
     }
 
+    async getContentAt(offset: number, size: number) {
+        const buffer = Buffer.alloc(size);
+        await this.fd.read(buffer, 0, size, offset + 512);
+        return buffer;
+    }
     async getContent(name: string) {
         const entry = this.entries[name];
         if (entry) {
-            const offset = entry.offset + 512;
-            const buffer = Buffer.alloc(entry.size);
-            await this.fd.read(buffer, 0, entry.size, offset);
-            return buffer;
+            return this.getContentAt(entry.offset, entry.size);
         } else {
             return null;
         }
@@ -159,19 +192,12 @@ function getHeaderFileSize(buffer: Buffer) {
     return parseInt(octalSize, 8);
 }
 
-// async function test() {
-//     const index = await loadTarIndex('../memory-cli/memo.tar');
-//     if (!index) {
-//         throw new Error('Index not found');
-//     }
-//     try {
-//         const buffer = await index.getContent("L1009972.jpg")
-//         if (!buffer) {
-//             throw new Error('Entry not found');
-//         }
-//         fs.writeFileSync('extracted_L1009972.jpg', buffer);
-//     } finally {
-//         index.close();
-//     }
-// }
-// test();
+export function normalizePath(path: string) {
+    if (path.startsWith('/')) {
+        path = path.slice(1);
+    }
+    if (path.endsWith('/')) {
+        path = path.slice(-1);
+    }
+    return path;
+}

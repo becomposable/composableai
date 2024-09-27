@@ -1,24 +1,26 @@
 {
   "name": "@becomposable/api-fetch-client",
-  "version": "0.31.0",
+  "version": "0.35.0",
   "description": "HTTP client which wraps a fetch implementation and simplify the creation of REST API clients. Works both in browser and in node.",
   "type": "module",
   "types": "./lib/types/index.d.ts",
-  "exports": {
-    "types": "./lib/types/index.d.ts",
-    "import": "./lib/esm/index.js",
-    "require": "./lib/cjs/index.js",
-    "default": "./lib/esm/index.js"
-  },
   "files": [
     "lib",
     "src"
   ],
+  "ts_dual_module": {
+    "outDir": "lib"
+  },
+  "exports": {
+    "types": "./lib/types/index.d.ts",
+    "import": "./lib/esm/index.js",
+    "require": "./lib/cjs/index.js"
+  },
   "scripts": {
-    "test": "ESBK_TSCONFIG_PATH=./test/tsconfig.json npx mocha -r tsx --exit ./test/**/*.ts",
-    "clean": "rm -rf ./lib",
-    "build": "npm run clean && ./build.sh",
-    "dist": "npm run build && rm ./lib/*tsbuildinfo"
+    "test": "ESBK_TSCONFIG_PATH=./test/tsconfig.json pnpm exec mocha -r tsx --exit ./test/**/*.ts",
+    "eslint": "eslint './src/**/*.{jsx,js,tsx,ts}'",
+    "build": "pnpm exec tsmod build",
+    "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
   },
   "repository": {
     "type": "git",
@@ -47,9 +49,11 @@
     "@types/mocha": "^10.0.1",
     "koa": "^2.14.2",
     "mocha": "^10.2.0",
+    "ts-dual-module": "^0.6.3",
     "ts-node": "^10.9.1",
     "tsx": "^3.14.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vitest": "^1.4.0"
   },
   "dependencies": {
     "eventsource-parser": "^1.1.1"

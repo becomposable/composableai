@@ -20,11 +20,27 @@ export interface RunListingFilters {
 }
 
 export interface SimpleSearchQuery {
-    location?: string;
+    name?: string;
     status?: string;
-    type?: string;
+}
+
+export interface ObjectSearchQuery extends SimpleSearchQuery {
+    location?: string;
     parent?: string;
     similarTo?: string;
-    name?: string;
+    type?: string;
+}
+
+export interface ObjectTypeSearchQuery extends SimpleSearchQuery {
+    chunckable?: boolean;
+}
+
+export interface PromptSearchQuery extends SimpleSearchQuery {
     role?: string;
+}
+
+export interface InteractionSearchQuery extends SimpleSearchQuery {
+    prompt?: string;
+    tags?: string[];
+    version?: number;
 }

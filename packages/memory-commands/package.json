@@ -1,7 +1,7 @@
 {
     "name": "@becomposable/memory-commands",
     "description": "Memory commands for memory recipe scripts",
-    "version": "0.31.0",
+    "version": "0.35.0",
     "type": "module",
     "types": "./lib/types/index.d.ts",
     "files": [
@@ -10,9 +10,8 @@
     ],
     "license": "Apache-2.0",
     "scripts": {
-        "preinstall": "npx only-allow pnpm",
         "eslint": "eslint './src/**/*.{jsx,js,tsx,ts}'",
-        "build": "npx tsmod build",
+        "build": "pnpm exec tsmod build",
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
     },
     "devDependencies": {

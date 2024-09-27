@@ -1,0 +1,29 @@
+name: composableai
+on:
+  - push
+jobs:
+  composableai-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: |
+          pnpm install
+      - run: |
+          # issue-266: enable "memory" related packages when they are ready
+          pnpm --filter='!./packages/memory*' -r build
+      - name: Run tests
+        run: |
+          pnpm \
+            --filter '!./packages/api-fetch-client' \
+            --filter '!./packages/blobs' \
+            --filter '!./packages/converters' \
+            --filter '!./packages/common' \
+            --filter '!./packages/workflow' \
+            -r test

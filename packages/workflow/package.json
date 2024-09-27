@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/workflow",
-    "version": "0.31.0",
+    "version": "0.35.0",
     "type": "module",
     "description": "Composable prompts workflow dsl",
     "main": "./lib/esm/index.js",
@@ -12,9 +12,8 @@
         "bundle-workflows": "./bin/bundle-workflows.mjs"
     },
     "scripts": {
-        "preinstall": "npx only-allow pnpm",
         "test": "vitest run",
-        "build": "npx tsmod build && npx bundle-workflows lib/esm/workflows.js lib/workflows-bundle.js",
+        "build": "pnpm exec tsmod build && node ./bin/bundle-workflows.mjs lib/esm/workflows.js lib/workflows-bundle.js",
         "clean": "rm -rf ./lib tsconfig.tsbuildinfo"
     },
     "repository": {
@@ -35,7 +34,6 @@
         "@becomposable/blobs": "workspace:*",
         "@becomposable/client": "workspace:*",
         "@becomposable/common": "workspace:*",
-        "@dglabs/logger": "workspace:*",
         "@llumiverse/core": "workspace:*",
         "@opendocsg/pdf2md": "^0.1.29",
         "@temporalio/activity": "^1.9.3",
@@ -44,6 +42,7 @@
         "@types/json-schema": "^7.0.15",
         "fast-deep-equal": "^3.1.3",
         "jsonwebtoken": "^9.0.2",
+        "ms": "3.0.0-canary.1",
         "node-web-stream-adapters": "^0.1.0",
         "seedrandom": "^3.0.5",
         "sharp": "^0.33.4",

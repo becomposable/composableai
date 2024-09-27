@@ -82,19 +82,28 @@ export function validateActivity(activity: DSLActivitySpec, workflowVars: Set<st
             pushLocalVar(key, localVars, errors);
         }
     }
-    // check expressions in params
+    // check expressions in activity params
     if (activity.params) {
-        validateExpressions(activity.params, localVars, errors);
+        validateExpressions(activity.params, localVars, errors, true);
     }
     return errors;
 }
 
 
-function validateExpressions(target: Record<string, any>, localVars: Record<string, boolean>, errors: string[]) {
+function validateExpressions(target: Record<string, any>, localVars: Record<string, boolean>, errors: string[], checkSelfReference = false) {
     const vars = new Vars(localVars);
     const refs = vars.getUnknownReferences(target);
     for (const ref of refs) {
         errors.push(`Unknown variable "${ref.name}" in expression "${ref.expression}"`)
+    }
+    if (checkSelfReference) {
+        // check for self references like `"object_type": "${object_type}"`.
+        for (const key of Object.keys(target)) {
+            const value = target[key];
+            if (typeof value === 'string' && value.includes("${" + key + "}")) {
+                errors.push(`Self referencing parameter "${key}" in expression "${value}"`);
+            }
+        }
     }
 }
 

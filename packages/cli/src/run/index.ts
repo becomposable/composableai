@@ -1,8 +1,8 @@
-import { ExecutionRun } from "@becomposable/common";
+import { ExecutionRun, MEMORY_INPUT_PREFIX } from "@becomposable/common";
 import { Command } from "commander";
 import { getClient } from "../client.js";
 import { Spinner } from "../utils/console.js";
-import { readFile, readStdin, writeFile } from "../utils/stdio.js";
+import { readFile, readJsonFile, readStdin, writeFile } from "../utils/stdio.js";
 import { ExecutionQueue, ExecutionRequest } from "./executor.js";
 
 
@@ -10,6 +10,16 @@ export default async function runInteraction(program: Command, interactionId: st
     const queue = new ExecutionQueue();
     const data = await getInputData(options);
     const client = getClient(program);
+
+    if (typeof data === "string" && data.startsWith(MEMORY_INPUT_PREFIX)) {
+        if (options.mmap && options.mmap.startsWith('@')) {
+            options.mmap = readJsonFile(options.mmap.substring(1));
+        } else if (options.mmap) {
+            options.mmap = JSON.parse(options.mmap);
+        }
+    } else {
+        options.mmap = undefined;
+    }
 
     let count = options.count ? parseInt(options.count) : 1;
     if (isNaN(count) || count < 0) {

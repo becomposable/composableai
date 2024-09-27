@@ -1,5 +1,6 @@
-import { WorkflowExecutionPayload } from "./index.js";
+import { StringValue } from "ms";
 import { BaseObject } from "./common.js";
+import { WorkflowExecutionPayload } from "./index.js";
 
 /**
  * The interface of a function that can be used as a DSL workflow activity.
@@ -18,6 +19,31 @@ export interface DSLWorkflowExecutionPayload extends WorkflowExecutionPayload {
      * If a dsl workflow is executed and no definition is provided the workflow will fail.
      */
     workflow: DSLWorkflowSpec;
+}
+
+/**
+ * The payload for a DSL acitivty options.
+ *
+ * @see ActivityOptions in @temporalio/common
+ */
+export interface DSLActivityOptions {
+    startToCloseTimeout?: StringValue | number;
+    scheduleToStartTimeout?: StringValue | number;
+    scheduleToCloseTimeout?: StringValue | number;
+    retry?: DSLRetryPolicy;
+}
+
+/**
+ * The payload for a DSL retry policy.
+ *
+ * @see RetryPolicy in @temporalio/common
+ */
+export interface DSLRetryPolicy {
+    backoffCoefficient?: number;
+    initialInterval?: StringValue | number;
+    maximumAttempts?: number;
+    maximumInterval?: StringValue | number;
+    nonRetryableErrorTypes?: string[];
 }
 
 /**
@@ -132,6 +158,11 @@ export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<str
      */
     await?: string; //the activity name to await
 
+    /**
+     * Activity options for configuring the activity execution, which overrides the activity options
+     * defined at workflow level.
+     */
+    options?: DSLActivityOptions;
 }
 
 export interface DSLWorkflowSpec {
@@ -143,8 +174,8 @@ export interface DSLWorkflowSpec {
     // a dictionary of vars to initialize the workflow execution vars
     // Initial vars cannot contains references to other vars
     vars: Record<string, any>;
-    // this must be an ActivityOptions from @temporalio/common //TODO: why not type it this way?
-    options?: Record<string, any>;
+    // activity options that apply to all activities within the workflow
+    options?: DSLActivityOptions;
     // the name of the variable that will hold the workflow result
     // if not specified "result" will be assumed
     result?: string;

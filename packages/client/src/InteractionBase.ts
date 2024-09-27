@@ -37,7 +37,7 @@ export class InteractionBase<P = any, R = any> {
      * @param onChunk callback to be called when the next chunk of the response is available
      * @returns the resolved execution run as Promise<ExecutionRun>
      */
-    async execute(payload: InteractionExecutionPayload<P> = {},
+    async execute(payload: InteractionExecutionPayload = {},
         onChunk?: (chunk: string) => void): Promise<ExecutionRun<P, R>> {
         return executeInteraction<P, R>(this.client, this.id, payload, onChunk);
     }

@@ -1,10 +1,9 @@
 {
     "name": "@becomposable/studio",
-    "version": "0.33.0",
+    "version": "0.35.0",
     "private": true,
     "scripts": {
-        "preinstall": "pnpm exec only-allow pnpm",
-        "bump": "pnpm exec npm-ws-tools bump minor -x llumiverse",
+        "bump": "pnpm exec wst bump minor -x llumiverse",
         "release": "pnpm -r publish --access public",
         "build": "pnpm -r build",
         "test": "pnpm -r test",
@@ -12,8 +11,8 @@
     },
     "devDependencies": {
         "npm-ws-tools": "^0.3.0",
-        "only-allow": "^1.2.1",
         "rimraf": "^5.0.5",
         "typescript": "^5.3.3"
-    }
+    },
+    "packageManager": "pnpm@9.7.1"
 }

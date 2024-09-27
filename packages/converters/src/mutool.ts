@@ -31,12 +31,15 @@ export function pdfFileToText(input: string, output: string) {
 
 }
 export function pdfToText(buffer: Buffer): Promise<string> {
+    return pdfToTextBuffer(buffer).then((buffer) => buffer.toString('utf-8'));
+}
+export function pdfToTextBuffer(buffer: Buffer): Promise<Buffer> {
     const inputFile = tmp.fileSync({ postfix: '.pdf' });
     const targetFileName = tmp.tmpNameSync({ postfix: '.txt' });
 
     fs.writeSync(inputFile.fd, buffer);
 
     return pdfFileToText(inputFile.name, targetFileName).then(() => {
-        return readFile(targetFileName, 'utf-8');
+        return readFile(targetFileName);
     });
 }

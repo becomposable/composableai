@@ -1,8 +1,8 @@
 import colors from 'ansi-colors';
 import enquirer from "enquirer";
+import jwt from 'jsonwebtoken';
 import { config } from "./index.js";
 const { prompt } = enquirer;
-import jwt from 'jsonwebtoken';
 
 export async function listProfiles() {
     const selected = config.current?.name;
@@ -33,7 +33,7 @@ export async function useProfile(name?: string) {
 export function showProfile(name?: string) {
     if (!name) {
         if (config.profiles.length === 0) {
-            console.log('No profiles are defined. Run `cpcli config create` to add a new profile.');
+            console.log('No profiles are defined. Run `composable profiles create` to add a new profile.');
             return;
         } else {
             console.log(JSON.stringify({
@@ -48,6 +48,23 @@ export function showProfile(name?: string) {
         } else {
             console.error(`Profile ${name} not found`);
         }
+    }
+}
+
+export function showActiveAuthToken() {
+    if (config.profiles.length === 0) {
+        console.log('No profiles are defined. Run `composable profiles create` to add a new profile.');
+        return;
+    } else if (config.current) {
+        const token = jwt.decode(config.current.apikey, { json: true });
+        if (token?.exp && token.exp * 1000 < Date.now()) {
+            console.log("Authentication token expired. Create a new one ");
+            _doRefreshToken(config.current.name);
+        } else {
+            console.log(config.current.apikey);
+        }
+    } else {
+        console.log('No profile is selected. Run `composable auth refresh` to refrehs the token');
     }
 }
 
@@ -138,15 +155,19 @@ export async function tryRrefreshToken() {
             console.log();
             console.log(colors.bold("Operation Failed:"), colors.red("Authentication token expired!"));
             console.log();
-            const r: any = await prompt({
-                name: 'refresh',
-                type: "confirm",
-                message: "Do you want to refresh the token for the current profile?",
-                initial: true,
-            })
-            if (r.refresh) {
-                config.updateProfile(config.current.name).start();
-            }
+            _doRefreshToken(config.current.name);
         }
+    }
+}
+
+async function _doRefreshToken(profileName: string) {
+    const r: any = await prompt({
+        name: 'refresh',
+        type: "confirm",
+        message: "Do you want to refresh the token for the current profile?",
+        initial: true,
+    })
+    if (r.refresh) {
+        config.updateProfile(profileName).start();
     }
 }

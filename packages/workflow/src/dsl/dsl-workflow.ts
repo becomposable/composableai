@@ -1,7 +1,14 @@
-import { DSLActivityExecutionPayload, DSLActivitySpec, DSLWorkflowExecutionPayload, WorkflowExecutionPayload } from "@becomposable/common";
+import {
+    DSLActivityExecutionPayload,
+    DSLActivityOptions,
+    DSLActivitySpec,
+    DSLWorkflowExecutionPayload,
+    WorkflowExecutionPayload
+} from "@becomposable/common";
 import { ActivityOptions, log, proxyActivities } from "@temporalio/workflow";
 import { ActivityParamNotFound, NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
 import { Vars } from "./vars.js";
+import ms, { StringValue } from 'ms';
 
 interface BaseActivityPayload extends WorkflowExecutionPayload {
     workflow_name: string;
@@ -30,8 +37,8 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
     }
     delete (basePayload as any).workflow;
 
-    const options: ActivityOptions = {
-        ...definition.options,
+    const defaultOptions: ActivityOptions = {
+        ...convertDSLActivityOptions(definition.options),
         startToCloseTimeout: "5 minute",
         retry: {
             initialInterval: '30s',
@@ -45,7 +52,11 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
             ],
         },
     };
-    const proxy = proxyActivities(options as any);
+    log.debug("Global activity options", {
+        activityOptions: defaultOptions,
+    });
+    const defaultProxy = proxyActivities(defaultOptions);
+    log.debug("Default activity proxy is ready");
     // merge default vars with the payload vars and add objectIds and obejctId
     const vars = new Vars({
         ...definition.vars,
@@ -67,6 +78,22 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
         const importParams = vars.createImportVars(activity.import);
         const executionPayload = dslActivityPayload(basePayload, activity, importParams);
         log.info("Executing activity: " + activity.name, { payload: executionPayload });
+
+        let proxy = defaultProxy;
+        if (activity.options) {
+            const options = computeActivityOptions(activity.options, defaultOptions);
+            log.debug("Use custom activity options", {
+                activityName: activity.name,
+                activityOptions: options,
+            });
+            proxy = proxyActivities(options)
+        } else {
+            log.debug("Use default activity options", {
+                activityName: activity.name,
+                activityOptions: defaultOptions,
+            });
+        }
+
         const fn = proxy[activity.name];
         if (activity.parallel) {
             //TODO execute in parallel
@@ -85,3 +112,52 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
     }
     return vars.getValue(definition.result || 'result');
 }
+
+export function computeActivityOptions(customOptions: DSLActivityOptions, defaultOptions: ActivityOptions): ActivityOptions {
+    const options = convertDSLActivityOptions(customOptions);
+    return {
+        ...defaultOptions,
+        ...options,
+        retry: {
+            ...defaultOptions.retry,
+            ...options.retry,
+        }
+    }
+}
+
+function convertDSLActivityOptions(options?: DSLActivityOptions): ActivityOptions {
+    if (!options) {
+        return {};
+    }
+    let result: ActivityOptions = {};
+    if (options.startToCloseTimeout) {
+        result.startToCloseTimeout = ms(options.startToCloseTimeout as StringValue);
+    }
+    if (options.scheduleToCloseTimeout) {
+        result.scheduleToCloseTimeout = ms(options.scheduleToCloseTimeout as StringValue);
+    }
+    if (options.scheduleToStartTimeout) {
+        result.scheduleToStartTimeout = ms(options.scheduleToStartTimeout as StringValue);
+    }
+    if (options.retry) {
+        result.retry = {};
+        if (options.retry.initialInterval) {
+            result.retry.initialInterval = ms(options.retry.initialInterval as StringValue);
+        }
+        if (options.retry.maximumInterval) {
+            result.retry.maximumInterval = ms(options.retry.maximumInterval as StringValue);
+        }
+        if (options.retry.maximumAttempts) {
+            result.retry.maximumAttempts = options.retry.maximumAttempts;
+        }
+        if (options.retry.backoffCoefficient) {
+            result.retry.backoffCoefficient = options.retry.backoffCoefficient;
+        }
+        if (options.retry.nonRetryableErrorTypes) {
+            result.retry.nonRetryableErrorTypes = options.retry.nonRetryableErrorTypes;
+        }
+    }
+    return result;
+}
+
+  

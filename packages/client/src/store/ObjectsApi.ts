@@ -1,5 +1,5 @@
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
-import { ComplexSearchPayload, ComputeObjectFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, ObjectSearchPayload, ObjectSearchQuery } from "@becomposable/common";
+import { ComplexSearchPayload, ComputeObjectFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, ExportPropertiesPayload, ExportPropertiesResponse, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, ObjectSearchPayload, ObjectSearchQuery } from "@becomposable/common";
 
 export class StreamSource {
     constructor(public stream: ReadableStream, public name: string, public type?: string, public id?: string) { }
@@ -201,6 +201,11 @@ export class ObjectsApi extends ApiTopic {
         return this.get(`/${documentId}/renditions/${options.format}`, { query });
     }
 
+    exportProperties(payload: ExportPropertiesPayload): Promise<ExportPropertiesResponse> {
+        return this.post("/export", {
+            payload
+        });
+    }
 
 }
 

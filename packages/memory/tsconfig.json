@@ -42,5 +42,15 @@
     "lib",
     "test"
   ],
-  "references": []
+  "references": [
+    {
+      "path": "../client/tsconfig.json"
+    },
+    {
+      "path": "../converters/tsconfig.json"
+    },
+    {
+      "path": "../json/tsconfig.json"
+    }
+  ]
 }

@@ -6,7 +6,7 @@ import { readFile, readJsonFile, readStdin, writeFile } from "../utils/stdio.js"
 import { ExecutionQueue, ExecutionRequest } from "./executor.js";
 
 
-export default async function runInteraction(program: Command, interactionId: string, options: Record<string, any>) {
+export default async function runInteraction(program: Command, interactionSpec: string, options: Record<string, any>) {
     const queue = new ExecutionQueue();
     const data = await getInputData(options);
     const client = getClient(program);
@@ -60,14 +60,14 @@ export default async function runInteraction(program: Command, interactionId: st
             let runNumber = count > 1 ? 0 : i + 1;
             if (Array.isArray(data)) {
                 for (const d of data) {
-                    const req = new ExecutionRequest(client, interactionId, d, options);
+                    const req = new ExecutionRequest(client, interactionSpec, d, options);
                     if (runNumber > 0) {
                         req.runNumber = runNumber;
                     }
                     queue.add(req);
                 }
             } else {
-                const req = new ExecutionRequest(client, interactionId, data, options);
+                const req = new ExecutionRequest(client, interactionSpec, data, options);
                 if (runNumber > 0) {
                     req.runNumber = runNumber;
                 }

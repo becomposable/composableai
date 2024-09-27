@@ -33,7 +33,7 @@ export class ExecutionRequest {
 
     constructor(
         public readonly client: ComposableClient,
-        public interactionId: string,
+        public interactionSpec: string, // namespace:name@version
         public data: any,
         public options: Record<string, any>) {
     }
@@ -41,7 +41,7 @@ export class ExecutionRequest {
     async run(onChunk?: ((chunk: any) => void)): Promise<ExecutionRun> {
         const options = this.options;
 
-        const run = await this.client.interactions.execute(this.interactionId, {
+        const run = await this.client.interactions.executeByName(this.interactionSpec, {
             data: this.data,
             memory_mapping: options.mmap || undefined,
             config: {

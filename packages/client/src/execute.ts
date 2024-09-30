@@ -31,7 +31,7 @@ export async function executeInteraction<P = any, R = any>(client: ComposableCli
         if (response.status === ExecutionRunStatus.failed) {
             return response;
         }
-        handleStreaming(client, response.id, onChunk);
+        await handleStreaming(client, response.id, onChunk);
     }
     return response;
 }
@@ -68,7 +68,7 @@ export async function executeInteractionByName<P = any, R = any>(client: Composa
         if (response.status === ExecutionRunStatus.failed) {
             return response;
         }
-        handleStreaming(client, response.id, onChunk);
+        await handleStreaming(client, response.id, onChunk);
     }
     return response;
 }
@@ -87,11 +87,15 @@ function handleStreaming(client: ComposableClient, runId: string, onChunk: (chun
                 throw new Error('No auth token available');
             }
 
-            const sse = new EventSourceImpl(streamUrl);
+            const sse = new EventSourceImpl(streamUrl.href);
             sse.addEventListener("message", ev => {
-                const data = JSON.parse(ev.data);
-                if (data) {
-                    onChunk && onChunk(data);
+                try {
+                    const data = JSON.parse(ev.data);
+                    if (data) {
+                        onChunk && onChunk(data);
+                    }
+                } catch (err) {
+                    reject(err);
                 }
             });
             sse.addEventListener("close", (ev) => {

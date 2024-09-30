@@ -198,6 +198,8 @@ export interface ExecutionRun<P = any, R = any> {
     }
     result: R;
     parameters: P; //params used to create the interaction, only in varies on?
+    // optional memory mapping when using memory packs as input
+    memory_mapping?: Record<string, string>;
     tags?: string[];
     //TODO a string is returned when executing not the interaction object
     interaction: Interaction;

@@ -100,18 +100,28 @@ export default async function runInteraction(program: Command, interactionSpec: 
 }
 
 async function getInputData(options: Record<string, any>) {
-    let input: any;
-    if (options.data) {
-        input = options.data;
-    } else if (options.input) {
-        if (options.input === true) {
-            input = await readStdin();
-        } else {
-            input = readFile(options.input);
+    try {
+        let input: any;
+        if (options.data) {
+            input = options.data;
+        } else if (options.input) {
+            if (options.input === true) {
+                input = await readStdin();
+            } else {
+                input = readFile(options.input);
+            }
         }
-    }
 
-    return input ? JSON.parse(input) : undefined;
+        if (!input) return undefined;
+        if (typeof input === 'string' && input.startsWith(MEMORY_INPUT_PREFIX)) {
+            return input;
+        } else {
+            return input ? JSON.parse(input) : undefined;
+        }
+    } catch (err: any) {
+        console.error('Invalid JSON data: ', err.message);
+        process.exit(1);
+    }
 }
 
 function writeResult(runs: ExecutionRun[], hasMultiOutputs: boolean, options: Record<string, any>) {

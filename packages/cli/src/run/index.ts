@@ -90,8 +90,9 @@ export default async function runInteraction(program: Command, interactionSpec: 
         }, onChunk);
         spinner?.done(true);
 
-    } catch (err) {
+    } catch (err: any) {
         spinner?.done(false);
+        console.error("Failed to execute the interaction", err?.message);//, err?.stack);
         throw err;
     }
 

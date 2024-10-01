@@ -8,7 +8,7 @@ Run Generatehaiku like this:
 composable run GenerateHaiku -d 'memory:path/to/memory.tar'
 2. the mapping {".": ".", "topic": "content:topic.txt"}
 Run Generatehaiku like this:
-composable run GenerateHaiku -d 'memory:path/to/memory.tar' -m '{"." : ".", "topic": "content:topic.txt"}'
+composable run GenerateHaiku -d 'memory:path/to/memory.tar' --mmap '{"." : ".", "topic": "content:topic.txt"}'
 */
 
 copyText("space", "topic.txt")

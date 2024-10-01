@@ -4,7 +4,7 @@
     "version": "0.35.0",
     "type": "module",
     "bin": {
-        "composable": "./bin/app.js"
+        "memo": "./bin/memo.js"
     },
     "main": "./lib/index.js",
     "types": "./lib/index.d.ts",

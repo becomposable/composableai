@@ -13,7 +13,12 @@ class App {
             const resolvedScript = resolve(script);
             let module: any;
             if (resolvedScript.endsWith('.ts')) {
-                module = await importTsFile(resolvedScript);
+                try {
+                    module = await importTsFile(resolvedScript);
+                } catch (er: any) {
+                    console.error(er);
+                    process.exit(1);
+                }
             } else {
                 module = await import(resolvedScript);
             }

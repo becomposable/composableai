@@ -1,8 +1,10 @@
+import { setupMemoCommand } from '@becomposable/memory-cli';
 import { Command } from 'commander';
 import runExport from './codegen/index.js';
 import { genTestData } from './datagen/index.js';
 import { listEnvirnments } from './envs/index.js';
 import { listInteractions } from './interactions/index.js';
+import { getPublishMemoryAction } from './memory/index.js';
 import { registerObjectsCommand } from './objects/index.js';
 import { getVersion, upgrade } from './package.js';
 import { createProfile, deleteProfile, listProfiles, showActiveAuthToken, showProfile, tryRrefreshToken, updateCurrentProfile, updateProfile, useProfile } from './profiles/commands.js';
@@ -11,7 +13,6 @@ import { listProjects } from './projects/index.js';
 import runInteraction from './run/index.js';
 import { runHistory } from './runs/index.js';
 import { registerWorkflowsCommand } from './workflows/index.js';
-
 //warnIfNotLatest();
 
 const program = new Command();
@@ -60,7 +61,7 @@ program.command("datagen <interaction>")
     .option('-t, --temperature [value]', 'The temperature used to generating the test data.')
     .option('-o, --output [file]', 'A file to save the generated test data. If not specified the data will be printed to stdout.')
     .option('-c, --count [value]', 'The number of data objects to generate', '1')
-    .option('-m, --message [value]', 'An optional message')
+    .option('--message [value]', 'An optional message')
     .action((interactionId: string, options: Record<string, any>) => {
         genTestData(program, interactionId, options);
     })
@@ -76,7 +77,7 @@ program.command("run <interaction>")
     .option('-i, --input [file]', 'The input data if any. If no file path is specified it will read from stdin')
     .option('-o, --output [file]', 'The output file if any. If not specified it will print to stdout')
     .option('-d, --data [json]', 'Inline data as a JSON string. If specified takes precendence over --input')
-    .option('-m, --mmap [json]', 'The memory mapping as a JSON string or a reference to a file containing the JSON. The file reference must start with @')
+    .option('--mmap [json]', 'The memory mapping as a JSON string or a reference to a file containing the JSON. The file reference must start with @')
     .option('-T, --tags [tags]', 'A comma separated list of tags to add to the execution run')
     .option('-t, --temperature [temperature]', 'The temperature to use')
     .option('-m, --model [model]', 'The model to use. Optional.')
@@ -103,6 +104,9 @@ program.command("runs [interactionId]")
     .action((interactionId: string | undefined, options: Record<string, any>) => {
         runHistory(program, interactionId, options);
     });
+
+const memoCmd = program.command("memo");
+setupMemoCommand(memoCmd, getPublishMemoryAction(program));
 
 const profilesRoot = program.command("profiles")
     .description("Manage configuration profiles")

@@ -1,6 +1,7 @@
 import { AsyncObjectWalker } from "@becomposable/json";
+import { rmSync } from "fs";
 import { tmpdir } from "os";
-import { resolve } from "path";
+import { join, resolve } from "path";
 import { copy, CopyOptions } from "./commands/copy.js";
 import { exec, ExecOptions } from "./commands/exec.js";
 import { ContentObject, DocxObject, JsonObject, MediaObject, MediaOptions, PdfObject } from "./ContentObject.js";
@@ -35,6 +36,13 @@ export interface BuildOptions {
      * Vars to be injected into the script context as the vars object
      */
     vars?: Record<string, any>;
+
+    /**
+     * Optional publish action
+     * @param file
+     * @returns the URI of the published memory
+     */
+    publish?: (file: string, name: string) => Promise<string>
 }
 
 export interface Commands {
@@ -130,12 +138,21 @@ export class Builder implements Commands {
     }
 
     async build(object: Record<string, any>) {
-        const baseName = resolve(this.options.out || 'memory');
+        const { baseName, publishName } = getOutputNames(this.tmpdir, this.options);
         // resolve all content objects values from the conext object
         object = await resolveContextObject(object);
         // write the memory to a file
-        const file = await this.memory.build(baseName, object);
+        let file = await this.memory.build(baseName, object);
+        if (publishName) {
+            const tarFile = file;
+            try {
+                file = await this.options.publish!(tarFile, publishName);
+            } finally {
+                rmSync(tarFile);
+            }
+        }
         this.options.quiet || console.log(`Memory saved to ${file}`);
+        return file;
     }
 
 }
@@ -148,4 +165,30 @@ function resolveContextObject(object: Record<string, any>): Promise<Record<strin
             return value;
         }
     });
+}
+
+function createTmpBaseName(tmpdir: string) {
+    return join(tmpdir, `composable-memory-${Date.now()}`);
+}
+
+function getOutputNames(tmpdir: string, options: BuildOptions): { baseName: string, publishName: string | undefined } {
+    if (!options.out) {
+        options.out = "memory";
+    }
+    let baseName: string;
+    let publishName: string | undefined;
+    const out = options.out;
+    if (out.startsWith("memory:")) {
+        if (!options.publish) {
+            throw new Error(`The publish option is required for "${out}" output`);
+        }
+        // force gzip when publishing
+        options.gzip = true;
+        // create a temporary path for the output
+        baseName = createTmpBaseName(tmpdir);
+        publishName = out.substring("memory:".length);
+    } else {
+        baseName = resolve(out || 'memory');
+    }
+    return { baseName, publishName };
 }

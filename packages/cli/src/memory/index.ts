@@ -12,16 +12,12 @@ export function getPublishMemoryAction(program: Command) {
 }
 
 async function publishMemory(client: ComposableClient, file: string, name: string) {
-
     const fileId = `memories/${name}`;
-    console.log('Publishing memory to', fileId)
-
     const stream = createReadableStreamFromReadable(createReadStream(file));
     await client.objects.upload(new StreamSource(stream,
         `${name}.tar.gz`,
         "application/gzip",
         fileId
     ));
-
     return fileId;
 }

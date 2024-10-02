@@ -9,7 +9,7 @@ export interface ContentSource {
     getStream(): Promise<NodeJS.ReadableStream>;
 }
 
-export type SourceSpec = string | ContentSource | Buffer;
+export type SourceSpec = string | ContentSource;
 export abstract class AbstractContentSource implements ContentSource {
     abstract getContent(): Promise<Buffer>
 

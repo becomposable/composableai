@@ -5,7 +5,7 @@ if (!MemoApp.builder) {
     throw new Error("No builder app was instantiated!");
 }
 
-const builder = MemoApp.builder as Commands & { tmpdir: string, vars: Record<string, any> };
+const builder = MemoApp.builder as Commands & { tmpdir: string, vars: Record<string, any>, env: Record<string, any> };
 
 const env = process.env;
 const tmpdir = builder.tmpdir;

@@ -39,9 +39,7 @@ export class TypesApi extends ApiTopic {
     }
 
     getTypeByName(typeName: string): Promise<ContentObjectType> {
-        return this.get("/", {
-            query: { name: typeName }
-        });
+        return this.get(`/name/${typeName}`);
     }
 
     update(typeId: string, payload: Partial<CreateContentObjectTypePayload>): Promise<ContentObjectType> {

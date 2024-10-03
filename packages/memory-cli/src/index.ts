@@ -1,2 +1,3 @@
-export * from "./MemoApp.js";
-export * from "./command.js";
+import { setupMemoCommand } from './command.js';
+
+export { setupMemoCommand };

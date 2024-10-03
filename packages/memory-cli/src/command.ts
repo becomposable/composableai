@@ -1,6 +1,6 @@
 import { BuildOptions } from '@becomposable/memory';
+import { build } from '@becomposable/memory-commands';
 import { Command } from 'commander';
-import MemoApp from './MemoApp.js';
 
 export function setupMemoCommand(command: Command, publish?: (file: string, name: string) => Promise<string>) {
     return command.allowUnknownOption()
@@ -19,7 +19,7 @@ function memoAction(command: Command, options: Record<string, any>) {
     if (options.indent) {
         options.indent = parseInt(options.indent);
     }
-    return MemoApp.run(script!, { ...options, vars } as BuildOptions);
+    return build(script!, { ...options, vars } as BuildOptions);
 }
 
 /**

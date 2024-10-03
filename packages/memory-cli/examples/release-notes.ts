@@ -1,6 +1,6 @@
 import { copy, copyText, exec, tmpdir, vars } from "@becomposable/memory-commands";
 
-const { start, end } = vars;
+const { start, end } = vars();
 if (!start || !end) {
     console.error("Please provide start and end tags using --var-start and --var-end");
     process.exit(1);

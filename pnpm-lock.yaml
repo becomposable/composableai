@@ -344,6 +344,9 @@ importers:
       '@becomposable/memory':
         specifier: workspace:*
         version: link:../memory
+      typescript:
+        specifier: ^5.5.4
+        version: 5.5.4
     devDependencies:
       '@types/node':
         specifier: ^20.8.9
@@ -351,9 +354,6 @@ importers:
       ts-dual-module:
         specifier: ^0.6.3
         version: 0.6.3
-      typescript:
-        specifier: ^5.0.2
-        version: 5.5.4
       vitest:
         specifier: ^1.4.0
         version: 1.6.0(@types/node@20.16.1)(terser@5.31.6)

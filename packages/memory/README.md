@@ -35,37 +35,22 @@ export default {
     ...
 }
 ```
-## Memory Pack Built-in Variables.
-There a three built-in variables which you can access in a recipe ts file.
-
-#### env
-
-This is a shortcut to `process.env`. It can be used to access envirnoment properties. To use the `env` variable you need to import it:
-
-`import { env } from "@becomposable/memory-commands"`
-
-#### tmpdir
-
-This is a temporary directory that is created just before processing the recipe. It can be used to write into temporary files. After the memory pack is built the temporary directory is removed. To use the `tmpdir` variable you need to import it:
-
-`import { tmpdir } from "@becomposable/memory-commands"`
-
-#### vars
-
-A javascript object that holds variables specified by the user when invoking the memory pack build. Can be used to parametrize the recipe. When using the `memo` cli application (i.e. `@becomposable/emmory-cli`) ypu can pass vars to the recipe by using command line parameters that starts with a `--var-` prefix. Example: `--var-language fr` will produce a property `language` in the `vars` object whith a value of `'fr'`.
-To use the `vars` variable you need to import it:
-
-``import { vars } from "@becomposable/memory-commands"`
 
 ## Memory Pack Commands.
 
 The only dependency you need to import in your recipe ts file is the `@becmposable/memory-commands` package. This package contains all the buil-in commands which are grouped in two categories: execution commands and content loading commands:
+
+### Context commands
+1. **vars** - Get the build user variables
+2. **tmpdir** - Get or create a temporary directory for use while building
+3. **getBuilder** - Get the builder instance.
 
 ### Execution commands
 1. **from** - Extends an existing memory pack (a tar file)
 2. **exec** - Execute a shell command.
 3. **copy** - Copy a file to the tar. The file content can be transformed using the built-in transformers. See the [copy command](#copy) for more details.
 4. **copyText** - Copy an inline text or string variable as a tar entry.
+5. **build** - Build an external recipe.
 
 ### Content loading commands
 
@@ -75,6 +60,46 @@ These commands can be used to fetch content from files. The result is returned a
 3. **pdf** - extract the text content from a PDF file.
 4. **docx** - extract the text content from a Docx file.
 5. **media** - Load an image with an optional conversion. The image is exported as base64 text, when the variable is referenced in the exported memory metadata.
+
+#### vars
+
+**Signature:** `vars (): Record<string,any>`
+
+A command that returns the user variables which were specified when invoking the memory pack build.
+These variables can be used to parametrize the recipe. When using the `memo` cli application (i.e. `@becomposable/memory-cli`) you can pass vars to the recipe by using command line parameters which starts with a `--var-` prefix.
+
+**Example:** `--var-language fr` will produce a property `language` whith a value of `'fr'`.
+
+**Usage:**
+```js
+import { vars } from "@becomposable/memory-commands"
+
+const { language } = vars();
+```
+
+#### tmpdir
+
+**Signature:** `tmpdir (): string`
+
+Get or create a temporary directory. If the directory was not yet created it will be created and its path returned.
+
+If created, the temporary directory will be automatically removed at the end of the build.
+
+**Usage:**
+
+```js
+import { tmpdir } from "@becomposable/memory-commands";
+
+const wd = tmpdir();
+
+await exec(`ls -al > ${wd}/text.txt`);
+```
+
+### getBuilder
+
+**Signature:** `getBuilder (): Builder`
+
+Get the instance of the builder which is used to build the current recipe ts file.
 
 
 ### from
@@ -129,8 +154,9 @@ The `exec` command is asynchronous so you need to use await when incoking it. If
 
 ```javascript
 import { tmpdir, exec } from "@becomposable/memory-commands"
+const wd = tmpdir();
 const output = await exec("cat some/file | wc -l")
-await exec(`cat some/file | wc -l > ${tmpdir}out.txt`)
+await exec(`cat some/file | wc -l > ${wd}out.txt`)
 ```
 
 ### copy
@@ -161,18 +187,42 @@ You can convert images by specfying a max height or widtth and / or an output im
 **Example:**
 
 ```js
-import { exec, copy } from "@becomposable/memory-commands"
-await exec(`cat some/file > ${tmpdir}/out.txt`)
-copy(`${tmpdir}/out.txt`, 'out.txt');
+import { exec, copy, tmpdir } from "@becomposable/memory-commands"
+const wd = tmpdir();
+await exec(`cat some/file > ${wd}/out.txt`)
+copy(`${wd}/out.txt`, 'out.txt');
 copy('./my-project/src/**/*.ts', './my-project/src!sources/*')
 ```
 
 The rewrite expression in the example above `./my-project/src!sources/*` means: strip the prefix `./my-project/src` fromt he copied file and prefix the remaining od the path with the value `sources/`.
 
-#### Rewrite expressions
+#### Path rewrite expressions
 
-TODO
+A path rewrite expression is composed of two parts:
+1. an optional prefix separated by a `!` charcater from the rest of the path. If present this prefix will be removed from the matched path.
+If no prefix is specified then the entrie directory part of the matched path will be removed.
+2. A mandatory suffix which is describing how to rewrite the matched path. The suffix may contain either a wildcard `*` which will be replaced with the matched path (without the removed prefix), either a combination of the followinf variables:
+    * `%n` - the file name without the extension
+    * `%e` - the extension
+    * `%f` - the file name including the extension
+    * `%d` - the directory path (not including the removed prefix)
+    * `%i` - the 0 based index of the file in the matched array of files.
 
+**Examples:**
+
+```js
+// copy all .ts files flatened in the sources directory (the directory structure is not preserved)
+copy("work/docs/project1/src/**/*.ts", "sources/*")
+// copy all .ts files  in the sources directory and recreate the subdirectories structure inside src/
+copy("work/docs/project1/src/**/*.ts", "work/docs/project1/src!sources/*")
+// Remove the work/ prefix and preserver the same subdirectories structure including images/
+// and replace the file extension with .png
+copy("work/images/**/*.png", "work!%d/%n.jpeg")
+// Copy all images inaide a images/ folder without preserving subdirectories and append the index of the image
+copy("work/images/**/*.png", "images/%n-%i.%e")
+```
+
+In the last example for the mnatched files: `work/images/header/home.png` and `work/images/footer/logo.png` the result will be: `images/home-0.png`, `images/logo-1.png`
 
 ### copyText
 
@@ -184,6 +234,56 @@ This command will create a new entry in the target memory pack tar using the con
 import { exec, copyText } from "@becomposable/memory-commands"
 const content = await exec(`cat some/file`)
 copyText(content.trim(), 'content.txt')
+```
+
+### build
+
+**Signature:** `build (recipePath: string, options?: BuildOptions): void`
+
+Build a memory pack from a recipe file. You can use this command if you need to build multiple memory packs.
+
+The `BuildOptions` options have the following shape:
+
+```ts
+export interface BuildOptions {
+    indent?: number;
+    /**
+     * the path to save the output. Defaults to 'memory'
+     * The path should not contain the file extension. The extension will be chosen based on the content.
+     * It will be either .json or .tar (if media files are present)
+     */
+    out?: string;
+
+    /**
+     * If set, suppress logs. Defaults to false.
+     */
+    quiet?: boolean;
+
+    /**
+     * If true, compress the output (tar or json) with gzip. Defaults to false.
+     */
+    gzip?: boolean;
+
+    /**
+     * Vars to be injected into the script context as the vars object
+     */
+    vars?: Record<string, any>;
+
+    /**
+     * Optional publish action
+     * @param file
+     * @returns the URI of the published memory
+     */
+    publish?: (file: string, name: string) => Promise<string>
+}
+```
+
+**Usage:**
+
+```js
+import { build, tmpdir } from "@becomposable/memory-commands";
+const wd = tmpdir();
+await build("./some/recipe.ts", { out: `${wd}}/child-memory`});
 ```
 
 ### content
@@ -207,6 +307,20 @@ Load a JSON object from a json file. When assigned as a metadata property the co
 
 Load a PdfObject form a pdf file. When assigned as a metadata property the PdfObject is transformed to the text representation of the PDF.
 
+**Example:**
+
+```js
+import { pdf } from "@becomposable/memory-commands";
+
+const doc = pdf("./my-doc.pdf")
+
+export default {
+    textContent: doc
+}
+```
+
+In the example above the PDF text will be extracted from the pdf and ibjected as the textContent property ion the memory pack metadata.
+
 ### docx
 
 Load a DocxObject form a docx file. When assigned as a metadata property the DocxObject is transformed to the text representation of the Docx.
@@ -229,7 +343,22 @@ export interface MediaOptions {
 }
 ```
 
-You can thus convertt he image before using it.
+You can thus convert the image before using it.
+
+**Example:**
+
+```js
+import { pdf } from "@becomposable/memory-commands";
+
+const images = media("./images/*.jpeg")
+
+export default {
+    images: images
+}
+```
+
+In the example above the an array of images encoded as base64 will be injected in the `images` property pf the memory pack metadata.
+
 
 ### Custom commands
 
@@ -241,14 +370,14 @@ Here is a template of custom command functions:
 import { Builder } from "@becomposable/memory";
 import fs from "node:fs";
 
-// this is the current instance of the builder being used to build the memory pack.
-const builder = Builder.instance;
-
 export myCommand(message:string) {
+    const wd = builder.tmpdir();
+    // this is the current instance of the builder being used to build the memory pack.
+    const builder = Builder.getInstance();
     // you can add a variable in the build vars:
     builder.vars.greeting = 'hello world!';
     // or write a file named greeting.txt in the current build tmpdir
-    fs.writeFileSync(`${builder.tmpdir}/greeting.txt`, "hello world!", "utf-8");
+    fs.writeFileSync(`${wd}/greeting.txt`, "hello world!", "utf-8");
     // or create a tar entry named greeting.txt
     builder.copyText("hello world!", "greeting.txt");
     // refer to Builder API for other operations.
@@ -264,7 +393,7 @@ This example builds a memory pack with the information on which issues were fixe
 ```js
 import { copy, copyText, exec, tmpdir, vars } from "@becomposable/memory-commands";
 
-const { start, end } = vars;
+const { start, end } = vars();
 if (!start || !end) {
     console.error("Please provide start and end tags using --var-start and --var-end");
     process.exit(1);

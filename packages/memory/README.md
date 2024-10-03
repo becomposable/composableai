@@ -367,13 +367,13 @@ To create custom commands you have 2 options. Either you write the command in as
 Here is a template of custom command functions:
 
 ```js
-import { Builder } from "@becomposable/memory";
+import { getBuilder } from "@becomposable/memory-commands";
 import fs from "node:fs";
 
 export myCommand(message:string) {
     const wd = builder.tmpdir();
     // this is the current instance of the builder being used to build the memory pack.
-    const builder = Builder.getInstance();
+    const builder = getBuilder();
     // you can add a variable in the build vars:
     builder.vars.greeting = 'hello world!';
     // or write a file named greeting.txt in the current build tmpdir
@@ -399,6 +399,8 @@ if (!start || !end) {
     process.exit(1);
 }
 
+const wd = tmpdir();
+
 console.log(`Retrieving issues between ${start}and ${end}...`)
 // Get list of commit logs containing '#' between the two tags and extract unique issue numbers
 const issue_numbers = await exec(`git log ${start}..${end} --oneline | grep -o '#[0-9]\\+' | sed 's/#//' | sort -u`) as string;
@@ -410,8 +412,8 @@ for (const issue of issue_numbers.trim().split("\n")) {
 }
 
 console.log("Generating diff");
-await exec(`git diff --submodule=diff ${start}...${end} > ${tmpdir}/range_diff.txt`)
-copy(`${tmpdir}/range_diff.txt`, "range_diff.txt");
+await exec(`git diff --submodule=diff ${start}...${end} > ${wd}/range_diff.txt`)
+copy(`${wd}/range_diff.txt`, "range_diff.txt");
 
 export default {
     from_version: start,

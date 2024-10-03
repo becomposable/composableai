@@ -37,6 +37,11 @@ export interface BuildOptions {
      * @returns the URI of the published memory
      */
     publish?: (file: string, name: string) => Promise<string>
+
+    /**
+     * The directory where to transpile the recipe ts file
+     */
+    transpileDir?: string;
 }
 
 export interface Commands {

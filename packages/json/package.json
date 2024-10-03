@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/json",
-    "version": "0.35.0",
+    "version": "0.36.0",
     "description": "JSON utlities",
     "type": "module",
     "types": "./lib/types/index.d.ts",

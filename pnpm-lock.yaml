@@ -319,9 +319,6 @@ importers:
 
   packages/memory-cli:
     dependencies:
-      '@becomposable/common':
-        specifier: ^0.35.0
-        version: 0.35.0
       '@becomposable/memory':
         specifier: workspace:*
         version: link:../memory
@@ -470,9 +467,6 @@ packages:
 
   '@becomposable/common@0.30.1':
     resolution: {integrity: sha512-KResq2bDyccEpZIeMIGKzsYEt2sjbViEnlJVbOuwRW3+LdHeSRax/xyzANFiIk9onOPjryS3asie/U0qzOfuNw==}
-
-  '@becomposable/common@0.35.0':
-    resolution: {integrity: sha512-NDBrhSB0ZTK7bLbLwHIGhCQIJDEbP6p1FNsHzwXYVodB9SjZZOxYF6bRwCqDGFGW0JZoPWNqguLw+3DdO8djxg==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -948,9 +942,6 @@ packages:
 
   '@llumiverse/core@0.13.0':
     resolution: {integrity: sha512-Y30dvSQt4SaMdSBbOUJ8aAafc9LJAF0t9TpFFGDRpK40IlG2OuxR72dqaxE7ce4L4SGSlelerSp0luWOQr9RWg==}
-
-  '@llumiverse/core@0.15.0':
-    resolution: {integrity: sha512-MDTHapYicYP+p0vpcc98njXey2F+hWtGc+gnWzS4ufU+vxYkL4DfBpeOF9O00Bg/hTxzGdxv0BYRcY88hqpk6g==}
 
   '@mapbox/node-pre-gyp@1.0.11':
     resolution: {integrity: sha512-Yhlar6v9WQgUp/He7BdgzOz8lqMQ8sU+jkCq7Wx8Myc5YFJLbEe7lgui/V7G1qB1DJykHSGwreceSaD60Y0PUQ==}
@@ -3420,12 +3411,6 @@ snapshots:
       ajv: 8.17.1
       json-schema: 0.4.0
 
-  '@becomposable/common@0.35.0':
-    dependencies:
-      '@llumiverse/core': 0.15.0
-      ajv: 8.17.1
-      json-schema: 0.4.0
-
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
@@ -3773,12 +3758,6 @@ snapshots:
   '@llumiverse/core@0.13.0':
     dependencies:
       json-schema: 0.4.0
-
-  '@llumiverse/core@0.15.0':
-    dependencies:
-      '@types/node': 22.5.1
-      ajv: 8.17.1
-      ajv-formats: 3.0.1(ajv@8.17.1)
 
   '@mapbox/node-pre-gyp@1.0.11':
     dependencies:

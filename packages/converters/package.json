@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/converters",
-    "version": "0.36.0",
+    "version": "0.36.1",
     "description": "Image and content converters",
     "type": "module",
     "types": "./lib/types/index.d.ts",

@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/react",
-    "version": "0.36.0",
+    "version": "0.36.1",
     "description": "React helpers for Composable AI",
     "type": "module",
     "types": "./lib/index.d.ts",

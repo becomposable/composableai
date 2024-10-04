@@ -54,6 +54,7 @@ export interface ContentObjectItem<T = any> extends BaseObject {
     external_id?: string;
     summary?: string;
     properties: T | Record<string, any>; // a JSON object that describes the object
+    run?: string; // the ID of the interaction run that created the object
 }
 
 /**

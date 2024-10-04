@@ -33,7 +33,6 @@ export interface CreateOrUpdateObjectFromInteractionRun extends DSLActivitySpec<
 }
 
 export async function createOrUpdateDocumentFromInteractionRun(payload: DSLActivityExecutionPayload) {
-
     const { params, client } = await setupActivity<CreateOrUpdateObjectFromInteractionRunParams>(payload);
 
     const runId = params.run_id;
@@ -77,6 +76,7 @@ export async function createOrUpdateDocumentFromInteractionRun(payload: DSLActiv
         text: !resultIsObject ? result : undefined,
         type: type?.id,
         status: ContentObjectStatus.completed,
+        run: runId,
     };
     log.info("Creating document with payload", docPayload);
 

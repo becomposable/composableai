@@ -8,6 +8,7 @@ import { createReadableStreamFromReadable } from "node-web-stream-adapters";
 import { basename, join, resolve } from "path";
 import { getClient } from "../client.js";
 import enquirer from "enquirer";
+import mime from "mime";
 const { prompt } = enquirer;
 
 const AUTOMATIC_TYPE_SELECTION = "AutomaticTypeSelection";
@@ -53,6 +54,34 @@ export async function createObject(program: Command, files: string[], options: R
     if (files.length === 0) {
         return "No files specified"
     } else if (files.length > 1) {
+        const types: any[] = await listTypes(program);
+        const questions: any[] = [];
+        if (!options.type) {
+            questions.push({
+                type: 'select',
+                name: 'type',
+                message: "Select a Type",
+                choices: types,
+                limit: 10,
+                result() {
+                    return this.focused.value;
+                }
+            });
+            const response: any = await prompt(questions);
+            options.type = response.type;
+        } else {
+            const searchedType = findTypeValue(types, options.type);
+            if (searchedType === TYPE_SELECTION_ERROR) {
+                console.error(`${options.type} is not an existing type`);
+                process.exit(2);
+            }
+            options.type = searchedType;
+        }
+
+        if (options.type === AUTOMATIC_TYPE_SELECTION) {
+            delete options.type;
+        }
+
         return createObjectFromFiles(program, files, options);
     } else {
         let file = files[0];
@@ -144,11 +173,17 @@ export async function createObjectFromFile(program: Command, file: string, optio
     const client = getClient(program);
     const stream = createReadStream(file);
 
+    const content = new StreamSource(createReadableStreamFromReadable(stream), fileName);
+    const mime_type = mime.getType(file);
+    if (mime_type) {
+        content.type = mime_type;
+    }
+
     const res = await client.objects.create({
         name: options.name || fileName,
         type: options.type,
         location: options.path,
-        content: new StreamSource(createReadableStreamFromReadable(stream), fileName),
+        content: content,
     });
 
     console.log('Created object', res.id);

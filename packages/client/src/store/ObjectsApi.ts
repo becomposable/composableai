@@ -109,7 +109,7 @@ export class ObjectsApi extends ApiTopic {
             mime_type: source.type
         });
 
-        //console.log(`Uploading file to ${url}`, { id, mime_type, isStream, source })
+        console.log(`Uploading file to ${url}`, { id, mime_type, isStream, source })
 
         // upload the file content to the signed URL
         /*const res = await this.fetch(url, {

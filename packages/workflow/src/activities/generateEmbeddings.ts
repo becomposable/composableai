@@ -36,9 +36,9 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
         throw new NoDocumentFound('Project not found', [payload.project_id]);
     }
 
-    if (!projectData?.configuration.generate_embeddings) {
-        log.info(`Embeddings generation disabled for project: ${projectData?.id}`);
-        return { id: objectId, status: "skipped", message: "Embeddings generation is disabled (generated_embeddings is false)" }
+    if (!projectData?.configuration.embeddings[type]?.enabled) {
+        log.info(`Embeddings generation disabled for type ${type} on project: ${projectData.name} (${projectData.namespace})`);
+        return { id: objectId, status: "skipped", message: `Embeddings generation disabled for type ${type}` }
     }
 
     log.info(`${type} embedding generation starting for object ${objectId}`, { force, config });

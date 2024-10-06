@@ -1,10 +1,10 @@
 {
     "name": "@becomposable/memory-cli",
     "description": "becomposable memory builder CLI",
-    "version": "0.35.0",
+    "version": "0.37.0",
     "type": "module",
     "bin": {
-        "composable": "./bin/app.js"
+        "memo": "./bin/memo.js"
     },
     "main": "./lib/index.js",
     "types": "./lib/index.d.ts",

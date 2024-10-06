@@ -1,6 +1,6 @@
 import { AsyncObjectWalker } from "@becomposable/json";
-import { tmpdir } from "os";
-import { resolve } from "path";
+import { mkdtempSync, rmSync } from "fs";
+import { join, resolve } from "path";
 import { copy, CopyOptions } from "./commands/copy.js";
 import { exec, ExecOptions } from "./commands/exec.js";
 import { ContentObject, DocxObject, JsonObject, MediaObject, MediaOptions, PdfObject } from "./ContentObject.js";
@@ -22,11 +22,6 @@ export interface BuildOptions {
     quiet?: boolean;
 
     /**
-     * A temporary directory to use for the build. If not set, the system tmp dir will be used
-     */
-    tmpdir?: string;
-
-    /**
      * If true, compress the output (tar or json) with gzip. Defaults to false.
      */
     gzip?: boolean;
@@ -35,11 +30,23 @@ export interface BuildOptions {
      * Vars to be injected into the script context as the vars object
      */
     vars?: Record<string, any>;
+
+    /**
+     * Optional publish action
+     * @param file
+     * @returns the URI of the published memory
+     */
+    publish?: (file: string, name: string) => Promise<string>
+
+    /**
+     * The directory where to transpile the recipe ts file
+     */
+    transpileDir?: string;
 }
 
 export interface Commands {
     exec: (cmd: string, options?: ExecOptions) => Promise<void | string>;
-    from: (location: string, options?: FromOptions) => void;
+    from: (location: string, options?: FromOptions) => Promise<void>;
     content: (location: string, encoding?: BufferEncoding) => ContentObject | ContentObject[];
     json: (location: string) => ContentObject | ContentObject[];
     pdf: (location: string) => PdfObject | PdfObject[];
@@ -52,14 +59,28 @@ export interface Commands {
 export class Builder implements Commands {
     static instance?: Builder;
 
+    static getInstance() {
+        if (!Builder.instance) {
+            throw new Error("No builder instance found");
+        }
+        return Builder.instance;
+    }
+
     vars: Record<string, any>;
-    tmpdir: string;
+    _tmpdir?: string;
     memory: MemoryPackBuilder;
 
     constructor(public options: BuildOptions = {}) {
-        this.tmpdir = options.tmpdir || tmpdir();
         this.memory = new MemoryPackBuilder(this);
         this.vars = options.vars || {};
+        Builder.instance = this;
+    }
+
+    tmpdir() {
+        if (!this._tmpdir) {
+            this._tmpdir = mkdtempSync('becomposable-memo-');
+        }
+        return this._tmpdir;
     }
 
     from(location: string, options?: FromOptions) {
@@ -130,12 +151,50 @@ export class Builder implements Commands {
     }
 
     async build(object: Record<string, any>) {
-        const baseName = resolve(this.options.out || 'memory');
-        // resolve all content objects values from the conext object
-        object = await resolveContextObject(object);
-        // write the memory to a file
-        const file = await this.memory.build(baseName, object);
-        this.options.quiet || console.log(`Memory saved to ${file}`);
+        try {
+            const { baseName, publishName } = this._getOutputNames();
+            // resolve all content objects values from the conext object
+            object = await resolveContextObject(object);
+            // write the memory to a file
+            let file = await this.memory.build(baseName, object);
+            if (publishName) {
+                const tarFile = file;
+                try {
+                    file = await this.options.publish!(tarFile, publishName);
+                } finally {
+                    rmSync(tarFile);
+                }
+            }
+            this.options.quiet || console.log(`Memory saved to ${file}`);
+            return file;
+        } finally {
+            if (this._tmpdir) {
+                rmSync(this._tmpdir, { recursive: true });
+            }
+        }
+    }
+
+    private _getOutputNames(): { baseName: string, publishName: string | undefined } {
+        const options = this.options;
+        if (!options.out) {
+            options.out = "memory";
+        }
+        let baseName: string;
+        let publishName: string | undefined;
+        const out = options.out;
+        if (out.startsWith("memory:")) {
+            if (!options.publish) {
+                throw new Error(`The publish option is required for "${out}" output`);
+            }
+            // force gzip when publishing
+            options.gzip = true;
+            // create a temporary path for the output
+            baseName = createTmpBaseName(this.tmpdir());
+            publishName = out.substring("memory:".length);
+        } else {
+            baseName = resolve(out || 'memory');
+        }
+        return { baseName, publishName };
     }
 
 }
@@ -148,4 +207,8 @@ function resolveContextObject(object: Record<string, any>): Promise<Record<strin
             return value;
         }
     });
+}
+
+function createTmpBaseName(tmpdir: string) {
+    return join(tmpdir, `.composable-memory-${Date.now()}`);
 }

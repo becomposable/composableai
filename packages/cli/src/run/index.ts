@@ -1,15 +1,25 @@
-import { ExecutionRun } from "@becomposable/common";
+import { ExecutionRun, MEMORY_INPUT_PREFIX } from "@becomposable/common";
 import { Command } from "commander";
 import { getClient } from "../client.js";
 import { Spinner } from "../utils/console.js";
-import { readFile, readStdin, writeFile } from "../utils/stdio.js";
+import { readFile, readJsonFile, readStdin, writeFile } from "../utils/stdio.js";
 import { ExecutionQueue, ExecutionRequest } from "./executor.js";
 
 
-export default async function runInteraction(program: Command, interactionId: string, options: Record<string, any>) {
+export default async function runInteraction(program: Command, interactionSpec: string, options: Record<string, any>) {
     const queue = new ExecutionQueue();
     const data = await getInputData(options);
     const client = getClient(program);
+
+    if (typeof data === "string" && data.startsWith(MEMORY_INPUT_PREFIX)) {
+        if (options.mmap && options.mmap.startsWith('@')) {
+            options.mmap = readJsonFile(options.mmap.substring(1));
+        } else if (options.mmap) {
+            options.mmap = JSON.parse(options.mmap);
+        }
+    } else {
+        options.mmap = undefined;
+    }
 
     let count = options.count ? parseInt(options.count) : 1;
     if (isNaN(count) || count < 0) {
@@ -50,14 +60,14 @@ export default async function runInteraction(program: Command, interactionId: st
             let runNumber = count > 1 ? 0 : i + 1;
             if (Array.isArray(data)) {
                 for (const d of data) {
-                    const req = new ExecutionRequest(client, interactionId, d, options);
+                    const req = new ExecutionRequest(client, interactionSpec, d, options);
                     if (runNumber > 0) {
                         req.runNumber = runNumber;
                     }
                     queue.add(req);
                 }
             } else {
-                const req = new ExecutionRequest(client, interactionId, data, options);
+                const req = new ExecutionRequest(client, interactionSpec, data, options);
                 if (runNumber > 0) {
                     req.runNumber = runNumber;
                 }
@@ -80,8 +90,9 @@ export default async function runInteraction(program: Command, interactionId: st
         }, onChunk);
         spinner?.done(true);
 
-    } catch (err) {
+    } catch (err: any) {
         spinner?.done(false);
+        console.error("Failed to execute the interaction", err?.message);//, err?.stack);
         throw err;
     }
 
@@ -89,18 +100,28 @@ export default async function runInteraction(program: Command, interactionId: st
 }
 
 async function getInputData(options: Record<string, any>) {
-    let input: any;
-    if (options.data) {
-        input = options.data;
-    } else if (options.input) {
-        if (options.input === true) {
-            input = await readStdin();
-        } else {
-            input = readFile(options.input);
+    try {
+        let input: any;
+        if (options.data) {
+            input = options.data;
+        } else if (options.input) {
+            if (options.input === true) {
+                input = await readStdin();
+            } else {
+                input = readFile(options.input);
+            }
         }
-    }
 
-    return input ? JSON.parse(input) : undefined;
+        if (!input) return undefined;
+        if (typeof input === 'string' && input.startsWith(MEMORY_INPUT_PREFIX)) {
+            return input;
+        } else {
+            return input ? JSON.parse(input) : undefined;
+        }
+    } catch (err: any) {
+        console.error('Invalid JSON data: ', err.message);
+        process.exit(1);
+    }
 }
 
 function writeResult(runs: ExecutionRun[], hasMultiOutputs: boolean, options: Record<string, any>) {

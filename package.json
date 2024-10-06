@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/studio",
-    "version": "0.35.0",
+    "version": "0.37.0",
     "private": true,
     "scripts": {
         "bump": "pnpm exec wst bump minor -x llumiverse",

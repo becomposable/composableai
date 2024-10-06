@@ -58,18 +58,35 @@ export interface ProjectConfiguration {
     default_environment?: string;
     default_model?: string;
 
-    generate_embeddings: boolean;
-    embeddings?: ProjectConfigurationEmbeddings
+    embeddings: {
+        text?: ProjectConfigurationEmbeddings;
+        image?: ProjectConfigurationEmbeddings;
+        properties?: ProjectConfigurationEmbeddings
+    }
 
     datacenter?: string;
     storage_bucket?: string;
 
 }
 
+// export interface ProjectConfigurationEmbeddings {
+//     environment: string;
+//     max_tokens: number;
+//     dimensions: number;
+//     model?: string;
+// }
+
+export enum SupportedEmbeddingTypes {
+    text = "text",
+    image = "image",
+    properties = "properties"
+}
+
 export interface ProjectConfigurationEmbeddings {
     environment: string;
-    max_tokens: number;
+    enabled: boolean;
     dimensions: number;
+    max_tokens?: number;
     model?: string;
 }
 

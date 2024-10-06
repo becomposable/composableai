@@ -1,6 +1,6 @@
-import { md5 } from '@becomposable/blobs';
+import { Blobs, md5 } from '@becomposable/blobs';
 import { ComposableClient } from "@becomposable/client";
-import { DSLActivityExecutionPayload, DSLActivitySpec } from "@becomposable/common";
+import { ContentObject, DSLActivityExecutionPayload, DSLActivitySpec, ProjectConfigurationEmbeddings, SupportedEmbeddingTypes } from "@becomposable/common";
 import { EmbeddingsResult } from "@llumiverse/core";
 import { log } from "@temporalio/activity";
 import * as tf from '@tensorflow/tfjs-node';
@@ -13,6 +13,7 @@ export interface GenerateEmbeddingsParams {
     model?: string;
     environment?: string;
     force?: boolean;
+    type: SupportedEmbeddingTypes;
 }
 
 export interface GenerateEmbeddings extends DSLActivitySpec<GenerateEmbeddingsParams> {
@@ -21,10 +22,15 @@ export interface GenerateEmbeddings extends DSLActivitySpec<GenerateEmbeddingsPa
 
 export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
     const { params, client, objectId, fetchProject } = await setupActivity<GenerateEmbeddingsParams>(payload);
-    const force = params.force;
+    const { force, type } = params;
     const projectData = await fetchProject();
-    const embeddingsConfig = projectData?.configuration.embeddings;
-    const maxTokens = embeddingsConfig?.max_tokens ?? 4000;
+    const config = projectData?.configuration.embeddings[type];
+    if (!projectData) {
+        throw new NoDocumentFound('Project not found', [payload.project_id]);
+    }
+    if (!config) {
+        throw new NoDocumentFound('Embeddings configuration not found', [objectId])
+    }
 
     if (!projectData) {
         throw new NoDocumentFound('Project not found', [payload.project_id]);
@@ -35,52 +41,104 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
         return { id: objectId, status: "skipped", message: "Embeddings generation is disabled (generated_embeddings is false)" }
     }
 
-    log.info(`Object ${objectId} embedding generation starting`, { force, config: embeddingsConfig });
+    log.info(`${type} embedding generation starting for object ${objectId}`, { force, config });
 
-    const env = embeddingsConfig?.environment;
-    if (!env) {
+    if (!config.environment) {
         throw new Error('No environment found in project configuration. Set environment in project configuration to generate embeddings.');
     }
 
-    const document = await client.objects.retrieve(objectId, "+text +parts +embedding +tokens");
+    const document = await client.objects.retrieve(objectId, "+text +parts +embedding +tokens +properties");
 
-    if (!document) {
-        return { id: objectId, status: "failed", message: "object not found" }
+    let res;
+
+
+    switch (type) {
+        case SupportedEmbeddingTypes.text:
+            res = await generateTextEmbeddings({
+                client, 
+                config,
+                document,
+                type
+            })
+            break;
+        case SupportedEmbeddingTypes.properties:
+            res = await generateTextEmbeddings({
+                client, 
+                config,
+                document,
+                type
+            });
+            break;
+        case SupportedEmbeddingTypes.image:
+            res = await generateImageEmbeddings({
+                client,
+                config,
+                document,
+                type
+            });
+            break;
+        default:
+            res = { id: objectId, status: "failed", message: `unsupported embedding type: ${type}` }
     }
 
-    if (!document.text) {
-        return { id: objectId, status: "failed", message: "no text found" }
+    return res;
+
+}
+
+
+interface ExecuteGenerateEmbeddingsParams {
+    document: ContentObject;
+    client: ComposableClient;
+    type: SupportedEmbeddingTypes;
+    config: ProjectConfigurationEmbeddings;
+    force?: boolean;
+}
+
+async function generateTextEmbeddings({ document, client, type, config, force }: ExecuteGenerateEmbeddingsParams) {
+    // if (!force && document.embeddings[type]?.etag === (document.text_etag ?? md5(document.text))) {
+    //     return { id: objectId, status: "skipped", message: "embeddings already generated" }
+    // }
+
+    if (type !== SupportedEmbeddingTypes.text && type !== SupportedEmbeddingTypes.properties) {
+        return { id: document.id, status: "failed", message: `unsupported embedding type: ${type}` }
     }
 
-    if (!force && document.embedding?.etag === (document.text_etag ?? md5(document.text))) {
-        return { id: objectId, status: "skipped", message: "embeddings already generated" }
+    if (type === SupportedEmbeddingTypes.text && !document.text) {
+        return { id: document.id, status: "failed", message: "no text found" }
     }
+    if (type === SupportedEmbeddingTypes.properties && !document.properties) {
+        return { id: document.id, status: "failed", message: "no properties found" }
+    }
+
+    const { environment, model } = config;
 
     // Count tokens if not already done
-    if (!document.tokens?.count) {
-        log.debug('Updating token count for document: ' + objectId);
-        const tokensData = countTokens(document.text);
+    if (!document.tokens?.count && type === SupportedEmbeddingTypes.text) {
+        log.debug('Updating token count for document: ' + document.id);
+        const tokensData = countTokens(document.text!);
         await client.objects.update(document.id, {
             tokens: {
                 ...tokensData,
-                etag: document.text_etag ?? md5(document.text)
+                etag: document.text_etag ?? md5(document.text!)
             }
         });
         document.tokens = {
             ...tokensData,
-            etag: document.text_etag ?? md5(document.text)
+            etag: document.text_etag ?? md5(document.text!)
         };
     }
+
+    const maxTokens = config.max_tokens ?? 8000;
 
     //generate embeddings for the main doc if document isn't too large
     //if too large, we'll just generate embeddings for the parts
     //then we can generate embeddings for the main document by averaging the tensors
-    log.info(`Generating embeddings for document ${objectId} - ${document.tokens?.count} tokens - ${document.text.length} chars`);
-    if (document.tokens?.count && document.tokens.count > maxTokens) {
+    log.info(`Generating ${type} embeddings for document ${document.id}`);
+    if (type === SupportedEmbeddingTypes.text && document.tokens?.count && document.tokens?.count > maxTokens) {
         log.info('Document too large, generating embeddings for parts');
 
         if (!document.parts || document.parts.length === 0) {
-            return { id: objectId, status: "failed", message: "no parts found" }
+            return { id: document.id, status: "failed", message: "no parts found" }
         }
 
         const docParts = await Promise.all(document.parts?.map(async (partId) => client.objects.retrieve(partId, "+text +embedding +tokens")));
@@ -96,11 +154,11 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
             }
 
 
-            if (!force && part.embedding?.etag === (part.text_etag ?? md5(part.text))) {
-                return { id: part.id, number: i, result: part.embedding }
+            if (!force && part.embeddings[type]?.etag === (part.text_etag ?? md5(part.text))) {
+                return { id: part.id, number: i }
             }
 
-            const e = await generateEmbeddingsFromStudio(part.text, env, client).catch(e => {
+            const e = await generateEmbeddingsFromStudio(part.text, environment, client, model).catch(e => {
                 log.error('Error generating embeddings for part', { part: part.id, tokens: part.tokens, text_length: part.text?.length, error: e });
                 return null;
             });
@@ -110,10 +168,11 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
             }
 
             const updated = await client.objects.update(part.id, {
-                embedding: {
-                    content: e.values,
-                    model: e.model,
-                    etag: e.etag
+                embeddings: {
+                    text: {
+                        values: e.values,
+                        model: e.model,
+                    }
                 }
             });
 
@@ -131,43 +190,99 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
         const documentEmbedding = computeAttentionEmbedding(validEmbeddings.map(item => item.result.values));
 
         // Save the document-level embedding
-        await client.objects.update(objectId, {
-            embedding: {
-                content: documentEmbedding,
-                model: "attention",
-                etag: document.text_etag ?? md5(document.text)
+        await client.objects.update(document.id, {
+            embeddings: {
+                [type]: {
+                    values: documentEmbedding,
+                    model: "attention",
+                    etag: document.text_etag
+                }
             }
         });
-        return { id: objectId, status: "completed", part: docParts.map(i => i.id), len: documentEmbedding.length }
+        return { id: document.id, status: "completed", part: docParts.map(i => i.id), len: documentEmbedding.length }
 
     } else {
-        log.info('Generating embeddings for document');
-        const res = await generateEmbeddingsFromStudio(document.text, env, client);
+        log.info(`Generating ${type} embeddings for document`);
+        const res = await generateEmbeddingsFromStudio(document[type], environment, client);
         if (!res || !res.values) {
-            return { id: objectId, status: "failed", message: "no embeddings generated" }
+            return { id: document.id, status: "failed", message: "no embeddings generated" }
         }
 
-        await client.objects.update(objectId, {
-            embedding: {
-                content: res.values,
-                model: res.model,
-                etag: document.text_etag ?? md5(document.text)
+        await client.objects.update(document.id, {
+            embeddings: {
+                [type]: {
+                    content: res.values,
+                    model: res.model,
+                    etag: document.text_etag
+                }
             }
         });
 
-        return { id: objectId, status: "completed", len: res.values.length }
+        return { id: document.id, type, status: "completed", len: res.values.length }
+
     }
 
 }
 
+async function generateImageEmbeddings({ document, client, type, config }: ExecuteGenerateEmbeddingsParams) {
 
+    log.info('Generating embeddings for document');
+    if (!document.content.type?.startsWith('image/') || !document.content.type?.includes('pdf')) {
+        return { id: document.id, type, status: "failed", message: "content is not an image" }
+    }
+    const { environment, model } = config
 
-async function generateEmbeddingsFromStudio(text: string, env: string, client: ComposableClient): Promise<EmbeddingsResult> {
+    const resRnd = await client.store.objects.getRendition(document.id, {
+        format: "image/png",
+        max_hw: 1024,
+        generate_if_missing: true
+    });
+
+    if (resRnd.status === 'generating') {
+        throw new Error("Rendition is generating, will retry later")
+    } else if (resRnd.status === "failed" || !resRnd.rendition) {
+        throw new NoDocumentFound("Rendition retrieval failed", [document.id])
+    }
+
+    if (!resRnd.rendition.content.source) {
+        throw new NoDocumentFound("No source found in rendition", [document.id])
+    }
+
+    const image = await Blobs.getFile(resRnd.rendition.content.source).then(file => file.readAsBuffer()).then(b => b.toString('base64'))
+
+    const res = await client.environments.embeddings(environment, {
+        image,
+        model
+    }).then(res => res).catch(e => {
+        log.error('Error generating embeddings for image', { error: e })
+        throw e;
+    });
+
+    if (!res || !res.values) {
+        return { id: document.id, status: "failed", message: "no embeddings generated" }
+    }
+
+    await client.objects.update(document.id, {
+        embeddings: {
+            image: {
+                values: res.values,
+                model: res.model,
+                etag: document.text_etag
+            }
+        }
+    });
+
+    return { id: document.id, type, status: "completed", len: res.values.length }
+
+}
+
+async function generateEmbeddingsFromStudio(text: string, env: string, client: ComposableClient, model?: string): Promise<EmbeddingsResult> {
 
     log.info(`Generating embeddings for text of ${text.length} chars with environment ${env}`);
 
     return client.environments.embeddings(env, {
-        content: text,
+        text,
+        model
     }).then(res => res).catch(e => {
         log.error('Error generating embeddings for text', { error: e })
         throw e;

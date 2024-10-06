@@ -84,7 +84,9 @@ export interface VectorSearchQuery {
     objectId?: string;
     values?: number[];
     text?: string;
+    image?: string;
     threshold?: number;
+    type: SupportedEmbeddingTypes
 }
 
 export interface ComplexSearchPayload extends Omit<SearchPayload, 'query'> {

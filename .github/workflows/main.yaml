@@ -56,5 +56,10 @@ jobs:
           cache: "pnpm"
       - name: Install pandoc
         uses: pandoc/actions/setup@main
+      - name: Install mutool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mupdf-tools
+        shell: bash
       - run: pnpm install
       - run: npm --prefix packages/converters test

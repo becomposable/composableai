@@ -13,19 +13,8 @@ jobs:
         with:
           node-version: 22
           cache: "pnpm"
-      - run: |
-          pnpm install
-      - run: |
-          pnpm -r build
-      - name: Run tests
-        run: |
-          pnpm \
-            --filter '!./packages/api-fetch-client' \
-            --filter '!./packages/blobs' \
-            --filter '!./packages/converters' \
-            --filter '!./packages/common' \
-            --filter '!./packages/workflow' \
-            -r test
+      - run: pnpm install
+      - run: pnpm -r build
 
   api-fetch-client-test:
     runs-on: ubuntu-latest
@@ -64,6 +53,36 @@ jobs:
       - run: pnpm install
       - run: npm --prefix packages/converters test
 
+  json-test:
+    runs-on: ubuntu-latest
+    needs: composableai-build
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install
+      - run: npm --prefix packages/json test
+
+  memory-test:
+    runs-on: ubuntu-latest
+    needs: composableai-build
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - run: pnpm install
+      - run: npm --prefix packages/memory test
+
   workflow-test:
     runs-on: ubuntu-latest
     needs: composableai-build
@@ -84,4 +103,5 @@ jobs:
           sudo apt-get install -y mupdf-tools
         shell: bash
       - run: pnpm install
+      - run: pnpm build
       - run: npm --prefix packages/workflow test

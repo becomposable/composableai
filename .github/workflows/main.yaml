@@ -63,3 +63,25 @@ jobs:
         shell: bash
       - run: pnpm install
       - run: npm --prefix packages/converters test
+
+  workflow-test:
+    runs-on: ubuntu-latest
+    needs: composableai-build
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - name: Install pandoc
+        uses: pandoc/actions/setup@main
+      - name: Install mutool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mupdf-tools
+        shell: bash
+      - run: pnpm install
+      - run: npm --prefix packages/workflow test

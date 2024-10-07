@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/workflow",
-    "version": "0.35.0",
+    "version": "0.37.0",
     "type": "module",
     "description": "Composable prompts workflow dsl",
     "main": "./lib/esm/index.js",

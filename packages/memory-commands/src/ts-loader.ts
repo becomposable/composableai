@@ -63,7 +63,7 @@ function tryDeleteFile(file: string) {
     }
 }
 
-export function importTsFile(file: string): Promise<any> {
+export function importTsFile(file: string, outdir: string = '.'): Promise<any> {
     if (!file.endsWith('.ts')) {
         throw new Error("Not a type script file: " + file);
     }
@@ -85,7 +85,7 @@ export function importTsFile(file: string): Promise<any> {
         process.exit(1);
     }
     const fname = basename(file).slice(0, -3);
-    const emittedFile = resolve(`__${fname}.mjs`);
+    const emittedFile = resolve(outdir, `__${Date.now()}-${fname}.mjs`);
     transpileFile(file, emittedFile, baseOptions);
 
     return import(emittedFile).finally(() => tryDeleteFile(emittedFile));

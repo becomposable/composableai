@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/client",
-    "version": "0.35.0",
+    "version": "0.37.0",
     "type": "module",
     "types": "./lib/types/index.d.ts",
     "files": [

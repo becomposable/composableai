@@ -1,6 +1,8 @@
 import { BuildOptions } from '@becomposable/memory';
+import { build } from '@becomposable/memory-commands';
 import { Command } from 'commander';
-import MemoApp from './MemoApp.js';
+import { dirname } from 'path';
+import url from 'url';
 
 export function setupMemoCommand(command: Command, publish?: (file: string, name: string) => Promise<string>) {
     return command.allowUnknownOption()
@@ -19,7 +21,10 @@ function memoAction(command: Command, options: Record<string, any>) {
     if (options.indent) {
         options.indent = parseInt(options.indent);
     }
-    return MemoApp.run(script!, { ...options, vars } as BuildOptions);
+    if (!options.transpileDir) {
+        options.transpileDir = dirname(url.fileURLToPath(import.meta.url));
+    }
+    return build(script!, { ...options, vars } as BuildOptions);
 }
 
 /**

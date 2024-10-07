@@ -1,36 +1,45 @@
 import type { Commands } from "@becomposable/memory";
-const MemoApp = (globalThis as any).__becomposable_memo_builder_app__;
+import { build, getBuilder } from "./build.js";
 
-if (!MemoApp.builder) {
-    throw new Error("No builder app was instantiated!");
+
+function vars() {
+    return getBuilder().vars;
+}
+function tmpdir() {
+    return getBuilder().tmpdir();
+}
+function from(...args: Parameters<Commands['from']>): ReturnType<Commands['from']> {
+    return getBuilder().from(...args);
 }
 
-const builder = MemoApp.builder as Commands & { tmpdir: string, vars: Record<string, any>, env: Record<string, any> };
+function exec(...args: Parameters<Commands['exec']>): ReturnType<Commands['exec']> {
+    return getBuilder().exec(...args);
+}
 
-const env = process.env;
-const tmpdir = builder.tmpdir;
-const content = builder.content.bind(builder);
-const json = builder.json.bind(builder);
-const pdf = builder.pdf.bind(builder);
-const docx = builder.docx.bind(builder);
-const media = builder.media.bind(builder);
-const from = builder.from.bind(builder);
-const exec = builder.exec.bind(builder);
-const copy = builder.copy.bind(builder);
-const copyText = builder.copyText.bind(builder);
-const vars = builder.vars;
+function copy(...args: Parameters<Commands['copy']>): ReturnType<Commands['copy']> {
+    return getBuilder().copy(...args);
+}
+
+function copyText(...args: Parameters<Commands['copyText']>): ReturnType<Commands['copyText']> {
+    return getBuilder().copyText(...args);
+}
+
+function content(...args: Parameters<Commands['content']>): ReturnType<Commands['content']> {
+    return getBuilder().content(...args);
+}
+function json(...args: Parameters<Commands['json']>): ReturnType<Commands['json']> {
+    return getBuilder().json(...args);
+}
+function pdf(...args: Parameters<Commands['pdf']>): ReturnType<Commands['pdf']> {
+    return getBuilder().pdf(...args);
+}
+function docx(...args: Parameters<Commands['docx']>): ReturnType<Commands['docx']> {
+    return getBuilder().docx(...args);
+}
+function media(...args: Parameters<Commands['media']>): ReturnType<Commands['media']> {
+    return getBuilder().media(...args);
+}
 
 export {
-    vars,
-    env,
-    tmpdir,
-    content,
-    json,
-    pdf,
-    docx,
-    media,
-    from,
-    exec,
-    copy,
-    copyText
-}
+    build, content, copy, copyText, docx, exec, from, getBuilder, json, media, pdf, tmpdir, vars
+};

@@ -12,6 +12,7 @@
     "scripts": {
         "eslint": "eslint './src/**/*.{jsx,js,tsx,ts}'",
         "build": "pnpm exec tsmod build",
+        "test": "vitest run",
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
     },
     "devDependencies": {

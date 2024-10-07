@@ -1,3 +1,4 @@
+import { ComposableClient } from '@becomposable/client';
 import { ContentEventName, DSLActivityExecutionPayload, DSLActivitySpec, DSLWorkflowExecutionPayload, FindPayload } from '@becomposable/common';
 import { TestWorkflowEnvironment } from '@temporalio/testing';
 import { Worker } from '@temporalio/worker';
@@ -5,7 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { dslWorkflow } from './dsl-workflow.js';
 import { setupActivity } from "./setup/ActivityContext.js";
 import { DataProvider } from './setup/fetch/DataProvider.js';
-import { FetchContext, registerFetchProviderFactory } from './setup/fetch/index.js';
+import { registerFetchProviderFactory } from './setup/fetch/index.js';
 
 
 class DocumentTestProvider extends DataProvider {
@@ -26,7 +27,7 @@ class DocumentTestProvider extends DataProvider {
         }
     }
 
-    static factory(_context: FetchContext) {
+    static factory(_context: ComposableClient) {
         return new DocumentTestProvider();
     }
 }
@@ -99,14 +100,14 @@ describe('DSL Workflow', () => {
             event: ContentEventName.create,
             objectIds: ['123'],
             vars: {},
-            accountId: '123',
-            projectId: '123',
+            account_id: '123',
+            project_id: '123',
             timestamp: Date.now(),
-            wfRuleName: 'test',
-            authToken: 'test',
+            wf_rule_name: 'test',
+            auth_token: 'test',
             config: {
-                studioUrl: process.env.CP_STUDIO_URL || "http://localhost:8081",
-                storeUrl: process.env.CP_STODRE_URL || "http://localhost:8082",
+                studio_url: process.env.CP_STUDIO_URL || "http://localhost:8081",
+                store_url: process.env.CP_STODRE_URL || "http://localhost:8082",
             },
             workflow: {
                 activities,

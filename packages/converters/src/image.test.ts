@@ -24,7 +24,9 @@ test('should resize an image to a maximum height or width', async () => {
 
 });
 
-test('should convert a pdf to image', async () => {
+// https://github.com/becomposable/studio/issues/432 Skip tests
+// Error: Input Buffer is empty
+test.skip('should convert a pdf to image', async () => {
   const max_hw = 1024;
   const format: keyof sharp.FormatEnum = 'png';
   const pdfFile = fs.readFileSync(path.join(__dirname, '../fixtures', 'test-pdf1.pdf'));

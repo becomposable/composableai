@@ -1,4 +1,4 @@
-name: composableai
+name: composable
 on:
   - push
 jobs:
@@ -29,6 +29,7 @@ jobs:
 
   api-fetch-client-test:
     runs-on: ubuntu-latest
+    needs: composableai-build
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,3 +41,20 @@ jobs:
           cache: "pnpm"
       - run: pnpm install
       - run: npm --prefix packages/api-fetch-client test
+
+  converters-test:
+    runs-on: ubuntu-latest
+    needs: composableai-build
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+      - name: Install pandoc
+        uses: pandoc/actions/setup@main
+      - run: pnpm install
+      - run: npm --prefix packages/converters test

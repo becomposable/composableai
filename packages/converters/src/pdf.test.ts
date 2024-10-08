@@ -1,12 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import { beforeAll, expect, test } from 'vitest';
+import { expect, test } from 'vitest';
 import { trasformPdfToMarkdown } from './pdf';
 
 
 
 test('Converts a PDF to markdown', async () => {
-  const pdfPath = path.resolve(__dirname, '../../fixtures', 'test-pdf1.pdf');
+  const pdfPath = path.resolve(__dirname, '../fixtures', 'test-pdf1.pdf');
   const pdfBuffer = fs.readFileSync(pdfPath);
   const result = await trasformPdfToMarkdown(pdfBuffer);
 
@@ -16,7 +16,7 @@ test('Converts a PDF to markdown', async () => {
 });
 
 test('Converts another PDF to markdown', async () => {
-  const pdfPath = path.resolve(__dirname, '../../fixtures', 'test-pdf2.pdf');
+  const pdfPath = path.resolve(__dirname, '../fixtures', 'test-pdf2.pdf');
   const pdfBuffer = fs.readFileSync(pdfPath);
   const result = await trasformPdfToMarkdown(pdfBuffer);
 

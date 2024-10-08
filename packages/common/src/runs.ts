@@ -89,6 +89,8 @@ export interface RunSearchPayload {
      */
     parent?: string[] | false;
 
+    parameter?: string;
+
     /**
      * An ISO date string to use as an anchor start date for the search.
      */

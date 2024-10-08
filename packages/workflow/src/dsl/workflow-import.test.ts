@@ -4,13 +4,7 @@ import { Worker } from '@temporalio/worker';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { dslWorkflow } from './dsl-workflow.js';
 import { setupActivity } from "./setup/ActivityContext.js";
-import { configure } from "@dglabs/logger";
 
-configure({
-    name: "test",
-    type: "test",
-    version: "1.0.0"
-});
 
 async function testImportedVars(payload: DSLActivityExecutionPayload) {
     const { params } = await setupActivity(payload);

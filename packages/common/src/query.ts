@@ -1,4 +1,5 @@
 import { ExecutionRunStatus } from "./interaction.js";
+import { SupportedEmbeddingTypes } from "./project.js";
 
 export interface RunListingQueryOptions {
     project?: string;
@@ -28,6 +29,7 @@ export interface ObjectSearchQuery extends SimpleSearchQuery {
     location?: string;
     parent?: string;
     similarTo?: string;
+    embeddingType?: SupportedEmbeddingTypes;
     type?: string;
 }
 

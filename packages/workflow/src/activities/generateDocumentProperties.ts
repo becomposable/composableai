@@ -48,7 +48,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
 
     const getImageRef = () => {
         if (doc.content?.type?.startsWith("image/")) {
-            "store:" + doc.id;
+            return "store:" + doc.id;
         }
 
         if (params.use_vision && doc.content?.type?.startsWith("application/pdf")) {
@@ -84,7 +84,8 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
         properties: {
             ...infoRes.result,
             etag: doc.text_etag
-        }
+        },
+        text: infoRes.result.description ?? undefined
     });
 
 

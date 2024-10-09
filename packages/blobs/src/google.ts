@@ -88,7 +88,7 @@ export class GoogleBlob extends AbstractBlob {
             //action: 'resumable',
             action: 'write',
             expires: opts.ttl || Date.now() + 15 * 60 * 1000, // 15 minutes
-            contentType: opts.mimeType || 'application/octet-stream',
+            //contentType: opts.mimeType || 'application/octet-stream',
         });
         return url;
     }

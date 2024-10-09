@@ -5,3 +5,4 @@ export type { ComputeRunFacetsResponse, FilterOption } from './RunsApi.js';
 export * from './client.js';
 export * from './InteractionBase.js';
 export * from "./store/index.js";
+export * from "./StreamSource.js";

@@ -9,6 +9,8 @@ export interface FilterOption {
 }
 
 export interface ComputeRunFacetsResponse {
+    environments?: { _id: string, count: number }[];
+    interactions?: { _id: string, count: number }[];
     models?: { _id: string, count: number }[];
     tags?: { _id: string, count: number }[];
     status?: { _id: string, count: number }[];

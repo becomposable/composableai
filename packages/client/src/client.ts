@@ -1,5 +1,5 @@
-import { AuthTokenResponse } from "@becomposable/common";
 import { AbstractFetchClient } from "@becomposable/api-fetch-client";
+import { AuthTokenResponse } from "@becomposable/common";
 import AccountApi from "./AccountApi.js";
 import AccountsApi from "./AccountsApi.js";
 import AnalyticsApi from "./AnalyticsApi.js";
@@ -8,6 +8,7 @@ import CommandsApi from "./CommandsApi.js";
 import EnvironmentsApi from "./EnvironmentsApi.js";
 import { IamApi } from "./IamApi.js";
 import InteractionsApi from "./InteractionsApi.js";
+import { MemoryApi } from "./MemoryApi.js";
 import ProjectsApi from "./ProjectsApi.js";
 import PromptsApi from "./PromptsApi.js";
 import { RefsApi } from "./RefsApi.js";
@@ -167,6 +168,7 @@ export class ComposableClient extends AbstractFetchClient<ComposableClient> {
     iam = new IamApi(this);
     refs = new RefsApi(this);
     commands = new CommandsApi(this);
+    memory = new MemoryApi(this);
 
 }
 

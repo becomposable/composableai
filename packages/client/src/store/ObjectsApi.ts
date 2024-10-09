@@ -1,9 +1,6 @@
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
 import { ComplexSearchPayload, ComputeObjectFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, ExportPropertiesPayload, ExportPropertiesResponse, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, ObjectSearchPayload, ObjectSearchQuery } from "@becomposable/common";
-
-export class StreamSource {
-    constructor(public stream: ReadableStream, public name: string, public type?: string, public id?: string) { }
-}
+import { StreamSource } from "../StreamSource.js";
 
 export interface UploadContentObjectPayload extends Omit<CreateContentObjectPayload, 'content'> {
     content?: StreamSource | File | {
@@ -135,7 +132,7 @@ export class ObjectsApi extends ApiTopic {
             //@ts-ignore: duplex is not in the types. See https://github.com/node-fetch/node-fetch/issues/1769
             duplex: isStream ? "half" : undefined,
             headers: {
-                'Content-Type': 'application/octet-stream'
+                'Content-Type': mime_type || 'application/octet-stream'
             }
         }).then((res: Response) => {
             if (res.ok) {

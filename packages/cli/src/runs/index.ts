@@ -10,21 +10,19 @@ export async function runHistory(program: Command, interactionId: string | undef
     if (limit <= 0) limit === 100;
     const offset = page * limit;
 
-    const anchor_date = options.before || options.after || undefined;
-    const anchor_date_direction = options.before ? 'before' : (options.after ? 'after' : undefined);
-
     const response = await client.runs.search({
         limit, offset,
-        filters: {
+        query: {
             interaction: interactionId || undefined,
             tags: options.tags ? options.tags.split(/\s*,\s*/) : undefined,
             status: options.status || undefined,
             environment: options.env || undefined,
             model: options.model || undefined,
+            query: options.query as string || undefined,
+            start: options.start as string || undefined,
+            end: options.end as string || undefined,
         },
-        anchor_date,
-        anchor_date_direction,
-        query: options.query as string || undefined,
+
     });
 
     const runs = response.results || [];

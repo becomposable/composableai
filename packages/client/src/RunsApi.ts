@@ -1,7 +1,6 @@
-import { ExecutionRun, ExecutionRunRef, FindPayload, RunCreatePayload, RunListingFilters, RunListingQueryOptions, RunSearchPayload, RunSearchResponse } from "@becomposable/common";
+import { ComputeRunFacetPayload, ExecutionRun, ExecutionRunRef, FindPayload, RunCreatePayload, RunListingFilters, RunListingQueryOptions, RunSearchPayload, RunSearchResponse } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
 import { ComposableClient } from "./client.js";
-
 
 export interface FilterOption {
     id: string,
@@ -9,6 +8,12 @@ export interface FilterOption {
     count: number
 }
 
+export interface ComputeRunFacetsResponse {
+    models?: { _id: string, count: number }[];
+    tags?: { _id: string, count: number }[];
+    status?: { _id: string, count: number }[];
+    total?: { count: number }[];
+}
 
 export class RunsApi extends ApiTopic {
 
@@ -48,7 +53,6 @@ export class RunsApi extends ApiTopic {
         return this.get('/' + id);
     }
 
-
     /**
      * Get filter options for a field
      * return FilterOption[]
@@ -74,6 +78,17 @@ export class RunsApi extends ApiTopic {
         }
         return this.post("/", {
             payload
+        });
+    }
+
+    /**
+     * Get the list of all runs facets
+     * @param payload query payload to filter facet search
+     * @returns ComputeRunFacetsResponse[]
+     **/
+    computeFacets(query: ComputeRunFacetPayload): Promise<ComputeRunFacetsResponse> {
+        return this.post("/facets", {
+            payload: query
         });
     }
 

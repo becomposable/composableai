@@ -1,10 +1,9 @@
 import { ComposableClient } from "@becomposable/client";
-import { DSLActivityExecutionPayload, DSLActivitySpec, ExecutionRun, ExecutionRunStatus, InteractionExecutionConfiguration } from "@becomposable/common";
+import { DSLActivityExecutionPayload, DSLActivitySpec, ExecutionRun, ExecutionRunStatus, InteractionExecutionConfiguration, RunSearchPayload } from "@becomposable/common";
 import { activityInfo, log } from "@temporalio/activity";
 import { projectResult } from "../dsl/projections.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { TruncateSpec, truncByMaxTokens } from "../utils/tokens.js";
-
 
 //Example:
 //@ts-ignore
@@ -141,10 +140,11 @@ export async function executeInteractionFromActivity(client: ComposableClient, i
         //retrieve last failed run if any
         if (info.attempt > 1) {
             log.info("Retrying, searching for previous run", { tags: ["tmpRunId:" + runId] });
-            const previousRun = await client.runs.search({
-                filters: { tags: ["tmpRunId:" + info.workflowExecution.runId] },
+            const payload: RunSearchPayload = {
+                query: { tags: ["tmpRunId:" + info.workflowExecution.runId] },
                 limit: 1,
-            }).then((res) => {
+            };
+            const previousRun = await client.runs.search(payload).then((res) => {
                 log.info("Search results", { results: res.results });
                 return res.results ? res.results[0] ?? undefined : undefined
             });
@@ -192,7 +192,7 @@ export async function executeInteractionFromActivity(client: ComposableClient, i
     }
 
     if (res.error || res.status === ExecutionRunStatus.failed) {
-        log.error(`Error executing interaction ${interactionName}`, {error: res.error });
+        log.error(`Error executing interaction ${interactionName}`, { error: res.error });
         throw new Error(`Interaction Execution failed ${interactionName}: ${res.error}`);
     }
 

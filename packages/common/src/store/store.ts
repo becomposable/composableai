@@ -1,7 +1,8 @@
+import { SearchPayload } from "../payload.js";
+import { SupportedEmbeddingTypes } from "../project.js";
+import { ObjectSearchQuery } from "../query.js";
 import { BaseObject } from "./common.js";
 import { RenditionProperties } from "./index.js";
-import { ObjectSearchQuery } from "../query.js";
-import { SearchPayload } from "../payload.js";
 
 export enum ContentObjectStatus {
     created = 'created',
@@ -9,6 +10,13 @@ export enum ContentObjectStatus {
     completed = 'completed',
     failed = 'failed',
     archived = 'archived',
+}
+
+
+export interface Embedding {
+    model: string; //the model used to generate this embedding
+    values: number[];
+    etag?: string; // the etag of the text used for the embedding
 }
 
 export interface ContentObject<T = any> extends ContentObjectItem<T> {
@@ -19,11 +27,7 @@ export interface ContentObject<T = any> extends ContentObjectItem<T> {
         encoding: string; // the encoding used to calculate the tokens
         etag: string; //the etag of the text used for the token count
     };
-    embedding?: {
-        model?: string;
-        content: number[];
-        etag: string; // the etag of the text used for the embedding
-    },
+    embeddings: Partial<Record<SupportedEmbeddingTypes, Embedding>>;
     parts?: string[]; // the list of objectId of the parts of the object
     parts_etag?: string; // the etag of the text used for the parts list
 }
@@ -80,7 +84,9 @@ export interface VectorSearchQuery {
     objectId?: string;
     values?: number[];
     text?: string;
+    image?: string;
     threshold?: number;
+    type: SupportedEmbeddingTypes
 }
 
 export interface ComplexSearchPayload extends Omit<SearchPayload, 'query'> {

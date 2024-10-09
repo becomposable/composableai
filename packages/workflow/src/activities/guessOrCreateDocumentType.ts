@@ -72,7 +72,7 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
         if (!object.content?.type?.startsWith("image/")) {
             return undefined;
         }
-        const res = await client.objects.getRendition(objectId, { max_hw: 1024, format: "image/jpeg", generate_if_missing: true });
+        const res = await client.objects.getRendition(objectId, { max_hw: 1024, format: "image/png", generate_if_missing: true });
         if (!res.rendition && res.status === "generating") {
             //throw to try again
             throw new Error(`Rendition for object ${objectId} is in progress`);

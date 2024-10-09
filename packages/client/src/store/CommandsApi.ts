@@ -1,5 +1,5 @@
-import { EmbeddingsStatusResponse, GenericCommandResponse, ProjectConfigurationEmbeddings } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
+import { EmbeddingsStatusResponse, GenericCommandResponse, ProjectConfigurationEmbeddings, SupportedEmbeddingTypes } from "@becomposable/common";
 
 
 export class CommandsApi extends ApiTopic {
@@ -18,25 +18,25 @@ export class EmbeddingsApi extends ApiTopic {
         super(parent, "/embeddings");
     }
 
-    async status(): Promise<EmbeddingsStatusResponse> {
-        return this.get("/status");
+    async status(type: SupportedEmbeddingTypes): Promise<EmbeddingsStatusResponse> {
+        return this.get(type + "/status");
     }
 
-    async activate(config: Partial<ProjectConfigurationEmbeddings>): Promise<GenericCommandResponse> {
+    async activate(type: SupportedEmbeddingTypes, config: Partial<ProjectConfigurationEmbeddings>): Promise<GenericCommandResponse> {
 
         if (!config.environment) {
             throw new Error("Invalid configuration: select environment");
         }
 
-        return this.post("/enable", { payload: config });
+        return this.post(type + "/enable", { payload: config });
     }
 
-    async disable(): Promise<GenericCommandResponse> {
-        return this.post("/disable");
+    async disable(type: SupportedEmbeddingTypes): Promise<GenericCommandResponse> {
+        return this.post(type + "/disable");
     }
 
-    async recalculate(): Promise<GenericCommandResponse> {
-        return this.post("/recalculate");
+    async recalculate(type: SupportedEmbeddingTypes): Promise<GenericCommandResponse> {
+        return this.post(type + "/recalculate");
     }
 
 }

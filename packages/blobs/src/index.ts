@@ -2,6 +2,15 @@ import { GoogleDriveStorage } from "./google-drive.js";
 import { GoogleStorage } from "./google.js";
 import { Blob, BlobStorage, Bucket, CreateBucketOptions } from "./storage.js";
 
+export const defaultCreateBucketOpts: CreateBucketOptions = {
+    cors: {
+        maxAgeSeconds: 3600,
+        method: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE'],
+        origin: ['*'],
+        responseHeader: ['*']
+    },
+}
+
 export class BlobUri {
     scheme: string;
     bucket: string;
@@ -48,7 +57,7 @@ async function getBucket(uri: string | BlobUri): Promise<Bucket> {
     return storage.bucket(bucket);
 }
 
-async function getOrCreateBucket(uri: string | BlobUri, opts?: CreateBucketOptions): Promise<Bucket> {
+async function getOrCreateBucket(uri: string | BlobUri, opts: CreateBucketOptions = defaultCreateBucketOpts): Promise<Bucket> {
     const bucket = await getBucket(uri);
     if (!(await bucket.exists())) {
         await bucket.create(opts);

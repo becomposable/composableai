@@ -140,7 +140,7 @@ export interface InteractionForkPayload {
     targetProject?: string;
 }
 
-export const MEMORY_INPUT_PREFIX = "memory:";
+
 export interface InteractionExecutionPayload {
     /**
      * If a `memory:uri` reference is given then the data (i.e. interaction params)

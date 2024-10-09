@@ -397,6 +397,9 @@ importers:
       '@becomposable/common':
         specifier: workspace:*
         version: link:../common
+      '@becomposable/memory':
+        specifier: ^0.37.0
+        version: 0.37.0
       '@llumiverse/core':
         specifier: workspace:*
         version: link:../../llumiverse/core
@@ -465,11 +468,29 @@ packages:
     resolution: {integrity: sha512-E/jKbPoca1tfUPj3iSbitDZTGnq6FUFjkH6L8U2oDwSuwK1WhnnVtCG7oFOTg/DDnyoXbQYUiUiGOibHqaGVnw==}
     engines: {node: '>= 16'}
 
+  '@becomposable/api-fetch-client@0.37.0':
+    resolution: {integrity: sha512-Lj+kX3HfxEPMzd6BIHAO+8A+gDqr8iHweoRDT9O449XYMmP7iPtiqySKDOrTEXZP1dH7zoGr6qrDZFYyt7pTMw==}
+
   '@becomposable/client@0.30.1':
     resolution: {integrity: sha512-cd8Q3J/VfFB4fpbgQO1kQB66MTkdZtxKUBREv6KG6PAvhteOKMnmwoamb8yvdQD6dN3goeqLPvfLfL9UVI1iAA==}
 
+  '@becomposable/client@0.37.0':
+    resolution: {integrity: sha512-LOi4zGIEcgSQ/jVfCXqHD+/qsVVvWJ3PaMBqSdPuI8DEzsi+FVujhjcVh5idwW5AzNU9DMaZLhmMDQOhL/is5w==}
+
   '@becomposable/common@0.30.1':
     resolution: {integrity: sha512-KResq2bDyccEpZIeMIGKzsYEt2sjbViEnlJVbOuwRW3+LdHeSRax/xyzANFiIk9onOPjryS3asie/U0qzOfuNw==}
+
+  '@becomposable/common@0.37.0':
+    resolution: {integrity: sha512-Hcsgt7x8gyE90cLISmo5aP6EMHNS6Wz5/CXECWCh1FrqDpmBlqpFlK4Ptc5Uln33bbGoNGixDOJTusRHXhnI4A==}
+
+  '@becomposable/converters@0.37.0':
+    resolution: {integrity: sha512-MkT+KKGM++XgzFaqybe+PC/+LcffLimpMb2jYAI9NUBYjrUJf0CaZgfXXOFiviRScBciMinqS7xaq8mv9lTH+Q==}
+
+  '@becomposable/json@0.37.0':
+    resolution: {integrity: sha512-LEzCiaYc9012MW/RhLa+drOG3NbPRmj/yi7fzyviY/Irt4RQiNgkdO420oZhOuLp1XjRpZtiWvaco3D2Q+VLtw==}
+
+  '@becomposable/memory@0.37.0':
+    resolution: {integrity: sha512-Lh828mBF03LzS0lhGMTs0L3w6VwV90X6pKdLCf98r0KRqmanQM8fdQC4aM++5wTNxNUtAXn1mXS8s/pjbTHlRw==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -945,6 +966,9 @@ packages:
 
   '@llumiverse/core@0.13.0':
     resolution: {integrity: sha512-Y30dvSQt4SaMdSBbOUJ8aAafc9LJAF0t9TpFFGDRpK40IlG2OuxR72dqaxE7ce4L4SGSlelerSp0luWOQr9RWg==}
+
+  '@llumiverse/core@0.15.0':
+    resolution: {integrity: sha512-MDTHapYicYP+p0vpcc98njXey2F+hWtGc+gnWzS4ufU+vxYkL4DfBpeOF9O00Bg/hTxzGdxv0BYRcY88hqpk6g==}
 
   '@mapbox/node-pre-gyp@1.0.11':
     resolution: {integrity: sha512-Yhlar6v9WQgUp/He7BdgzOz8lqMQ8sU+jkCq7Wx8Myc5YFJLbEe7lgui/V7G1qB1DJykHSGwreceSaD60Y0PUQ==}
@@ -3406,6 +3430,10 @@ snapshots:
       call-me-maybe: 1.0.2
       js-yaml: 4.1.0
 
+  '@becomposable/api-fetch-client@0.37.0':
+    dependencies:
+      eventsource-parser: 1.1.2
+
   '@becomposable/client@0.30.1':
     dependencies:
       '@becomposable/common': 0.30.1
@@ -3413,11 +3441,51 @@ snapshots:
       api-fetch-client: 0.12.0
       eventsource: 2.0.2
 
+  '@becomposable/client@0.37.0':
+    dependencies:
+      '@becomposable/api-fetch-client': 0.37.0
+      '@becomposable/common': 0.37.0
+      '@llumiverse/core': 0.15.0
+      eventsource: 2.0.2
+
   '@becomposable/common@0.30.1':
     dependencies:
       '@llumiverse/core': 0.13.0
       ajv: 8.17.1
       json-schema: 0.4.0
+
+  '@becomposable/common@0.37.0':
+    dependencies:
+      '@llumiverse/core': 0.15.0
+      ajv: 8.17.1
+      json-schema: 0.4.0
+
+  '@becomposable/converters@0.37.0':
+    dependencies:
+      '@opendocsg/pdf2md': 0.1.31
+      '@pdftron/pdfnet-node': 10.11.0
+      mupdf: 0.3.0
+      pdf2pic: 3.1.1
+      sharp: 0.33.5
+      tmp: 0.2.3
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+
+  '@becomposable/json@0.37.0': {}
+
+  '@becomposable/memory@0.37.0':
+    dependencies:
+      '@becomposable/client': 0.37.0
+      '@becomposable/converters': 0.37.0
+      '@becomposable/json': 0.37.0
+      glob: 11.0.0
+      micromatch: 4.0.8
+      tar-stream: 3.1.7
+      typescript: 5.5.4
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -3766,6 +3834,12 @@ snapshots:
   '@llumiverse/core@0.13.0':
     dependencies:
       json-schema: 0.4.0
+
+  '@llumiverse/core@0.15.0':
+    dependencies:
+      '@types/node': 22.5.1
+      ajv: 8.17.1
+      ajv-formats: 3.0.1(ajv@8.17.1)
 
   '@mapbox/node-pre-gyp@1.0.11':
     dependencies:

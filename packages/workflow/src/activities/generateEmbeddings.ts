@@ -23,6 +23,7 @@ export interface GenerateEmbeddings extends DSLActivitySpec<GenerateEmbeddingsPa
 export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
     const { params, client, objectId, fetchProject } = await setupActivity<GenerateEmbeddingsParams>(payload);
     const { force, type } = params;
+
     const projectData = await fetchProject();
     const config = projectData?.configuration.embeddings[type];
     if (!projectData) {
@@ -37,7 +38,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
     }
 
     if (!projectData?.configuration.embeddings[type]?.enabled) {
-        log.info(`Embeddings generation disabled for type ${type} on project: ${projectData.name} (${projectData.namespace})`);
+        log.info(`Embeddings generation disabled for type ${type} on project: ${projectData.name} (${projectData.namespace})`, { config });
         return { id: objectId, status: "skipped", message: `Embeddings generation disabled for type ${type}` }
     }
 
@@ -48,6 +49,14 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
     }
 
     const document = await client.objects.retrieve(objectId, "+text +parts +embedding +tokens +properties");
+
+    if (!document) {
+        throw new NoDocumentFound('Document not found', [objectId]);
+    }
+
+    if (!document.content) {
+        throw new NoDocumentFound('Document content not found', [objectId]);
+    }
 
     let res;
 
@@ -66,7 +75,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
                 client, 
                 config,
                 document,
-                type
+                type,
             });
             break;
         case SupportedEmbeddingTypes.image:
@@ -91,6 +100,7 @@ interface ExecuteGenerateEmbeddingsParams {
     client: ComposableClient;
     type: SupportedEmbeddingTypes;
     config: ProjectConfigurationEmbeddings;
+    property?: string;
     force?: boolean;
 }
 
@@ -190,33 +200,37 @@ async function generateTextEmbeddings({ document, client, type, config, force }:
         const documentEmbedding = computeAttentionEmbedding(validEmbeddings.map(item => item.result.values));
 
         // Save the document-level embedding
-        await client.objects.update(document.id, {
+        await client.objects.retrieve(document.id).then(d => client.objects.update(d.id, {
             embeddings: {
+                ...d.embeddings,
                 [type]: {
                     values: documentEmbedding,
                     model: "attention",
                     etag: document.text_etag
                 }
             }
-        });
+        }));
         return { id: document.id, status: "completed", part: docParts.map(i => i.id), len: documentEmbedding.length }
 
     } else {
         log.info(`Generating ${type} embeddings for document`);
-        const res = await generateEmbeddingsFromStudio(document[type], environment, client);
+
+        const res = await generateEmbeddingsFromStudio(JSON.stringify(document[type]), environment, client);
         if (!res || !res.values) {
             return { id: document.id, status: "failed", message: "no embeddings generated" }
         }
 
-        await client.objects.update(document.id, {
+        log.info(`${type} embeddings generated for document ${document.id}`, { len: res.values.length });
+        await client.objects.retrieve(document.id).then(d => client.objects.update(d.id, {
             embeddings: {
+                ...d.embeddings,
                 [type]: {
-                    content: res.values,
+                    values: res.values,
                     model: res.model,
                     etag: document.text_etag
                 }
             }
-        });
+        }));
 
         return { id: document.id, type, status: "completed", len: res.values.length }
 
@@ -226,8 +240,8 @@ async function generateTextEmbeddings({ document, client, type, config, force }:
 
 async function generateImageEmbeddings({ document, client, type, config }: ExecuteGenerateEmbeddingsParams) {
 
-    log.info('Generating embeddings for document');
-    if (!document.content.type?.startsWith('image/') || !document.content.type?.includes('pdf')) {
+    log.info('Generating image embeddings for document ' + document.id, { content: document.content});
+    if (!document.content?.type?.startsWith('image/') && !document.content?.type?.includes('pdf')) {
         return { id: document.id, type, status: "failed", message: "content is not an image" }
     }
     const { environment, model } = config
@@ -262,15 +276,17 @@ async function generateImageEmbeddings({ document, client, type, config }: Execu
         return { id: document.id, status: "failed", message: "no embeddings generated" }
     }
 
-    await client.objects.update(document.id, {
+    //TODO: replace by a an atomic REST call
+    await client.objects.retrieve(document.id).then(d => client.objects.update(d.id, {
         embeddings: {
+            ...d.embeddings,
             image: {
-                values: res.values,
+                values: res.values, 
                 model: res.model,
                 etag: document.text_etag
             }
         }
-    });
+    }));
 
     return { id: document.id, type, status: "completed", len: res.values.length }
 

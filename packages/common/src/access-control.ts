@@ -36,6 +36,7 @@ export enum Permission {
     workflow_run = "workflow:run",
 
     access_protected = "access_protected",
+
 }
 
 export enum AccessControlledResource {

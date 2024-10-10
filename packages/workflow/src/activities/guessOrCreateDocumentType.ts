@@ -40,12 +40,12 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
     const object = await client.objects.retrieve(objectId, "+text");
     if (object.type) {
         log.warn(`Object ${objectId} has already a type. Skipping type creation.`);
-        return null;
+        return { status: "skipped", message: "Object already has a type: " + object.type.name };
     }
 
-    if (!object || (!object.text && !object.content?.type?.startsWith("image/"))) {
+    if (!object || (!object.text && !object.content?.type?.startsWith("image/") && !object.content?.type?.startsWith("application/pdf"))) {
         log.info(`Object ${objectId} not found or text is empty and not an image`, { object });
-        return null;
+        return { status: "failed", error: "no-text" };
     }
 
     if (object.type) {
@@ -69,6 +69,9 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
     const content = object.text ? truncByMaxTokens(object.text, params.truncate || 4000) : undefined;
 
     const getImage = async () => {
+        if (object.content?.type?.includes("pdf") && object.text?.length && object.text?.length < 100) {
+            return "store:" + objectId
+        }
         if (!object.content?.type?.startsWith("image/")) {
             return undefined;
         }

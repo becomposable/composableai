@@ -25,7 +25,7 @@ export async function runHistory(program: Command, interactionId: string | undef
 
     });
 
-    const runs = response.results || [];
+    const runs = response || [];
     let out;
     if (options.format === 'json') {
         out = JSON.stringify(runs, undefined, 4);

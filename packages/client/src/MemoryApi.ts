@@ -22,11 +22,16 @@ export class MemoryApi extends ApiTopic {
         })
     }
 
-    async uploadMemoryPack(source: StreamSource | File): Promise<Response> {
+    /**
+     * Upload a memory pack and return the full path (including bucket name) of the uploaded file
+     * @param source
+     * @returns
+     */
+    async uploadMemoryPack(source: StreamSource | File): Promise<string> {
         const isStream = source instanceof StreamSource;
-        const { url } = await this.getUploadUrl(source);
+        const { url, path } = await this.getUploadUrl(source);
 
-        const res = await fetch(url, {
+        await fetch(url, {
             method: 'PUT',
             body: isStream ? source.stream : source,
             //@ts-ignore: duplex is not in the types. See https://github.com/node-fetch/node-fetch/issues/1769
@@ -46,7 +51,7 @@ export class MemoryApi extends ApiTopic {
             throw err;
         });
 
-        return res;
+        return path;
     }
 
     async downloadMemoryPack(name: string): Promise<ReadableStream<Uint8Array>> {

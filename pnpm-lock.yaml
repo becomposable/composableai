@@ -159,8 +159,8 @@ importers:
         specifier: ^4.0.4
         version: 4.0.4
       node-web-stream-adapters:
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.2.1
+        version: 0.2.1
       open:
         specifier: ^10.1.0
         version: 10.1.0
@@ -2639,9 +2639,6 @@ packages:
 
   node-releases@2.0.18:
     resolution: {integrity: sha512-d9VeXT4SJ7ZeOqGX6R5EM022wpL+eWPooLI+5UpWn2jCT1aosUQEhQP214x33Wkwx3JQMvIm+tIoVOdodFS40g==}
-
-  node-web-stream-adapters@0.1.0:
-    resolution: {integrity: sha512-haxMmH8J0WMp1GHVP18QTMY5bl0OhmPYaVT1oiyeDU5XvSF8z9IK8sNnjs1Z0zwv/MgDYrMXic48+EVCxTIlTQ==}
 
   node-web-stream-adapters@0.2.1:
     resolution: {integrity: sha512-9wHGcVhyYz4BJrDOdVAiS9ENJXzX3XnRCaocGl0/awuDQLEKuFxd48LSQjIXClAb5f6NHvagGWv/Y14Dpxlo6Q==}
@@ -5673,8 +5670,6 @@ snapshots:
       whatwg-url: 5.0.0
 
   node-releases@2.0.18: {}
-
-  node-web-stream-adapters@0.1.0: {}
 
   node-web-stream-adapters@0.2.1: {}
 

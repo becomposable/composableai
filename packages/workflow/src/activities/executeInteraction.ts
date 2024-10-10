@@ -146,7 +146,7 @@ export async function executeInteractionFromActivity(client: ComposableClient, i
             };
             const previousRun = await client.runs.search(payload).then((res) => {
                 log.info("Search results", { results: res });
-                return res;
+                return res ? res[0] ?? undefined : undefined
             });
 
             if (previousRun) {

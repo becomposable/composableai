@@ -21,7 +21,6 @@ describe("Builder", () => {
         const builder = new Builder({
             out: memoryBaseName,
         });
-        builder.tmpdir = tmpdir;
 
         await builder.exec(`printf 'file1 from base memory' > ${tmpdir}/file1.txt`);
         const file2 = await builder.exec('printf "file2 from base memory"', { quiet: true });
@@ -43,7 +42,6 @@ describe("Builder", () => {
         const builder = new Builder({
             out: memoryName,
         });
-        builder.tmpdir = tmpdir;
 
         await builder.from(memoryBaseFile, {
             files: ["!file1.txt"], // remove file1
@@ -58,6 +56,7 @@ describe("Builder", () => {
         await builder.build({
             baseProp2: "baseProp2", // override baseProp2
             prop4: "prop4",
+            parent: { child: 123 }
         });
 
         const stats = statSync(memoryFile);
@@ -92,25 +91,27 @@ describe("Builder", () => {
             baseProp2: "baseProp2",
             baseProp3: "baseProp3",
             prop4: "prop4",
+            parent: { child: 123 }
         });
     })
 
     test("MemoryPack.exportObject", async () => {
         const memory = await loadMemoryPack(memoryFile);
         let obj = await memory.exportObject({
-            ".": ".",
-            "file2": "content:file2.txt",
+            "@": "@",
+            "file2": "@content:file2.txt",
         });
         expect(obj).toStrictEqual({
             "file2": "file2 from new memory",
             baseProp2: "baseProp2",
             baseProp3: "baseProp3",
             prop4: "prop4",
+            parent: { child: 123 }
         })
         obj = await memory.exportObject({
-            "prop4": "prop4",
-            "file2": "content:file2.txt",
-            "manifest": "."
+            "prop4": "@prop4",
+            "file2": "@content:file2.txt",
+            "manifest": "@",
         });
         expect(obj).toStrictEqual({
             prop4: "prop4",
@@ -119,10 +120,11 @@ describe("Builder", () => {
                 baseProp2: "baseProp2",
                 baseProp3: "baseProp3",
                 prop4: "prop4",
+                parent: { child: 123 }
             }
         })
         obj = await memory.exportObject({
-            "content": "content:*.txt",
+            "content": "@content:*.txt",
         });
         expect(obj).toStrictEqual({
             content: [
@@ -133,7 +135,7 @@ describe("Builder", () => {
         })
 
         obj = await memory.exportObject({
-            "files": "file:*.txt",
+            "files": "@file:*.txt",
         });
         expect(obj).toStrictEqual({
             files: [
@@ -144,4 +146,27 @@ describe("Builder", () => {
         })
 
     })
+
+    test("MemoryPack.exportObject with nested props", async () => {
+        const memory = await loadMemoryPack(memoryFile);
+        let obj = await memory.exportObject({
+            "child": "@parent.child",
+        });
+        expect(obj).toStrictEqual({
+            child: 123
+        })
+    });
+
+    test("MemoryPack.exportObject with runtime values", async () => {
+        const memory = await loadMemoryPack(memoryFile);
+        let obj = await memory.exportObject({
+            "father": "@parent",
+            "instruction": "Use this runtime instruction"
+        });
+        expect(obj).toStrictEqual({
+            father: { child: 123 },
+            "instruction": "Use this runtime instruction"
+        })
+    });
+
 });

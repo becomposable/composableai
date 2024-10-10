@@ -6,8 +6,9 @@ import { extname } from "path";
 
 export const MEMORY_METADATA_ENTRY = "metadata.json";
 
-const EXPORT_CONTENT_KEY = 'content:';
-const EXPORT_ENTRY_KEY = 'file:';
+const EXPORT_CONTENT_KEY = '@content:';
+const EXPORT_ENTRY_KEY = '@file:';
+const EXPORT_PROPERTY_KEY = '@';
 const mediaExtensions = new Set([".jpg", ".jpeg", ".png"])
 
 /**
@@ -52,16 +53,16 @@ export abstract class MemoryPack {
     abstract getEntriesContent(filters?: string[]): Promise<Buffer[]>;
     abstract getEntriesText(filters?: string[], encoding?: BufferEncoding): Promise<string[]>;
 
-    async exportObject(mapping: Record<string, string>): Promise<Record<string, any>> {
+    async exportObject(mapping: Record<string, any>): Promise<Record<string, any>> {
         let metadata: any;
         const result: Record<string, any> = {};
         for (const key of Object.keys(mapping)) {
             const value = mapping[key];
-            if (value === '.') {
+            if (value === '@') {
                 if (!metadata) {
                     metadata = await this.getMetadata();
                 }
-                if (key === '.') {
+                if (key === '@') {
                     Object.assign(result, metadata);
                 } else {
                     result[key] = metadata;
@@ -82,11 +83,14 @@ export abstract class MemoryPack {
                     const entry = this.getEntry(selector);
                     result[key] = entry ? { name: entry.name, content: await entry.getText() } : null;
                 }
-            } else {
+            } else if (value.startsWith(EXPORT_PROPERTY_KEY)) {
                 if (!metadata) {
                     metadata = await this.getMetadata();
                 }
-                result[key] = metadata[value];
+                const accessor = value.substring(EXPORT_PROPERTY_KEY.length);
+                result[key] = resolveProperty(metadata, accessor);
+            } else {
+                result[key] = value;
             }
         }
         return result;
@@ -254,4 +258,21 @@ export function loadMemoryPack(location: string, type?: 'tar' | 'json'): Promise
 function getTextEncodingForPath(path: string) {
     const ext = extname(path);
     return mediaExtensions.has(ext) ? "base64" : "utf-8";
+}
+
+
+function resolveProperty(obj: Record<string, any>, key: string) {
+    if (key.includes('.')) {
+        const keys = key.split('.');
+        let value = obj;
+        for (const k of keys) {
+            value = value[k];
+            if (value == undefined) {
+                return undefined;
+            }
+        }
+        return value;
+    } else {
+        return obj[key];
+    }
 }

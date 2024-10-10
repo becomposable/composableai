@@ -1,4 +1,4 @@
-import { ComputeRunFacetPayload, ExecutionRun, ExecutionRunRef, FindPayload, RunCreatePayload, RunListingFilters, RunListingQueryOptions, RunSearchPayload, RunSearchResponse } from "@becomposable/common";
+import { ComputeRunFacetPayload, ExecutionRun, ExecutionRunRef, FindPayload, RunCreatePayload, RunListingFilters, RunListingQueryOptions, RunSearchPayload } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
 import { ComposableClient } from "./client.js";
 
@@ -94,7 +94,7 @@ export class RunsApi extends ApiTopic {
         });
     }
 
-    search(payload: RunSearchPayload): Promise<RunSearchResponse> {
+    search(payload: RunSearchPayload): Promise<ExecutionRunRef[]> {
         return this.post("/search", {
             payload
         });

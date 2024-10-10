@@ -1,5 +1,5 @@
 import { Bucket as GBucket, File as GFile, Storage as GStorage } from '@google-cloud/storage';
-import { AbstractBlob, Blob, BlobStorage, Bucket, CreateBucketOptions, getContentDispositionType } from './storage.js';
+import { AbstractBlob, Blob, BlobStorage, Bucket, CreateBucketOptions, getContentDispositionType, SignedUrlOptions } from './storage.js';
 
 
 export class GoogleStorage implements BlobStorage {
@@ -31,7 +31,7 @@ export class GoogleBucket implements Bucket {
         return new GoogleBlob(this.bucket.file(name));
     }
     exists(): Promise<boolean> {
-        return this.bucket.exists().then(r => r[0]);
+        return this.bucket.exists().then((r: any) => r[0]);
     }
     async create(opts?: CreateBucketOptions): Promise<void> {
         const cors = opts?.cors;
@@ -82,22 +82,29 @@ export class GoogleBlob extends AbstractBlob {
         return this.metadata.md5Hash ?? this.metadata.etag;
     }
 
-    async getUploadUrl(opts: { mimeType?: string, ttl?: number } = {}): Promise<string> {
+    async getUploadUrl(opts: SignedUrlOptions = {}): Promise<string> {
         const [url] = await this.file.getSignedUrl({
             version: 'v4',
             //action: 'resumable',
             action: 'write',
             expires: opts.ttl || Date.now() + 15 * 60 * 1000, // 15 minutes
+            //this is throwing a 403 - signature doesn't match - even if the content-type is included when PUTting
             //contentType: opts.mimeType || 'application/octet-stream',
         });
         return url;
     }
 
-    async getDownloadUrl(): Promise<string> {
+    async getDownloadUrl(opts: SignedUrlOptions = {}): Promise<string> {
+        let contentDisposition: string | undefined;
+        if (opts.name) {
+            contentDisposition = `${opts.disposition || "attachment"}; filename="${opts.name}"`;
+        }
         const [url] = await this.file.getSignedUrl({
             version: 'v4',
             action: 'read',
             expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+            responseDisposition: contentDisposition,
+            responseType: opts.mimeType,
         });
         return url;
     }

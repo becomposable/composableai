@@ -41,14 +41,14 @@ export interface Blob {
     md5Hash?: string;
     contentDisposition: string | undefined;
     isWriteable: boolean;
-    getDownloadUrl(): Promise<string>;
+    getDownloadUrl(opts?: SignedUrlOptions | undefined): Promise<string>;
     getPublicUrl(): Promise<string>;
     exists(): Promise<boolean>;
     read(): Promise<Readable>;
     readAsBuffer(): Promise<Buffer>;
     saveToFile(file: string, options?: BufferEncoding | WriteStreamOptions | undefined): Promise<fs.WriteStream>;
     // writable methods
-    getUploadUrl(opts?: { mimeType?: string | undefined; ttl?: number | undefined; } | undefined): Promise<string>;
+    getUploadUrl(opts?: SignedUrlOptions | undefined): Promise<string>;
     setFileNameAndType(fileName?: string, mimeType?: string): Promise<void>;
     setMetadata(meta: Record<string, any>): Promise<void>;
     delete(): Promise<void>;
@@ -71,6 +71,15 @@ export interface Bucket {
     create(opts?: CreateBucketOptions): Promise<void>;
 }
 
+export interface SignedUrlOptions {
+    mimeType?: string | undefined;
+    ttl?: number | undefined;
+    // a content disposition file name for GET signed URLs
+    name?: string | undefined;
+    // optional disposition to generate a content dispoition for GET signed URLs
+    disposition?: "inline" | "attachment";
+}
+
 export abstract class AbstractBlob implements Blob {
     constructor(public isWriteable = true) {
     }
@@ -79,7 +88,7 @@ export abstract class AbstractBlob implements Blob {
     abstract metadata: Record<string, any>;
     abstract md5Hash?: string;
     abstract contentDisposition: string | undefined;
-    abstract getDownloadUrl(): Promise<string>;
+    abstract getDownloadUrl(opts?: SignedUrlOptions | undefined): Promise<string>;
     abstract getPublicUrl(): Promise<string>;
     abstract exists(): Promise<boolean>;
     abstract read(): Promise<Readable>;
@@ -107,7 +116,7 @@ export abstract class AbstractBlob implements Blob {
         return w;
     }
     //writeable methods
-    abstract getUploadUrl(opts?: { mimeType?: string | undefined; ttl?: number | undefined; } | undefined): Promise<string>;
+    abstract getUploadUrl(opts?: SignedUrlOptions | undefined): Promise<string>;
     abstract setFileNameAndType(fileName?: string, mimeType?: string): Promise<void>;
     abstract setMetadata(meta: Record<string, any>): Promise<void>;
     abstract delete(): Promise<void>;

@@ -44,7 +44,7 @@ function applyProjection(projection: ProjectionProperties, object: any) {
 
 
 export abstract class MemoryPack {
-    abstract getMetadata(projection?: ProjectionProperties): Promise<any>;
+    abstract getMetadata(projection?: ProjectionProperties): Promise<Record<string, any>>;
     abstract getEntry(path: string): MemoryEntry | null;
     abstract getEntryContent(path: string): Promise<Buffer | null>;
     abstract getEntryText(path: string, encoding?: BufferEncoding): Promise<string | null>;
@@ -117,7 +117,7 @@ export class TarMemoryPack extends MemoryPack {
             throw new Error("Invalid memory tar file. Context entry not found");
         }
     }
-    async getMetadata(projection?: ProjectionProperties) {
+    async getMetadata(projection?: ProjectionProperties): Promise<Record<string, any>> {
         const content = await this.index.getContent(MEMORY_METADATA_ENTRY);
         if (content) {
             let metadata = JSON.parse(content.toString('utf-8'));
@@ -203,7 +203,7 @@ export class JsonMemoryPack extends MemoryPack {
         super();
     }
 
-    getMetadata() {
+    getMetadata(): Promise<Record<string, any>> {
         return Promise.resolve(this.context);
     }
 

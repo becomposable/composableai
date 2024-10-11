@@ -1,4 +1,4 @@
-export { Builder } from "./Builder.js"
+export { Builder, buildMemoryPack } from "./Builder.js"
 export type { BuildOptions, Commands } from "./Builder.js"
 export type { CopyOptions } from "./commands/copy.js"
 export type { ExecOptions } from "./commands/exec.js"

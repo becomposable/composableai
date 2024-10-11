@@ -45,6 +45,8 @@ export interface BuildOptions {
 }
 
 export interface Commands {
+    vars: () => Record<string, any>;
+    tmpdir: () => string;
     exec: (cmd: string, options?: ExecOptions) => Promise<void | string>;
     from: (location: string, options?: FromOptions) => Promise<void>;
     content: (location: string, encoding?: BufferEncoding) => ContentObject | ContentObject[];
@@ -66,14 +68,18 @@ export class Builder implements Commands {
         return Builder.instance;
     }
 
-    vars: Record<string, any>;
+    _vars: Record<string, any>;
     _tmpdir?: string;
     memory: MemoryPackBuilder;
 
     constructor(public options: BuildOptions = {}) {
         this.memory = new MemoryPackBuilder(this);
-        this.vars = options.vars || {};
+        this._vars = options.vars || {};
         Builder.instance = this;
+    }
+
+    vars(): Record<string, any> {
+        return this._vars;
     }
 
     tmpdir() {
@@ -211,4 +217,22 @@ function resolveContextObject(object: Record<string, any>): Promise<Record<strin
 
 function createTmpBaseName(tmpdir: string) {
     return join(tmpdir, `.composable-memory-${Date.now()}`);
+}
+
+
+export function buildMemoryPack(recipeFn: (commands: Commands) => Promise<Record<string, any>>, options: BuildOptions): Promise<string> {
+    const builder = new Builder(options);
+    return recipeFn({
+        vars: builder.vars.bind(builder),
+        tmpdir: builder.tmpdir.bind(builder),
+        exec: builder.exec.bind(builder),
+        from: builder.from.bind(builder),
+        content: builder.content.bind(builder),
+        json: builder.json.bind(builder),
+        pdf: builder.pdf.bind(builder),
+        docx: builder.docx.bind(builder),
+        media: builder.media.bind(builder),
+        copy: builder.copy.bind(builder),
+        copyText: builder.copyText.bind(builder),
+    }).then(metadata => builder.build(metadata));
 }

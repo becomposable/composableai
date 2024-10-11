@@ -1,12 +1,10 @@
 
 /**
- * An iterative generation workflow uses up to 3 memory packs
- * which are located inside the folder: `project_bucket/memories/{memory.name}/`
- * These 3 memory packs have hardocded names:
- * 1. input - this is the input memory pack which contains input files and content
- * 2. context - this is the context memory pack which can be updated by activities. The context memory is usually not containing content files but only metadata.
- * 3. output - this memory pack will conytain the generated files.
- * The input memory pack is named: `input`, the output memory pack is named: `output`
+ * An iterative generation workflow uses 2 memory packs one for input and the other for output.
+ * The input memory packs must be available in the project blobs bucket at `${tenant_id/memories/${memory_name}/input.tar.gz`.
+ * The output memory pack will be generated at `${tenant_id/memories/${memory_name}/output.tar.gz`.
+ * Each iteration is overwriting the output memory pack with the new generated content.
+ * The complete name of the input and output memory packs are: "${name}/input" and "${name}/output" where name is the base memory name.
  */
 export interface IterativeGenerationPayload {
     // the interaction to execute
@@ -27,19 +25,23 @@ export interface IterativeGenerationPayload {
     toc_schema?: Record<string, any>
 }
 
+export interface TocPart {
+    id: string;
+    name: string;
+    description?: string;
+    instructions?: string;
+}
+
+export interface TocSection {
+    id: string;
+    name: string;
+    description?: string;
+    instructions?: string;
+    parts?: TocPart[];
+}
+
 export interface Toc {
-    sections: {
-        id: string;
-        name: string;
-        description?: string;
-        instructions?: string;
-        parts?: {
-            id: string;
-            name: string;
-            description?: string;
-            instructions?: string;
-        }[]
-    }[]
+    sections: TocSection[];
 }
 
 
@@ -52,4 +54,10 @@ export interface PartIndex {
 }
 export interface TocIndex {
     sections: SectionIndex[];
+}
+
+export interface OutputMemoryMeta {
+    toc: Toc;
+    previouslyGenerated: string;
+    lastProcessdPart?: number[] | undefined;
 }

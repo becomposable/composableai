@@ -6,7 +6,6 @@ import { IterativeGenerationPayload, PartIndex } from "./types.js";
 
 const {
     generateToc,
-    generateSection,
     generatePart
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "5 minute",
@@ -41,14 +40,14 @@ export async function iterativeGenerationWorkflow(payload: WorkflowExecutionPayl
     log.info(`Generated TOC: ${JSON.stringify(toc, null, 2)}`);
 
     if (toc.sections.length === 0) {
-        //TODO jow to handle this case?
+        //TODO how to handle this case?
         throw new Error("Nothing to generate: TOC is empty");
     }
 
     for (const section of toc.sections) {
         console.log(section);
         log.info(`Generating section: ${formatPath(section)}`);
-        await generateSection(payload, section.path);
+        await generatePart(payload, section.path);
 
         if (section.parts) {
             for (const part of section.parts) {

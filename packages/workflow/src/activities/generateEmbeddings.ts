@@ -113,10 +113,10 @@ async function generateTextEmbeddings({ document, client, type, config, force }:
         return { id: document.id, status: "failed", message: `unsupported embedding type: ${type}` }
     }
 
-    if (type === SupportedEmbeddingTypes.text && !document.text) {
+    if (type === SupportedEmbeddingTypes.text && !document?.text) {
         return { id: document.id, status: "failed", message: "no text found" }
     }
-    if (type === SupportedEmbeddingTypes.properties && !document.properties) {
+    if (type === SupportedEmbeddingTypes.properties && !document?.properties) {
         return { id: document.id, status: "failed", message: "no properties found" }
     }
 

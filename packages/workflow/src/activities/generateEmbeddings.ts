@@ -48,7 +48,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
         throw new Error('No environment found in project configuration. Set environment in project configuration to generate embeddings.');
     }
 
-    const document = await client.objects.retrieve(objectId, "+text +parts +embedding +tokens +properties");
+    const document = await client.objects.retrieve(objectId, "+text +parts +embeddings +tokens +properties");
 
     if (!document) {
         throw new NoDocumentFound('Document not found', [objectId]);
@@ -60,11 +60,10 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
 
     let res;
 
-
     switch (type) {
         case SupportedEmbeddingTypes.text:
             res = await generateTextEmbeddings({
-                client, 
+                client,
                 config,
                 document,
                 type
@@ -72,7 +71,7 @@ export async function generateEmbeddings(payload: DSLActivityExecutionPayload) {
             break;
         case SupportedEmbeddingTypes.properties:
             res = await generateTextEmbeddings({
-                client, 
+                client,
                 config,
                 document,
                 type,
@@ -104,16 +103,20 @@ interface ExecuteGenerateEmbeddingsParams {
     force?: boolean;
 }
 
-async function generateTextEmbeddings({ document, client, type, config, force }: ExecuteGenerateEmbeddingsParams) {
+async function generateTextEmbeddings({ document, client, type, config }: ExecuteGenerateEmbeddingsParams) {
     // if (!force && document.embeddings[type]?.etag === (document.text_etag ?? md5(document.text))) {
     //     return { id: objectId, status: "skipped", message: "embeddings already generated" }
     // }
+
+    if (!document) {
+        return { status: "error", message: "document is null or undefined" }
+    }
 
     if (type !== SupportedEmbeddingTypes.text && type !== SupportedEmbeddingTypes.properties) {
         return { id: document.id, status: "failed", message: `unsupported embedding type: ${type}` }
     }
 
-    if (type === SupportedEmbeddingTypes.text && !document?.text) {
+    if (type === SupportedEmbeddingTypes.text && !document.text) {
         return { id: document.id, status: "failed", message: "no text found" }
     }
     if (type === SupportedEmbeddingTypes.properties && !document?.properties) {
@@ -148,50 +151,64 @@ async function generateTextEmbeddings({ document, client, type, config, force }:
         log.info('Document too large, generating embeddings for parts');
 
         if (!document.parts || document.parts.length === 0) {
-            return { id: document.id, status: "failed", message: "no parts found" }
+            return { id: document.id, status: "skipped", message: "no parts found" }
         }
 
-        const docParts = await Promise.all(document.parts?.map(async (partId) => client.objects.retrieve(partId, "+text +embedding +tokens")));
+        const docParts = await Promise.all(document.parts?.map(async (partId) => client.objects.retrieve(partId, "+text +embeddings +properties +tokens")));
+        log.info(`Retrieved ${docParts.length} parts`)
 
-        const res = await Promise.all(docParts.map(async (part, i) => {
-            if (!part.text) {
-                return { id: part.id, number: i, result: null, message: "no text found" }
-            }
-
-            if (part.tokens?.count && part.tokens.count > maxTokens) {
-                log.info('Part too large, skipping embeddings generation for part', { part: part.id, tokens: part.tokens.count });
-                return { id: part.id, number: i, result: null, message: "part too large" }
-            }
-
-
-            if (!force && part.embeddings[type]?.etag === (part.text_etag ?? md5(part.text))) {
-                return { id: part.id, number: i }
-            }
-
-            const e = await generateEmbeddingsFromStudio(part.text, environment, client, model).catch(e => {
-                log.error('Error generating embeddings for part', { part: part.id, tokens: part.tokens, text_length: part.text?.length, error: e });
-                return null;
-            });
-
-            if (!e || !e.values) {
-                return { id: part.id, number: i, result: null, message: "no embeddings generated" }
-            }
-
-            const updated = await client.objects.update(part.id, {
-                embeddings: {
-                    text: {
-                        values: e.values,
-                        model: e.model,
-                    }
+        const generatePartEmbeddings = async (part: ContentObject<any>, i: number) => {
+            try {
+                log.info(`Generating embeddings for part ${part.id}`, { text_len: part.text?.length })
+                if (!part.text) {
+                    return { id: part.id, number: i, result: null, status: "skipped", message: "no text found" }
                 }
-            });
 
-            log.debug('Generated embeddings for part:', { result: updated });
-            return { id: part.id, number: i, result: e }
-        }));
+                if (part.tokens?.count && part.tokens.count > maxTokens) {
+                    log.info('Part too large, skipping embeddings generation for part', { part: part.id, tokens: part.tokens.count });
+                    return { id: part.id, number: i, result: null, message: "part too large" }
+                }
 
-        log.info('Got embeddings generated for parts:', res);
+                const e = await generateEmbeddingsFromStudio(part.text, environment, client, model).catch(e => {
+                    log.error('Error generating embeddings for part', { part: part.id, tokens: part.tokens, text_length: part.text?.length, error: e });
+                    return null;
+                });
 
+                if (!e || !e.values) {
+                    return { id: part.id, number: i, result: null, message: "no embeddings generated" }
+                }
+
+                log.info(`Embeddings generated for part ${part.id}, updating object in the store.`)
+                await client.objects.update(part.id, {
+                    embeddings: {
+                        text: {
+                            values: e.values,
+                            model: e.model,
+                        }
+                    }
+                }).catch(err => {
+                    log.info(`Error updating embeddings on part ${part.id}`);
+                    return { id: part.id, number: i, result: null, message: "error setting embeddings on part", error: err.message }
+                })
+
+                log.info('Generated embeddings for part: ' + part.id);
+                return { id: part.id, number: i, result: e }
+            } catch (err: any) {
+                log.info(`Error generating ${type} embeddings for part ${part.id} of ${document.id}`, {error: err});
+                return { id: part.id, number: i, result: null, message: "error generating embeddings", error: err.message }
+            }
+        }
+
+        const promises = docParts.map((p, i)=> generatePartEmbeddings(p, i))
+        const res = await Promise.all(promises);
+        // let i = 0;
+        // for (const p of docParts) {
+        //     log.info(`Processing part ${p.id}`)
+        //     const r = await generatePartEmbeddings(p, i++);
+        //     res.push(r)
+        // }
+
+        
         // Filter out parts without embeddings
         const validEmbeddings = res.filter(item => item.result !== null) as { id: string, number: number, result: EmbeddingsResult }[];
 
@@ -210,7 +227,7 @@ async function generateTextEmbeddings({ document, client, type, config, force }:
                 }
             }
         }));
-        return { id: document.id, status: "completed", part: docParts.map(i => i.id), len: documentEmbedding.length }
+        return { id: document.id, status: "completed", parts: docParts.map(i => i.id), len: documentEmbedding.length, part_embeddings: res.map(r => { return { id: r.id, status: r.status, error: r.error, message: r.message } }) }
 
     } else {
         log.info(`Generating ${type} embeddings for document`);
@@ -240,7 +257,7 @@ async function generateTextEmbeddings({ document, client, type, config, force }:
 
 async function generateImageEmbeddings({ document, client, type, config }: ExecuteGenerateEmbeddingsParams) {
 
-    log.info('Generating image embeddings for document ' + document.id, { content: document.content});
+    log.info('Generating image embeddings for document ' + document.id, { content: document.content });
     if (!document.content?.type?.startsWith('image/') && !document.content?.type?.includes('pdf')) {
         return { id: document.id, type, status: "failed", message: "content is not an image" }
     }
@@ -281,7 +298,7 @@ async function generateImageEmbeddings({ document, client, type, config }: Execu
         embeddings: {
             ...d.embeddings,
             image: {
-                values: res.values, 
+                values: res.values,
                 model: res.model,
                 etag: document.text_etag
             }

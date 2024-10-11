@@ -2,12 +2,14 @@ import type { Commands } from "@becomposable/memory";
 import { build, getBuilder } from "./build.js";
 
 
-function vars() {
-    return getBuilder().vars;
+function vars(): ReturnType<Commands['vars']> {
+    return getBuilder().vars();
 }
-function tmpdir() {
+
+function tmpdir(): ReturnType<Commands['tmpdir']> {
     return getBuilder().tmpdir();
 }
+
 function from(...args: Parameters<Commands['from']>): ReturnType<Commands['from']> {
     return getBuilder().from(...args);
 }
@@ -27,15 +29,19 @@ function copyText(...args: Parameters<Commands['copyText']>): ReturnType<Command
 function content(...args: Parameters<Commands['content']>): ReturnType<Commands['content']> {
     return getBuilder().content(...args);
 }
+
 function json(...args: Parameters<Commands['json']>): ReturnType<Commands['json']> {
     return getBuilder().json(...args);
 }
+
 function pdf(...args: Parameters<Commands['pdf']>): ReturnType<Commands['pdf']> {
     return getBuilder().pdf(...args);
 }
+
 function docx(...args: Parameters<Commands['docx']>): ReturnType<Commands['docx']> {
     return getBuilder().docx(...args);
 }
+
 function media(...args: Parameters<Commands['media']>): ReturnType<Commands['media']> {
     return getBuilder().media(...args);
 }

@@ -1,11 +1,8 @@
 import { WorkflowExecutionPayload } from "@becomposable/common";
-import { Builder } from "@becomposable/memory";
-import { createReadStream } from "fs";
-import tmp from "tmp";
 import { getClient } from "../../utils/client.js";
-import { execute } from "../execute.js";
-import { NodeStreamSource } from "../NodeStreamSource.js";
-import { IterativeGenerationPayload, PartIndex, Toc, TocIndex } from "../types.js";
+import { buildAndPublishMemoryPack } from "../../utils/memory.js";
+import { IterativeGenerationPayload, OutputMemoryMeta, PartIndex, Toc, TocIndex } from "../types.js";
+import { executeWithVars } from "../utils.js";
 
 const defaultTocSchema = {
     "type": "object",
@@ -110,43 +107,17 @@ export async function generateToc(payload: WorkflowExecutionPayload): Promise<To
 
     const client = getClient(payload);
 
-    const run = await execute(client, {
-        interaction: vars.interaction,
-        memory: vars.memory + '/input',
-        memory_mapping: vars.input_mapping,
-        environment: vars.environment,
-        model: vars.model,
-        max_tokens: vars.max_tokens,
-        temperature: vars.temperature,
-        result_schema: schema
-    });
+    const run = await executeWithVars(client, vars, undefined, schema);
 
     const toc = run.result as Toc;
 
-    //TODO save toc in context memory
-    const contextFile = tmp.fileSync({
-        prefix: "memory-context-",
-        name: "-studio-memory-input.tar",
+    await buildAndPublishMemoryPack(client, `${vars.memory}/output`, async () => {
+        return {
+            toc,
+            lastProcessdPart: undefined, // the part index (a number array)
+            previouslyGenerated: ""
+        } as OutputMemoryMeta
     });
-
-    const contextMemory = new Builder({
-        out: contextFile.name,
-        gzip: true,
-    });
-    // put the doc as a metadata under "toc" key
-    contextMemory.copyText('', 'already-generated.txt');
-    const file = await contextMemory.build({
-        toc
-    });
-
-    // upload the memory pack
-    const stream = createReadStream(file);
-    try {
-        const source = new NodeStreamSource(stream, `${vars.memory}/context`);
-        await client.memory.uploadMemoryPack(source);
-    } catch (err: any) {
-        stream.destroy();
-    }
 
     return tocIndex(toc);
 }

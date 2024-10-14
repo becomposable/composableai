@@ -18,7 +18,6 @@ const {
     },
 });
 
-
 export async function iterativeGenerationWorkflow(payload: WorkflowExecutionPayload) {
     const activitiesPayload = payload.vars as IterativeGenerationPayload;
     const {
@@ -27,9 +26,8 @@ export async function iterativeGenerationWorkflow(payload: WorkflowExecutionPayl
         input_mapping
     } = activitiesPayload;
 
-    console.log("interaction to execute : ", interaction);
-    console.log("memory pack group: ", memory);
-    console.log("input memory pack mapping: ", input_mapping);
+    log.info(`Executing Iterative generation workflow. Interaction: ${interaction}, memory pack group: ${memory}`);
+    log.debug(`Memory pack mapping is: ${JSON.stringify(input_mapping || {})}`);
 
     log.info(`Generating TOC`);
     // the generateToc activity is retiurning the toc hierarchy.

@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { createOrUpdateWorkflowDefinition, createOrUpdateWorkflowRule, createWorkflowRule, deleteWorkflowDefinition, deleteWorkflowRule, executeWorkflowRule, getWorkflowDefinition, getWorkflowRule, listWorkflowsDefinition, listWorkflowsRule, transpileWorkflow } from "./commands.js";
+import { createOrUpdateWorkflowDefinition, createOrUpdateWorkflowRule, createWorkflowRule, deleteWorkflowDefinition, deleteWorkflowRule, executeWorkflowByName, executeWorkflowRule, getWorkflowDefinition, getWorkflowRule, listWorkflowsDefinition, listWorkflowsRule, transpileWorkflow } from "./commands.js";
 
 export function registerWorkflowsCommand(program: Command) {
     const workflows = program.command("workflows");
@@ -37,6 +37,7 @@ export function registerWorkflowsCommand(program: Command) {
     rules.command("execute <workflowId>")
         .description("Execute a workflow")
         .option('-o, --objectId [objectIds...]', 'The object to execute the workflow on.')
+        .option('--vars [vars]', 'workflow vars as an inlined JSON string.')
         .option('-f, --file [file]', 'The file containing workflow execution payload.')
         .action((workflowId: string, options: Record<string, any>) => {
             executeWorkflowRule(program, workflowId, options);
@@ -48,6 +49,13 @@ export function registerWorkflowsCommand(program: Command) {
             deleteWorkflowRule(program, objectId, options);
         });
 
+    workflows.command("execute <workflowName>")
+        .description("Execute a workflow by name")
+        .option('-o, --objectId [objectIds...]', 'Optional object to execute the workflow on.')
+        .option('-f, --file [file]', 'The file containing workflow execution payload.')
+        .action((workflowName: string, options: Record<string, any>) => {
+            executeWorkflowByName(program, workflowName, options);
+        });
     const definitions = workflows.command("definitions");
 
     definitions.command("transpile <files...>")

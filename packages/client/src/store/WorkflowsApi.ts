@@ -1,5 +1,5 @@
-import { CreateWorkflowRulePayload, DSLWorkflowDefinition, DSLWorkflowSpec, ExecuteWorkflowPayload, ListWorkflowRunsResponse, WorkflowDefinitionRef, WorkflowRule, WorkflowRuleItem, WorkflowRunWithDetails } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
+import { CreateWorkflowRulePayload, DSLWorkflowDefinition, DSLWorkflowSpec, ExecuteWorkflowPayload, ListWorkflowRunsResponse, WorkflowDefinitionRef, WorkflowRule, WorkflowRuleItem, WorkflowRunWithDetails } from "@becomposable/common";
 
 export class WorkflowsApi extends ApiTopic {
 
@@ -21,6 +21,10 @@ export class WorkflowsApi extends ApiTopic {
 
     cancel(workflowId: string, runId: string, reason?: string): Promise<{ message: string }> {
         return this.post(`/runs/${workflowId}/${runId}/cancel`, { payload: { reason } });
+    }
+
+    execute(name: string, payload: ExecuteWorkflowPayload = {}): Promise<{ runIds: string[] }> {
+        return this.post(`/execute/${name}`, { payload });
     }
 
     rules = new WorkflowsRulesApi(this);

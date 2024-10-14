@@ -7,8 +7,13 @@
  * The complete name of the input and output memory packs are: "${name}/input" and "${name}/output" where name is the base memory name.
  */
 export interface IterativeGenerationPayload {
-    // the interaction to execute
+    // the main interaction to execute. If iterative_generation is defined
+    // the main interaction will only be used to prepare the iteration (to generate the TOC)
+    // otherwise it will be used for the iterative generation too.
     interaction: string;
+    // if defined this will be used for the iterative interaction which will genrate parts.
+    // otherwise the main interaction will be used for iterative generation.
+    iterative_interaction?: string;
     // the environment to use
     environment?: string;
     // the model to use

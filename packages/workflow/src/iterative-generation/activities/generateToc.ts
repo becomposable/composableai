@@ -107,7 +107,7 @@ export async function generateToc(payload: WorkflowExecutionPayload): Promise<To
 
     const client = getClient(payload);
 
-    const run = await executeWithVars(client, vars, undefined, schema);
+    const run = await executeWithVars(client, vars.interaction, vars, undefined, schema);
 
     const toc = run.result as Toc;
 

@@ -29,7 +29,8 @@ export async function generatePart(payload: WorkflowExecutionPayload, path: numb
 
     expectMemoryIsConsistent(meta, path);
 
-    const r = await executeWithVars(client, vars, {
+    const interaction = vars.iterative_interaction || vars.interaction;
+    const r = await executeWithVars(client, interaction, vars, {
         context: {
             previouslyGenerated: meta.previouslyGenerated,
             section: sectionWithoutParts(section),

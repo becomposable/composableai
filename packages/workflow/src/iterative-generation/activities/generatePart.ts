@@ -32,7 +32,7 @@ export async function generatePart(payload: WorkflowExecutionPayload, path: numb
     const interaction = vars.iterative_interaction || vars.interaction;
     const r = await executeWithVars(client, interaction, vars, {
         context: {
-            previouslyGenerated: meta.previouslyGenerated,
+            previously_generated: meta.previouslyGenerated,
             section: sectionWithoutParts(section),
             part: part,
             path: path

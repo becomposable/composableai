@@ -41,4 +41,15 @@ describe("Path rewrite", () => {
         r = fn("/root/the/path.ext", 0)
         expect(r).toBe("images/file-0-path.ext")
     })
+
+    test("expression using widlcard with prefix", () => {
+        let fn = createPathRewrite("/root!images/*")
+        let r = fn("/root/the/path.ext", 0)
+        expect(r).toBe("images/the/path.ext")
+
+        fn = createPathRewrite("images/*")
+        r = fn("/root/the/path.ext", 0)
+        expect(r).toBe("images/path.ext")
+    })
+
 })

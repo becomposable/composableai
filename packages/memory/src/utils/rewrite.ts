@@ -1,4 +1,4 @@
-import { basename, dirname, extname } from "path";
+import { basename, dirname, extname, join } from "path";
 
 /**
  * The path argumentmay is the empty string when mapping streams or buffers not related to a file system file.
@@ -26,6 +26,12 @@ export function createPathRewrite(path: string): PathMapperFn {
     if (path === '*') {
         // preserve path
         return truncPath;
+    } else if (path.endsWith("/*")) {
+        const prefix = path.slice(0, -2);
+        return (path: string) => {
+            path = truncPath(path);
+            return join(prefix, path);
+        }
     } else {
         // use path builder
         return buildPathRewrite(path, truncPath);

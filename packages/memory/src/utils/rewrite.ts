@@ -1,4 +1,4 @@
-import { basename, dirname, extname } from "path";
+import { basename, dirname, extname, join } from "path";
 
 /**
  * The path argumentmay is the empty string when mapping streams or buffers not related to a file system file.
@@ -26,13 +26,19 @@ export function createPathRewrite(path: string): PathMapperFn {
     if (path === '*') {
         // preserve path
         return truncPath;
+    } else if (path.endsWith("/*")) {
+        const prefix = path.slice(0, -2);
+        return (path: string) => {
+            path = truncPath(path);
+            return join(prefix, path);
+        }
     } else {
         // use path builder
         return buildPathRewrite(path, truncPath);
     }
 }
 
-const RX_PARTS = /(%d\/)|(\.?%e)|(%[fni])/g;
+const RX_PARTS = /(%d\/)|(\.?%e)|(%[fnip])/g;
 function buildPathRewrite(path: string, truncPath: (path: string) => string): PathMapperFn {
     let parts: ((path: Path, index: number) => string)[] = [];
     let m: RegExpExecArray | null;
@@ -58,7 +64,16 @@ function buildPathRewrite(path: string, truncPath: (path: string) => string): Pa
                 case '%n':
                     parts.push((path: Path) => path.basename);
                     break;
-                case '%i':
+                case '%p': // stringify the path by replacing / with _
+                    parts.push((path: Path) => {
+                        let p = path.value;
+                        if (p.startsWith('/')) {
+                            p = p.substring(1);
+                        }
+                        return p.replaceAll('/', '_');
+                    });
+                    break;
+                case '%i': // index
                     parts.push((_path: Path, index: number) => String(index));
                     break;
                 default: throw new Error(`Bug: should never happen`);

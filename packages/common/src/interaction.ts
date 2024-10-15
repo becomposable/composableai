@@ -100,7 +100,7 @@ export interface Interaction {
     prompts: PromptSegmentDef[];
     max_tokens?: number;
     environment: string | ExecutionEnvironmentRef;
-    restriction: RestrictionLevel;
+    restriction?: RestrictionLevel;
     project: string | ProjectRef;
     // only for drafts - when it was last published
     last_published_at?: Date;

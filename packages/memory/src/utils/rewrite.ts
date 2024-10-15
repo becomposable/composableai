@@ -38,7 +38,7 @@ export function createPathRewrite(path: string): PathMapperFn {
     }
 }
 
-const RX_PARTS = /(%d\/)|(\.?%e)|(%[fni])/g;
+const RX_PARTS = /(%d\/)|(\.?%e)|(%[fnip])/g;
 function buildPathRewrite(path: string, truncPath: (path: string) => string): PathMapperFn {
     let parts: ((path: Path, index: number) => string)[] = [];
     let m: RegExpExecArray | null;
@@ -64,7 +64,16 @@ function buildPathRewrite(path: string, truncPath: (path: string) => string): Pa
                 case '%n':
                     parts.push((path: Path) => path.basename);
                     break;
-                case '%i':
+                case '%p': // stringify the path by replacing / with _
+                    parts.push((path: Path) => {
+                        let p = path.value;
+                        if (p.startsWith('/')) {
+                            p = p.substring(1);
+                        }
+                        return p.replaceAll('/', '_');
+                    });
+                    break;
+                case '%i': // index
                     parts.push((_path: Path, index: number) => String(index));
                     break;
                 default: throw new Error(`Bug: should never happen`);

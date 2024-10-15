@@ -1,9 +1,10 @@
 import { WorkflowExecutionPayload } from "@becomposable/common";
+import { MemoryPack } from "@becomposable/memory";
 import { ApplicationFailure } from "@temporalio/workflow";
 import { getClient } from "../../utils/client.js";
 import { buildAndPublishMemoryPack, loadMemoryPack } from "../../utils/memory.js";
-import { IterativeGenerationPayload, OutputMemoryMeta, TocPart, TocSection } from "../types.js";
-import { executeWithVars, expectMemoryIsConsistent, sectionWithoutParts } from "../utils.js";
+import { IterativeGenerationPayload, OutputMemoryMeta, Section, TocPart, TocSection } from "../types.js";
+import { executeWithVars, expectMemoryIsConsistent } from "../utils.js";
 
 export async function generatePart(payload: WorkflowExecutionPayload, path: number[]) {
     const vars = payload.vars as IterativeGenerationPayload;
@@ -29,23 +30,42 @@ export async function generatePart(payload: WorkflowExecutionPayload, path: numb
 
     expectMemoryIsConsistent(meta, path);
 
+    const content = await loadGeneratedContent(outMemory);
+
+    const previously_generated = content.map((section: Section) => section.content || '').join('\n\n');
+
+    if (!part) { // a new section
+        content.push({
+            id: section.id,
+            name: section.name,
+            description: section.description,
+            content: ''
+        })
+    } else if (!content.length) {
+        throw ApplicationFailure.nonRetryable('content.json is empty while generating a part', 'InvalidIterationState', { memory, path });
+    }
+
     const interaction = vars.iterative_interaction || vars.interaction;
     const r = await executeWithVars(client, interaction, vars, {
-        context: {
-            previously_generated: meta.previouslyGenerated,
-            section: sectionWithoutParts(section),
-            part: part,
-            path: path
+        iteration: {
+            toc: meta.toc,
+            previously_generated,
+            section: section.name,
+            part: part?.name,
+            path: path,
         }
     });
 
     const result = r.result as string;
-    if (!meta.previouslyGenerated) {
-        meta.previouslyGenerated = '';
-    }
-    meta.previouslyGenerated += result;
+    content[content.length - 1].content += result;
     meta.lastProcessdPart = path;
-    await buildAndPublishMemoryPack(client, `${memory}/output`, async () => {
+    await buildAndPublishMemoryPack(client, `${memory}/output`, async ({ copyText }) => {
+        copyText(JSON.stringify(content, null, 2), "content.json");
         return meta;
     });
+}
+
+async function loadGeneratedContent(memory: MemoryPack): Promise<Section[]> {
+    const content = await memory.getEntryText('content.json');
+    return content ? JSON.parse(content) : [];
 }

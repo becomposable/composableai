@@ -66,3 +66,10 @@ export interface OutputMemoryMeta {
     previouslyGenerated: string;
     lastProcessdPart?: number[] | undefined;
 }
+
+export interface Section {
+    id: string;
+    name: string;
+    description?: string;
+    content: string;
+}

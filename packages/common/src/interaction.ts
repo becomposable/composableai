@@ -1,15 +1,12 @@
 import type { JSONObject } from "@llumiverse/core";
-import { ExecutionTokenUsage } from "@llumiverse/core";
-import { JSONSchema4 } from "json-schema";
-import { ExecutionEnvironmentRef } from "./environment.js";
-import { ProjectRef } from "./project.js";
-import {
-    PopulatedPromptSegmentDef,
-    PromptSegmentDef,
-    PromptTemplateRef,
-    PromptTemplateRefWithSchema,
-} from "./prompt.js";
-import { AccountRef } from "./user.js";
+import { JSONSchema4 } from 'json-schema';
+
+import { ExecutionTokenUsage } from '@llumiverse/core';
+
+import { ExecutionEnvironmentRef } from './environment.js';
+import { ProjectRef } from './project.js';
+import { PopulatedPromptSegmentDef, PromptSegmentDef, PromptTemplateRef, PromptTemplateRefWithSchema } from './prompt.js';
+import { AccountRef } from './user.js';
 
 export interface InteractionExecutionError {
     code: string;
@@ -64,6 +61,12 @@ export enum ExecutionRunStatus {
     failed = "failed",
 }
 
+export enum RestrictionLevel {
+    STANDARD = "STANDARD",
+    RESTRICTED = "RESTRICTED",
+    DEBUG = "DEBUG"
+};
+
 export interface CachePolicy {
     type: "cache" | "no_cache" | "cache_and_refresh";
     refresh_probability: number;
@@ -97,6 +100,7 @@ export interface Interaction {
     prompts: PromptSegmentDef[];
     max_tokens?: number;
     environment: string | ExecutionEnvironmentRef;
+    restriction: RestrictionLevel;
     project: string | ProjectRef;
     // only for drafts - when it was last published
     last_published_at?: Date;

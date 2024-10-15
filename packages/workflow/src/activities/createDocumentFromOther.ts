@@ -1,5 +1,4 @@
 import { Blobs } from "@becomposable/blobs";
-import { StreamSource } from "@becomposable/client";
 import { DSLActivityExecutionPayload, DSLActivitySpec } from "@becomposable/common";
 import { log } from "@temporalio/activity";
 import fs from 'fs';
@@ -7,6 +6,7 @@ import tmp from "tmp";
 import { pdfExtractPages } from "../conversion/mutool.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { NoDocumentFound } from "../errors.js";
+import { NodeStreamSource } from "../utils/memory.js";
 
 tmp.setGracefulCleanup();
 
@@ -28,7 +28,7 @@ export interface CreatePdfDocumentFromSource extends DSLActivitySpec<CreatePdfDo
 
 /**
  * Create a new PDF by extrracting pages from a source PDF
- * @returns 
+ * @returns
  */
 export async function createPdfDocumentFromSource(payload: DSLActivityExecutionPayload) {
     const { client, objectId, params } = await setupActivity<CreatePdfDocumentFromSourceParams>(payload);
@@ -76,12 +76,12 @@ export async function createPdfDocumentFromSource(payload: DSLActivityExecutionP
     log.info(`PDF created from pages ${pages.join(', ')} `, { newPdf });
     const name = `pages-${pages.join('-')}.pdf`;
 
-    const sourceToUpload = new StreamSource(
+    const sourceToUpload = new NodeStreamSource(
         fs.createReadStream(newPdf),
         name,
         "application/pdf"
     )
-    
+
     log.info(`Uploading file ${newPdf} `);
     const upload = await client.objects.upload(sourceToUpload);
     log.info(`File uploaded ${upload.source} `);

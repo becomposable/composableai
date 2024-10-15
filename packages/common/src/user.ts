@@ -39,6 +39,7 @@ export interface Account {
     members: {
         role: ProjectRoles;
         user: UserRef;
+        disabled: boolean;
     }[];
 
     onboarding: {

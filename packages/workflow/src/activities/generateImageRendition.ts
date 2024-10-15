@@ -1,5 +1,4 @@
 import { Blobs } from "@becomposable/blobs";
-import { StreamSource } from "@becomposable/client";
 import { DSLActivityExecutionPayload, DSLActivitySpec, RenditionProperties } from "@becomposable/common";
 import { log } from "@temporalio/activity";
 import fs from 'fs';
@@ -9,6 +8,7 @@ import { imageResizer } from "../conversion/image.js";
 import { pdfToImages } from "../conversion/mutool.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
+import { NodeStreamSource } from "../utils/memory.js";
 interface GenerateImageRenditionParams {
     max_hw: number; //maximum size of the longuest side of the image
     format: keyof sharp.FormatEnum; //format of the output image
@@ -101,7 +101,7 @@ export async function generateImageRendition(payload: DSLActivityExecutionPayloa
         const pageId = getRenditionName(i);
         const resized = sharp(page).pipe(imageResizer(params.max_hw, params.format));
 
-        const source = new StreamSource(
+        const source = new NodeStreamSource(
             resized,
             pageId.replace('renditions/', '').replace('/', '_'),
             'image/' + params.format,
@@ -109,7 +109,7 @@ export async function generateImageRendition(payload: DSLActivityExecutionPayloa
         )
 
         log.info(`Uploading rendition for ${objectId} page ${i} with max_hw: ${params.max_hw} and format: ${params.format}`);
-        return client.objects.upload(source).catch((err) => { 
+        return client.objects.upload(source).catch((err) => {
             log.error(`Failed to upload rendition for ${objectId} page ${i}`, err);
             return Promise.resolve(null);
         });

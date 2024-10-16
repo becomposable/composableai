@@ -95,10 +95,8 @@ export async function createProfile(name?: string, target?: string) {
         });
     }
     if (!target) {
-        //TODO do not sho local and staging in the list.
-        // these are dev only.
-        //const choices = ['local', 'staging', 'preview', 'prod', 'custom'];
-        const choices = ['preview', 'prod'];
+        // only show local and staging in dev mode
+        const choices = config.isDevMode ? ['local', 'staging', 'preview', 'prod', 'custom'] : ['preview', 'prod'];
         questions.push({
             type: 'select',
             name: 'target',

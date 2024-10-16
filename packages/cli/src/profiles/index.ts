@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync } from "fs";
+import { existsSync, mkdirSync, statSync } from "fs";
 import os from "os";
 import { join } from "path";
 import { readJsonFile, writeJsonFile } from "../utils/stdio.js";
@@ -93,6 +93,7 @@ export class ConfigureProfile {
 export class Config {
     current?: Profile;
     profiles: Profile[];
+    isDevMode = false;
 
     constructor(data?: ProfilesData) {
         this.profiles = data?.profiles || [];
@@ -208,6 +209,10 @@ export class Config {
                 this.use(data.default)
             } else {
                 this.current = undefined;
+            }
+            const stats = statSync(getConfigFile('dev'));
+            if (stats.isFile()) {
+                this.isDevMode = true;
             }
         } catch (err: any) {
             if (err.code !== 'ENOENT') {

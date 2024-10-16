@@ -95,12 +95,16 @@ export async function createProfile(name?: string, target?: string) {
         });
     }
     if (!target) {
+        //TODO do not sho local and staging in the list.
+        // these are dev only.
+        //const choices = ['local', 'staging', 'preview', 'prod', 'custom'];
+        const choices = ['preview', 'prod'];
         questions.push({
             type: 'select',
             name: 'target',
             message: "Target environment",
-            choices: ['local', 'staging', 'preview', 'prod', 'custom'],
-            initial: 'staging',
+            choices,
+            initial: choices[0],
         });
     }
 

@@ -1,5 +1,6 @@
 import { AsyncObjectWalker } from "@becomposable/json";
 import { mkdtempSync, rmSync } from "fs";
+import os from "os";
 import { join, resolve } from "path";
 import { copy, CopyOptions } from "./commands/copy.js";
 import { exec, ExecOptions } from "./commands/exec.js";
@@ -84,7 +85,7 @@ export class Builder implements Commands {
 
     tmpdir() {
         if (!this._tmpdir) {
-            this._tmpdir = mkdtempSync('becomposable-memo-');
+            this._tmpdir = mkdtempSync(join(os.tmpdir(), 'becomposable-memo-'));
         }
         return this._tmpdir;
     }

@@ -1,5 +1,5 @@
-import { ExecutionRunStatus } from "./interaction.js";
-import { SupportedEmbeddingTypes } from "./project.js";
+import { ExecutionRunStatus } from './interaction.js';
+import { SupportedEmbeddingTypes } from './project.js';
 
 export interface RunListingQueryOptions {
     project?: string;
@@ -18,6 +18,15 @@ export interface RunListingFilters {
     fromDate?: string,
     toDate?: string,
     parent?: string | false,
+}
+
+export interface VectorSearchQuery {
+    objectId?: string;
+    values?: number[];
+    text?: string;
+    image?: string;
+    threshold?: number;
+    type: SupportedEmbeddingTypes
 }
 
 export interface SimpleSearchQuery {
@@ -45,4 +54,8 @@ export interface InteractionSearchQuery extends SimpleSearchQuery {
     prompt?: string;
     tags?: string[];
     version?: number;
+}
+
+export interface ComplexSearchQuery extends ObjectSearchQuery {
+    vector?: VectorSearchQuery;
 }

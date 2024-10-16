@@ -1,4 +1,4 @@
-import { ExecutionRun, ExecutionRunStatus, InteractionExecutionPayload } from '@becomposable/common';
+import { ExecutionRun, ExecutionRunStatus, InteractionExecutionPayload, NamedInteractionExecutionPayload } from '@becomposable/common';
 import { ComposableClient } from './client.js';
 
 export function EventSourceProvider(): Promise<typeof EventSource> {
@@ -62,7 +62,7 @@ export async function executeInteractionByName<P = any, R = any>(client: Composa
             ...payload,
             interaction,
             stream
-        },
+        } as NamedInteractionExecutionPayload,
     });
     if (stream) {
         if (response.status === ExecutionRunStatus.failed) {

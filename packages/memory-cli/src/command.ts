@@ -1,19 +1,34 @@
-import { BuildOptions } from '@becomposable/memory';
+import { BuildOptions, loadMemoryPack } from '@becomposable/memory';
 import { build } from '@becomposable/memory-commands';
 import { Command } from 'commander';
+import { readFile } from 'fs/promises';
 import { dirname } from 'path';
 import url from 'url';
 
 export function setupMemoCommand(command: Command, publish?: (file: string, name: string) => Promise<string>) {
-    return command.allowUnknownOption()
-        .option('-i, --indent <spaces>', 'The number of spaces to indent the JSON result. No identation is done by default.')
+    const buildCmd = new Command("build").description("Build a memory pack from a recipe script.");
+    buildCmd.allowUnknownOption()
+        .option('-i, --indent <spaces>', 'The number of spaces to indent the JSON result. A identation of 2 is used by default.')
         .option('-q, --quiet', 'Do not log anything to the console.')
         .option('-z, --gzip', 'Compress the output file using gzip.')
         .option('-o, --out <file>', 'The output file. Defaults to "memory.tar".')
+        .option('-t, --test', 'Test the memory script without building it.')
         .argument('<recipe>', 'The recipe script to build the memory from.')
         .action((_arg: string, options: Record<string, any>, command: Command) => {
             memoAction(command, { ...options, publish });
         })
+
+    const exportCmd = new Command("export").description("Export a JSON object from the memory pack given a mapping.");
+    exportCmd.option('--mmap <mapping>', 'The mapping to use. An inline JSON object or a path to a JSOn file prefixed with @')
+        .option('-i, --indent <spaces>', 'The number of spaces to indent the JSON result. No identation is done by default.')
+        .argument('<pack>', 'The uncompressed memory pack to use (i.e. a .tar file).')
+        .action((arg: string, options: Record<string, any>, command: Command) => {
+            exportAction(command, arg, options);
+        });
+
+    command.addCommand(buildCmd);
+    command.addCommand(exportCmd);
+    return command;
 }
 
 function memoAction(command: Command, options: Record<string, any>) {
@@ -67,4 +82,15 @@ function parseArgs(args: string[]) {
         }
     }
     return { script, vars };
+}
+
+async function exportAction(_command: Command, packFile: string, options: Record<string, any>) {
+    let mapParam = options.mmap;
+    if (mapParam.startsWith('@')) {
+        mapParam = await readFile(mapParam.substring(1), "utf-8");
+    }
+    const mapping: Record<string, any> = JSON.parse(mapParam);
+    const pack = await loadMemoryPack(packFile);
+    const obj = await pack.exportObject(mapping);
+    console.log(JSON.stringify(obj, null, options.indent || 2));
 }

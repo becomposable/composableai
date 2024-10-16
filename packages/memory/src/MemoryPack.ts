@@ -1,8 +1,7 @@
-import { readFile } from "fs/promises";
 import micromatch from 'micromatch';
+import { extname } from "path";
 import { AbstractContentSource } from "./ContentSource.js";
 import { loadTarIndex, TarEntryIndex, TarIndex } from "./utils/tar.js";
-import { extname } from "path";
 
 export const MEMORY_METADATA_ENTRY = "metadata.json";
 
@@ -198,61 +197,10 @@ export class TarMemoryPack extends MemoryPack {
 
 }
 
-export class JsonMemoryPack extends MemoryPack {
-    constructor(public context: any) {
-        super();
-    }
 
-    getMetadata(): Promise<Record<string, any>> {
-        return Promise.resolve(this.context);
-    }
-
-    getEntry(_path: string) {
-        return null;
-    }
-
-    getPaths(_filters?: string[]): string[] {
-        return [];
-    }
-
-    getEntries(_filters?: string[]): MemoryEntry[] {
-        return [];
-    }
-
-    getEntryContent(): Promise<Buffer | null> {
-        return Promise.resolve(null);
-    }
-
-    getEntryText(): Promise<string | null> {
-        return Promise.resolve(null);
-    }
-    getEntriesContent(_filters?: string[]): Promise<Buffer[]> {
-        return Promise.resolve([]);
-    }
-    getEntriesText(_filters?: string[]): Promise<string[]> {
-        return Promise.resolve([]);
-    }
-    static async loadFile(file: string) {
-        return new JsonMemoryPack(JSON.parse(await readFile(file, 'utf-8')));
-    }
-}
-
-export function loadMemoryPack(location: string, type?: 'tar' | 'json'): Promise<MemoryPack> {
+export function loadMemoryPack(location: string): Promise<MemoryPack> {
     // TODO we only support file paths as location for now
-    if (!type) {
-        if (location.endsWith('.tar')) {
-            type = 'tar';
-        } else if (location.endsWith('.json')) {
-            type = 'json';
-        } else {
-            throw new Error("Invalid memory pack file extension. Expecting .tar or .json");
-        }
-    }
-    if (type === 'tar') {
-        return TarMemoryPack.loadFile(location);
-    } else {
-        return JsonMemoryPack.loadFile(location);
-    }
+    return TarMemoryPack.loadFile(location);
 }
 
 function getTextEncodingForPath(path: string) {

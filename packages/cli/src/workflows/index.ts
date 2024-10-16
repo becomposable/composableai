@@ -53,7 +53,7 @@ export function registerWorkflowsCommand(program: Command) {
         .description("Execute a workflow by name")
         .option('-o, --objectId [objectIds...]', 'Optional object to execute the workflow on.')
         .option('--vars', 'The workflow vars as an inline JSON.')
-        .option('-f, --file [file]', 'The file containing workflow execution payload.')
+        .option('-f, --file [file]', 'A file containing workflow execution payload.')
         .action((workflowName: string, options: Record<string, any>) => {
             executeWorkflowByName(program, workflowName, options);
         });

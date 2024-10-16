@@ -6,7 +6,7 @@ export { ContentObject, DocxObject, JsonObject, MediaObject, PdfObject } from ".
 export type { MediaOptions } from "./ContentObject.js"
 export { AbstractContentSource, BufferSource, FileSource, TextSource } from "./ContentSource.js"
 export type { ContentSource, SourceSpec } from "./ContentSource.js"
-export { JsonMemoryPack, MemoryEntry, TarMemoryPack, loadMemoryPack } from "./MemoryPack.js"
+export { MemoryEntry, TarMemoryPack, loadMemoryPack } from "./MemoryPack.js"
 export type { MemoryPack, ProjectionProperties } from "./MemoryPack.js"
 export { MemoryPackBuilder } from "./MemoryPackBuilder.js"
 export type { FromOptions } from "./MemoryPackBuilder.js"

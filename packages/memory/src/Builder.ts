@@ -12,11 +12,11 @@ import { FromOptions, MemoryPackBuilder } from "./MemoryPackBuilder.js";
 export interface BuildOptions {
     indent?: number;
     /**
-     * the path to save the output. Defualts to 'memory'
-     * The path should not contain the file extension. The extension will be chosen based on the content.
-     * It will be either .json or .tar (if media files are present)
+     * the path to save the output. Defaults to 'memory.tar'.
+     * If no .tar extension is present it will be added
      */
     out?: string;
+
     /**
      * If set, suppress logs. Defaults to false.
      */
@@ -159,21 +159,21 @@ export class Builder implements Commands {
 
     async build(object: Record<string, any>) {
         try {
-            const { baseName, publishName } = this._getOutputNames();
+            let { fileName, publishName } = this._getOutputNames();
             // resolve all content objects values from the conext object
             object = await resolveContextObject(object);
             // write the memory to a file
-            let file = await this.memory.build(baseName, object);
+            fileName = await this.memory.build(fileName, object);
+            let target: string = fileName;
             if (publishName) {
-                const tarFile = file;
                 try {
-                    file = await this.options.publish!(tarFile, publishName);
+                    target = await this.options.publish!(fileName, publishName);
                 } finally {
-                    rmSync(tarFile);
+                    rmSync(fileName);
                 }
             }
-            this.options.quiet || console.log(`Memory saved to ${file}`);
-            return file;
+            this.options.quiet || console.log(`Memory saved to ${target}`);
+            return target;
         } finally {
             if (this._tmpdir) {
                 rmSync(this._tmpdir, { recursive: true });
@@ -181,12 +181,12 @@ export class Builder implements Commands {
         }
     }
 
-    private _getOutputNames(): { baseName: string, publishName: string | undefined } {
+    private _getOutputNames(): { fileName: string, publishName: string | undefined } {
         const options = this.options;
         if (!options.out) {
-            options.out = "memory";
+            options.out = "memory.tar";
         }
-        let baseName: string;
+        let fileName: string;
         let publishName: string | undefined;
         const out = options.out;
         if (out.startsWith("memory:")) {
@@ -196,12 +196,12 @@ export class Builder implements Commands {
             // force gzip when publishing
             options.gzip = true;
             // create a temporary path for the output
-            baseName = createTmpBaseName(this.tmpdir());
+            fileName = createTmpBaseName(this.tmpdir());
             publishName = out.substring("memory:".length);
         } else {
-            baseName = resolve(out || 'memory');
+            fileName = resolve(out);
         }
-        return { baseName, publishName };
+        return { fileName, publishName };
     }
 
 }
@@ -217,7 +217,7 @@ function resolveContextObject(object: Record<string, any>): Promise<Record<strin
 }
 
 function createTmpBaseName(tmpdir: string) {
-    return join(tmpdir, `.composable-memory-${Date.now()}`);
+    return join(tmpdir, `.composable-memory-${Date.now()}.tar`);
 }
 
 

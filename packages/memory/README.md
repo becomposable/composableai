@@ -3,7 +3,7 @@
 This is the core of the Composable memory Pack library.
 It defines the memory pack commands and provide an API to build and read memory packs.
 
-A memory pack is an indexed tar file containing media or text files and a `metadata.json` file which is defining the properties of a memory pack. The metadata is used to describe the memory and the other files in the tar can be used to hold the additional content you need in order to create a context for the interaction with a target LLM.
+A memory pack is an indexed tar file containing a `metadata.json` and other random files (images, documents, text files etc.). The `metadata.json` file is defining the properties of a memory pack. The metadata is used to describe the memory and the other files in the tar can be used to hold the additional content you need in order to create a context for the interaction with a target LLM.
 
 To build a memory pack you must use the memory pack API or the `memo` application provided by `@becomposable/memory-cli` package. The tar contains a special file named `.index` which is used to index the tar content so that the tar entries can be quickly extracted from the tar without nneeding to untar the entire content.
 
@@ -248,9 +248,8 @@ The `BuildOptions` options have the following shape:
 export interface BuildOptions {
     indent?: number;
     /**
-     * the path to save the output. Defaults to 'memory'
-     * The path should not contain the file extension. The extension will be chosen based on the content.
-     * It will be either .json or .tar (if media files are present)
+     * the path to save the output. Defaults to 'memory.tar'.
+     * If no .tar extension is present it will be added
      */
     out?: string;
 

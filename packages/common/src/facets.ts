@@ -33,6 +33,12 @@ export interface FacetBucket {
     count: number,
 }
 
+export interface FacetNameBucket {
+    name: string,
+    _id: string,
+    count: number,
+}
+
 export interface FacetResult {
     buckets: FacetBucket[]
 }

@@ -56,6 +56,21 @@ export interface InteractionSearchQuery extends SimpleSearchQuery {
     version?: number;
 }
 
+export interface RunSearchQuery extends SimpleSearchQuery {
+    offset?: number;
+    interaction?: string;
+    environment?: string;
+    model?: string;
+    status?: ExecutionRunStatus;
+    tags?: string[];
+    query?: string;
+    default_query_path?: string;
+    parent?: string[] | false;
+    object?: string;
+    start?: string;
+    end?: string;
+}
+
 export interface ComplexSearchQuery extends ObjectSearchQuery {
     vector?: VectorSearchQuery;
 }

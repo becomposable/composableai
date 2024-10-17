@@ -15,7 +15,10 @@ export function setupMemoCommand(command: Command, publish?: (file: string, name
         .option('-t, --test', 'Test the memory script without building it.')
         .argument('<recipe>', 'The recipe script to build the memory from.')
         .action((_arg: string, options: Record<string, any>, command: Command) => {
-            memoAction(command, { ...options, publish });
+            memoAction(command, { ...options, publish }).catch((err: Error) => {
+                console.error("Failed to run command: ", err);
+                process.exit(1);
+            })
         })
 
     const exportCmd = new Command("export").description("Export a JSON object from the memory pack given a mapping.");
@@ -23,7 +26,10 @@ export function setupMemoCommand(command: Command, publish?: (file: string, name
         .option('-i, --indent <spaces>', 'The number of spaces to indent the JSON result. No identation is done by default.')
         .argument('<pack>', 'The uncompressed memory pack to use (i.e. a .tar file).')
         .action((arg: string, options: Record<string, any>, command: Command) => {
-            exportAction(command, arg, options);
+            exportAction(command, arg, options).catch((err: Error) => {
+                console.error("Failed to run command: ", err);
+                process.exit(1);
+            })
         });
 
     command.addCommand(buildCmd);
@@ -39,7 +45,7 @@ function memoAction(command: Command, options: Record<string, any>) {
     if (!options.transpileDir) {
         options.transpileDir = dirname(url.fileURLToPath(import.meta.url));
     }
-    return build(script!, { ...options, vars } as BuildOptions);
+    return build(script!, { ...options, vars } as BuildOptions)
 }
 
 /**

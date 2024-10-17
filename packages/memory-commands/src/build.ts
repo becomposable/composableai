@@ -15,7 +15,7 @@ export function getBuilder() {
 
 export function build(script: string, options: BuildOptions = {}): Promise<void> {
     const builder = new Builder(options);
-    return als.run(builder, async () => {
+    return als.run(builder, () => {
         return _build(builder, script, options.transpileDir);
     });
 }

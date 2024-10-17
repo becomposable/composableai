@@ -1,4 +1,5 @@
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
+import { GenericCommandResponse } from "@becomposable/common";
 
 
 /**
@@ -13,6 +14,10 @@ export default class CommandsApi extends ApiTopic {
 
     async isNamespaceAvailable(name: string): Promise<boolean> {
         return this.get(`/namespaces/${name}/is_available`).then((response) => response.available);
+    }
+
+    async initSamples(): Promise<GenericCommandResponse> {
+        return this.post("/onboarding/init-samples");
     }
 
 }

@@ -36,15 +36,9 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
     }
 
     if (!type || !type.object_schema) {
-        log.warn(`Object ${objectId} has no schema`);
-        return { status: "failed", error: "no-schema" };
+        log.info(`Object ${objectId} has no schema`);
+        return { document: objectId, status: "skipped", message: "no schema defined on type" };
     }
-
-    /*if (!force && doc.properties?.etag === (doc.text_etag ?? md5(doc.text))) {
-        log.info("Properties already extracted", { objectId: objectId });
-        return { status: "skipped" };
-    }*/
-
 
     const getImageRef = () => {
         if (doc.content?.type?.startsWith("image/")) {

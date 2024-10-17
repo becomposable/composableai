@@ -2,11 +2,10 @@ import { WorkflowExecutionPayload } from "@becomposable/common";
 
 import { log, proxyActivities } from "@temporalio/workflow";
 import * as activities from "./activities/index.js";
-import { IterativeGenerationPayload, PartIndex } from "./types.js";
+import { PartIndex } from "./types.js";
 
 const {
     generateToc,
-    generateSection,
     generatePart
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "5 minute",
@@ -19,20 +18,9 @@ const {
     },
 });
 
-
 export async function iterativeGenerationWorkflow(payload: WorkflowExecutionPayload) {
-    const activitiesPayload = payload.vars as IterativeGenerationPayload;
-    const {
-        interaction,
-        memory,
-        input_mapping
-    } = activitiesPayload;
+    log.info(`Executing Iterative generation workflow.`);
 
-    console.log("interaction to execute : ", interaction);
-    console.log("memory pack group: ", memory);
-    console.log("input memory pack mapping: ", input_mapping);
-
-    log.info(`Generating TOC`);
     // the generateToc activity is retiurning the toc hierarchy.
     // It doesn't include extra TOC details like description etc.
     // To minimize the payload size only the hierarchy and the section/part names are returned
@@ -41,14 +29,13 @@ export async function iterativeGenerationWorkflow(payload: WorkflowExecutionPayl
     log.info(`Generated TOC: ${JSON.stringify(toc, null, 2)}`);
 
     if (toc.sections.length === 0) {
-        //TODO jow to handle this case?
+        //TODO how to handle this case?
         throw new Error("Nothing to generate: TOC is empty");
     }
 
     for (const section of toc.sections) {
-        console.log(section);
         log.info(`Generating section: ${formatPath(section)}`);
-        await generateSection(payload, section.path);
+        await generatePart(payload, section.path);
 
         if (section.parts) {
             for (const part of section.parts) {

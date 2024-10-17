@@ -1,7 +1,7 @@
 {
     "name": "@becomposable/memory-commands",
     "description": "Memory commands for memory recipe scripts",
-    "version": "0.37.0",
+    "version": "0.38.4",
     "type": "module",
     "types": "./lib/types/index.d.ts",
     "files": [
@@ -15,7 +15,7 @@
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo"
     },
     "devDependencies": {
-        "@types/node": "^20.8.9",
+        "@types/node": "^22.5.1",
         "ts-dual-module": "^0.6.3",
         "vitest": "^1.4.0"
     },

@@ -1,4 +1,4 @@
-import { WorkflowRuleInputType } from "@becomposable/common";
+import { ExecuteWorkflowPayload, WorkflowRuleInputType } from "@becomposable/common";
 import { Command } from "commander";
 import fs from 'fs';
 import { resolve, join, basename } from "path";
@@ -74,6 +74,25 @@ export async function getWorkflowRule(program: Command, objectId: string, option
     }
 
 }
+
+export async function executeWorkflowByName(program: Command, workflowName: string, options: Record<string, any>) {
+    console.log("Executing workflow", workflowName, options);
+    const { objectId, vars, file } = options;
+
+    let mergedConfig = {
+        objectIds: objectId ? objectId : [],
+        vars: vars || {},
+    } as ExecuteWorkflowPayload;
+
+    if (file) {
+        const payload = JSON.parse(fs.readFileSync(file, 'utf-8'));
+        Object.assign(mergedConfig, payload);
+    }
+
+    const res = await getClient(program).workflows.execute(workflowName, mergedConfig);
+    console.log(res);
+}
+
 
 export async function executeWorkflowRule(program: Command, workflowId: string, options: Record<string, any>) {
     console.log("Executing workflow", workflowId, options);

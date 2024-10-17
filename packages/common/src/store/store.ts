@@ -1,8 +1,8 @@
-import { SearchPayload } from "../payload.js";
-import { SupportedEmbeddingTypes } from "../project.js";
-import { ObjectSearchQuery } from "../query.js";
-import { BaseObject } from "./common.js";
-import { RenditionProperties } from "./index.js";
+import { SearchPayload } from '../payload.js';
+import { SupportedEmbeddingTypes } from '../project.js';
+import { ComplexSearchQuery } from '../query.js';
+import { BaseObject } from './common.js';
+import { RenditionProperties } from './index.js';
 
 export enum ContentObjectStatus {
     created = 'created',
@@ -74,19 +74,6 @@ export interface CreateContentObjectPayload<T = any> extends Partial<Omit<Conten
 export interface ContentObjectTypeRef {
     id: string;
     name: string;
-}
-
-export interface ComplexSearchQuery extends ObjectSearchQuery {
-    vector?: VectorSearchQuery;
-}
-
-export interface VectorSearchQuery {
-    objectId?: string;
-    values?: number[];
-    text?: string;
-    image?: string;
-    threshold?: number;
-    type: SupportedEmbeddingTypes
 }
 
 export interface ComplexSearchPayload extends Omit<SearchPayload, 'query'> {

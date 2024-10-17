@@ -1,8 +1,8 @@
-import { Command } from "commander";
-import { getClient } from "../client.js"
 import { ComposableClient, StreamSource } from "@becomposable/client";
+import { Command } from "commander";
 import { createReadStream } from "fs";
 import { readableToWebStream } from "node-web-stream-adapters";
+import { getClient } from "../client.js";
 
 export function getPublishMemoryAction(program: Command) {
     return (file: string, name: string) => {
@@ -12,12 +12,10 @@ export function getPublishMemoryAction(program: Command) {
 }
 
 async function publishMemory(client: ComposableClient, file: string, name: string) {
-    const fileId = `memories/${name}`;
     const stream = readableToWebStream(createReadStream(file));
-    await client.memory.uploadMemoryPack(new StreamSource(stream,
+    const path = await client.memory.uploadMemoryPack(new StreamSource(stream,
         `${name}.tar.gz`,
-        "application/gzip",
-        fileId
+        "application/gzip"
     ));
-    return fileId;
+    return path;
 }

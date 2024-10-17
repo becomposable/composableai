@@ -95,12 +95,14 @@ export async function createProfile(name?: string, target?: string) {
         });
     }
     if (!target) {
+        // only show local and staging in dev mode
+        const choices = config.isDevMode ? ['local', 'staging', 'preview', 'prod', 'custom'] : ['preview', 'prod'];
         questions.push({
             type: 'select',
             name: 'target',
             message: "Target environment",
-            choices: ['local', 'staging', 'preview', 'prod', 'custom'],
-            initial: 'staging',
+            choices,
+            initial: choices[0],
         });
     }
 

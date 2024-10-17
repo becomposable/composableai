@@ -1,6 +1,7 @@
-import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
-import { ComplexSearchPayload, ComputeObjectFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, ExportPropertiesPayload, ExportPropertiesResponse, FacetResult, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, ObjectSearchPayload, ObjectSearchQuery } from "@becomposable/common";
-import { StreamSource } from "../StreamSource.js";
+import { ApiTopic, ClientBase } from '@becomposable/api-fetch-client';
+import { ComplexSearchPayload, ComputeObjectFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, ExportPropertiesPayload, ExportPropertiesResponse, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, ObjectSearchPayload, ObjectSearchQuery } from '@becomposable/common';
+
+import { StreamSource } from '../StreamSource.js';
 
 export interface UploadContentObjectPayload extends Omit<CreateContentObjectPayload, 'content'> {
     content?: StreamSource | File | {
@@ -79,10 +80,7 @@ export class ObjectsApi extends ApiTopic {
         });
     }
 
-    search(payload: ComplexSearchPayload): Promise<{
-        result: ContentObjectItem[],
-        facets: FacetResult
-    }> {
+    search(payload: ComplexSearchPayload): Promise<ContentObjectItem[]> {
         return this.post("/search", {
             payload
         });

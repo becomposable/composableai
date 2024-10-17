@@ -15,7 +15,7 @@ export * from "./activities/extractDocumentText.js";
 export * from "./activities/generateDocumentProperties.js";
 export * from "./activities/generateEmbeddings.js";
 export * from "./activities/generateImageRendition.js";
-export * from "./activities/guessOrCreateDocumentType.js";
+export * from "./activities/generateOrAssignContentType.js";
 export * from "./activities/setDocumentStatus.js";
 
 export * from "./activities/advanced/createDocumentTypeFromInteractionRun.js";

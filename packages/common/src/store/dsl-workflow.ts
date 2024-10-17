@@ -90,7 +90,15 @@ export interface ActivityFetchSpec {
     on_not_found?: "ignore" | "throw";
 }
 
-export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<string, any>> {
+export interface DSLWorkflowStepBase {
+    /**
+     * The type fo the step.
+     * If not set defaults to "activity"
+     */
+    type?: "activity" | "workflow";
+}
+
+export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<string, any>> extends DSLWorkflowStepBase {
     /**
      * The name of the activity function
      */
@@ -165,12 +173,48 @@ export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<str
     options?: DSLActivityOptions;
 }
 
-export interface DSLWorkflowSpec {
+export interface DSLRunWorkflowSpec extends DSLWorkflowStepBase {
+    type: "workflow";
+    // the workflow endpoint to run
+    name: string;
+    // whether or not to wait for the workflow to finish.
+    // default is false. (the parent workflow will await for the workflow to finish)
+    async?: boolean;
+    /**
+     * The name of the workflow variable that will store the result of the child workflow (if async the workflow id is stored)
+     * If not specified the result will not be stored
+     * The parameters describe how the actual parameters will be obtained from the worlkfow execution vars.
+     * since it may contain references to workflow execution vars.
+     */
+    output?: string;
+    options?: {
+        memo?: Record<string, any>;
+        retry?: DSLRetryPolicy;
+        searchAttributes?: Record<string, string[] | number[] | boolean[] | Date[]>;
+        taskQueue?: string;
+        workflowExecutionTimeout?: StringValue | number;
+        workflowRunTimeout?: StringValue | number;
+        workflowTaskTimeout?: StringValue | number;
+        workflowId?: string;
+        cronSchedule?: string;
+        //TODO
+        //cancellationType
+        //parentClosePolicy
+        //versioningIntent
+        //workflowIdReusePolicy
+    }
+}
+
+export type DSLStepSpec = DSLActivitySpec | DSLRunWorkflowSpec;
+
+export interface DSLWorkflowSpecBase {
     name: string;
     description?: string;
     tags?: string[];
 
-    activities: DSLActivitySpec[];
+    steps?: DSLStepSpec[] | never;
+    activities?: DSLActivitySpec[] | never;
+
     // a dictionary of vars to initialize the workflow execution vars
     // Initial vars cannot contains references to other vars
     vars: Record<string, any>;
@@ -182,9 +226,28 @@ export interface DSLWorkflowSpec {
     debug_mode?: boolean;
 }
 
-export interface DSLWorkflowDefinition extends BaseObject, DSLWorkflowSpec {
+export interface DSLWorkflowSpecWithSteps extends DSLWorkflowSpecBase {
+    steps: DSLStepSpec[];
+    activities?: never;
+}
+
+export interface DSLWorkflowSpecWithActivities extends DSLWorkflowSpecBase {
+    steps?: never;
+    activities: DSLActivitySpec[];
+}
+
+/**
+ * activities and steps fields are mutally exclusive
+ * steps was added after activities and may contain a mix of activities and other tasks like exec child workflows.
+ * For backward compatibility we keep the activities field as a fallback but one should use one or the other not both.
+ */
+export type DSLWorkflowSpec = DSLWorkflowSpecWithSteps | DSLWorkflowSpecWithActivities;
+
+export interface DSLWorkflowDefinition extends BaseObject, DSLWorkflowSpecBase {
     // an optional JSON schema to describe the input vars of the workflow.
     input_schema?: Record<string, any>;
+    activities?: DSLActivitySpec[];
+    steps?: DSLStepSpec[];
 }
 
 export interface WorkflowDefinitionRef {

@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/blobs",
-    "version": "0.38.3",
+    "version": "0.38.4",
     "type": "module",
     "description": "Blobs abstraction",
     "main": "./lib/esm/index.js",

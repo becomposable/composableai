@@ -18,14 +18,6 @@ export enum Permission {
     env_manage = "environment:manage",
 
     project_manage = "project:manage",
-    /**
-     * @deprecated Use api_key_create (since 0.38.4)
-     */
-    project_key_create = "project:key:create",
-    /**
-     * @deprecated Use api_key_read (since 0.38.4)
-     */
-    project_key_read = "project:key:read",
 
     api_key_create = "api_key:create",
     api_key_read = "api_key:read",
@@ -44,11 +36,6 @@ export enum Permission {
     content_admin = "content:admin", //manage schemas, workflows, rules
 
     workflow_run = "workflow:run",
-
-    /**
-     * @deprecated Use account_member (since 0.38.4)
-     */
-    access_protected = "access_protected",
 }
 
 export enum AccessControlledResource {

@@ -101,6 +101,7 @@ async function startChildWorkflow(step: DSLChildWorkflowStep, payload: DSLWorkfl
         ...step.options,
         args: [{
             ...payload,
+            workflow: step.spec,
             vars: resolvedVars
         }]
     });
@@ -118,7 +119,8 @@ async function executeChildWorkflow(step: DSLChildWorkflowStep, payload: DSLWork
         ...step.options,
         args: [{
             ...payload,
-            vars: resolvedVars
+            workflow: step.spec,
+            vars: resolvedVars,
         }]
     });
 

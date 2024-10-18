@@ -176,8 +176,6 @@ describe('DSL Workflow with chld workflows', () => {
             taskQueue,
         }));
 
-        console.log("##########", result);
-
         expect(result).toEqual([`Parent: Hello, ${name}!`, `DSL Child: Hello, ${name}!`]);
 
     });

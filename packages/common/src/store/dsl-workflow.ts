@@ -217,6 +217,9 @@ export interface DSLWorkflowSpecBase {
     tags?: string[];
 
     steps?: DSLWorkflowStep[] | never;
+    /**
+     * @deprecated use steps instead
+     */
     activities?: DSLActivitySpec[] | never;
 
     // a dictionary of vars to initialize the workflow execution vars
@@ -232,11 +235,20 @@ export interface DSLWorkflowSpecBase {
 
 export interface DSLWorkflowSpecWithSteps extends DSLWorkflowSpecBase {
     steps: DSLWorkflowStep[];
+    /**
+     * @deprecated use steps instead
+     */
     activities?: never;
 }
 
+/**
+ * @deprecated use steps instead
+ */
 export interface DSLWorkflowSpecWithActivities extends DSLWorkflowSpecBase {
     steps?: never;
+    /**
+     * @deprecated use steps instead
+     */
     activities: DSLActivitySpec[];
 }
 

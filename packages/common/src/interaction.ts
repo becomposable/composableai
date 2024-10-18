@@ -232,7 +232,7 @@ export interface ExecutionRunRef
     interaction: InteractionRef;
 }
 
-export const ExecutionRunRefSelect = "-result -parameters -result_schema -prompt";
+export const ExecutionRunRefSelect = "-prompt";
 
 export interface InteractionExecutionConfiguration {
     environment?: string;

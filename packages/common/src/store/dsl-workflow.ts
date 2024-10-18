@@ -95,10 +95,10 @@ export interface DSLWorkflowStepBase {
      * The type fo the step.
      * If not set defaults to "activity"
      */
-    type?: "activity" | "workflow";
+    type: "activity" | "workflow";
 }
 
-export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<string, any>> extends DSLWorkflowStepBase {
+export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<string, any>> {
     /**
      * The name of the activity function
      */
@@ -173,7 +173,11 @@ export interface DSLActivitySpec<PARAMS extends Record<string, any> = Record<str
     options?: DSLActivityOptions;
 }
 
-export interface DSLRunWorkflowSpec extends DSLWorkflowStepBase {
+export interface DSLActivityStep<PARAMS extends Record<string, any> = Record<string, any>> extends DSLActivitySpec<PARAMS>, DSLWorkflowStepBase {
+    type: "activity";
+}
+
+export interface DSLChildWorkflowStep extends DSLWorkflowStepBase {
     type: "workflow";
     // the workflow endpoint to run
     name: string;
@@ -205,14 +209,14 @@ export interface DSLRunWorkflowSpec extends DSLWorkflowStepBase {
     }
 }
 
-export type DSLStepSpec = DSLActivitySpec | DSLRunWorkflowSpec;
+export type DSLWorkflowStep = DSLActivityStep | DSLChildWorkflowStep;
 
 export interface DSLWorkflowSpecBase {
     name: string;
     description?: string;
     tags?: string[];
 
-    steps?: DSLStepSpec[] | never;
+    steps?: DSLWorkflowStep[] | never;
     activities?: DSLActivitySpec[] | never;
 
     // a dictionary of vars to initialize the workflow execution vars
@@ -227,7 +231,7 @@ export interface DSLWorkflowSpecBase {
 }
 
 export interface DSLWorkflowSpecWithSteps extends DSLWorkflowSpecBase {
-    steps: DSLStepSpec[];
+    steps: DSLWorkflowStep[];
     activities?: never;
 }
 
@@ -247,7 +251,7 @@ export interface DSLWorkflowDefinition extends BaseObject, DSLWorkflowSpecBase {
     // an optional JSON schema to describe the input vars of the workflow.
     input_schema?: Record<string, any>;
     activities?: DSLActivitySpec[];
-    steps?: DSLStepSpec[];
+    steps?: DSLWorkflowStep[];
 }
 
 export interface WorkflowDefinitionRef {

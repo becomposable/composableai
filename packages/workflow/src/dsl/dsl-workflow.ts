@@ -2,8 +2,7 @@ import {
     DSLActivityExecutionPayload,
     DSLActivityOptions,
     DSLActivitySpec,
-    DSLRunWorkflowSpec,
-    DSLStepSpec,
+    DSLChildWorkflowStep,
     DSLWorkflowExecutionPayload,
     WorkflowExecutionPayload
 } from "@becomposable/common";
@@ -69,25 +68,31 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
 
     log.info("Executing workflow", { payload });
 
-    const steps: DSLStepSpec[] = definition.steps || definition.activities;
-
-    for (const step of steps) {
-        const stepType = step.type ?? 'activity';
-        if (stepType === 'workflow') {
-            const childWorkflowStep = step as DSLRunWorkflowSpec;
-            if (childWorkflowStep.async) {
-                await startChildWorkflow(childWorkflowStep, payload, vars, basePayload.debug_mode);
-            } else {
-                await executeChildWorkflow(childWorkflowStep, payload, vars, basePayload.debug_mode);
+    if (definition.steps) {
+        for (const step of definition.steps) {
+            const stepType = step.type;
+            if (stepType === 'workflow') {
+                const childWorkflowStep = step as DSLChildWorkflowStep;
+                if (childWorkflowStep.async) {
+                    await startChildWorkflow(childWorkflowStep, payload, vars, basePayload.debug_mode);
+                } else {
+                    await executeChildWorkflow(childWorkflowStep, payload, vars, basePayload.debug_mode);
+                }
+            } else { // activity
+                await runActivity(step as DSLActivitySpec, basePayload, vars, defaultProxy, defaultOptions);
             }
-        } else { // activity
-            await runActivity(step as DSLActivitySpec, basePayload, vars, defaultProxy, defaultOptions);
         }
+    } else if (definition.activities) { // legacy support
+        for (const activity of definition.activities) {
+            await runActivity(activity, basePayload, vars, defaultProxy, defaultOptions);
+        }
+    } else {
+        throw new Error("No steps or activities found in the workflow definition");
     }
     return vars.getValue(definition.result || 'result');
 }
 
-async function startChildWorkflow(step: DSLRunWorkflowSpec, payload: DSLWorkflowExecutionPayload, vars: Vars, debug_mode?: boolean) {
+async function startChildWorkflow(step: DSLChildWorkflowStep, payload: DSLWorkflowExecutionPayload, vars: Vars, debug_mode?: boolean) {
     const resolvedVars = vars.resolve();
     if (debug_mode) {
         log.debug(`Workflow vars before starting child workflow ${step.name}`, { vars: resolvedVars });
@@ -104,7 +109,7 @@ async function startChildWorkflow(step: DSLRunWorkflowSpec, payload: DSLWorkflow
     }
 }
 
-async function executeChildWorkflow(step: DSLRunWorkflowSpec, payload: DSLWorkflowExecutionPayload, vars: Vars, debug_mode?: boolean) {
+async function executeChildWorkflow(step: DSLChildWorkflowStep, payload: DSLWorkflowExecutionPayload, vars: Vars, debug_mode?: boolean) {
     const resolvedVars = vars.resolve();
     if (debug_mode) {
         log.debug(`Workflow vars before excuting child workflow ${step.name}`, { vars: resolvedVars });

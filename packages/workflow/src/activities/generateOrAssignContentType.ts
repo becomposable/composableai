@@ -7,7 +7,7 @@ import { InteractionExecutionParams, executeInteractionFromActivity } from "./ex
 const INT_SELECT_DOCUMENT_TYPE = "sys:SelectDocumentType"
 const INT_GENERATE_METADATA_MODEL = "sys:GenerateMetadataModel"
 
-export interface GuessOrCreateDocumentTypeParams extends InteractionExecutionParams {
+export interface GenerateOrAssignContentTypeParams extends InteractionExecutionParams {
     typesHint?: string[];
     /**
      * truncate the input doc text to the specified max_tokens
@@ -24,12 +24,12 @@ export interface GuessOrCreateDocumentTypeParams extends InteractionExecutionPar
     }
 }
 
-export interface GuessOrCreateDocumentType extends DSLActivitySpec<GuessOrCreateDocumentTypeParams> {
-    name: 'guessOrCreateDocumentType';
+export interface GenerateOrAssignContentType extends DSLActivitySpec<GenerateOrAssignContentTypeParams> {
+    name: 'generateOrAssignContentType';
 }
 
-export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPayload) {
-    const context = await setupActivity<GuessOrCreateDocumentTypeParams>(payload);
+export async function generateOrAssignContentType(payload: DSLActivityExecutionPayload) {
+    const context = await setupActivity<GenerateOrAssignContentTypeParams>(payload);
     const { params, client, objectId } = context;
 
     const interactionName = params.interactionNames?.selectDocumentType ?? INT_SELECT_DOCUMENT_TYPE;
@@ -38,23 +38,19 @@ export async function guessOrCreateDocumentType(payload: DSLActivityExecutionPay
     log.info("SelectDocumentType for object: " + objectId, { payload });
 
     const object = await client.objects.retrieve(objectId, "+text");
+
+    //Expects object.type to be null on first ingestion of content
+    //User initiated Content Type change via the Composable UI,
+    //sets object.type to null when they let Composable choose for them.
+    //sets object.type to chosen type (thus non-null) when user picks a type.
     if (object.type) {
         log.warn(`Object ${objectId} has already a type. Skipping type creation.`);
         return { status: "skipped", message: "Object already has a type: " + object.type.name };
     }
-
+    
     if (!object || (!object.text && !object.content?.type?.startsWith("image/") && !object.content?.type?.startsWith("application/pdf"))) {
         log.info(`Object ${objectId} not found or text is empty and not an image`, { object });
         return { status: "failed", error: "no-text" };
-    }
-
-    if (object.type) {
-        log.warn(`Object ${objectId} has already a type. Skipping type creation.`);
-        return {
-            id: object.type,
-            isNew: false,
-            message: "Object already has a type"
-        };
     }
 
     const types = await client.types.list();

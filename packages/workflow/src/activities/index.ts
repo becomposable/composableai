@@ -11,6 +11,6 @@ export { extractDocumentText } from "./extractDocumentText.js";
 export { generateDocumentProperties } from "./generateDocumentProperties.js";
 export { generateEmbeddings } from "./generateEmbeddings.js";
 export { generateImageRendition } from "./generateImageRendition.js";
-export { guessOrCreateDocumentType } from "./guessOrCreateDocumentType.js";
+export { generateOrAssignContentType } from "./generateOrAssignContentType.js";
 export { setDocumentStatus } from "./setDocumentStatus.js";
 

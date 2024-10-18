@@ -9,7 +9,7 @@ export interface FromOptions {
 }
 
 export class MemoryPackBuilder {
-    baseContext: any;
+    baseMetadata: Record<string, any> = {};
     entries: { [path: string]: ContentSource } = {};
 
     constructor(public builder: Builder) {
@@ -17,13 +17,13 @@ export class MemoryPackBuilder {
 
     async load(memory: MemoryPack, options: FromOptions = {}) {
         const files = options.files || [];
-        // do not fetch the context entry an the .index file
+        // do not fetch the context entry an the metadata.json file
         files.push(`!${MEMORY_METADATA_ENTRY}`);
         const entries = memory.getEntries(files);
         for (const entry of entries) {
             this.add(entry.name, entry);
         }
-        this.baseContext = await memory.getMetadata(options.projection);
+        this.baseMetadata = await memory.getMetadata(options.projection);
     }
 
     add(path: string, content: ContentSource) {
@@ -31,11 +31,8 @@ export class MemoryPackBuilder {
         this.entries[path] = content;
     }
 
-    stringifyContext(context: object) {
-        return JSON.stringify(context, undefined, this.builder.options.indent || undefined);
-    }
-
-    async build(file: string, context: object) {
+    async build(file: string, metadata: object) {
+        metadata = { ...this.baseMetadata, ...metadata };
         if (!file.endsWith('.tar')) {
             file += '.tar';
         }
@@ -48,7 +45,10 @@ export class MemoryPackBuilder {
             const source = this.entries[key];
             tar.add(key, await source.getContent());
         }
-        tar.add(MEMORY_METADATA_ENTRY, Buffer.from(this.stringifyContext(context), "utf-8"));
+        tar.add(MEMORY_METADATA_ENTRY, Buffer.from(
+            JSON.stringify(metadata, undefined, this.builder.options.indent || undefined),
+            "utf-8")
+        );
         await tar.build();
         return file;
     }

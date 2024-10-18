@@ -4,10 +4,8 @@ import { Builder } from "./Builder";
 import { loadTarIndex } from "./utils/tar";
 import { loadMemoryPack, MEMORY_METADATA_ENTRY } from "./MemoryPack";
 
-const memoryBaseName = "test-base-memory";
-const memoryBaseFile = memoryBaseName + '.tar';
-const memoryName = "test-memory"
-const memoryFile = memoryName + '.tar';
+const memoryBaseFile = 'test-base-memory.tar';
+const memoryFile = 'test-memory.tar';
 const tmpdir = mkdtempSync("composable-memory-pack-test-");
 
 afterAll(() => {
@@ -19,7 +17,7 @@ afterAll(() => {
 describe("Builder", () => {
     test("create base memory pack", async () => {
         const builder = new Builder({
-            out: memoryBaseName,
+            out: memoryBaseFile,
         });
 
         await builder.exec(`printf 'file1 from base memory' > ${tmpdir}/file1.txt`);
@@ -40,7 +38,7 @@ describe("Builder", () => {
 
     test("create memory pack override", async () => {
         const builder = new Builder({
-            out: memoryName,
+            out: memoryFile,
         });
 
         await builder.from(memoryBaseFile, {

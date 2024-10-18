@@ -191,6 +191,11 @@ export interface DSLChildWorkflowStep extends DSLWorkflowStepBase {
      * since it may contain references to workflow execution vars.
      */
     output?: string;
+    /**
+     * In case the dslWorkflow is used as a child workflow the spec is used to define the child workflow.
+     * If spec is defined then the name must be "dslWorkflow"
+     */
+    spec?: DSLWorkflowSpec;
     options?: {
         memo?: Record<string, any>;
         retry?: DSLRetryPolicy;

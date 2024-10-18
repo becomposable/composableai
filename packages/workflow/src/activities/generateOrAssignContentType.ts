@@ -40,7 +40,9 @@ export async function generateOrAssignContentType(payload: DSLActivityExecutionP
     const object = await client.objects.retrieve(objectId, "+text");
 
     //Expects object.type to be null on first ingestion of content
-    //User can set type manually via "Change Content type" via change-type.ts
+    //User initiated Content Type change via the Composable UI,
+    //sets object.type to null when they let Composable choose for them.
+    //sets object.type to chosen type (thus non-null) when user picks a type.
     if (object.type) {
         log.warn(`Object ${objectId} has already a type. Skipping type creation.`);
         return { status: "skipped", message: "Object already has a type: " + object.type.name };

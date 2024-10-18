@@ -2,13 +2,14 @@ import {
     DSLActivityExecutionPayload,
     DSLActivityOptions,
     DSLActivitySpec,
+    DSLChildWorkflowStep,
     DSLWorkflowExecutionPayload,
     WorkflowExecutionPayload
 } from "@becomposable/common";
-import { ActivityOptions, log, proxyActivities } from "@temporalio/workflow";
+import { ActivityInterfaceFor, ActivityOptions, executeChild, log, proxyActivities, startChild, UntypedActivities } from "@temporalio/workflow";
+import ms, { StringValue } from 'ms';
 import { ActivityParamNotFound, NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
 import { Vars } from "./vars.js";
-import ms, { StringValue } from 'ms';
 
 interface BaseActivityPayload extends WorkflowExecutionPayload {
     workflow_name: string;
@@ -67,50 +68,111 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
 
     log.info("Executing workflow", { payload });
 
-    for (const activity of definition.activities) {
-        if (basePayload.debug_mode) {
-            log.debug(`Workflow vars before executing activity ${activity.name}`, { vars: vars.resolve() });
-        }
-        if (activity.condition && !vars.match(activity.condition)) {
-            log.info("Activity skiped: condition not satisfied", activity.condition);
-            continue;
-        }
-        const importParams = vars.createImportVars(activity.import);
-        const executionPayload = dslActivityPayload(basePayload, activity, importParams);
-        log.info("Executing activity: " + activity.name, { payload: executionPayload });
-
-        let proxy = defaultProxy;
-        if (activity.options) {
-            const options = computeActivityOptions(activity.options, defaultOptions);
-            log.debug("Use custom activity options", {
-                activityName: activity.name,
-                activityOptions: options,
-            });
-            proxy = proxyActivities(options)
-        } else {
-            log.debug("Use default activity options", {
-                activityName: activity.name,
-                activityOptions: defaultOptions,
-            });
-        }
-
-        const fn = proxy[activity.name];
-        if (activity.parallel) {
-            //TODO execute in parallel
-            log.info("Parallel execution not yet implemented");
-        } else {
-            log.info("Executing activity: " + activity.name, { importParams });
-            const result = await fn(executionPayload);
-            if (activity.output) {
-                vars.setValue(activity.output, result);
+    if (definition.steps) {
+        for (const step of definition.steps) {
+            const stepType = step.type;
+            if (stepType === 'workflow') {
+                const childWorkflowStep = step as DSLChildWorkflowStep;
+                if (childWorkflowStep.async) {
+                    await startChildWorkflow(childWorkflowStep, payload, vars, basePayload.debug_mode);
+                } else {
+                    await executeChildWorkflow(childWorkflowStep, payload, vars, basePayload.debug_mode);
+                }
+            } else { // activity
+                await runActivity(step as DSLActivitySpec, basePayload, vars, defaultProxy, defaultOptions);
             }
         }
-        if (basePayload.debug_mode) {
-            log.debug(`Workflow vars after executing activity ${activity.name}`, { vars: vars.resolve() });
+    } else if (definition.activities) { // legacy support
+        for (const activity of definition.activities) {
+            await runActivity(activity, basePayload, vars, defaultProxy, defaultOptions);
         }
-
+    } else {
+        throw new Error("No steps or activities found in the workflow definition");
     }
     return vars.getValue(definition.result || 'result');
+}
+
+async function startChildWorkflow(step: DSLChildWorkflowStep, payload: DSLWorkflowExecutionPayload, vars: Vars, debug_mode?: boolean) {
+    const resolvedVars = vars.resolve();
+    if (debug_mode) {
+        log.debug(`Workflow vars before starting child workflow ${step.name}`, { vars: resolvedVars });
+    }
+    const handle = await startChild(step.name, {
+        ...step.options,
+        args: [{
+            ...payload,
+            vars: resolvedVars
+        }]
+    });
+    if (step.output) {
+        vars.setValue(step.output, handle.workflowId);
+    }
+}
+
+async function executeChildWorkflow(step: DSLChildWorkflowStep, payload: DSLWorkflowExecutionPayload, vars: Vars, debug_mode?: boolean) {
+    const resolvedVars = vars.resolve();
+    if (debug_mode) {
+        log.debug(`Workflow vars before excuting child workflow ${step.name}`, { vars: resolvedVars });
+    }
+    const result = await executeChild(step.name, {
+        ...step.options,
+        args: [{
+            ...payload,
+            vars: resolvedVars
+        }]
+    });
+
+    if (step.output) {
+        vars.setValue(step.output, result);
+        if (debug_mode) {
+            log.debug(`Workflow vars after executing child workflow ${step.name}`, { vars: vars.resolve() });
+        }
+    } else if (debug_mode) {
+        log.debug(`Workflow vars after executing child workflow ${step.name}`, { vars: resolvedVars });
+    }
+}
+
+async function runActivity(activity: DSLActivitySpec, basePayload: BaseActivityPayload, vars: Vars, defaultProxy: ActivityInterfaceFor<UntypedActivities>, defaultOptions: ActivityOptions) {
+    if (basePayload.debug_mode) {
+        log.debug(`Workflow vars before executing activity ${activity.name}`, { vars: vars.resolve() });
+    }
+    if (activity.condition && !vars.match(activity.condition)) {
+        log.info("Activity skiped: condition not satisfied", activity.condition);
+        return;
+    }
+    const importParams = vars.createImportVars(activity.import);
+    const executionPayload = dslActivityPayload(basePayload, activity, importParams);
+    log.info("Executing activity: " + activity.name, { payload: executionPayload });
+
+    let proxy = defaultProxy;
+    if (activity.options) {
+        const options = computeActivityOptions(activity.options, defaultOptions);
+        log.debug("Use custom activity options", {
+            activityName: activity.name,
+            activityOptions: options,
+        });
+        proxy = proxyActivities(options)
+    } else {
+        log.debug("Use default activity options", {
+            activityName: activity.name,
+            activityOptions: defaultOptions,
+        });
+    }
+
+    const fn = proxy[activity.name];
+    if (activity.parallel) {
+        //TODO execute in parallel
+        log.info("Parallel execution not yet implemented");
+    } else {
+        log.info("Executing activity: " + activity.name, { importParams });
+        const result = await fn(executionPayload);
+        if (activity.output) {
+            vars.setValue(activity.output, result);
+        }
+    }
+    if (basePayload.debug_mode) {
+        log.debug(`Workflow vars after executing activity ${activity.name}`, { vars: vars.resolve() });
+    }
 }
 
 export function computeActivityOptions(customOptions: DSLActivityOptions, defaultOptions: ActivityOptions): ActivityOptions {
@@ -159,5 +221,3 @@ function convertDSLActivityOptions(options?: DSLActivityOptions): ActivityOption
     }
     return result;
 }
-
-  

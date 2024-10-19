@@ -1,9 +1,10 @@
 
 import { DSLWorkflowExecutionPayload } from "@becomposable/common";
-import { proxyActivities } from "@temporalio/workflow";
+import { log, proxyActivities } from "@temporalio/workflow";
 import { GetObject } from "../activities/getObjectFromStore.js";
 import * as activities from "../activities/index.js";
 import { NoDocumentFound } from "../errors.js";
+import { TextExtractionResult } from "../index.js";
 
 const {
     getObjectFromStore,
@@ -22,7 +23,7 @@ const {
 
 
 
-export async function generateObjectText(payload: DSLWorkflowExecutionPayload) {
+export async function generateObjectText(payload: DSLWorkflowExecutionPayload): Promise<TextExtractionResult> {
 
     const { objectIds } = payload;
     const objectId = objectIds[0];
@@ -45,6 +46,10 @@ export async function generateObjectText(payload: DSLWorkflowExecutionPayload) {
     }
 
     const converter = ConverterActivity.find(({ type }) => type.test(mimetype));
+    if (!converter) {
+        throw new NoDocumentFound(`No converter found for mimetype ${mimetype}`, objectIds);
+    }
+
     const res = await converter?.activity({
         ...payload,
         activity: {
@@ -54,7 +59,8 @@ export async function generateObjectText(payload: DSLWorkflowExecutionPayload) {
         workflow_name: "Generate Text",
     })
 
-    return { res, content: object.content }
+    log.info("Generated text for object", {res, objectId});
+    return res; 
 
 } 
 

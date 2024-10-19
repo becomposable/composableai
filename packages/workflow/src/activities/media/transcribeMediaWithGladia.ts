@@ -4,6 +4,7 @@ import { activityInfo, CompleteAsyncError, log } from "@temporalio/activity";
 import { FetchClient } from "api-fetch-client";
 import { setupActivity } from "../../dsl/setup/ActivityContext.js";
 import { NoDocumentFound } from "../../errors.js";
+import { TextExtractionResult, TextExtractionStatus } from "../../index.js";
 
 
 export interface TranscriptMediaParams {
@@ -15,11 +16,8 @@ export interface TranscriptMedia extends DSLActivitySpec<TranscriptMediaParams> 
     name: 'TranscribeMedia';
 }
 
-export interface TranscriptMediaResult {
-    id: string;
-    status: "completed" | "failed" | "skipped";
+export interface TranscriptMediaResult extends TextExtractionResult {
     message?: string;
-
 }
 
 const GLADIA_KEY = process.env.GLADIA_API_KEY;
@@ -31,7 +29,7 @@ export async function transcribeMedia(payload: DSLActivityExecutionPayload): Pro
     const object = await client.objects.retrieve(objectId, "+text");
 
     if (object.text && !params.force) {
-        return { id: objectId, status: "skipped", message: "text already present" }
+        return { hasText: false, objectId, status: TextExtractionStatus.skipped, message: "text already present and force not enabled" }
     }
 
     if (!object.content?.source) {

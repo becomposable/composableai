@@ -128,7 +128,7 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload) 
                 txt = fileBuffer.toString('utf8'); //TODO: add charset detection
                 break;
             }
-            return createResponse(doc, "", 'text-extract-failed', `Unsupported mime type: ${doc.content.type}`);
+            return createResponse(doc, doc.text ?? '', 'text-extract-failed', `Unsupported mime type: ${doc.content.type}`);
     }
 
 

@@ -7,7 +7,7 @@ import { OutputMemoryMeta, Toc, TocSection } from "./types.js";
 export interface ExecuteOptions {
     interaction: string;
     memory: string;
-    memory_mapping?: Record<string, string>;
+    memory_mapping?: Record<string, any>;
     environment?: string;
     model?: string;
     max_tokens?: number;
@@ -17,8 +17,10 @@ export interface ExecuteOptions {
 
 export async function execute<T = any>(client: ComposableClient, options: ExecuteOptions): Promise<ExecutionRun<any, T>> {
     return client.interactions.executeByName(options.interaction, {
-        data: `memory:$[options.memory}`,
-        memory_mapping: options.memory_mapping,
+        data: {
+            ...options.memory_mapping,
+            "@memory": options.memory
+        },
         result_schema: options.result_schema,
         config: {
             environment: options.environment,

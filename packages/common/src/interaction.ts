@@ -89,11 +89,6 @@ export interface Interaction {
     tags: string[];
     test_data?: JSONObject;
     result_schema?: JSONSchema4;
-    /**
-     * A default mapping which maps a memory pack to the interaction params.
-     * If not defined the memory pack metadata will be used as the interaction params
-     */
-    memory_mapping?: Record<string, string>;
     cache_policy?: CachePolicy;
     model: string;
     temperature?: number;
@@ -147,16 +142,11 @@ export interface InteractionForkPayload {
 
 export interface InteractionExecutionPayload {
     /**
-     * If a `memory:uri` reference is given then the data (i.e. interaction params)
-     * will be constructed from the resolved memory pack and the specified memory_mapping.
+     * If a `@memory` property exists on the input data then the value will be used as the value of a memory pack location.
+     * and the other proerties of the data will contain the memory pack mapping.
      */
     data?: Record<string, any> | `memory:${string}`;
     config?: InteractionExecutionConfiguration;
-    /**
-     * A memory pack to itnercation params mapping to overwrite the default mapping.
-     * Only used in conjunction with a `data` field which points to a `memory:uri` reference.
-     */
-    memory_mapping?: Record<string, string>;
     result_schema?: JSONSchema4;
     stream?: boolean;
     do_validate?: boolean;
@@ -201,9 +191,12 @@ export interface ExecutionRun<P = any, R = any> {
         scores?: Record<string, number>
     }
     result: R;
+    /**
+     * The parameters used to create the interaction.
+     * If the parameters contains the special property "@memory" it will be used
+     * to locate a meory pack and the other properties will be used as the memory pack mapping.
+     */
     parameters: P; //params used to create the interaction, only in varies on?
-    // optional memory mapping when using memory packs as input
-    memory_mapping?: Record<string, any>;
     tags?: string[];
     //TODO a string is returned when executing not the interaction object
     interaction: Interaction;

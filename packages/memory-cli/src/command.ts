@@ -22,7 +22,7 @@ export function setupMemoCommand(command: Command, publish?: (file: string, name
         })
 
     const exportCmd = new Command("export").description("Export a JSON object from the memory pack given a mapping.");
-    exportCmd.option('--mmap <mapping>', 'The mapping to use. An inline JSON object or a path to a JSOn file prefixed with @')
+    exportCmd.option('--map <mapping>', 'The mapping to use. An inline JSON object or a path to a JSOn file prefixed with @')
         .option('-i, --indent <spaces>', 'The number of spaces to indent the JSON result. No identation is done by default.')
         .argument('<pack>', 'The uncompressed memory pack to use (i.e. a .tar file).')
         .action((arg: string, options: Record<string, any>, command: Command) => {
@@ -91,7 +91,7 @@ function parseArgs(args: string[]) {
 }
 
 async function exportAction(_command: Command, packFile: string, options: Record<string, any>) {
-    let mapParam = options.mmap;
+    let mapParam = options.map;
     if (mapParam.startsWith('@')) {
         mapParam = await readFile(mapParam.substring(1), "utf-8");
     }

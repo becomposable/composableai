@@ -202,6 +202,10 @@ export class Config {
     }
 
     load() {
+        const stats = statSync(getConfigFile('dev'));
+        if (stats.isFile()) {
+            this.isDevMode = true;
+        }
         try {
             const data = readJsonFile(getConfigFile('profiles.json')) as ProfilesData;
             this.profiles = data.profiles;
@@ -209,10 +213,6 @@ export class Config {
                 this.use(data.default)
             } else {
                 this.current = undefined;
-            }
-            const stats = statSync(getConfigFile('dev'));
-            if (stats.isFile()) {
-                this.isDevMode = true;
             }
         } catch (err: any) {
             if (err.code !== 'ENOENT') {

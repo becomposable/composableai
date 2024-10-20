@@ -1,5 +1,3 @@
-export const MEMORY_INPUT_PREFIX = "memory:";
-
 /**
  * Payload to get a memory pack URL for the current project
  */

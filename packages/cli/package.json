@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/cli",
-    "version": "0.38.4",
+    "version": "0.39.0",
     "description": "Code generation for the interaction defined with Composable AI Studio",
     "type": "module",
     "bin": {

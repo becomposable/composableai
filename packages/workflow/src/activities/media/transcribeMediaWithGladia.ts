@@ -29,7 +29,7 @@ export async function transcribeMedia(payload: DSLActivityExecutionPayload): Pro
     const object = await client.objects.retrieve(objectId, "+text");
 
     if (object.text && !params.force) {
-        return { hasText: false, objectId, status: TextExtractionStatus.skipped, message: "text already present and force not enabled" }
+        return { hasText: true, objectId, status: TextExtractionStatus.skipped, message: "text already present and force not enabled" }
     }
 
     if (!object.content?.source) {

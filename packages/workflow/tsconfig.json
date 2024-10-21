@@ -48,9 +48,6 @@
       "path": "../common/tsconfig.json"
     },
     {
-      "path": "../memory/tsconfig.json"
-    },
-    {
       "path": "../client/tsconfig.json"
     }
   ]

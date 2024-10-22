@@ -31,7 +31,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
     const type = doc.type ? await client.types.retrieve(doc.type.id) : undefined;
 
     if (!doc?.text && !params.use_vision && !doc?.content?.type?.startsWith("image/")) {
-        log.warn(`Object ${objectId} not found or text is empty`, { doc });
+        log.warn(`Object ${objectId} not found or text is empty`);
         return { status: "failed", error: "no-text" }
     }
 

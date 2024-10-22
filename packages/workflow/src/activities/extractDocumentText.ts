@@ -6,6 +6,7 @@ import { manyToMarkdown } from '../conversion/pandoc.js';
 import { trasformPdfToMarkdown } from '../conversion/pdf.js';
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { NoDocumentFound } from '../errors.js';
+import { TextExtractionResult, TextExtractionStatus } from '../result-types.js';
 import { countTokens } from '../utils/tokens.js';
 
 //@ts-ignore
@@ -21,7 +22,7 @@ export interface ExtractDocumentText extends DSLActivitySpec<ExtractDocumentText
     projection?: never;
 }
 
-export async function extractDocumentText(payload: DSLActivityExecutionPayload) {
+export async function extractDocumentText(payload: DSLActivityExecutionPayload): Promise<TextExtractionResult> {
     const { client, objectId } = await setupActivity(payload);
 
     const r = await client.objects.find({
@@ -40,15 +41,15 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload) 
 
     if (!doc.content?.type || !doc.content?.source) {
         if (doc.text) {
-            return createResponse(doc, doc.text, 'text-already-extracted');
+            return createResponse(doc, doc.text, TextExtractionStatus.skipped, "Text present and no source or type");
         } else {
-            return createResponse(doc, "", 'text-not-found');
+            return createResponse(doc, "", TextExtractionStatus.error, "No source or type found");
         }
     }
 
     //skip if text already extracted and proper etag
     if (doc.text && doc.text.length > 0 && doc.text_etag === doc.content.etag) {
-        return createResponse(doc, doc.text, 'text-already-extracted');
+        return createResponse(doc, doc.text, TextExtractionStatus.skipped, "Text already extracted");
     }
 
     let fileBuffer: Buffer;
@@ -57,7 +58,7 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload) 
         fileBuffer = await file.readAsBuffer();
     } catch (e: any) {
         log.error(`Error reading file: ${e}`);
-        return createResponse(doc, "", 'text-extract-failed', e.message);
+        return createResponse(doc, "", TextExtractionStatus.error, e.message);
     }
 
 
@@ -128,7 +129,7 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload) 
                 txt = fileBuffer.toString('utf8'); //TODO: add charset detection
                 break;
             }
-            return createResponse(doc, "", 'text-extract-failed', `Unsupported mime type: ${doc.content.type}`);
+            return createResponse(doc, doc.text ?? '', TextExtractionStatus.skipped, `Unsupported mime type: ${doc.content.type}`);
     }
 
 
@@ -146,17 +147,17 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload) 
 
     await client.objects.update(doc.id, updateData);
 
-    return createResponse(doc, txt, 'text-extracted');
+    return createResponse(doc, txt, TextExtractionStatus.success);
 }
 
-function createResponse(doc: ContentObject, text: string, status: string, error?: string) {
+function createResponse(doc: ContentObject, text: string, status: TextExtractionStatus, message?: string): TextExtractionResult {
     return {
         status,
+        message,
         tokens: doc.tokens,
         len: text.length,
         objectId: doc.id,
         hasText: !!text,
-        error
     }
 
 }

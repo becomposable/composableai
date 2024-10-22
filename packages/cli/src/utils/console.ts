@@ -125,7 +125,7 @@ export class LogUpdate {
     }
 
     clear() {
-        if (this.last) {
+        if (this.last && this.stream.isTTY) {
             this.stream.clearLine(0);
             this.stream.cursorTo(0);
         }

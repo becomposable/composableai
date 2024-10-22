@@ -1,4 +1,3 @@
-import { Blobs } from "@becomposable/blobs";
 import { DSLActivityExecutionPayload, DSLActivitySpec, GladiaConfiguration } from "@becomposable/common";
 import { activityInfo, CompleteAsyncError, log } from "@temporalio/activity";
 import { FetchClient } from "api-fetch-client";
@@ -43,9 +42,7 @@ export async function transcribeMedia(payload: DSLActivityExecutionPayload): Pro
         throw new NoDocumentFound(`No source found for object ${objectId}`);
     }
 
-
-    const source = await Blobs.getFile(object.content.source);
-    const mediaUrl = await source.getDownloadUrl();
+    const mediaUrl = await client.store.objects.getContentSource(object.content.source).then(res => res.source);
 
     if (!mediaUrl) {
         throw new NoDocumentFound(`Error fetching source ${object.content.source}`);

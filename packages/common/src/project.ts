@@ -1,3 +1,4 @@
+import { SupportedIntegrations } from "./integrations.js";
 import { AccountRef } from "./user.js";
 
 export interface ICreateProjectPayload {
@@ -97,6 +98,7 @@ export interface Project {
     description?: string;
     account: string;
     configuration: ProjectConfiguration;
+    integrations: Map<string, any>;
     created_by: string,
     updated_by: string,
     created_at: Date;
@@ -126,4 +128,9 @@ export interface EmbeddingsStatusResponse {
         name?: string,
         type?: string
     }
+}
+
+export interface ProjectIntegrationListEntry {
+    id: SupportedIntegrations;
+    enabled: boolean;
 }

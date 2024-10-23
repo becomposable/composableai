@@ -42,7 +42,7 @@ export async function transcribeMedia(payload: DSLActivityExecutionPayload): Pro
         throw new NoDocumentFound(`No source found for object ${objectId}`);
     }
 
-    const mediaUrl = await client.store.objects.getContentSource(object.content.source).then(res => res.source);
+    const mediaUrl = await client.store.objects.getContentSource(objectId).then(res => res.source);
 
     if (!mediaUrl) {
         throw new NoDocumentFound(`Error fetching source ${object.content.source}`);

@@ -57,10 +57,12 @@ export async function transcribeMedia(payload: DSLActivityExecutionPayload): Pro
         payload: {
             audio_url: mediaUrl,
             callback_url: callbackUrl,
-            name_consistency: true,
-            chapterization: true,
             diarization_enhanced: true,
             enable_code_switching: true,
+            subtitles: true,
+            subtitles_config: {
+            formats: ["vtt"],
+            }
         }
     }) as GladiaTranscriptRequestResponse;
 

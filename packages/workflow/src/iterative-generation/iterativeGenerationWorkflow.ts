@@ -8,7 +8,7 @@ const {
     generateToc,
     generatePart
 } = proxyActivities<typeof activities>({
-    startToCloseTimeout: "5 minute",
+    startToCloseTimeout: "10 minute",
     retry: {
         initialInterval: '30s',
         backoffCoefficient: 2,

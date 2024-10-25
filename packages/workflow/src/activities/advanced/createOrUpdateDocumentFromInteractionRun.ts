@@ -1,10 +1,9 @@
-import { UploadContentObjectPayload } from "@becomposable/client";
-import { ContentObjectStatus, DSLActivityExecutionPayload, DSLActivitySpec } from "@becomposable/common";
-import { log } from "@temporalio/activity";
-import { setupActivity } from "../../dsl/setup/ActivityContext.js";
-import { ActivityParamNotFound, NoDocumentFound } from "../../errors.js";
+import { UploadContentObjectPayload } from '@becomposable/client';
+import { ContentObjectStatus, DSLActivityExecutionPayload, DSLActivitySpec } from '@becomposable/common';
+import { log } from '@temporalio/activity';
 
-
+import { setupActivity } from '../../dsl/setup/ActivityContext.js';
+import { ActivityParamNotFound, NoDocumentFound } from '../../errors.js';
 
 interface CreateOrUpdateObjectFromInteractionRunParams {
     /**
@@ -76,7 +75,6 @@ export async function createOrUpdateDocumentFromInteractionRun(payload: DSLActiv
         text: !resultIsObject ? result : undefined,
         type: type?.id,
         status: ContentObjectStatus.completed,
-        run: runId,
     };
     log.info("Creating document with payload", docPayload);
 

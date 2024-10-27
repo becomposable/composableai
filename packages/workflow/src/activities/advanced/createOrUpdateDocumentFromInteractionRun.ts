@@ -2,9 +2,6 @@ import { ContentObjectStatus, DSLActivityExecutionPayload, DSLActivitySpec } fro
 import { log } from "@temporalio/activity";
 import { setupActivity } from "../../dsl/setup/ActivityContext.js";
 import { ActivityParamNotFound, NoDocumentFound } from "../../errors.js";
-
-
-
 interface CreateOrUpdateObjectFromInteractionRunParams {
     /**
      * The execution run object to use. Required.

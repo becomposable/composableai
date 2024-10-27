@@ -41,12 +41,20 @@ export interface Location {
     longitude: number;
 }
 
+export interface GenerationRunMetadata {
+    id: string;
+    date: string;
+    model: string;
+    target?: string;
+}
+
 export interface ContentMetadata {
     // Common fields for all media types
-    type: ContentNature;
+    type?: ContentNature;
     size?: number;      // in bytes
     language?: string;
     location?: Location;
+    generation_runs: GenerationRunMetadata[];
     etag?: string;
 }
 
@@ -73,10 +81,6 @@ export interface VideoMetadata extends TemporalMediaMetadata {
 export interface DocumentMetadata extends ContentMetadata {
     type: 'document';
     page_count?: number;
-}
-
-export interface GenerationMetadata {
-    run_id: string;
 }
 
 export interface Transcript {
@@ -119,7 +123,7 @@ export interface ContentObjectItem<T = any> extends BaseObject {
     content: ContentSource;
     external_id?: string;
     properties: T | Record<string, any>; // a JSON object that describes the object
-    metadata?: VideoMetadata | AudioMetadata | ImageMetadata | DocumentMetadata;
+    metadata?: VideoMetadata | AudioMetadata | ImageMetadata | DocumentMetadata | ContentMetadata;
     tokens?: {
         count: number; // the number of tokens in the text
         encoding: string; // the encoding used to calculate the tokens
@@ -136,6 +140,7 @@ export interface CreateContentObjectPayload<T = any> extends Partial<Omit<Conten
     | 'owner'>> {
     id?: string; // An optional existing object ID to be replaced by the new one
     type?: string; // the object type ID
+    generation_run_info?: GenerationRunMetadata;
 }
 
 export interface ContentObjectTypeRef {

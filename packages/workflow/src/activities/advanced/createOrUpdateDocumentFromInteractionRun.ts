@@ -1,4 +1,3 @@
-import { UploadContentObjectPayload } from "@becomposable/client";
 import { ContentObjectStatus, DSLActivityExecutionPayload, DSLActivitySpec } from "@becomposable/common";
 import { log } from "@temporalio/activity";
 import { setupActivity } from "../../dsl/setup/ActivityContext.js";
@@ -69,23 +68,29 @@ export async function createOrUpdateDocumentFromInteractionRun(payload: DSLActiv
         name = inputData['name'] || params.fallbackName || 'Untitled';
     }
 
-    const docPayload: UploadContentObjectPayload = {
+    const docPayload = {
         name,
         parent: params.parent ?? undefined,
         properties: resultIsObject ? result : {},
         text: !resultIsObject ? result : undefined,
         type: type?.id,
         status: ContentObjectStatus.completed,
-        run: runId,
+        generation_run_info: {
+            id: run.id,
+            date: new Date().toISOString(),
+            model: run.modelId,
+            target: resultIsObject ? 'properties' : 'text'
+        }
     };
-    log.info("Creating document with payload", docPayload);
 
     //create or update the document
     let newDoc: boolean = false;
     let doc = undefined;
     if (params.updateExistingId) {
+        log.info(`Updating existing document ${params.updateExistingId}`);
         doc = await client.objects.update(params.updateExistingId, docPayload);
     } else {
+        log.info(`Creating new document of type ${objectTypeName}`);
         doc = await client.objects.create(docPayload);
         newDoc = true;
     }

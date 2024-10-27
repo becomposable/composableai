@@ -73,13 +73,18 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
         payload.debug_mode ?? false
     );
 
-    log.info(`Extracted information from object ${objectId} with type ${type.name}`, { runId: infoRes.id, result: infoRes.result });
+    log.info(`Extracted information from object ${objectId} with type ${type.name}`, { runId: infoRes.id });
     await client.objects.update(doc.id, {
         properties: {
             ...infoRes.result,
             etag: doc.text_etag
         },
-        text: infoRes.result.description ?? undefined
+        text: infoRes.result.description ?? undefined,
+        generation_run_info: {
+            id: infoRes.id,
+            date: new Date().toISOString(),
+            model: infoRes.modelId,
+        }
     });
 
 

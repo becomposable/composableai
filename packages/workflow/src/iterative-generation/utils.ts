@@ -33,7 +33,7 @@ export async function execute<T = any>(client: ComposableClient, options: Execut
 
 export function executeWithVars<T = any>(client: ComposableClient, interaction: string, vars: Record<string, any>, mapping?: Record<string, any>, result_schema?: Record<string, any>): Promise<ExecutionRun<any, T>> {
     if (mapping) {
-        mapping = { ...vars.input_mapping, mapping };
+        mapping = { ...vars.input_mapping, ...mapping };
     } else {
         mapping = vars.input_mapping;
     }

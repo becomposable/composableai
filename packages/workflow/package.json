@@ -35,7 +35,7 @@
         "@becomposable/blobs": "workspace:*",
         "@becomposable/client": "workspace:*",
         "@becomposable/common": "workspace:*",
-        "@becomposable/memory": "^0.39.1",
+        "@becomposable/memory": "^0.41.0",
         "@llumiverse/core": "workspace:*",
         "@opendocsg/pdf2md": "^0.1.29",
         "@temporalio/activity": "^1.9.3",

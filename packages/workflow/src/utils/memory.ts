@@ -31,7 +31,7 @@ export async function publishMemoryPack(client: ComposableClient, file: string, 
 export async function buildMemoryPack(recipeFn: (commands: Commands) => Promise<Record<string, any>>): Promise<string> {
     const tarFile = tmp.fileSync({
         prefix: "composable-memory-pack-",
-        name: ".tar.gz",
+        postfix: ".tar.gz",
     });
     return await _buildMemoryPack(recipeFn, {
         out: tarFile.name,

@@ -32,8 +32,9 @@ export interface IterativeGenerationPayload {
     toc_schema?: Record<string, any>
     /**
      * If present will save sections in files using the pattern
-     * The pattern must include a placeholder for the section id: %section.
-     * Examples: `sections/%section.md`, `%section/page.mdx` etc.
+     * The pattern must include a placeholder for the section id: %id.
+     * Examples: `sections/%id.md`, `%id/page.mdx` etc.
+     * @see SECTION_ID_PLACEHOLDER
      */
     section_file_pattern?: string;
     /**

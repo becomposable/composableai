@@ -34,10 +34,11 @@ export async function iterativeGenerationWorkflow(payload: WorkflowExecutionPayl
     // To minimize the payload size only the hierarchy and the section/part names are returned
     let toc = await it_gen_extractToc(payload);
     if (!toc) {
+        log.info(`No TOC was specified in the input memory pack. Generating one.`);
         toc = await it_gen_generateToc(payload);
+    } else {
+        log.info(`Using the TOC specified in the input memory pack.`);
     }
-
-    log.info(`Generated TOC: ${JSON.stringify(toc, null, 2)}`);
 
     if (toc.sections.length === 0) {
         //TODO how to handle this case?

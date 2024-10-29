@@ -4,6 +4,7 @@ import { getClient } from "../../utils/client.js";
 import { buildAndPublishMemoryPack, loadMemoryPack } from "../../utils/memory.js";
 import { IterativeGenerationPayload, OutputMemoryMeta, Toc, TocIndex } from "../types.js";
 import { tocIndex } from "../utils.js";
+import { log } from "@temporalio/activity";
 
 /**
  * This activity is called if the toc was provided in the payload. Otherwise
@@ -30,9 +31,11 @@ export async function it_gen_extractToc(payload: WorkflowExecutionPayload): Prom
         toc = JSON.parse(tocJson) as Toc;
     }
     if (!toc) {
+        log.info(`Nothing to extract: no TOC found in the input memory pack.`);
         return null; // no toc found
     }
 
+    log.info(`Found a TOC in the input memory pack`);
 
     await buildAndPublishMemoryPack(client, `${vars.memory}/output`, async () => {
         return {

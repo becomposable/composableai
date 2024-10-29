@@ -3,6 +3,7 @@ import { getClient } from "../../utils/client.js";
 import { expandVars } from "../../utils/expand-vars.js";
 import { buildAndPublishMemoryPack, loadMemoryPack } from "../../utils/memory.js";
 import { IterativeGenerationPayload, SECTION_ID_PLACEHOLDER, TocSection } from "../types.js";
+import { log } from "@temporalio/activity";
 
 export async function it_gen_finalizeOutput(payload: WorkflowExecutionPayload): Promise<void> {
     const vars = payload.vars as IterativeGenerationPayload;
@@ -15,8 +16,11 @@ export async function it_gen_finalizeOutput(payload: WorkflowExecutionPayload): 
 
     const content = await outMemory.getEntryText("content.json");
     if (!content) {
+        log.info(`Nothing to do. No content.json file found`);
         return;
     }
+
+    log.info(`Creating the final output memory pack.`);
 
     const inMeta = await inMemory.getMetadata();
     let tocName = "toc.json";
@@ -40,6 +44,7 @@ export async function it_gen_finalizeOutput(payload: WorkflowExecutionPayload): 
         // copy the raw JSON content
         copyText(content, "content.json");
         if (vars.section_file_pattern) {
+            log.info(`Saving sections to files using pattern: ${vars.section_file_pattern}`);
             // save sections to files
             for (const section of sections) {
                 let content = section.content;

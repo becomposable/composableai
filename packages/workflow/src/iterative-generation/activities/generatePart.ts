@@ -6,7 +6,7 @@ import { buildAndPublishMemoryPack, loadMemoryPack } from "../../utils/memory.js
 import { IterativeGenerationPayload, OutputMemoryMeta, Section, TocPart, TocSection } from "../types.js";
 import { executeWithVars, expectMemoryIsConsistent } from "../utils.js";
 
-export async function generatePart(payload: WorkflowExecutionPayload, path: number[]) {
+export async function it_gen_generatePart(payload: WorkflowExecutionPayload, path: number[]) {
     const vars = payload.vars as IterativeGenerationPayload;
     const client = getClient(payload);
     const memory = vars.memory;

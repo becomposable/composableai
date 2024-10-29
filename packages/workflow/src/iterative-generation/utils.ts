@@ -1,8 +1,7 @@
 import { ComposableClient } from "@becomposable/client";
 import { ExecutionRun } from "@becomposable/common";
 import { ApplicationFailure } from "@temporalio/workflow";
-import { OutputMemoryMeta, Toc, TocSection } from "./types.js";
-
+import { OutputMemoryMeta, PartIndex, Toc, TocIndex, TocSection } from "./types.js";
 
 export interface ExecuteOptions {
     interaction: string;
@@ -96,4 +95,29 @@ export function sectionWithoutParts(section: TocSection) {
     const clone = { ...section };
     delete clone.parts;
     return clone;
+}
+
+export function tocIndex(toc: Toc): TocIndex {
+    const index = { sections: [] } as TocIndex;
+    const sections = toc.sections;
+    for (let i = 0, l = sections.length; i < l; i++) {
+        const section = sections[i];
+        const indexParts: PartIndex[] = [];
+        if (section.parts) {
+            const parts = section.parts;
+            for (let k = 0, ll = section.parts.length; k < ll; k++) {
+                const part = parts[k];
+                indexParts.push({
+                    name: part.id,
+                    path: [i, k]
+                });
+            }
+        }
+        index.sections.push({
+            name: section.id,
+            path: [i],
+            parts: indexParts
+        });
+    }
+    return index;
 }

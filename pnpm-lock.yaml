@@ -120,11 +120,11 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@becomposable/memory-cli':
-        specifier: ^0.39.1
-        version: 0.39.1
+        specifier: ^0.41.0
+        version: 0.41.0
       '@becomposable/memory-commands':
-        specifier: ^0.39.1
-        version: 0.39.1
+        specifier: ^0.41.0
+        version: 0.41.0
       '@becomposable/workflow':
         specifier: workspace:*
         version: link:../workflow
@@ -364,6 +364,9 @@ importers:
       tmp:
         specifier: ^0.2.3
         version: 0.2.3
+      yaml:
+        specifier: ^2.6.0
+        version: 2.6.0
     devDependencies:
       '@temporalio/testing':
         specifier: ^1.9.0
@@ -414,15 +417,18 @@ packages:
   '@becomposable/json@0.39.1':
     resolution: {integrity: sha512-NCZwgtM9pUMrL/CaepH8Vs4hRW7OOfnG2cfjlA+lyQgPEtFehSWO2x3gNHcNZByVNy+ucxb9BquZb+PdKz/TTw==}
 
-  '@becomposable/memory-cli@0.39.1':
-    resolution: {integrity: sha512-NtrLU8tIaAIuag5wYTCtScWLXql3hki9MYyqfIvNdUHfiZN+pVeOwW5LCFvxC8pWbHi/kfrEGp+WylFN2vKoBQ==}
+  '@becomposable/memory-cli@0.41.0':
+    resolution: {integrity: sha512-4ijTNlR/EmRcAWo+fbb4e3kY3XxtqpdZN17RJMPRJWGBhwe9+2ldxTvbmEzw2d9Zyga5oH7EVQdtfRLr64Pb9w==}
     hasBin: true
 
-  '@becomposable/memory-commands@0.39.1':
-    resolution: {integrity: sha512-u9H5AS2g6JJUeLXQhdg2Rc/vcU6koMivl3qeqIqOYVoIz82oKWuwdEQkyA6lt3ZeMkMhVnRLdjGTDbWlK4QPeA==}
+  '@becomposable/memory-commands@0.41.0':
+    resolution: {integrity: sha512-zebuSZVgQHlmlq2Z98D7iVppBPSyKhgumTSsq++gX0UPf7qYsX7ACd61fDn4HpQNeaQdWKZJYJXrzk4l4c9Vig==}
 
   '@becomposable/memory@0.39.1':
     resolution: {integrity: sha512-SjlJPKk5SWxphYPXZ66GXrMCoj901dPo168l+pRMJPWpLXdE7s2DKT3dA41t3OnGo7CIfLazGRnkgdWAJOcxpg==}
+
+  '@becomposable/memory@0.41.0':
+    resolution: {integrity: sha512-lwMjBlOrOW7Cie7L9ZZoe6PHYSTUq7JakfYe6a7WlBzqR9lBZaG2t82EUidS0Oaq2uc8ULMSxmNHmGF3g8C02g==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -3299,6 +3305,11 @@ packages:
   yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
 
+  yaml@2.6.0:
+    resolution: {integrity: sha512-a6ae//JvKDEra2kdi1qzCyrJW/WZCgFi8ydDV+eXExl95t+5R+ijnqHJbz9tmMh8FUjx3iv2fCQ4dclAQlO2UQ==}
+    engines: {node: '>= 14'}
+    hasBin: true
+
   yargs-parser@20.2.9:
     resolution: {integrity: sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==}
     engines: {node: '>=10'}
@@ -3388,18 +3399,18 @@ snapshots:
 
   '@becomposable/json@0.39.1': {}
 
-  '@becomposable/memory-cli@0.39.1':
+  '@becomposable/memory-cli@0.41.0':
     dependencies:
-      '@becomposable/memory': 0.39.1
-      '@becomposable/memory-commands': 0.39.1
+      '@becomposable/memory': 0.41.0
+      '@becomposable/memory-commands': 0.41.0
       commander: 12.1.0
     transitivePeerDependencies:
       - encoding
       - supports-color
 
-  '@becomposable/memory-commands@0.39.1':
+  '@becomposable/memory-commands@0.41.0':
     dependencies:
-      '@becomposable/memory': 0.39.1
+      '@becomposable/memory': 0.41.0
       typescript: 5.6.3
     transitivePeerDependencies:
       - encoding
@@ -3414,6 +3425,17 @@ snapshots:
       micromatch: 4.0.8
       tar-stream: 3.1.7
       typescript: 5.6.3
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+
+  '@becomposable/memory@0.41.0':
+    dependencies:
+      '@becomposable/converters': 0.39.1
+      '@becomposable/json': 0.39.1
+      glob: 11.0.0
+      micromatch: 4.0.8
+      tar-stream: 3.1.7
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -6472,6 +6494,8 @@ snapshots:
   yallist@2.1.2: {}
 
   yallist@4.0.0: {}
+
+  yaml@2.6.0: {}
 
   yargs-parser@20.2.9: {}
 

@@ -32,7 +32,7 @@ export async function it_gen_generatePart(payload: WorkflowExecutionPayload, pat
 
     const content = await loadGeneratedContent(outMemory);
 
-    const previously_generated = content.map((section: Section) => section.content || '').join('\n\n');
+    let previously_generated = getPreviouslyGeneratedContent(content, !part, vars.rememberance_strategy);
 
     if (!part) { // a new section
         content.push({
@@ -68,4 +68,15 @@ export async function it_gen_generatePart(payload: WorkflowExecutionPayload, pat
 async function loadGeneratedContent(memory: MemoryPack): Promise<Section[]> {
     const content = await memory.getEntryText('content.json');
     return content ? JSON.parse(content) : [];
+}
+
+function getPreviouslyGeneratedContent(sections: Section[], isNewSection: boolean, strategy?: "document" | "section" | "none"): string {
+    switch (strategy) {
+        case "document":
+            return sections.map((section: Section) => section.content || '').join('\n\n');
+        case "none":
+            return '';
+        default:
+            return isNewSection ? '' : sections[sections.length - 1]?.content || '';
+    }
 }

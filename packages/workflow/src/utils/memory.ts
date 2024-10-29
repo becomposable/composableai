@@ -53,6 +53,7 @@ export async function fetchMemoryPack(client: ComposableClient, name: string): P
     const tarFile = tmp.fileSync({
         prefix: "composable-memory-pack-",
         postfix: ".tar",
+        discardDescriptor: true,
     });
     const streamIn = webStreamToReadable(webStream);
     const streamOut = createWriteStream(tarFile.name);

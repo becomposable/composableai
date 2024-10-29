@@ -10,7 +10,7 @@ const {
     it_gen_generatePart,
     it_gen_finalizeOutput
 } = proxyActivities<typeof activities>({
-    startToCloseTimeout: "10 minute",
+    startToCloseTimeout: "15 minute",
     retry: {
         initialInterval: '30s',
         backoffCoefficient: 2,
@@ -57,7 +57,8 @@ export async function iterativeGenerationWorkflow(payload: WorkflowExecutionPayl
         }
     }
 
-    it_gen_finalizeOutput(payload);
+    log.info(`Post-processing output memory pack`);
+    await it_gen_finalizeOutput(payload);
 }
 
 function formatPath(node: PartIndex) {

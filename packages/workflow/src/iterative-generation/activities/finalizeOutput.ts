@@ -1,11 +1,11 @@
 import { WorkflowExecutionPayload } from "@becomposable/common";
+import { log } from "@temporalio/activity";
 import { getClient } from "../../utils/client.js";
 import { expandVars } from "../../utils/expand-vars.js";
 import { buildAndPublishMemoryPack, loadMemoryPack } from "../../utils/memory.js";
-import { IterativeGenerationPayload, SECTION_ID_PLACEHOLDER, TocSection } from "../types.js";
-import { log } from "@temporalio/activity";
+import { IterativeGenerationPayload, Section, SECTION_ID_PLACEHOLDER, TocSection } from "../types.js";
 
-export async function it_gen_finalizeOutput(payload: WorkflowExecutionPayload): Promise<void> {
+export async function it_gen_finalizeOutput(payload: WorkflowExecutionPayload): Promise<string> {
     const vars = payload.vars as IterativeGenerationPayload;
 
     const memory = vars.memory;
@@ -13,11 +13,10 @@ export async function it_gen_finalizeOutput(payload: WorkflowExecutionPayload): 
     const inMemory = await loadMemoryPack(client, `${memory}/input`);
     const outMemory = await loadMemoryPack(client, `${memory}/output`);
 
-
     const content = await outMemory.getEntryText("content.json");
     if (!content) {
         log.info(`Nothing to do. No content.json file found`);
-        return;
+        return "No content.json file found";
     }
 
     log.info(`Creating the final output memory pack.`);
@@ -34,7 +33,7 @@ export async function it_gen_finalizeOutput(payload: WorkflowExecutionPayload): 
         tocName = "toc.json";
         toc = JSON.stringify(outMeta.toc);
     }
-    const sections = JSON.parse(content) as (TocSection & { content: string })[];
+    const sections = JSON.parse(content) as Section[];
 
     await buildAndPublishMemoryPack(client, `${memory}/output`, async ({ copyText }) => {
         // copy the input toc file if any
@@ -54,9 +53,13 @@ export async function it_gen_finalizeOutput(payload: WorkflowExecutionPayload): 
                 copyText(content, getSectionFileName(section, vars.section_file_pattern));
             }
         }
-        return inMeta;
+        return {
+            ...inMeta,
+            vars
+        };
     });
 
+    return `Processing done. Extracted files to: ${vars.section_file_pattern}`;
 }
 
 

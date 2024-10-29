@@ -31,6 +31,14 @@ export interface IterativeGenerationPayload {
     // custom toc schema if any TODO remove this
     toc_schema?: Record<string, any>
     /**
+     * If not set to "none" the previously generated content will be passed to the iteration.
+     * If not set at all defaults to "section".
+     * If "section" is used only the section content previously generated will be passed to the next iteration.
+     * If "document" is used the whole previopusly generated document content will be passed to the next iteration.
+     * Defaults to section.
+     */
+    rememberance_strategy?: "document" | "section" | "none";
+    /**
      * If present will save sections in files using the pattern
      * The pattern must include a placeholder for the section id: %id.
      * Examples: `sections/%id.md`, `%id/page.mdx` etc.

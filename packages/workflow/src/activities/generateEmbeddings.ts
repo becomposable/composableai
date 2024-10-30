@@ -179,27 +179,25 @@ async function generateTextEmbeddings({ document, client, type, config }: Execut
                 }
 
                 log.info(`Embeddings generated for part ${part.id}, updating object in the store.`)
-                await client.objects.update(part.id, {
-                    embeddings: {
-                        text: {
-                            values: e.values,
-                            model: e.model,
-                        }
-                    }
-                }).catch(err => {
-                    log.info(`Error updating embeddings on part ${part.id}`);
-                    return { id: part.id, number: i, result: null, message: "error setting embeddings on part", error: err.message }
-                })
+                await client.objects.setEmbedding(part.id, SupportedEmbeddingTypes.text,
+                    {
+                        values: e.values,
+                        model: e.model,
+                        etag: part.text_etag
+                    }).catch(err => {
+                        log.info(`Error updating embeddings on part ${part.id}`);
+                        return { id: part.id, number: i, result: null, message: "error setting embeddings on part", error: err.message }
+                    })
 
                 log.info('Generated embeddings for part: ' + part.id);
                 return { id: part.id, number: i, result: e }
             } catch (err: any) {
-                log.info(`Error generating ${type} embeddings for part ${part.id} of ${document.id}`, {error: err});
+                log.info(`Error generating ${type} embeddings for part ${part.id} of ${document.id}`, { error: err });
                 return { id: part.id, number: i, result: null, message: "error generating embeddings", error: err.message }
             }
         }
 
-        const promises = docParts.map((p, i)=> generatePartEmbeddings(p, i))
+        const promises = docParts.map((p, i) => generatePartEmbeddings(p, i))
         const res = await Promise.all(promises);
         // let i = 0;
         // for (const p of docParts) {
@@ -208,7 +206,7 @@ async function generateTextEmbeddings({ document, client, type, config }: Execut
         //     res.push(r)
         // }
 
-        
+
         // Filter out parts without embeddings
         const validEmbeddings = res.filter(item => item.result !== null) as { id: string, number: number, result: EmbeddingsResult }[];
 
@@ -217,16 +215,13 @@ async function generateTextEmbeddings({ document, client, type, config }: Execut
         const documentEmbedding = computeAttentionEmbedding(validEmbeddings.map(item => item.result.values));
 
         // Save the document-level embedding
-        await client.objects.retrieve(document.id).then(d => client.objects.update(d.id, {
-            embeddings: {
-                ...d.embeddings,
-                [type]: {
-                    values: documentEmbedding,
-                    model: "attention",
-                    etag: document.text_etag
-                }
+        await client.objects.setEmbedding(document.id, type,
+            {
+                values: documentEmbedding,
+                model: "attention",
+                etag: document.text_etag
             }
-        }));
+        );
         return { id: document.id, status: "completed", parts: docParts.map(i => i.id), len: documentEmbedding.length, part_embeddings: res.map(r => { return { id: r.id, status: r.status, error: r.error, message: r.message } }) }
 
     } else {
@@ -238,16 +233,13 @@ async function generateTextEmbeddings({ document, client, type, config }: Execut
         }
 
         log.info(`${type} embeddings generated for document ${document.id}`, { len: res.values.length });
-        await client.objects.retrieve(document.id).then(d => client.objects.update(d.id, {
-            embeddings: {
-                ...d.embeddings,
-                [type]: {
-                    values: res.values,
-                    model: res.model,
-                    etag: document.text_etag
-                }
+        await client.objects.setEmbedding(document.id, type,
+            {
+                values: res.values,
+                model: res.model,
+                etag: document.text_etag
             }
-        }));
+        );
 
         return { id: document.id, type, status: "completed", len: res.values.length }
 
@@ -293,17 +285,13 @@ async function generateImageEmbeddings({ document, client, type, config }: Execu
         return { id: document.id, status: "failed", message: "no embeddings generated" }
     }
 
-    //TODO: replace by a an atomic REST call
-    await client.objects.retrieve(document.id).then(d => client.objects.update(d.id, {
-        embeddings: {
-            ...d.embeddings,
-            image: {
-                values: res.values,
-                model: res.model,
-                etag: document.text_etag
-            }
+    await client.objects.setEmbedding(document.id, SupportedEmbeddingTypes.image,
+        {
+            values: res.values,
+            model: res.model,
+            etag: document.text_etag
         }
-    }));
+    );
 
     return { id: document.id, type, status: "completed", len: res.values.length }
 

@@ -206,7 +206,7 @@ export class ObjectsApi extends ApiTopic {
     }
 
     setEmbedding(id: string, type: SupportedEmbeddingTypes, payload: Embedding): Promise<Record<SupportedEmbeddingTypes, Embedding>> {
-        return this.post(`/${id}/embeddings/${type}`, {
+        return this.put(`/${id}/embeddings/${type}`, {
             payload
         });
     }

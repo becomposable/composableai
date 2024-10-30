@@ -1,5 +1,5 @@
 import { ApiTopic, ClientBase } from '@becomposable/api-fetch-client';
-import { ComplexSearchPayload, ComputeObjectFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, ExportPropertiesPayload, ExportPropertiesResponse, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, ObjectSearchPayload, ObjectSearchQuery } from '@becomposable/common';
+import { ComplexSearchPayload, ComputeObjectFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, Embedding, ExportPropertiesPayload, ExportPropertiesResponse, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, ObjectSearchPayload, ObjectSearchQuery, SupportedEmbeddingTypes } from '@becomposable/common';
 
 import { StreamSource } from '../StreamSource.js';
 
@@ -201,6 +201,12 @@ export class ObjectsApi extends ApiTopic {
 
     exportProperties(payload: ExportPropertiesPayload): Promise<ExportPropertiesResponse> {
         return this.post("/export", {
+            payload
+        });
+    }
+
+    setEmbedding(id: string, type: SupportedEmbeddingTypes, payload: Embedding): Promise<Record<SupportedEmbeddingTypes, Embedding>> {
+        return this.post(`/${id}/embeddings/${type}`, {
             payload
         });
     }

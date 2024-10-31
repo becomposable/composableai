@@ -250,8 +250,13 @@ export interface GetUploadUrlPayload {
     ttl?: number;
 }
 
-export interface GetUploadUrlResponse {
+export interface GetFileUrlPayload {
+    file: string;
+}
+
+export interface GetFileUrlResponse {
     url: string;
     id: string;
     mime_type: string;
+    path: string;
 }

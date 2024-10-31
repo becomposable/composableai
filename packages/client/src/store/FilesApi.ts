@@ -1,33 +1,41 @@
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
-import { GetMemoryUploadUrlPayload, GetMemoryUrlResponse } from "@becomposable/common";
-import { StreamSource } from "./StreamSource.js";
+import { GetFileUrlPayload, GetFileUrlResponse, GetUploadUrlPayload } from "@becomposable/common";
+import { StreamSource } from "../StreamSource.js";
 
-export class MemoryApi extends ApiTopic {
+export const MEMORIES_PREFIX = 'memories';
+
+export function getMemoryFilePath(name: string) {
+    const nameWithExt = name.endsWith(".tar.gz") ? name : name + ".tar.gz";
+    return `${MEMORIES_PREFIX}/${nameWithExt}`;
+}
+
+
+export class FilesApi extends ApiTopic {
 
     constructor(parent: ClientBase) {
-        super(parent, "/api/v1/memory");
+        super(parent, "/api/v1/files");
     }
 
-    getUploadUrl(payload: GetMemoryUploadUrlPayload): Promise<GetMemoryUrlResponse> {
+    getUploadUrl(payload: GetUploadUrlPayload): Promise<GetFileUrlResponse> {
         return this.post('/upload-url', {
             payload
         })
     }
 
-    getDownloadUrl(name: string): Promise<GetMemoryUrlResponse> {
+    getDownloadUrl(file: string): Promise<GetFileUrlResponse> {
         return this.post('/download-url', {
             payload: {
-                name
-            }
+                file
+            } satisfies GetFileUrlPayload
         })
     }
 
     /**
-     * Upload a memory pack and return the full path (including bucket name) of the uploaded file
+     * Upload content to a file and return the full path (including bucket name) of the uploaded file
      * @param source
      * @returns
      */
-    async uploadMemoryPack(source: StreamSource | File): Promise<string> {
+    async uploadFile(source: StreamSource | File): Promise<string> {
         const isStream = source instanceof StreamSource;
         const { url, path } = await this.getUploadUrl(source);
 
@@ -54,7 +62,7 @@ export class MemoryApi extends ApiTopic {
         return path;
     }
 
-    async downloadMemoryPack(name: string): Promise<ReadableStream<Uint8Array>> {
+    async downloadFile(name: string): Promise<ReadableStream<Uint8Array>> {
         const { url } = await this.getDownloadUrl(name);
 
         const res = await fetch(url, {
@@ -76,5 +84,25 @@ export class MemoryApi extends ApiTopic {
         }
 
         return res.body;
+    }
+
+    async uploadMemoryPack(source: StreamSource | File): Promise<string> {
+        const fileId = getMemoryFilePath(source.name);
+        const nameWithExt = source.name.endsWith(".tar.gz") ? source.name : source.name + ".tar.gz";
+        if (source instanceof File) {
+            let file = source as File;
+            return this.uploadFile(new StreamSource(file.stream(), nameWithExt, file.type, fileId));
+        } else {
+            return this.uploadFile(new StreamSource(source.stream, nameWithExt, source.type, fileId));
+        }
+    }
+
+    async downloadMemoryPack(name: string, gunzip: boolean = false): Promise<ReadableStream<Uint8Array>> {
+        let stream = await this.downloadFile(getMemoryFilePath(name));
+        if (gunzip) {
+            const ds = new DecompressionStream("gzip");
+            stream = stream.pipeThrough(ds);
+        }
+        return stream;
     }
 }

@@ -102,6 +102,10 @@ export class GoogleDriveBlob extends AbstractReadableBlob {
         return this.file.name!;
     }
 
+    get path() {
+        return this.file.name!;
+    }
+
     get contentDisposition() {
         return undefined; // not supported
     }
@@ -175,6 +179,11 @@ export class GoogleDriveMissingBlob extends AbstractReadableBlob {
     get name() {
         return this.id;
     }
+
+    get path() {
+        return this.id;
+    }
+
     get metadata() {
         return {};
     }

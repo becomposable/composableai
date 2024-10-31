@@ -1,5 +1,5 @@
 import { ApiTopic, ClientBase } from '@becomposable/api-fetch-client';
-import { ComplexSearchPayload, ComputeObjectFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, Embedding, ExportPropertiesPayload, ExportPropertiesResponse, FindPayload, GetRenditionResponse, GetUploadUrlPayload, GetUploadUrlResponse, ListWorkflowRunsResponse, ObjectSearchPayload, ObjectSearchQuery, SupportedEmbeddingTypes } from '@becomposable/common';
+import { ComplexSearchPayload, ComputeObjectFacetPayload, ContentObject, ContentObjectItem, ContentSource, CreateContentObjectPayload, Embedding, ExportPropertiesPayload, ExportPropertiesResponse, FindPayload, GetFileUrlPayload, GetFileUrlResponse, GetRenditionResponse, GetUploadUrlPayload, ListWorkflowRunsResponse, ObjectSearchPayload, ObjectSearchQuery, SupportedEmbeddingTypes } from '@becomposable/common';
 
 import { StreamSource } from '../StreamSource.js';
 
@@ -32,7 +32,7 @@ export class ObjectsApi extends ApiTopic {
         super(parent, "/api/v1/objects");
     }
 
-    getUploadUrl(payload: GetUploadUrlPayload): Promise<GetUploadUrlResponse> {
+    getUploadUrl(payload: GetUploadUrlPayload): Promise<GetFileUrlResponse> {
         return this.post('/upload-url', {
             payload
         })
@@ -42,7 +42,7 @@ export class ObjectsApi extends ApiTopic {
         return this.post('/download-url', {
             payload: {
                 file: fileUri
-            }
+            } satisfies GetFileUrlPayload
         })
     }
 

@@ -8,7 +8,6 @@ import { TextExtractionResult } from "../index.js";
 
 const {
     getObjectFromStore,
-    transcribeMedia,
     extractDocumentText
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "5 minute",
@@ -21,6 +20,18 @@ const {
     },
 });
 
+const {
+    transcribeMedia
+} = proxyActivities<typeof activities>({
+    startToCloseTimeout: "30 minute",
+    retry: {
+        initialInterval: '30s',
+        backoffCoefficient: 2,
+        maximumAttempts: 5,
+        maximumInterval: 100 * 30 * 1000, //ms
+        nonRetryableErrorTypes: [],
+    },
+});
 
 
 export async function generateObjectText(payload: DSLWorkflowExecutionPayload): Promise<TextExtractionResult> {

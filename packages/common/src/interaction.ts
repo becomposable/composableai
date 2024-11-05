@@ -61,6 +61,11 @@ export enum ExecutionRunStatus {
     failed = "failed",
 }
 
+/**
+ * @deprecated Use RunDataStorageLevel instead (since 0.39.1)
+ */
+export type RestrictionLevel = RunDataStorageLevel;
+
 export enum RunDataStorageLevel {
     STANDARD = "STANDARD",
     RESTRICTED = "RESTRICTED",

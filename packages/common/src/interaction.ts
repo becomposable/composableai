@@ -61,11 +61,32 @@ export enum ExecutionRunStatus {
     failed = "failed",
 }
 
+/**
+ * @deprecated Use RunDataStorageLevel instead (since 0.39.1)
+ */
 export enum RestrictionLevel {
     STANDARD = "STANDARD",
     RESTRICTED = "RESTRICTED",
     DEBUG = "DEBUG"
 };
+
+export enum RunDataStorageLevel {
+    STANDARD = "STANDARD",
+    RESTRICTED = "RESTRICTED",
+    DEBUG = "DEBUG"
+}
+
+export enum RunDataStorageDescription {
+    STANDARD = "Run data is stored for both the model inputs and output.",
+    RESTRICTED = "No run data is stored for the model inputs — only the model output.",
+    DEBUG = "Run data is stored for the model inputs and output, schema, and final prompt."
+}
+
+export const RunDataStorageOptions: Record<RunDataStorageLevel, RunDataStorageDescription> = {
+    [RunDataStorageLevel.STANDARD]: RunDataStorageDescription.STANDARD,
+    [RunDataStorageLevel.RESTRICTED]: RunDataStorageDescription.RESTRICTED,
+    [RunDataStorageLevel.DEBUG]: RunDataStorageDescription.DEBUG,
+}
 
 export interface CachePolicy {
     type: "cache" | "no_cache" | "cache_and_refresh";
@@ -95,7 +116,7 @@ export interface Interaction {
     prompts: PromptSegmentDef[];
     max_tokens?: number;
     environment: string | ExecutionEnvironmentRef;
-    restriction?: RestrictionLevel;
+    restriction?: RunDataStorageLevel;
     project: string | ProjectRef;
     // only for drafts - when it was last published
     last_published_at?: Date;

@@ -120,11 +120,11 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@becomposable/memory-cli':
-        specifier: ^0.41.0
-        version: 0.41.0
+        specifier: ^0.43.0
+        version: 0.43.0
       '@becomposable/memory-commands':
-        specifier: ^0.41.0
-        version: 0.41.0
+        specifier: ^0.43.0
+        version: 0.43.0
       '@becomposable/workflow':
         specifier: workspace:*
         version: link:../workflow
@@ -317,8 +317,8 @@ importers:
         specifier: workspace:*
         version: link:../common
       '@becomposable/memory':
-        specifier: ^0.39.1
-        version: 0.39.1
+        specifier: ^0.43.0
+        version: 0.43.0
       '@llumiverse/core':
         specifier: workspace:*
         version: link:../../llumiverse/core
@@ -396,20 +396,11 @@ packages:
     resolution: {integrity: sha512-E/jKbPoca1tfUPj3iSbitDZTGnq6FUFjkH6L8U2oDwSuwK1WhnnVtCG7oFOTg/DDnyoXbQYUiUiGOibHqaGVnw==}
     engines: {node: '>= 16'}
 
-  '@becomposable/api-fetch-client@0.39.1':
-    resolution: {integrity: sha512-RGo/h5F8nnb5wChF4sSsqK+rt2EFIv/tnpsd+3wEnnhhX2PXFRuc9m3uw4Jlrn7Khp8EpMAehRQFQRbfEwN7Hw==}
-
   '@becomposable/client@0.30.1':
     resolution: {integrity: sha512-cd8Q3J/VfFB4fpbgQO1kQB66MTkdZtxKUBREv6KG6PAvhteOKMnmwoamb8yvdQD6dN3goeqLPvfLfL9UVI1iAA==}
 
-  '@becomposable/client@0.39.1':
-    resolution: {integrity: sha512-aw9h/sAYyr82Xp1L0DxQLyCUm9HM4MhOjBbDxT6KvMSWOP/K7VoqjP2WFOBEf51jRHQFxAdsctkXRJougCsWJg==}
-
   '@becomposable/common@0.30.1':
     resolution: {integrity: sha512-KResq2bDyccEpZIeMIGKzsYEt2sjbViEnlJVbOuwRW3+LdHeSRax/xyzANFiIk9onOPjryS3asie/U0qzOfuNw==}
-
-  '@becomposable/common@0.39.1':
-    resolution: {integrity: sha512-4WKLlkCLYn3T0TrR7g/ZXgzVd1qViGyv096exJhrhGZ1HSgcmcByZXz6lYV0+zzKNPH1D2b7nKDaIpfG+d1hBA==}
 
   '@becomposable/converters@0.39.1':
     resolution: {integrity: sha512-nLbnRwXy1BG0ONlZ9DAyDKbDmsQEegHSB1vPRn/0FbH4JaNYiWJr6xLSebsRsLrgqTj07n29fTrGGXIfLPLHSQ==}
@@ -417,18 +408,15 @@ packages:
   '@becomposable/json@0.39.1':
     resolution: {integrity: sha512-NCZwgtM9pUMrL/CaepH8Vs4hRW7OOfnG2cfjlA+lyQgPEtFehSWO2x3gNHcNZByVNy+ucxb9BquZb+PdKz/TTw==}
 
-  '@becomposable/memory-cli@0.41.0':
-    resolution: {integrity: sha512-4ijTNlR/EmRcAWo+fbb4e3kY3XxtqpdZN17RJMPRJWGBhwe9+2ldxTvbmEzw2d9Zyga5oH7EVQdtfRLr64Pb9w==}
+  '@becomposable/memory-cli@0.43.0':
+    resolution: {integrity: sha512-WR7WZDhNTSfJ9AYxaXklLL92Oa6paih9jDj/4KpKVuAocovIqJbpiGCjbKsmZR3JUPzw41lRE0B+rC1/GDpKXQ==}
     hasBin: true
 
-  '@becomposable/memory-commands@0.41.0':
-    resolution: {integrity: sha512-zebuSZVgQHlmlq2Z98D7iVppBPSyKhgumTSsq++gX0UPf7qYsX7ACd61fDn4HpQNeaQdWKZJYJXrzk4l4c9Vig==}
+  '@becomposable/memory-commands@0.43.0':
+    resolution: {integrity: sha512-Gwrnoz3yPUktKZjB/jGJ0XUZ/BQUx+ogn/dBDZl3AKrs8c5PKu8JM0zO9tKfDt3vg79fjiBasALBZv20YE5q4Q==}
 
-  '@becomposable/memory@0.39.1':
-    resolution: {integrity: sha512-SjlJPKk5SWxphYPXZ66GXrMCoj901dPo168l+pRMJPWpLXdE7s2DKT3dA41t3OnGo7CIfLazGRnkgdWAJOcxpg==}
-
-  '@becomposable/memory@0.41.0':
-    resolution: {integrity: sha512-lwMjBlOrOW7Cie7L9ZZoe6PHYSTUq7JakfYe6a7WlBzqR9lBZaG2t82EUidS0Oaq2uc8ULMSxmNHmGF3g8C02g==}
+  '@becomposable/memory@0.43.0':
+    resolution: {integrity: sha512-fA4V/Ba04bLvsS5I3KvDSS1pjrghKLUtdpiX2+NEy9cAotVILiUeP/Ctvgaap4PIlYn557bDQ893/PSo1HfCfg==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -904,9 +892,6 @@ packages:
 
   '@llumiverse/core@0.13.0':
     resolution: {integrity: sha512-Y30dvSQt4SaMdSBbOUJ8aAafc9LJAF0t9TpFFGDRpK40IlG2OuxR72dqaxE7ce4L4SGSlelerSp0luWOQr9RWg==}
-
-  '@llumiverse/core@0.15.0':
-    resolution: {integrity: sha512-MDTHapYicYP+p0vpcc98njXey2F+hWtGc+gnWzS4ufU+vxYkL4DfBpeOF9O00Bg/hTxzGdxv0BYRcY88hqpk6g==}
 
   '@mapbox/node-pre-gyp@1.0.11':
     resolution: {integrity: sha512-Yhlar6v9WQgUp/He7BdgzOz8lqMQ8sU+jkCq7Wx8Myc5YFJLbEe7lgui/V7G1qB1DJykHSGwreceSaD60Y0PUQ==}
@@ -3355,10 +3340,6 @@ snapshots:
       call-me-maybe: 1.0.2
       js-yaml: 4.1.0
 
-  '@becomposable/api-fetch-client@0.39.1':
-    dependencies:
-      eventsource-parser: 1.1.2
-
   '@becomposable/client@0.30.1':
     dependencies:
       '@becomposable/common': 0.30.1
@@ -3366,22 +3347,9 @@ snapshots:
       api-fetch-client: 0.12.0
       eventsource: 2.0.2
 
-  '@becomposable/client@0.39.1':
-    dependencies:
-      '@becomposable/api-fetch-client': 0.39.1
-      '@becomposable/common': 0.39.1
-      '@llumiverse/core': 0.15.0
-      eventsource: 2.0.2
-
   '@becomposable/common@0.30.1':
     dependencies:
       '@llumiverse/core': 0.13.0
-      ajv: 8.17.1
-      json-schema: 0.4.0
-
-  '@becomposable/common@0.39.1':
-    dependencies:
-      '@llumiverse/core': 0.15.0
       ajv: 8.17.1
       json-schema: 0.4.0
 
@@ -3399,37 +3367,24 @@ snapshots:
 
   '@becomposable/json@0.39.1': {}
 
-  '@becomposable/memory-cli@0.41.0':
+  '@becomposable/memory-cli@0.43.0':
     dependencies:
-      '@becomposable/memory': 0.41.0
-      '@becomposable/memory-commands': 0.41.0
+      '@becomposable/memory': 0.43.0
+      '@becomposable/memory-commands': 0.43.0
       commander: 12.1.0
     transitivePeerDependencies:
       - encoding
       - supports-color
 
-  '@becomposable/memory-commands@0.41.0':
+  '@becomposable/memory-commands@0.43.0':
     dependencies:
-      '@becomposable/memory': 0.41.0
+      '@becomposable/memory': 0.43.0
       typescript: 5.6.3
     transitivePeerDependencies:
       - encoding
       - supports-color
 
-  '@becomposable/memory@0.39.1':
-    dependencies:
-      '@becomposable/client': 0.39.1
-      '@becomposable/converters': 0.39.1
-      '@becomposable/json': 0.39.1
-      glob: 11.0.0
-      micromatch: 4.0.8
-      tar-stream: 3.1.7
-      typescript: 5.6.3
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
-
-  '@becomposable/memory@0.41.0':
+  '@becomposable/memory@0.43.0':
     dependencies:
       '@becomposable/converters': 0.39.1
       '@becomposable/json': 0.39.1
@@ -3787,12 +3742,6 @@ snapshots:
   '@llumiverse/core@0.13.0':
     dependencies:
       json-schema: 0.4.0
-
-  '@llumiverse/core@0.15.0':
-    dependencies:
-      '@types/node': 22.7.5
-      ajv: 8.17.1
-      ajv-formats: 3.0.1(ajv@8.17.1)
 
   '@mapbox/node-pre-gyp@1.0.11':
     dependencies:

@@ -64,13 +64,17 @@ export enum ExecutionRunStatus {
 /**
  * @deprecated Use RunDataStorageLevel instead (since 0.39.1)
  */
-export type RestrictionLevel = RunDataStorageLevel;
+export enum RestrictionLevel {
+    STANDARD = "STANDARD",
+    RESTRICTED = "RESTRICTED",
+    DEBUG = "DEBUG"
+};
 
 export enum RunDataStorageLevel {
     STANDARD = "STANDARD",
     RESTRICTED = "RESTRICTED",
     DEBUG = "DEBUG"
-};
+}
 
 export enum RunDataStorageDescription {
     STANDARD = "Run data is stored for both the model inputs and output.",

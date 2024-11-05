@@ -67,6 +67,13 @@ export enum RestrictionLevel {
     DEBUG = "DEBUG"
 };
 
+// TODO(issue-498): add tests for the enum
+export enum RunDataStorageDescription {
+    STANDARD = "No run data is stored for the model inputs — only the model output.",
+    RESTRICTED = "Run data is stored for both the model inputs and output.",
+    DEBUG = "Run data is stored for the model inputs and output, schema, and final prompt."
+}
+
 export interface CachePolicy {
     type: "cache" | "no_cache" | "cache_and_refresh";
     refresh_probability: number;

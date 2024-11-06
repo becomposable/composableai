@@ -8,7 +8,7 @@
 
 //TODO remove this - it is only for backward compat - iot is used from old workflows
 export { dslWorkflow } from "./dsl/dsl-workflow.js";
-export * from "./iterative-generation/iterativeGenerationWorkflow.js"
+export * from "./iterative-generation/iterativeGenerationWorkflow.js";
 
 export * from "./activities/advanced/createDocumentTypeFromInteractionRun.js";
 export * from "./activities/advanced/createOrUpdateDocumentFromInteractionRun.js";

@@ -1,4 +1,3 @@
-import { Blobs, md5 } from '@becomposable/blobs';
 import { ContentObject, CreateContentObjectPayload, DSLActivityExecutionPayload, DSLActivitySpec } from '@becomposable/common';
 import { log } from "@temporalio/activity";
 import { mutoolPdfToText } from '../conversion/mutool.js';
@@ -7,6 +6,7 @@ import { trasformPdfToMarkdown } from '../conversion/pdf.js';
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { NoDocumentFound } from '../errors.js';
 import { TextExtractionResult, TextExtractionStatus } from '../result-types.js';
+import { fetchBlobAsBuffer, md5 } from '../utils/blobs.js';
 import { countTokens } from '../utils/tokens.js';
 
 //@ts-ignore
@@ -54,8 +54,7 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload):
 
     let fileBuffer: Buffer;
     try {
-        const file = await Blobs.getFile(doc.content.source);
-        fileBuffer = await file.readAsBuffer();
+        fileBuffer = await fetchBlobAsBuffer(client, doc.content.source);
     } catch (e: any) {
         log.error(`Error reading file: ${e}`);
         return createResponse(doc, "", TextExtractionStatus.error, e.message);
@@ -72,7 +71,7 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload):
                 txt = await mutoolPdfToText(fileBuffer);
             } else {
                 txt = await trasformPdfToMarkdown(fileBuffer);
-            }   
+            }
             break;
 
         case 'text/plain':
@@ -108,7 +107,7 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload):
         case 'text/csv':
             txt = fileBuffer.toString('utf8');
             break;
-        
+
         //typescript
         case 'application/typescript':
             txt = fileBuffer.toString('utf8');
@@ -118,7 +117,7 @@ export async function extractDocumentText(payload: DSLActivityExecutionPayload):
         case 'application/javascript':
             txt = fileBuffer.toString('utf8');
             break;
-        
+
         //json
         case 'application/json':
             txt = fileBuffer.toString('utf8');

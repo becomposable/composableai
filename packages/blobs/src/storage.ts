@@ -66,6 +66,7 @@ export interface CreateBucketOptions {
 }
 
 export interface Bucket {
+    uri: string;
     name: string;
     file(name: string): Promise<Blob>;
     exists(): Promise<boolean>;

@@ -32,7 +32,6 @@
         "vitest": "^1.6.0"
     },
     "dependencies": {
-        "@becomposable/blobs": "workspace:*",
         "@becomposable/client": "workspace:*",
         "@becomposable/common": "workspace:*",
         "@becomposable/memory": "^0.43.0",

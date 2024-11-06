@@ -16,6 +16,15 @@ export class FilesApi extends ApiTopic {
         super(parent, "/api/v1/files");
     }
 
+    /**
+     * Get or create a bucket for the project. If the bucket already exists, it does nothing.
+     * The bucket URI is returned.
+     * @returns
+     */
+    getOrCreateBucket(): Promise<{ bucket: string }> {
+        return this.post('/bucket');
+    }
+
     getUploadUrl(payload: GetUploadUrlPayload): Promise<GetFileUrlResponse> {
         return this.post('/upload-url', {
             payload
@@ -72,10 +81,10 @@ export class FilesApi extends ApiTopic {
                 return res;
             } else {
                 console.log(res);
-                throw new Error(`Failed to download memory file ${name}: ${res.statusText}`);
+                throw new Error(`Failed to download file ${name}: ${res.statusText}`);
             }
         }).catch(err => {
-            console.error(`Failed to download memory file ${name}.`, err);
+            console.error(`Failed to download file ${name}.`, err);
             throw err;
         });
 

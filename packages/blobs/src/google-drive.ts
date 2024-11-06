@@ -78,13 +78,16 @@ export class GDriveBucket implements Bucket {
                 throw err;
             }
         }
-
     }
     async exists(): Promise<boolean> {
         return true;
     }
     async create(): Promise<void> {
         // do nothing
+    }
+
+    get uri() {
+        return `gdrive://${this.name}`;
     }
 }
 

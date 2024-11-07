@@ -37,6 +37,7 @@ export interface PromptTemplateRef {
     name: string;
     role: PromptRole;
     version: number;
+    latest?: boolean;
     status: PromptStatus;
     content_type: TemplateType;
 }

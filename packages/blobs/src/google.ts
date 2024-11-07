@@ -70,6 +70,10 @@ export class GoogleBlob extends AbstractBlob {
         return this.file.name;
     }
 
+    get path() {
+        return this.file.parent.name + '/' + this.file.name;
+    }
+
     get contentDisposition() {
         return this.metadata.contentDisposition
     }

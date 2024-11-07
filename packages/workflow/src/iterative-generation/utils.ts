@@ -1,13 +1,12 @@
 import { ComposableClient } from "@becomposable/client";
 import { ExecutionRun } from "@becomposable/common";
 import { ApplicationFailure } from "@temporalio/workflow";
-import { OutputMemoryMeta, Toc, TocSection } from "./types.js";
-
+import { OutputMemoryMeta, PartIndex, Toc, TocIndex, TocSection } from "./types.js";
 
 export interface ExecuteOptions {
     interaction: string;
     memory: string;
-    memory_mapping?: Record<string, string>;
+    memory_mapping?: Record<string, any>;
     environment?: string;
     model?: string;
     max_tokens?: number;
@@ -17,8 +16,10 @@ export interface ExecuteOptions {
 
 export async function execute<T = any>(client: ComposableClient, options: ExecuteOptions): Promise<ExecutionRun<any, T>> {
     return client.interactions.executeByName(options.interaction, {
-        data: `memory:$[options.memory}`,
-        memory_mapping: options.memory_mapping,
+        data: {
+            ...options.memory_mapping,
+            "@memory": options.memory
+        },
         result_schema: options.result_schema,
         config: {
             environment: options.environment,
@@ -31,7 +32,7 @@ export async function execute<T = any>(client: ComposableClient, options: Execut
 
 export function executeWithVars<T = any>(client: ComposableClient, interaction: string, vars: Record<string, any>, mapping?: Record<string, any>, result_schema?: Record<string, any>): Promise<ExecutionRun<any, T>> {
     if (mapping) {
-        mapping = { ...vars.input_mapping, mapping };
+        mapping = { ...vars.input_mapping, ...mapping };
     } else {
         mapping = vars.input_mapping;
     }
@@ -94,4 +95,29 @@ export function sectionWithoutParts(section: TocSection) {
     const clone = { ...section };
     delete clone.parts;
     return clone;
+}
+
+export function tocIndex(toc: Toc): TocIndex {
+    const index = { sections: [] } as TocIndex;
+    const sections = toc.sections;
+    for (let i = 0, l = sections.length; i < l; i++) {
+        const section = sections[i];
+        const indexParts: PartIndex[] = [];
+        if (section.parts) {
+            const parts = section.parts;
+            for (let k = 0, ll = section.parts.length; k < ll; k++) {
+                const part = parts[k];
+                indexParts.push({
+                    name: part.id,
+                    path: [i, k]
+                });
+            }
+        }
+        index.sections.push({
+            name: section.id,
+            path: [i],
+            parts: indexParts
+        });
+    }
+    return index;
 }

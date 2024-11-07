@@ -13,8 +13,8 @@ export function getPublishMemoryAction(program: Command) {
 
 async function publishMemory(client: ComposableClient, file: string, name: string) {
     const stream = readableToWebStream(createReadStream(file));
-    const path = await client.memory.uploadMemoryPack(new StreamSource(stream,
-        `${name}.tar.gz`,
+    const path = await client.files.uploadMemoryPack(new StreamSource(stream,
+        name,
         "application/gzip"
     ));
     return path;

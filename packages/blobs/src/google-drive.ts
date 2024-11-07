@@ -78,13 +78,16 @@ export class GDriveBucket implements Bucket {
                 throw err;
             }
         }
-
     }
     async exists(): Promise<boolean> {
         return true;
     }
     async create(): Promise<void> {
         // do nothing
+    }
+
+    get uri() {
+        return `gdrive://${this.name}`;
     }
 }
 
@@ -99,6 +102,10 @@ export class GoogleDriveBlob extends AbstractReadableBlob {
     }
 
     get name() {
+        return this.file.name!;
+    }
+
+    get path() {
         return this.file.name!;
     }
 
@@ -175,6 +182,11 @@ export class GoogleDriveMissingBlob extends AbstractReadableBlob {
     get name() {
         return this.id;
     }
+
+    get path() {
+        return this.id;
+    }
+
     get metadata() {
         return {};
     }

@@ -203,16 +203,22 @@ export class Config {
 
     load() {
         try {
+            const stats = statSync(getConfigFile('dev'));
+            if (stats.isFile()) {
+                this.isDevMode = true;
+            }
+        } catch (err: any) {
+            if (err.code !== 'ENOENT') {
+                throw err;
+            }
+        }
+        try {
             const data = readJsonFile(getConfigFile('profiles.json')) as ProfilesData;
             this.profiles = data.profiles;
             if (data.default) {
                 this.use(data.default)
             } else {
                 this.current = undefined;
-            }
-            const stats = statSync(getConfigFile('dev'));
-            if (stats.isFile()) {
-                this.isDevMode = true;
             }
         } catch (err: any) {
             if (err.code !== 'ENOENT') {

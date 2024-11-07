@@ -1,13 +1,12 @@
-import { Blobs } from "@becomposable/blobs";
 import { DSLActivityExecutionPayload, DSLActivitySpec, RenditionProperties } from "@becomposable/common";
 import { log } from "@temporalio/activity";
 import fs from 'fs';
 import sharp from "sharp";
-import tmp from "tmp";
 import { imageResizer } from "../conversion/image.js";
 import { pdfToImages } from "../conversion/mutool.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { NoDocumentFound, WorkflowParamNotFound } from "../errors.js";
+import { fetchBlobAsBuffer, saveBlobToTempFile } from "../utils/blobs.js";
 import { NodeStreamSource } from "../utils/memory.js";
 interface GenerateImageRenditionParams {
     max_hw: number; //maximum size of the longuest side of the image
@@ -56,33 +55,23 @@ export async function generateImageRendition(payload: DSLActivityExecutionPayloa
         throw new NoDocumentFound(`Document ${objectId} is not an image or pdf: ${inputObject.content.type}`, [objectId]);
     }
 
-    const file = await Blobs.getFile(inputObject.content.source);
-    if (!file) {
-        log.error(`Document ${objectId} source not found`);
-        throw new NoDocumentFound(`Document ${objectId} source not found`, [objectId]);
-    }
-
     //array of rendition files to upload
     let renditionPages: string[] = [];
 
     //if PDF, convert to pages
     if (inputObject.content.type === 'application/pdf') {
-        const pdfBuffer = await file.readAsBuffer();
+        const pdfBuffer = await fetchBlobAsBuffer(client, inputObject.content.source);
         const pages = await pdfToImages(pdfBuffer);
         if (!pages.length) {
             log.error(`Failed to convert pdf to image`);
             throw new Error(`Failed to convert pdf to image`);
         }
         renditionPages = [...pages];
-    }
-
-    if (inputObject.content.type.startsWith('image/')) {
-        const tmpFile = tmp.fileSync();
-        log.info(`Copying image ${objectId} to ${tmpFile.name} size: ${JSON.stringify(file.metadata)}`);
-        const res = await file.saveToFile(tmpFile.name);
-        const filestats = fs.statSync(tmpFile.name);
-        log.info(`Image ${objectId} copied to ${tmpFile.name}, closed: ${res.closed}`, { res, filestats });
-        renditionPages.push(tmpFile.name);
+    } else if (inputObject.content.type.startsWith('image/')) {
+        const tmpFile = await saveBlobToTempFile(client, inputObject.content.source);
+        const filestats = fs.statSync(tmpFile);
+        log.info(`Image ${objectId} copied to ${tmpFile}`, { filestats });
+        renditionPages.push(tmpFile);
     }
 
     //generate rendition name, pass an index for multi parts

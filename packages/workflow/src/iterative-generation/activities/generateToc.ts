@@ -1,8 +1,8 @@
 import { WorkflowExecutionPayload } from "@becomposable/common";
 import { getClient } from "../../utils/client.js";
 import { buildAndPublishMemoryPack } from "../../utils/memory.js";
-import { IterativeGenerationPayload, OutputMemoryMeta, PartIndex, Toc, TocIndex } from "../types.js";
-import { executeWithVars } from "../utils.js";
+import { IterativeGenerationPayload, OutputMemoryMeta, Toc, TocIndex } from "../types.js";
+import { executeWithVars, tocIndex } from "../utils.js";
 
 const defaultTocSchema = {
     "type": "object",
@@ -28,7 +28,7 @@ const defaultTocSchema = {
                     "description": {
                         "type": "string"
                     },
-                    "key_instructions": {
+                    "instructions": {
                         "type": "string"
                     },
                     "parts":
@@ -75,32 +75,7 @@ const defaultTocSchema = {
     ]
 }
 
-function tocIndex(toc: Toc): TocIndex {
-    const index = { sections: [] } as TocIndex;
-    const sections = toc.sections;
-    for (let i = 0, l = sections.length; i < l; i++) {
-        const section = sections[i];
-        const indexParts: PartIndex[] = [];
-        if (section.parts) {
-            const parts = section.parts;
-            for (let k = 0, ll = section.parts.length; k < ll; k++) {
-                const part = parts[k];
-                indexParts.push({
-                    name: part.id,
-                    path: [i, k]
-                });
-            }
-        }
-        index.sections.push({
-            name: section.id,
-            path: [i],
-            parts: indexParts
-        });
-    }
-    return index;
-}
-
-export async function generateToc(payload: WorkflowExecutionPayload): Promise<TocIndex> {
+export async function it_gen_generateToc(payload: WorkflowExecutionPayload): Promise<TocIndex> {
     const vars = payload.vars as IterativeGenerationPayload;
 
     const schema = vars.toc_schema || defaultTocSchema;

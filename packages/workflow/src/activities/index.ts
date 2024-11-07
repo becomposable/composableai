@@ -11,6 +11,9 @@ export { extractDocumentText } from "./extractDocumentText.js";
 export { generateDocumentProperties } from "./generateDocumentProperties.js";
 export { generateEmbeddings } from "./generateEmbeddings.js";
 export { generateImageRendition } from "./generateImageRendition.js";
-export { guessOrCreateDocumentType } from "./guessOrCreateDocumentType.js";
+export { generateOrAssignContentType } from "./generateOrAssignContentType.js";
+export { getObjectFromStore } from "./getObjectFromStore.js";
+export { transcribeMedia } from "./media/transcribeMediaWithGladia.js";
 export { setDocumentStatus } from "./setDocumentStatus.js";
 
+export * from "../iterative-generation/activities/index.js";

@@ -18,12 +18,14 @@ export enum Permission {
     env_manage = "environment:manage",
 
     project_manage = "project:manage",
-    project_key_create = "project:key:create",
-    project_key_read = "project:key:read",
+
+    api_key_create = "api_key:create",
+    api_key_read = "api_key:read",
 
     account_read = "account:read",
     account_manage = "account:manage",
     manage_billing = "account:billing",
+    account_member = "account:member",
 
 
     content_read = "content:read",
@@ -34,9 +36,6 @@ export enum Permission {
     content_admin = "content:admin", //manage schemas, workflows, rules
 
     workflow_run = "workflow:run",
-
-    access_protected = "access_protected",
-
 }
 
 export enum AccessControlledResource {

@@ -43,7 +43,6 @@ export class ExecutionRequest {
 
         const run = await this.client.interactions.executeByName(this.interactionSpec, {
             data: this.data,
-            memory_mapping: options.mmap || undefined,
             config: {
                 environment: typeof options.env === 'string' ? options.env : undefined,
                 model: typeof options.model === 'string' ? options.model : undefined,

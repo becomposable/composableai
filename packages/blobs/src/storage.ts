@@ -37,6 +37,7 @@ export interface BlobStorage {
 export interface Blob {
     id: string;
     name: string;
+    path: string;
     metadata: Record<string, any>;
     md5Hash?: string;
     contentDisposition: string | undefined;
@@ -65,6 +66,7 @@ export interface CreateBucketOptions {
 }
 
 export interface Bucket {
+    uri: string;
     name: string;
     file(name: string): Promise<Blob>;
     exists(): Promise<boolean>;
@@ -85,6 +87,7 @@ export abstract class AbstractBlob implements Blob {
     }
     abstract id: string;
     abstract name: string;
+    abstract path: string;
     abstract metadata: Record<string, any>;
     abstract md5Hash?: string;
     abstract contentDisposition: string | undefined;

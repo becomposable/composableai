@@ -1,4 +1,6 @@
 
+export const SECTION_ID_PLACEHOLDER = '%id';
+
 /**
  * An iterative generation workflow uses 2 memory packs one for input and the other for output.
  * The input memory packs must be available in the project blobs bucket at `${tenant_id/memories/${memory_name}/input.tar.gz`.
@@ -26,8 +28,30 @@ export interface IterativeGenerationPayload {
     memory: string;
     // the input memory pack mapping
     input_mapping?: Record<string, string>;
-    // custom toc schema if any
+    // custom toc schema if any TODO remove this
     toc_schema?: Record<string, any>
+    /**
+     * If not set to "none" the previously generated content will be passed to the iteration.
+     * If not set at all defaults to "section".
+     * If "section" is used only the section content previously generated will be passed to the next iteration.
+     * If "document" is used the whole previopusly generated document content will be passed to the next iteration.
+     * Defaults to section.
+     */
+    rememberance_strategy?: "document" | "section" | "none";
+    /**
+     * If present will save sections in files using the pattern
+     * The pattern must include a placeholder for the section id: %id.
+     * Examples: `sections/%id.md`, `%id/page.mdx` etc.
+     * @see SECTION_ID_PLACEHOLDER
+     */
+    section_file_pattern?: string;
+    /**
+     * An optional header to prepend to the section files.
+     * The header can contain the following variables:
+     * - ${section} - the section object
+     * - ${date} - the date when the file was generated
+     */
+    section_file_header?: string;
 }
 
 export interface TocPart {

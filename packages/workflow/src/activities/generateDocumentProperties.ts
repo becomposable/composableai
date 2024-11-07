@@ -31,7 +31,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
     const type = doc.type ? await client.types.retrieve(doc.type.id) : undefined;
 
     if (!doc?.text && !params.use_vision && !doc?.content?.type?.startsWith("image/")) {
-        log.warn(`Object ${objectId} not found or text is empty`, { doc });
+        log.warn(`Object ${objectId} not found or text is empty`);
         return { status: "failed", error: "no-text" }
     }
 
@@ -73,13 +73,18 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
         payload.debug_mode ?? false
     );
 
-    log.info(`Extracted information from object ${objectId} with type ${type.name}`, { runId: infoRes.id, result: infoRes.result });
+    log.info(`Extracted information from object ${objectId} with type ${type.name}`, { runId: infoRes.id });
     await client.objects.update(doc.id, {
         properties: {
             ...infoRes.result,
             etag: doc.text_etag
         },
-        text: infoRes.result.description ?? undefined
+        text: infoRes.result.description ?? undefined,
+        generation_run_info: {
+            id: infoRes.id,
+            date: new Date().toISOString(),
+            model: infoRes.modelId,
+        }
     });
 
 

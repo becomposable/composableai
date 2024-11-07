@@ -1,14 +1,11 @@
-import { Blobs } from "@becomposable/blobs";
 import { DSLActivityExecutionPayload, DSLActivitySpec } from "@becomposable/common";
 import { log } from "@temporalio/activity";
 import fs from 'fs';
-import tmp from "tmp";
 import { pdfExtractPages } from "../conversion/mutool.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { NoDocumentFound } from "../errors.js";
+import { saveBlobToTempFile } from "../utils/blobs.js";
 import { NodeStreamSource } from "../utils/memory.js";
-
-tmp.setGracefulCleanup();
 
 interface CreatePdfDocumentFromSourceParams {
 
@@ -63,16 +60,8 @@ export async function createPdfDocumentFromSource(payload: DSLActivityExecutionP
         throw new NoDocumentFound(`Type ${params.target_object_type} not found`);
     }
 
-    const blob = await Blobs.getFile(inputObject.content.source);
-    if (!blob) {
-        log.error(`Document ${objectId} source not found`);
-        throw new NoDocumentFound(`Document ${objectId} source not found`, [objectId]);
-    }
-
-    const inputFile = tmp.fileSync({ postfix: '.pdf' });
-    await blob.saveToFile(inputFile.name);
-
-    const newPdf = await pdfExtractPages(inputFile.name, pages);
+    const tmpFile = await saveBlobToTempFile(client, inputObject.content.source, ".pdf");
+    const newPdf = await pdfExtractPages(tmpFile, pages);
     log.info(`PDF created from pages ${pages.join(', ')} `, { newPdf });
     const name = `pages-${pages.join('-')}.pdf`;
 

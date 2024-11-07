@@ -53,6 +53,7 @@ export interface ExportPropertiesPayload {
     objectIds: string[];
     type: string;
     layout?: string;
+    exportAll?: boolean;
 }
 
 export interface ExportPropertiesResponse {

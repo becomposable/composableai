@@ -21,7 +21,7 @@ export async function publishMemoryPack(client: ComposableClient, file: string, 
     const stream = createReadStream(file);
     try {
         const source = new NodeStreamSource(stream, name);
-        await client.memory.uploadMemoryPack(source);
+        await client.files.uploadMemoryPack(source);
     } catch (err: any) {
         stream.destroy();
         throw err;
@@ -31,7 +31,7 @@ export async function publishMemoryPack(client: ComposableClient, file: string, 
 export async function buildMemoryPack(recipeFn: (commands: Commands) => Promise<Record<string, any>>): Promise<string> {
     const tarFile = tmp.fileSync({
         prefix: "composable-memory-pack-",
-        name: ".tar.gz",
+        postfix: ".tar.gz",
     });
     return await _buildMemoryPack(recipeFn, {
         out: tarFile.name,
@@ -49,10 +49,11 @@ export async function buildAndPublishMemoryPack(client: ComposableClient, name: 
 }
 
 export async function fetchMemoryPack(client: ComposableClient, name: string): Promise<string> {
-    const webStream = await client.memory.downloadMemoryPack(name);
+    const webStream = await client.files.downloadMemoryPack(name);
     const tarFile = tmp.fileSync({
         prefix: "composable-memory-pack-",
         postfix: ".tar",
+        discardDescriptor: true,
     });
     const streamIn = webStreamToReadable(webStream);
     const streamOut = createWriteStream(tarFile.name);

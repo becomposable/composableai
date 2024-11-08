@@ -37,7 +37,6 @@ export interface PromptTemplateRef {
     name: string;
     role: PromptRole;
     version: number;
-    latest?: boolean;
     status: PromptStatus;
     content_type: TemplateType;
 }
@@ -61,7 +60,6 @@ export interface PromptTemplate {
     // only to be used by published versions
     // the id draft version which is the source of this published version (only when published)
     parent?: string;
-    latest?: boolean;
     description?: string;
     content_type: TemplateType;
     content: string;

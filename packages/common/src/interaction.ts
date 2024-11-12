@@ -252,6 +252,7 @@ export interface InteractionExecutionConfiguration {
     temperature?: number;
     max_tokens?: number;
     do_validate?: boolean;
+    run_data?: RunDataStorageLevel;
 }
 
 export interface GenerateInteractionPayload {

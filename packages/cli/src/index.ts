@@ -86,6 +86,7 @@ program.command("run <interaction>")
     .option('-v, --verbose', 'Only used in no streaming mode. Instead of printing a progress it will print details about each executed run.')
     .option('--jsonl', 'Write output in jsonl. The default is to write the json. Ignored when only one run is executed')
     .option('--data-only', 'Write down only the data returned by the LLM and not the entire execution run. This mode is forced when streaming', false)
+    .option('-r, --run-data [level]', 'The level of storage for the run data. Possible values are: "standard", "restricted", or "debug". Optional.')
     .action((interaction: string, options: Record<string, any>) => runInteraction(program, interaction, options));
 program.command("runs [interactionId]")
     .description('Search the run history for specific execution runs')

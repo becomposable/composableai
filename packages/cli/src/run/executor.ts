@@ -1,5 +1,5 @@
 import { ComposableClient } from "@becomposable/client";
-import { ExecutionRun } from "@becomposable/common";
+import { ExecutionRun, RunDataStorageLevel } from "@becomposable/common";
 
 export class ExecutionQueue {
     requests: ExecutionRequest[] = [];
@@ -26,6 +26,10 @@ export class ExecutionQueue {
 
 }
 
+function convertRunData(raw_run_data: any): RunDataStorageLevel | undefined {
+    const levelStr: string =  typeof raw_run_data === 'string' ? raw_run_data.toUpperCase() : "";
+    return Object.values(RunDataStorageLevel).includes(levelStr as RunDataStorageLevel) ? levelStr as RunDataStorageLevel : undefined;
+}
 
 export class ExecutionRequest {
 
@@ -41,13 +45,14 @@ export class ExecutionRequest {
     async run(onChunk?: ((chunk: any) => void)): Promise<ExecutionRun> {
         const options = this.options;
 
+
         const run = await this.client.interactions.executeByName(this.interactionSpec, {
             data: this.data,
             config: {
                 environment: typeof options.env === 'string' ? options.env : undefined,
                 model: typeof options.model === 'string' ? options.model : undefined,
                 temperature: typeof options.temperature === 'string' ? parseFloat(options.temperature) : undefined,
-                run_data: typeof options.run_data === 'string' ? JSON.parse(options.run_data) : undefined,
+                run_data: convertRunData(options.run_data),
             },
             tags: options.tags ? options.tags.trim().split(/\s,*\s*/) : undefined
         }, onChunk);

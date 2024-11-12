@@ -47,6 +47,7 @@ export class ExecutionRequest {
                 environment: typeof options.env === 'string' ? options.env : undefined,
                 model: typeof options.model === 'string' ? options.model : undefined,
                 temperature: typeof options.temperature === 'string' ? parseFloat(options.temperature) : undefined,
+                run_data: typeof options.run_data === 'string' ? JSON.parse(options.run_data) : undefined,
             },
             tags: options.tags ? options.tags.trim().split(/\s,*\s*/) : undefined
         }, onChunk);

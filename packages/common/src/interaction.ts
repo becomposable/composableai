@@ -21,12 +21,11 @@ export interface InteractionRef {
     status: InteractionStatus;
     visibility?: InteractionVisibility;
     version: number;
-    latest?: boolean;
     tags: string[];
     prompts?: PromptSegmentDef<PromptTemplateRef>[];
     updated_at: Date;
 }
-export const InteractionRefPopulate = "id name description status version visibility latest tags updated_at prompts";
+export const InteractionRefPopulate = "id name description status version visibility tags updated_at prompts";
 
 export interface InteractionRefWithSchema
     extends Omit<InteractionRef, "prompts"> {
@@ -103,8 +102,6 @@ export interface Interaction {
     description?: string;
     status: InteractionStatus;
     parent?: string;
-    // only used for versions (status === "published")
-    latest?: boolean;
     // only used for versions (status === "published")
     visibility: InteractionVisibility;
     version: number;

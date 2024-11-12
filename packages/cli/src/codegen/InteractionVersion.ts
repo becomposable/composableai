@@ -37,7 +37,9 @@ export class InteractionVersion {
     }
 
     get isLatest() {
-        return this.interaction.latest;
+        //TODO we no more support the latest version
+        return false;
+        //return this.interaction.latest;
     }
 
     get versionName() {

@@ -42,9 +42,6 @@
   ],
   "references": [
     {
-      "path": "../blobs/tsconfig.json"
-    },
-    {
       "path": "../common/tsconfig.json"
     },
     {

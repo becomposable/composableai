@@ -1,5 +1,5 @@
 import { ApiTopic, ClientBase } from '@becomposable/api-fetch-client';
-import { CreateWorkflowRulePayload, DSLWorkflowDefinition, DSLWorkflowSpec, ExecuteWorkflowPayload, ListWorkflowRunsResponse, WorkflowDefinitionRef, WorkflowRule, WorkflowRuleItem, WorkflowRunWithDetails } from '@becomposable/common';
+import { CreateWorkflowRulePayload, DSLWorkflowDefinition, DSLWorkflowSpec, ExecuteWorkflowPayload, ListWorkflowRunsPayload, ListWorkflowRunsResponse, WorkflowDefinitionRef, WorkflowRule, WorkflowRuleItem, WorkflowRunWithDetails } from '@becomposable/common';
 
 export class WorkflowsApi extends ApiTopic {
 
@@ -11,8 +11,8 @@ export class WorkflowsApi extends ApiTopic {
         return this.post(`/runs`, { payload: { documentId, eventName, ruleId } });
     }
 
-    searchRuns(documentId: string, eventName: string, ruleId: string): Promise<ListWorkflowRunsResponse> {
-        return this.post(`/search`, { payload: { documentId, eventName, ruleId } });
+    searchRuns(payload: ListWorkflowRunsPayload): Promise<ListWorkflowRunsResponse> {
+        return this.post(`/runs`, { payload: payload });
     }
 
     getRunDetails(runId: string, workflowId: string): Promise<WorkflowRunWithDetails> {

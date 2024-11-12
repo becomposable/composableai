@@ -73,17 +73,17 @@ export interface ExecuteWorkflowPayload {
     vars?: Record<string, any>;
 }
 
-
-
 export interface ListWorkflowRunsPayload {
     document_id?: string;
     event_name?: string;
     rule_id?: string;
+    start?: string;
+    end?: string;
+    status?: string;
+    run_id?: string;
 }
 
-
 interface WorkflowRunEvent {
-
     event_id: number;
     event_time: number;
     event_type: string;
@@ -118,14 +118,12 @@ export interface WorkflowRun {
     raw?: any
 }
 
-
 export interface WorkflowRunWithDetails extends WorkflowRun {
     history?: WorkflowRunEvent[];
 }
 export interface ListWorkflowRunsResponse {
     runs: WorkflowRun[];
 }
-
 
 export interface MultiDocumentsInteractionParams extends Omit<WorkflowExecutionPayload, 'config'> {
     config: {
@@ -144,9 +142,6 @@ export interface DocumentActionConfig {
     documentId?: string; //doc Id to update
     parentId?: string; //parentId for the created doc
 }
-
-
-
 
 export enum WorkflowExecutionStatus {
     UNKNOWN = 0,

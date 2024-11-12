@@ -71,6 +71,15 @@ export interface RunSearchQuery extends SimpleSearchQuery {
     end?: string;
 }
 
+export interface WorkflowExecutionSearchQuery extends SimpleSearchQuery {
+    documentId?: string;
+    eventName?: string;
+    ruleId?: string;
+    start?: string;
+    end?: string;
+    status?: string;
+}
+
 export interface ComplexSearchQuery extends ObjectSearchQuery {
     vector?: VectorSearchQuery;
 }

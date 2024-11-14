@@ -1,4 +1,4 @@
 [submodule "llumiverse"]
 	path = llumiverse
-	url = https://github.com/llumiverse/llumiverse
+	url = https://github.com/becomposable/llumiverse
 	branch = main

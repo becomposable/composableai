@@ -156,7 +156,10 @@ profilesRoot.command('file')
 registerObjectsCommand(program);
 registerWorkflowsCommand(program);
 
-program.parse(process.argv);
+program.parseAsync(process.argv).catch(err => {
+    console.error(err);
+    process.exit(1);
+});
 
 process.on("unhandledRejection", (err: any) => {
     if (err.status === 401) { // token expired?

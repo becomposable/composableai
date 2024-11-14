@@ -17,6 +17,28 @@ export class FilesApi extends ApiTopic {
     }
 
     /**
+     * get the metadata of a blob given its URI. Supported URI are:
+     * starting with s3:// and gs://.
+     * For s3 blobs use #region to specify the region. Ex: s3://bucket/key#us-west-2
+     * @param uri
+     * @returns
+     */
+    getMetadata(uri: string): Promise<{
+        name: string,
+        size: number,
+        contentType: string,
+        contentDisposition?:
+        string,
+        etag?: string
+    }> {
+        return this.get("/metadata", {
+            query: {
+                file: uri
+            }
+        });
+    }
+
+    /**
      * Get or create a bucket for the project. If the bucket already exists, it does nothing.
      * The bucket URI is returned.
      * @returns

@@ -1,4 +1,4 @@
-import { DSLActivityExecutionPayload, DSLActivitySpec, GladiaConfiguration } from "@becomposable/common";
+import { DSLActivityExecutionPayload, DSLActivitySpec, GladiaConfiguration, SupportedIntegrations } from "@becomposable/common";
 import { activityInfo, CompleteAsyncError, log } from "@temporalio/activity";
 import { FetchClient } from "api-fetch-client";
 import { setupActivity } from "../../dsl/setup/ActivityContext.js";
@@ -25,7 +25,7 @@ export async function transcribeMedia(payload: DSLActivityExecutionPayload): Pro
 
     const { params, client, objectId } = await setupActivity<TranscriptMediaParams>(payload);
 
-    const gladiaConfig = await client.projects.integrations.retrieve(payload.project_id, "gladia") as GladiaConfiguration | undefined;
+    const gladiaConfig = await client.projects.integrations.retrieve(payload.project_id, SupportedIntegrations.gladia) as GladiaConfiguration | undefined;
     if (!gladiaConfig || !gladiaConfig.enabled) {
         throw new NoDocumentFound("Gladia integration not enabled");
     }
@@ -61,7 +61,7 @@ export async function transcribeMedia(payload: DSLActivityExecutionPayload): Pro
             enable_code_switching: true,
             subtitles: true,
             subtitles_config: {
-            formats: ["vtt"],
+                formats: ["vtt"],
             }
         }
     }) as GladiaTranscriptRequestResponse;

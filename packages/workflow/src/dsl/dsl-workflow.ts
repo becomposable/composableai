@@ -94,6 +94,10 @@ export async function dslWorkflow(payload: DSLWorkflowExecutionPayload) {
 
 async function startChildWorkflow(step: DSLChildWorkflowStep, payload: DSLWorkflowExecutionPayload, vars: Vars, debug_mode?: boolean) {
     const resolvedVars = vars.resolve();
+    if (step.vars) {
+        // copy user vars (from step definition) to the resolved vars
+        Object.assign(resolvedVars, step.vars);
+    }
     if (debug_mode) {
         log.debug(`Workflow vars before starting child workflow ${step.name}`, { vars: resolvedVars });
     }
@@ -112,6 +116,10 @@ async function startChildWorkflow(step: DSLChildWorkflowStep, payload: DSLWorkfl
 
 async function executeChildWorkflow(step: DSLChildWorkflowStep, payload: DSLWorkflowExecutionPayload, vars: Vars, debug_mode?: boolean) {
     const resolvedVars = vars.resolve();
+    if (step.vars) {
+        // copy user vars (from step definition) to the resolved vars
+        Object.assign(resolvedVars, step.vars);
+    }
     if (debug_mode) {
         log.debug(`Workflow vars before excuting child workflow ${step.name}`, { vars: resolvedVars });
     }

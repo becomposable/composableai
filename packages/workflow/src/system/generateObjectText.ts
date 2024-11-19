@@ -21,7 +21,8 @@ const {
 });
 
 const {
-    transcribeMedia
+    transcribeMedia,
+    convertPdfToStructuredText
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "30 minute",
     retry: {
@@ -77,6 +78,12 @@ export async function generateObjectText(payload: DSLWorkflowExecutionPayload): 
 
 
 const ConverterActivity = [
+    {
+        type: /application\/pdf/,
+        activity: convertPdfToStructuredText,
+        name: "ConvertPdfToStructuredText",
+        params: {},
+    },
     {
         type: /audio\/.+/,
         activity: transcribeMedia,

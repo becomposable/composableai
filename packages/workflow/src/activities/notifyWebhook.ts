@@ -1,4 +1,5 @@
 import { DSLActivityExecutionPayload, DSLActivitySpec } from "@becomposable/common";
+import { log } from "@temporalio/activity";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { WorkflowParamNotFound } from "../errors.js";
 
@@ -22,19 +23,26 @@ export async function notifyWebhook(payload: DSLActivityExecutionPayload) {
 
     if (!target_url) throw new WorkflowParamNotFound('target_url');
 
+    const body = method === 'POST' ? JSON.stringify(requestPayload) : undefined;
+
+    log.info(`Notifying webhook at ${target_url}`, { method, body, headers, payload: requestPayload });
     const res = await fetch(target_url, {
-        body: method === 'POST' ? JSON.stringify(requestPayload) : undefined,
+        method,
+        body,
         headers: {
             'Content-Type': 'application/json',
             ...headers
         },
-        method,
+    }).catch(err => {
+        log.warn(`Failed to notify webhook ${target_url}: ${err}`);
+        throw new Error(`Failed to notify webhook ${target_url}: ${err}`);
     });
 
     if (!res.ok) {
-        throw new Error(`Failed to notify webhook: ${res.statusText}`);
+        log.warn(`Failed to notify webhook ${target_url} - ${res.status}: ${res.statusText}`, { res });
+        throw new Error(`Failed to notify webhook ${target_url}: ${res.statusText}`);
     }
 
-    return {status: res.status, message: res.statusText, body: await res.json(), url: res.url } 
+    return {status: res.status, message: res.statusText, url: res.url } 
 
 }

@@ -6,15 +6,15 @@ import { NoDocumentFound } from "../errors.js";
 
 tmp.setGracefulCleanup();
 
-export async function fetchBlobAsStream(client: ComposableClient, blobName: string): Promise<ReadableStream<Uint8Array>> {
+export async function fetchBlobAsStream(client: ComposableClient, blobUri: string): Promise<ReadableStream<Uint8Array>> {
     try {
-        return await client.files.downloadFile(blobName);
+        return await client.files.downloadFile(blobUri);
     } catch (err: any) {
-        throw new NoDocumentFound(`Blob ${blobName} not found`, []);
+        throw new NoDocumentFound(`Blob ${blobUri} not found`, []);
     }
 }
-export async function fetchBlobAsBuffer(client: ComposableClient, blobName: string): Promise<Buffer> {
-    let stream = await fetchBlobAsStream(client, blobName);
+export async function fetchBlobAsBuffer(client: ComposableClient, blobUri: string): Promise<Buffer> {
+    let stream = await fetchBlobAsStream(client, blobUri);
     const buffers: Uint8Array[] = [];
     for await (const data of stream) {
         buffers.push(data);
@@ -22,24 +22,24 @@ export async function fetchBlobAsBuffer(client: ComposableClient, blobName: stri
     return Buffer.concat(buffers);
 }
 
-export async function fetchBlobAsBase64(client: ComposableClient, blobName: string): Promise<string> {
-    const buffer = await fetchBlobAsBuffer(client, blobName);
+export async function fetchBlobAsBase64(client: ComposableClient, blobUri: string): Promise<string> {
+    const buffer = await fetchBlobAsBuffer(client, blobUri);
     return buffer.toString('base64');
 }
 
-export async function saveBlobToFile(client: ComposableClient, blobName: string, toFile: string): Promise<void> {
-    let stream = await fetchBlobAsStream(client, blobName);
+export async function saveBlobToFile(client: ComposableClient, blobUri: string, toFile: string): Promise<void> {
+    let stream = await fetchBlobAsStream(client, blobUri);
     const out = createWriteStream(toFile);
     await writeChunksToStream(stream, out);
 }
 
-export async function saveBlobToTempFile(client: ComposableClient, blobName: string, fileExt?: string): Promise<string> {
+export async function saveBlobToTempFile(client: ComposableClient, blobUri: string, fileExt?: string): Promise<string> {
     const tmpFile = tmp.fileSync({
         prefix: "composable-activity-",
         postfix: fileExt,
         discardDescriptor: true
     });
-    await saveBlobToFile(client, blobName, tmpFile.name);
+    await saveBlobToFile(client, blobUri, tmpFile.name);
     return tmpFile.name;
 }
 

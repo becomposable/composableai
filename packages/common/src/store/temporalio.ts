@@ -3,7 +3,7 @@
  * Copied from temporalio
  * The temporalio ParentClosePolicy
  */
-export declare enum ParentClosePolicy {
+export enum ParentClosePolicy {
     /**
      * If a `ParentClosePolicy` is set to this, or is not set at all, the server default value will be used.
      */

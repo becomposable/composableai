@@ -25,7 +25,7 @@ export async function notifyWebhook(payload: DSLActivityExecutionPayload) {
 
     const body = method === 'POST' ? JSON.stringify(requestPayload) : undefined;
 
-    log.info(`Notifying webhook at ${target_url}`, { method, body, headers, payload: requestPayload });
+    log.info(`Notifying webhook at ${target_url}`);
     const res = await fetch(target_url, {
         method,
         body,

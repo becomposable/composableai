@@ -1,4 +1,4 @@
-import type { JSONObject } from "@llumiverse/core";
+import type { JSONObject, ModelOptions } from "@llumiverse/core";
 import { JSONSchema4 } from 'json-schema';
 
 import { ExecutionTokenUsage } from '@llumiverse/core';
@@ -86,7 +86,7 @@ export interface CachePolicy {
     ttl: number;
 }
 export type InteractionVisibility = 'public' | 'private';
-export interface Interaction {
+export interface Interaction extends ModelOptions {
     readonly id: string;
     name: string;
     endpoint: string;
@@ -101,9 +101,7 @@ export interface Interaction {
     result_schema?: JSONSchema4;
     cache_policy?: CachePolicy;
     model: string;
-    temperature?: number;
     prompts: PromptSegmentDef[];
-    max_tokens?: number;
     environment: string | ExecutionEnvironmentRef;
     restriction?: RunDataStorageLevel;
     project: string | ProjectRef;
@@ -237,11 +235,9 @@ export interface ExecutionRunRef
 
 export const ExecutionRunRefSelect = "-result -parameters -result_schema -prompt";
 
-export interface InteractionExecutionConfiguration {
+export interface InteractionExecutionConfiguration extends ModelOptions{
     environment?: string;
     model?: string;
-    temperature?: number;
-    max_tokens?: number;
     do_validate?: boolean;
     run_data?: RunDataStorageLevel;
 }

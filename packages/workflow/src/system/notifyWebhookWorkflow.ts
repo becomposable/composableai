@@ -42,8 +42,10 @@ export async function notifyWebhookWorkflow(payload: NotifyWebhookWorkflowParams
                 target_url: ep,
                 method: 'POST',
                 payload: {
-                    ids: objectIds,
-                    event: eventName
+                    object_ids: objectIds,
+                    event: eventName,
+                    data: vars.webhook_data ?? undefined,
+                    vars
                 }
             },
             workflow_name: "Notify Webhook",

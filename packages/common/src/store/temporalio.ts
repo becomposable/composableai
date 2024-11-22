@@ -1,3 +1,7 @@
+/**
+ * Copied from temporalio
+ * The temporalio ParentClosePolicy
+ */
 export type ParentClosePolicy = (typeof ParentClosePolicy)[keyof typeof ParentClosePolicy];
 export declare const ParentClosePolicy: {
     /**

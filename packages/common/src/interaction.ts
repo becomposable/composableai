@@ -235,11 +235,30 @@ export interface ExecutionRunRef
 
 export const ExecutionRunRefSelect = "-result -parameters -result_schema -prompt";
 
+export enum ConfigModes {
+    OVERWRITE = "OVERWRITE",
+    RUN_ONLY = "RUN_ONLY",
+    INTERACTION_ONLY = "INTERACTION_ONLY"
+};
+
+export enum ConfigModesDescription {
+    OVERWRITE = "This run configuration is used. Undefined options are filled with interaction configuration.",
+    RUN_ONLY = "Only this run configuration is used. Undefined options remain undefined.",
+    INTERACTION_ONLY = "Only interaction configuration is used."
+}
+
+export const ConfigModesOptions: Record<ConfigModes, ConfigModesDescription> = {
+    [ConfigModes.OVERWRITE]: ConfigModesDescription.OVERWRITE,
+    [ConfigModes.RUN_ONLY]: ConfigModesDescription.RUN_ONLY,
+    [ConfigModes.INTERACTION_ONLY]: ConfigModesDescription.INTERACTION_ONLY,
+}
+
 export interface InteractionExecutionConfiguration extends ModelOptions{
     environment?: string;
     model?: string;
     do_validate?: boolean;
     run_data?: RunDataStorageLevel;
+    configMode?: ConfigModes;
 }
 
 export interface GenerateInteractionPayload {

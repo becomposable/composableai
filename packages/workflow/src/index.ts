@@ -8,7 +8,11 @@
 
 //TODO remove this - it is only for backward compat - iot is used from old workflows
 export { dslWorkflow } from "./dsl/dsl-workflow.js";
+export * from "./iterative-generation/iterativeGenerationWorkflow.js";
 
+export * from "./activities/advanced/createDocumentTypeFromInteractionRun.js";
+export * from "./activities/advanced/createOrUpdateDocumentFromInteractionRun.js";
+export * from "./activities/advanced/updateDocumentFromInteractionRun.js";
 export * from "./activities/chunkDocument.js";
 export * from "./activities/executeInteraction.js";
 export * from "./activities/extractDocumentText.js";
@@ -17,7 +21,6 @@ export * from "./activities/generateEmbeddings.js";
 export * from "./activities/generateImageRendition.js";
 export * from "./activities/generateOrAssignContentType.js";
 export * from "./activities/setDocumentStatus.js";
+export * from "./iterative-generation/activities/index.js";
 
-export * from "./activities/advanced/createDocumentTypeFromInteractionRun.js";
-export * from "./activities/advanced/createOrUpdateDocumentFromInteractionRun.js";
-export * from "./activities/advanced/updateDocumentFromInteractionRun.js";
+export * from "./result-types.js";

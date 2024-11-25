@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/studio",
-    "version": "0.39.0",
+    "version": "0.40.0",
     "private": true,
     "scripts": {
         "bump": "pnpm exec wst bump minor -x llumiverse",
@@ -14,5 +14,5 @@
         "rimraf": "^5.0.5",
         "typescript": "^5.3.3"
     },
-    "packageManager": "pnpm@9.7.1"
+    "packageManager": "pnpm@9.13.2"
 }

@@ -6,7 +6,7 @@ import { buildAndPublishMemoryPack, loadMemoryPack } from "../../utils/memory.js
 import { IterativeGenerationPayload, OutputMemoryMeta, Section, TocPart, TocSection } from "../types.js";
 import { executeWithVars, expectMemoryIsConsistent } from "../utils.js";
 
-export async function generatePart(payload: WorkflowExecutionPayload, path: number[]) {
+export async function it_gen_generatePart(payload: WorkflowExecutionPayload, path: number[]) {
     const vars = payload.vars as IterativeGenerationPayload;
     const client = getClient(payload);
     const memory = vars.memory;
@@ -32,7 +32,7 @@ export async function generatePart(payload: WorkflowExecutionPayload, path: numb
 
     const content = await loadGeneratedContent(outMemory);
 
-    const previously_generated = content.map((section: Section) => section.content || '').join('\n\n');
+    let previously_generated = getPreviouslyGeneratedContent(content, !part, vars.rememberance_strategy);
 
     if (!part) { // a new section
         content.push({
@@ -68,4 +68,15 @@ export async function generatePart(payload: WorkflowExecutionPayload, path: numb
 async function loadGeneratedContent(memory: MemoryPack): Promise<Section[]> {
     const content = await memory.getEntryText('content.json');
     return content ? JSON.parse(content) : [];
+}
+
+function getPreviouslyGeneratedContent(sections: Section[], isNewSection: boolean, strategy?: "document" | "section" | "none"): string {
+    switch (strategy) {
+        case "document":
+            return sections.map((section: Section) => section.content || '').join('\n\n');
+        case "none":
+            return '';
+        default:
+            return isNewSection ? '' : sections[sections.length - 1]?.content || '';
+    }
 }

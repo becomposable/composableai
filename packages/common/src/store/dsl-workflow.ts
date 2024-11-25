@@ -1,6 +1,7 @@
 import { StringValue } from "ms";
 import { BaseObject } from "./common.js";
 import { WorkflowExecutionPayload } from "./index.js";
+import { ParentClosePolicy } from "./temporalio.js";
 
 /**
  * The interface of a function that can be used as a DSL workflow activity.
@@ -181,6 +182,11 @@ export interface DSLChildWorkflowStep extends DSLWorkflowStepBase {
     type: "workflow";
     // the workflow endpoint to run
     name: string;
+    /**
+     * The parameters to pass to the child workflow.
+     * These parameters will be merged over the parent workflow vars and passed altogether to the child workflow.
+     */
+    vars?: Record<string, any>;
     // whether or not to wait for the workflow to finish.
     // default is false. (the parent workflow will await for the workflow to finish)
     async?: boolean;
@@ -206,9 +212,9 @@ export interface DSLChildWorkflowStep extends DSLWorkflowStepBase {
         workflowTaskTimeout?: StringValue | number;
         workflowId?: string;
         cronSchedule?: string;
+        parentClosePolicy?: ParentClosePolicy;
         //TODO
         //cancellationType
-        //parentClosePolicy
         //versioningIntent
         //workflowIdReusePolicy
     }

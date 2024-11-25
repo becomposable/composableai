@@ -1,4 +1,3 @@
-import { Blobs, md5 } from '@becomposable/blobs';
 import { ComposableClient } from "@becomposable/client";
 import { ContentObject, DSLActivityExecutionPayload, DSLActivitySpec, ProjectConfigurationEmbeddings, SupportedEmbeddingTypes } from "@becomposable/common";
 import { EmbeddingsResult } from "@llumiverse/core";
@@ -6,6 +5,7 @@ import { log } from "@temporalio/activity";
 import * as tf from '@tensorflow/tfjs-node';
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { NoDocumentFound } from '../errors.js';
+import { fetchBlobAsBase64, md5 } from "../utils/blobs.js";
 import { countTokens } from "../utils/tokens.js";
 
 
@@ -265,7 +265,7 @@ async function generateImageEmbeddings({ document, client, type, config }: Execu
         throw new NoDocumentFound("No source found in rendition", [document.id])
     }
 
-    const image = await Blobs.getFile(resRnd.rendition.content.source).then(file => file.readAsBuffer()).then(b => b.toString('base64'))
+    const image = await fetchBlobAsBase64(client, resRnd.rendition.content.source);
 
     const res = await client.environments.embeddings(environment, {
         image,

@@ -8,7 +8,6 @@ import CommandsApi from "./CommandsApi.js";
 import EnvironmentsApi from "./EnvironmentsApi.js";
 import { IamApi } from "./IamApi.js";
 import InteractionsApi from "./InteractionsApi.js";
-import { MemoryApi } from "./MemoryApi.js";
 import ProjectsApi from "./ProjectsApi.js";
 import PromptsApi from "./PromptsApi.js";
 import { RefsApi } from "./RefsApi.js";
@@ -118,6 +117,10 @@ export class ComposableClient extends AbstractFetchClient<ComposableClient> {
         return this.store.objects;
     }
 
+    get files() {
+        return this.store.files;
+    }
+
     /**
      * Alias for store.types
      */
@@ -168,8 +171,6 @@ export class ComposableClient extends AbstractFetchClient<ComposableClient> {
     iam = new IamApi(this);
     refs = new RefsApi(this);
     commands = new CommandsApi(this);
-    memory = new MemoryApi(this);
-
 }
 
 function isApiKey(apiKey: string) {

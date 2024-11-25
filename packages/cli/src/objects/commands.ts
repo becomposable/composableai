@@ -1,14 +1,14 @@
-import { ContentObjectTypeItem, CreateContentObjectPayload } from "@becomposable/common";
-import { StreamSource } from "@becomposable/client";
+import { ComposableClient, StreamSource } from "@becomposable/client";
+import { ContentObject, ContentObjectTypeItem, CreateContentObjectPayload } from "@becomposable/common";
 import { Command } from "commander";
+import enquirer from "enquirer";
 import { Dirent, Stats, createReadStream } from "fs";
 import { readdir, stat } from "fs/promises";
 import { glob } from 'glob';
+import mime from "mime";
 import { createReadableStreamFromReadable } from "node-web-stream-adapters";
 import { basename, join, resolve } from "path";
 import { getClient } from "../client.js";
-import enquirer from "enquirer";
-import mime from "mime";
 const { prompt } = enquirer;
 
 const AUTOMATIC_TYPE_SELECTION = "AutomaticTypeSelection";
@@ -81,13 +81,14 @@ export async function createObject(program: Command, files: string[], options: R
         if (options.type === AUTOMATIC_TYPE_SELECTION) {
             delete options.type;
         }
-
         return createObjectFromFiles(program, files, options);
     } else {
         let file = files[0];
         if (file.indexOf('*') > -1) {
             const files = await glob(file);
             return createObjectFromFiles(program, files, options);
+        } else if (file.includes("://")) {
+            return createObjectFromExternalSource(getClient(program), file, options);
         } else {
             file = resolve(file);
             let stats: Stats;
@@ -169,8 +170,19 @@ export async function createObjectFromFiles(program: Command, files: string[], o
 }
 
 export async function createObjectFromFile(program: Command, file: string, options: Record<string, any>) {
-    const fileName = basename(file);
     const client = getClient(program);
+    let res: ContentObject;
+    if (file.startsWith("s3://") || file.startsWith("gs://")) {
+        res = await createObjectFromExternalSource(client, file, options);
+    } else {
+        res = await createObjectFromLocalFile(client, file, options);
+    }
+    console.log('Created object', res.id);
+    return res;
+}
+
+export async function createObjectFromLocalFile(client: ComposableClient, file: string, options: Record<string, any>) {
+    const fileName = basename(file);
     const stream = createReadStream(file);
 
     const content = new StreamSource(createReadableStreamFromReadable(stream), fileName);
@@ -186,7 +198,15 @@ export async function createObjectFromFile(program: Command, file: string, optio
         content: content,
     });
 
-    console.log('Created object', res.id);
+    return res;
+}
+
+async function createObjectFromExternalSource(client: ComposableClient, uri: string, options: Record<string, any>) {
+    return client.objects.createFromExternalSource(uri, {
+        name: options.name,
+        type: options.type,
+        location: options.path,
+    });
 }
 
 export async function updateObject(program: Command, objectId: string, type: string, _options: Record<string, any>) {

@@ -1,5 +1,5 @@
-import { ICreateProjectPayload, Project, ProjectRef } from "@becomposable/common";
 import { ApiTopic, ClientBase } from "@becomposable/api-fetch-client";
+import { AwsConfiguration, GithubConfiguration, GladiaConfiguration, ICreateProjectPayload, Project, ProjectIntegrationListEntry, ProjectRef, SupportedIntegrations } from "@becomposable/common";
 
 export default class ProjectsApi extends ApiTopic {
     constructor(parent: ClientBase) {
@@ -26,5 +26,33 @@ export default class ProjectsApi extends ApiTopic {
         });
     }
 
+    integrations: IntegrationsConfigurationApi = new IntegrationsConfigurationApi(this);
+
+}
+
+class IntegrationsConfigurationApi extends ApiTopic {
+
+    constructor(parent: ClientBase) {
+        super(parent, "/");
+    }
+
+    list(projectId: string): Promise<ProjectIntegrationListEntry[]> {
+        return this.get(`/${projectId}/integrations`).then(res => res.integrations);
+    }
+
+    retrieve(projectId: string, integrationId: SupportedIntegrations): Promise<GladiaConfiguration | GithubConfiguration | AwsConfiguration | undefined> {
+        return this.get(`/${projectId}/integrations/${integrationId}`).catch(err => {
+            if (err.status === 404) {
+                return undefined;
+            }
+            throw err;
+        });
+    }
+
+    update(projectId: string, integrationId: string, payload: any): Promise<GladiaConfiguration | GithubConfiguration> {
+        return this.put(`/${projectId}/integrations/${integrationId}`, {
+            payload
+        });
+    }
 
 }

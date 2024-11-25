@@ -22,14 +22,80 @@ export interface Embedding {
 export interface ContentObject<T = any> extends ContentObjectItem<T> {
     text?: string; // the text representation of the object
     text_etag?: string;
-    tokens?: {
-        count: number; // the number of tokens in the text
-        encoding: string; // the encoding used to calculate the tokens
-        etag: string; //the etag of the text used for the token count
-    };
     embeddings: Partial<Record<SupportedEmbeddingTypes, Embedding>>;
     parts?: string[]; // the list of objectId of the parts of the object
     parts_etag?: string; // the etag of the text used for the parts list
+    transcript?: Transcript;
+}
+
+
+export type ContentNature = 'video' | 'image' | 'audio' | 'document' | 'code' | 'other';
+
+export interface Dimensions {
+    width: number;
+    height: number;
+}
+
+export interface Location {
+    latitude: number;
+    longitude: number;
+}
+
+export interface GenerationRunMetadata {
+    id: string;
+    date: string;
+    model: string;
+    target?: string;
+}
+
+export interface ContentMetadata {
+    // Common fields for all media types
+    type?: ContentNature;
+    size?: number;      // in bytes
+    language?: string;
+    location?: Location;
+    generation_runs: GenerationRunMetadata[];
+    etag?: string;
+}
+
+// Example of type-specific metadata interfaces (optional, for better type safety)
+export interface TemporalMediaMetadata extends ContentMetadata {
+    duration?: number; // in seconds
+    transcript?: Transcript
+}
+
+export interface ImageMetadata extends ContentMetadata {
+    type: 'image';
+    dimensions?: Dimensions;
+}
+
+export interface AudioMetadata extends TemporalMediaMetadata {
+    type: 'audio';
+}
+
+export interface VideoMetadata extends TemporalMediaMetadata {
+    type: 'video';
+    dimensions?: Dimensions;
+}
+
+export interface DocumentMetadata extends ContentMetadata {
+    type: 'document';
+    page_count?: number;
+}
+
+export interface Transcript {
+    text?: string;
+    segments?: TranscriptSegment[];
+    etag?: string;
+}
+
+export interface TranscriptSegment {
+    start: number
+    text: string
+    speaker?: number
+    end?: number
+    language?: string
+    confidence?: number
 }
 
 export interface ContentSource {
@@ -56,8 +122,13 @@ export interface ContentObjectItem<T = any> extends BaseObject {
     // the content source URL and type
     content: ContentSource;
     external_id?: string;
-    summary?: string;
     properties: T | Record<string, any>; // a JSON object that describes the object
+    metadata?: VideoMetadata | AudioMetadata | ImageMetadata | DocumentMetadata | ContentMetadata;
+    tokens?: {
+        count: number; // the number of tokens in the text
+        encoding: string; // the encoding used to calculate the tokens
+        etag: string; //the etag of the text used for the token count
+    };
     run?: string; // the ID of the interaction run that created the object
 }
 
@@ -69,6 +140,7 @@ export interface CreateContentObjectPayload<T = any> extends Partial<Omit<Conten
     | 'owner'>> {
     id?: string; // An optional existing object ID to be replaced by the new one
     type?: string; // the object type ID
+    generation_run_info?: GenerationRunMetadata;
 }
 
 export interface ContentObjectTypeRef {
@@ -178,8 +250,13 @@ export interface GetUploadUrlPayload {
     ttl?: number;
 }
 
-export interface GetUploadUrlResponse {
+export interface GetFileUrlPayload {
+    file: string;
+}
+
+export interface GetFileUrlResponse {
     url: string;
     id: string;
     mime_type: string;
+    path: string;
 }

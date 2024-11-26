@@ -236,21 +236,21 @@ export interface ExecutionRunRef
 export const ExecutionRunRefSelect = "-result -parameters -result_schema -prompt";
 
 export enum ConfigModes {
-    OVERWRITE = "OVERWRITE",
-    RUN_ONLY = "RUN_ONLY",
-    INTERACTION_ONLY = "INTERACTION_ONLY"
+    RUN_AND_INTERACTION_CONFIG = "RUN_AND_INTERACTION_CONFIG",
+    RUN_CONFIG_ONLY = "RUN_CONFIG_ONLY",
+    INTERACTION_CONFIG_ONLY = "INTERACTION_CONFIG_ONLY"
 };
 
 export enum ConfigModesDescription {
-    OVERWRITE = "This run configuration is used. Undefined options are filled with interaction configuration.",
-    RUN_ONLY = "Only this run configuration is used. Undefined options remain undefined.",
-    INTERACTION_ONLY = "Only interaction configuration is used."
+    RUN_AND_INTERACTION_CONFIG = "This run configuration is used. Undefined options are filled with interaction configuration.",
+    RUN_CONFIG_ONLY = "Only this run configuration is used. Undefined options remain undefined.",
+    INTERACTION_CONFIG_ONLY = "Only interaction configuration is used."
 }
 
 export const ConfigModesOptions: Record<ConfigModes, ConfigModesDescription> = {
-    [ConfigModes.OVERWRITE]: ConfigModesDescription.OVERWRITE,
-    [ConfigModes.RUN_ONLY]: ConfigModesDescription.RUN_ONLY,
-    [ConfigModes.INTERACTION_ONLY]: ConfigModesDescription.INTERACTION_ONLY,
+    [ConfigModes.RUN_AND_INTERACTION_CONFIG]: ConfigModesDescription.RUN_AND_INTERACTION_CONFIG,
+    [ConfigModes.RUN_CONFIG_ONLY]: ConfigModesDescription.RUN_CONFIG_ONLY,
+    [ConfigModes.INTERACTION_CONFIG_ONLY]: ConfigModesDescription.INTERACTION_CONFIG_ONLY,
 }
 
 export interface InteractionExecutionConfiguration extends ModelOptions{

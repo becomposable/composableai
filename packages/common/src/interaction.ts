@@ -216,8 +216,10 @@ export interface ExecutionRun<P = any, R = any> {
     result_schema: JSONSchema4;
     ttl: number;
     status: ExecutionRunStatus;
+    finish_reason?: string;
     prompt: any;
     token_use?: ExecutionTokenUsage;
+    chunks?: number;
     execution_time?: number; //s
     created_at: Date;
     updated_at: Date;

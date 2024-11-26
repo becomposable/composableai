@@ -4,6 +4,7 @@ import { activityInfo, log } from "@temporalio/activity";
 import { projectResult } from "../dsl/projections.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 import { TruncateSpec, truncByMaxTokens } from "../utils/tokens.js";
+import { ModelOptions } from "@llumiverse/core";
 
 //Example:
 //@ts-ignore
@@ -52,7 +53,7 @@ const JSON: DSLActivitySpec = {
     }
 }
 
-export interface InteractionExecutionParams {
+export interface InteractionExecutionParams extends ModelOptions{
     /**
      * The environment to use. If not specified the project default environment will be used.
      * If the latter is not specified an exeption will be thrown.
@@ -64,16 +65,6 @@ export interface InteractionExecutionParams {
      * If the latter is not specified an exeption will be thrown.
      */
     model?: string;
-
-    /**
-     * Max tokens to generate for the response
-     */
-    max_tokens?: number;
-
-    /**
-     * The temperature to use for the generation
-     */
-    temperature?: number;
 
     /**
      * Force a JSON schema for the result

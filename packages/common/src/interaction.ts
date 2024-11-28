@@ -79,6 +79,13 @@ export const RunDataStorageOptions: Record<RunDataStorageLevel, RunDataStorageDe
     [RunDataStorageLevel.DEBUG]: RunDataStorageDescription.DEBUG,
 }
 
+/**
+ * Schema can be stored or specified as a reference to an external schema.
+ * We only support "store:" references for now
+ */
+export interface SchemaRef {
+    $uri: string;
+}
 export interface CachePolicy {
     type: "cache" | "no_cache" | "cache_and_refresh";
     refresh_probability: number;
@@ -98,7 +105,7 @@ export interface Interaction extends ModelOptions {
     version: number;
     tags: string[];
     test_data?: JSONObject;
-    result_schema?: JSONSchema4;
+    result_schema?: JSONSchema4 | SchemaRef;
     cache_policy?: CachePolicy;
     model: string;
     prompts: PromptSegmentDef[];
@@ -255,7 +262,7 @@ export const ConfigModesOptions: Record<ConfigModes, ConfigModesDescription> = {
     [ConfigModes.INTERACTION_CONFIG_ONLY]: ConfigModesDescription.INTERACTION_CONFIG_ONLY,
 }
 
-export interface InteractionExecutionConfiguration extends ModelOptions{
+export interface InteractionExecutionConfiguration extends ModelOptions {
     environment?: string;
     model?: string;
     do_validate?: boolean;

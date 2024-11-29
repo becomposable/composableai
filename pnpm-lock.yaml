@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      cross-spawn:
+        specifier: ^7.0.5
+        version: 7.0.6
       npm-ws-tools:
         specifier: ^0.3.0
         version: 0.3.0

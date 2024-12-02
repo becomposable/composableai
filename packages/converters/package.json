@@ -23,7 +23,7 @@
         "@types/tmp": "^0.2.6",
         "ts-dual-module": "^0.6.3",
         "typescript": "^5.0.2",
-        "vitest": "^1.4.0"
+        "vitest": "^2.1.6"
     },
     "dependencies": {
         "@opendocsg/pdf2md": "0.2.0",

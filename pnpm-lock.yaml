@@ -218,8 +218,8 @@ importers:
   packages/converters:
     dependencies:
       '@opendocsg/pdf2md':
-        specifier: 0.1.29
-        version: 0.1.29
+        specifier: 0.1.32
+        version: 0.1.32
       '@pdftron/pdfnet-node':
         specifier: ^10.11.0
         version: 10.12.1
@@ -861,10 +861,6 @@ packages:
 
   '@mapbox/node-pre-gyp@1.0.9':
     resolution: {integrity: sha512-aDF3S3rK9Q2gey/WAttUlISduDItz5BU3306M9Eyv6/oS40aMprnopshtlKTykxRNIBEZuRMaZAnbrQ4QtKGyw==}
-    hasBin: true
-
-  '@opendocsg/pdf2md@0.1.29':
-    resolution: {integrity: sha512-4n9dKJBxj6/HQ83IAbLwWQbEu8wYSNl5RS27hav7f3Xe9XgKXSvi//tCx7TqN7Ec9xsonCd5SEiXQKmX5nGnZQ==}
     hasBin: true
 
   '@opendocsg/pdf2md@0.1.32':
@@ -1761,10 +1757,6 @@ packages:
     resolution: {integrity: sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==}
     engines: {node: '>=0.3.1'}
 
-  dommatrix@1.0.3:
-    resolution: {integrity: sha512-l32Xp/TLgWb8ReqbVJAFIvXmY7go4nTxxlWiAFyhoQw9RKEOHBZNnyGvJWqDVSPmq3Y9HlM4npqF/T6VMOXhww==}
-    deprecated: dommatrix is no longer maintained. Please use @thednp/dommatrix.
-
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
@@ -2610,14 +2602,6 @@ packages:
     resolution: {integrity: sha512-KbW4Qb7iHw2fBRWtA9FTc4pZg9cokiFIzc6cE7dzelTrhXWolfQuG1fYVC0E2BRmK/w7xfBjQ+OEsPZPO3QEew==}
     engines: {node: '>=14'}
 
-  pdfjs-dist@2.16.105:
-    resolution: {integrity: sha512-J4dn41spsAwUxCpEoVf6GVoz908IAA3mYiLmNxg8J9kfRXc2jxpbUepcP0ocp0alVNLFthTAM8DZ1RaHh8sU0A==}
-    peerDependencies:
-      worker-loader: ^3.0.8
-    peerDependenciesMeta:
-      worker-loader:
-        optional: true
-
   pdfjs-dist@4.8.69:
     resolution: {integrity: sha512-IHZsA4T7YElCKNNXtiLgqScw4zPd3pG9do8UrznC757gMd7UPeHSL2qwNNMJo4r79fl8oj1Xx+1nh2YkzdMpLQ==}
     engines: {node: '>=18'}
@@ -3160,10 +3144,6 @@ packages:
     resolution: {integrity: sha512-TnbFSbcOCcDgjZ4piURLCbJ3nJhznVh9kw6F6iokjiFPl8ONxe9A6nMDVXDiNbrSfLILs6vB07F7wLBrwPYzJw==}
     engines: {node: '>=10.13.0'}
 
-  web-streams-polyfill@3.3.3:
-    resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
-    engines: {node: '>= 8'}
-
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
 
@@ -3686,14 +3666,6 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
-
-  '@opendocsg/pdf2md@0.1.29':
-    dependencies:
-      enumify: 1.0.4
-      minimist: 1.2.8
-      pdfjs-dist: 2.16.105
-    transitivePeerDependencies:
-      - worker-loader
 
   '@opendocsg/pdf2md@0.1.32':
     dependencies:
@@ -4649,8 +4621,6 @@ snapshots:
 
   diff@5.2.0: {}
 
-  dommatrix@1.0.3: {}
-
   eastasianwidth@0.2.0: {}
 
   ecdsa-sig-formatter@1.0.11:
@@ -5565,11 +5535,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  pdfjs-dist@2.16.105:
-    dependencies:
-      dommatrix: 1.0.3
-      web-streams-polyfill: 3.3.3
-
   pdfjs-dist@4.8.69:
     optionalDependencies:
       canvas: 3.0.0-rc2
@@ -6230,8 +6195,6 @@ snapshots:
     dependencies:
       glob-to-regexp: 0.4.1
       graceful-fs: 4.2.11
-
-  web-streams-polyfill@3.3.3: {}
 
   webidl-conversions@3.0.1: {}
 

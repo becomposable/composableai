@@ -301,8 +301,8 @@ importers:
         specifier: workspace:*
         version: link:../../llumiverse/core
       '@opendocsg/pdf2md':
-        specifier: 0.1.29
-        version: 0.1.29
+        specifier: 0.1.32
+        version: 0.1.32
       '@temporalio/activity':
         specifier: ^1.9.3
         version: 1.11.5

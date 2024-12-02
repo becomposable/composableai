@@ -218,8 +218,8 @@ importers:
   packages/converters:
     dependencies:
       '@opendocsg/pdf2md':
-        specifier: 0.1.32
-        version: 0.1.32
+        specifier: 0.2.0
+        version: 0.2.0
       '@pdftron/pdfnet-node':
         specifier: ^10.11.0
         version: 10.12.1
@@ -301,8 +301,8 @@ importers:
         specifier: workspace:*
         version: link:../../llumiverse/core
       '@opendocsg/pdf2md':
-        specifier: 0.1.32
-        version: 0.1.32
+        specifier: 0.2.0
+        version: 0.2.0
       '@temporalio/activity':
         specifier: ^1.9.3
         version: 1.11.5
@@ -865,6 +865,10 @@ packages:
 
   '@opendocsg/pdf2md@0.1.32':
     resolution: {integrity: sha512-UK4qVuesmUcpPZXMeO8FwRqpCNwJRBTHcae4j+3Mr3bxrNqilZIIowdrzgcgn8fSQ2Dg/P4/0NoPkxAvf9D5rw==}
+    hasBin: true
+
+  '@opendocsg/pdf2md@0.2.0':
+    resolution: {integrity: sha512-00sd98aUvbxf7SNlg3gBCrlwTW5ncwbRkPYBuIrchDpsma1Q9MDTveZfid450SXlZnzoYRYiCpNi6/YM4wbmMQ==}
     hasBin: true
 
   '@pdftron/pdfnet-node@10.12.1':
@@ -1535,6 +1539,10 @@ packages:
 
   caniuse-lite@1.0.30001683:
     resolution: {integrity: sha512-iqmNnThZ0n70mNwvxpEC2nBJ037ZHZUoBI5Gorh1Mw6IlEAZujEoU1tXA628iZfzm7R9FvFzxbfdgml82a3k8Q==}
+
+  canvas@2.11.2:
+    resolution: {integrity: sha512-ItanGBMrmRV7Py2Z+Xhs7cT+FNt5K0vPL4p9EZ/UX/Mu7hFbkxSjKF2KVtPwX7UYWp7dRKnrTvReflgrItJbdw==}
+    engines: {node: '>=6'}
 
   canvas@3.0.0-rc2:
     resolution: {integrity: sha512-esx4bYDznnqgRX4G8kaEaf0W3q8xIc51WpmrIitDzmcoEgwnv9wSKdzT6UxWZ4wkVu5+ileofppX0TpyviJRdQ==}
@@ -2446,6 +2454,9 @@ packages:
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
 
+  nan@2.22.0:
+    resolution: {integrity: sha512-nbajikzWTMwsW+eSsNm3QwlOs7het9gGJU5dDZzRTQGk03vyBOauxgI4VakDzE0PtsGTmXPsXTbbjVhRwR5mpw==}
+
   nanoid@3.3.7:
     resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -3051,6 +3062,9 @@ packages:
 
   unionfs@4.5.4:
     resolution: {integrity: sha512-qI3RvJwwdFcWUdZz1dWgAyLSfGlY2fS2pstvwkZBUTnkxjcnIvzriBLtqJTKz9FtArAvJeiVCqHlxhOw8Syfyw==}
+
+  unpdf@0.12.1:
+    resolution: {integrity: sha512-ktP8+TTLDBrlu/j8rQVNbHoMMpFXzkVAkb1rt/JdshFC3jOHdZjuGCNl/voPL0kraUrUOH7ZC88kVxMvlvDBzA==}
 
   unpipe@1.0.0:
     resolution: {integrity: sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==}
@@ -3672,6 +3686,15 @@ snapshots:
       enumify: 1.0.4
       minimist: 1.2.8
       pdfjs-dist: 4.8.69
+
+  '@opendocsg/pdf2md@0.2.0':
+    dependencies:
+      enumify: 1.0.4
+      minimist: 1.2.8
+      unpdf: 0.12.1
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
 
   '@pdftron/pdfnet-node@10.12.1':
     dependencies:
@@ -4413,6 +4436,16 @@ snapshots:
   camelcase@6.3.0: {}
 
   caniuse-lite@1.0.30001683: {}
+
+  canvas@2.11.2:
+    dependencies:
+      '@mapbox/node-pre-gyp': 1.0.11
+      nan: 2.22.0
+      simple-get: 3.1.1
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
+    optional: true
 
   canvas@3.0.0-rc2:
     dependencies:
@@ -5407,6 +5440,9 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
+  nan@2.22.0:
+    optional: true
+
   nanoid@3.3.7: {}
 
   napi-build-utils@1.0.2:
@@ -6046,6 +6082,13 @@ snapshots:
   unionfs@4.5.4:
     dependencies:
       fs-monkey: 1.0.6
+
+  unpdf@0.12.1:
+    optionalDependencies:
+      canvas: 2.11.2
+    transitivePeerDependencies:
+      - encoding
+      - supports-color
 
   unpipe@1.0.0: {}
 

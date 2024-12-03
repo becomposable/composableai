@@ -1,4 +1,3 @@
-import { fromBuffer } from 'pdf2pic';
 import sharp from "sharp";
 
 export interface TransformOptions {
@@ -76,29 +75,4 @@ export function transformImageToBuffer(input: SharpInputType, opts: TransformOpt
 export async function transformImageToFile(input: SharpInputType, output: string, opts: TransformOptions): Promise<void> {
     const sh = createImageTransformer(input, opts);
     await sh.toFile(output);
-}
-
-export interface PdfToImageParams {
-    pages: number[];
-    format: keyof sharp.FormatEnum;
-    max_hw: number;
-}
-
-export async function pdfToImage(buffer: Buffer, { pages, format }: PdfToImageParams) {
-
-
-    const images = await fromBuffer(buffer, {
-        density: 200,
-        format: format,
-        quality: 100,
-        preserveAspectRatio: true,
-        height: 2048,
-        width: 2048,
-    }).bulk(pages,
-        { responseType: 'buffer' }
-    );
-
-    return images.map(image => image.buffer);
-
-
 }

@@ -137,6 +137,7 @@ export interface InteractionUpdatePayload
     result_schema?: JSONSchema4 | null;
 
     // Change ModelOptions properties to include null as a possible type
+    // Null values indicate that the property should be cleared.
     temperature?: number | null;
     max_tokens?: number | null;
     stop_sequence?: string[] | null;

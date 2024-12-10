@@ -3,12 +3,17 @@ import { resolve } from "path";
 import { getClient } from "../client.js";
 import { Spinner, restoreCursotOnExit } from "../utils/console.js";
 import { writeJsonFile } from "../utils/stdio.js";
+import { ConfigModes } from "@becomposable/common";
+
+function convertConfigMode(raw_config_mode: any): ConfigModes | undefined {
+    const configStr: string =  typeof raw_config_mode === 'string' ? raw_config_mode.toUpperCase() : "";
+    return Object.values(ConfigModes).includes(configStr as ConfigModes) ? configStr as ConfigModes : undefined;
+}
 
 export function genTestData(program: Command, interactionId: string, options: Record<string, any>) {
     const count = options.count ? parseInt(options.count) : 1;
     const message = options.message || undefined;
     const output = options.output || undefined;
-    const temperature = options.temperature ? parseFloat(options.temperature) : undefined;
     const spinner = new Spinner('dots');
     spinner.prefix = "Generating data. Please be patient ";
     spinner.start();
@@ -19,7 +24,14 @@ export function genTestData(program: Command, interactionId: string, options: Re
         config: {
             environment: options.env,
             model: options.model || undefined,
-            temperature,
+            temperature: typeof options.temperature === 'string' ? parseFloat(options.temperature) : undefined,
+            max_tokens: typeof options.maxTokens === 'string' ? parseInt(options.maxTokens) : undefined,
+            top_p: typeof options.topP === 'string' ? parseFloat(options.topP) : undefined,
+            top_k: typeof options.topK === 'string' ? parseInt(options.topK) : undefined,
+            presence_penalty: typeof options.presencePenalty === 'string' ? parseFloat(options.presencePenalty) : undefined,
+            frequency_penalty: typeof options.frequencyPenalty === 'string' ? parseFloat(options.frequencyPenalty) : undefined,
+            stop_sequence: options.stopSequences ? options.stopSequences.trim().split(/\s*,\s*/) : undefined,
+            configMode: convertConfigMode(options.configMode),
         }
     }).then((result) => {
         spinner.done();

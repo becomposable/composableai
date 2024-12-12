@@ -7,8 +7,8 @@ export interface UserWithAccounts extends User {
 export interface User {
     id: string;
     externalId: string;
-    email: string;
-    name: string;
+    email?: string;
+    name?: string;
     username?: string;
     picture?: string;
     language?: string;

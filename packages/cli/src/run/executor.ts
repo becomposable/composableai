@@ -62,7 +62,7 @@ export class ExecutionRequest {
                 top_k: typeof options.topK === 'string' ? parseInt(options.topK) : undefined,
                 presence_penalty: typeof options.presencePenalty === 'string' ? parseFloat(options.presencePenalty) : undefined,
                 frequency_penalty: typeof options.frequencyPenalty === 'string' ? parseFloat(options.frequencyPenalty) : undefined,
-                stop_sequence: options.stopSequences ? options.stopSequences.trim().split(/\s*,\s*/) : undefined,
+                stop_sequence: options.stopSequence ? options.stopSequence.trim().split(/\s*,\s*/) : undefined,
                 configMode: convertConfigMode(options.configMode),
                 run_data: convertRunData(options.runData),
             },

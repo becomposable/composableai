@@ -1,4 +1,4 @@
-import type { JSONObject, ModelOptions } from "@llumiverse/core";
+import type { JSONObject, Modalities, ModelOptions } from "@llumiverse/core";
 import { JSONSchema4 } from 'json-schema';
 
 import { ExecutionTokenUsage } from '@llumiverse/core';
@@ -109,6 +109,7 @@ export interface Interaction extends ModelOptions {
     cache_policy?: CachePolicy;
     model: string;
     prompts: PromptSegmentDef[];
+    output_modality: Modalities;
     environment: string | ExecutionEnvironmentRef;
     restriction?: RunDataStorageLevel;
     project: string | ProjectRef;
@@ -245,6 +246,7 @@ export interface ExecutionRun<P = any, R = any> {
     config: InteractionExecutionConfiguration;
     error?: InteractionExecutionError;
     source: RunSource;
+    output_modality: Modalities;
     created_by: string,
     updated_by: string,
 }

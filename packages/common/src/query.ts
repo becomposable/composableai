@@ -10,14 +10,14 @@ export interface RunListingQueryOptions {
 }
 
 export interface RunListingFilters {
-    interaction?: string,
-    status?: ExecutionRunStatus,
-    model?: string,
-    environment?: string,
-    tag?: string,
-    fromDate?: string,
-    toDate?: string,
-    parent?: string | false,
+    interaction?: string;
+    status?: ExecutionRunStatus;
+    model?: string;
+    environment?: string;
+    tag?: string;
+    fromDate?: string;
+    toDate?: string;
+    parent?: string | false;
 }
 
 export interface VectorSearchQuery {
@@ -26,7 +26,7 @@ export interface VectorSearchQuery {
     text?: string;
     image?: string;
     threshold?: number;
-    type: SupportedEmbeddingTypes
+    type: SupportedEmbeddingTypes;
 }
 
 export interface SimpleSearchQuery {
@@ -69,6 +69,7 @@ export interface RunSearchQuery extends SimpleSearchQuery {
     object?: string;
     start?: string;
     end?: string;
+    ids?: string[];
 }
 
 export interface WorkflowExecutionSearchQuery extends SimpleSearchQuery {

@@ -61,6 +61,7 @@ export async function generateObjectText(payload: DSLWorkflowExecutionPayload): 
     if (!converter) {
         throw new NoDocumentFound(`No converter found for mimetype ${mimetype}`, objectIds);
     }
+    log.info(`Converting file type ${mimetype} to text with ${converter.name}`);
 
     const res = await converter?.activity({
         ...payload,

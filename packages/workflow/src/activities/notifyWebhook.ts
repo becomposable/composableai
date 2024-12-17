@@ -18,12 +18,15 @@ export interface NotifyWebhook extends DSLActivitySpec<NotifyWebhookParams> {
 
 export async function notifyWebhook(payload: DSLActivityExecutionPayload) {
 
-    const { params,  } = await setupActivity<NotifyWebhookParams>(payload);
+    const { params } = await setupActivity<NotifyWebhookParams>(payload);
     const { target_url, method, payload: requestPayload, headers } = params
 
     if (!target_url) throw new WorkflowParamNotFound('target_url');
 
-    const body = method === 'POST' ? JSON.stringify(requestPayload) : undefined;
+    const body = method === 'POST' ? JSON.stringify({
+        ...requestPayload,
+        ...params
+    }) : undefined
 
     log.info(`Notifying webhook at ${target_url}`);
     const res = await fetch(target_url, {

@@ -23,14 +23,15 @@
     },
     "license": "Apache-2.0",
     "devDependencies": {
-        "@temporalio/testing": "^1.9.0",
-        "@temporalio/worker": "^1.9.0",
+        "@temporalio/testing": "1.9.3",
+        "@temporalio/worker": "1.9.3",
         "@types/jsonwebtoken": "^9.0.7",
         "@types/node": "^22.5.1",
         "@types/papaparse": "^5.3.15",
         "@types/tmp": "^0.2.6",
         "ts-dual-module": "^0.6.3",
-        "vitest": "^2.1.6"
+        "vitest": "^2.1.6",
+        "@smithy/types": "^3.7.2"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.693.0",
@@ -41,8 +42,8 @@
         "@becomposable/memory": "^0.43.0",
         "@llumiverse/core": "workspace:*",
         "@opendocsg/pdf2md": "0.2.0",
-        "@temporalio/activity": "^1.9.3",
-        "@temporalio/workflow": "^1.9.3",
+        "@temporalio/activity": "1.9.3",
+        "@temporalio/workflow": "1.9.3",
         "@tensorflow/tfjs-node": "^4.19.0",
         "@types/json-schema": "^7.0.15",
         "api-fetch-client": "^0.13.0",

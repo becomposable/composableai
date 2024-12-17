@@ -40,12 +40,7 @@
         "@becomposable/common": "workspace:*",
         "@becomposable/memory": "^0.43.0",
         "@llumiverse/core": "workspace:*",
-<<<<<<< HEAD
-        "@opendocsg/pdf2md": "0.1.29",
-        "@smithy/types": "^3.7.1",
-=======
         "@opendocsg/pdf2md": "0.2.0",
->>>>>>> main
         "@temporalio/activity": "^1.9.3",
         "@temporalio/workflow": "^1.9.3",
         "@tensorflow/tfjs-node": "^4.19.0",

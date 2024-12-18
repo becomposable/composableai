@@ -146,13 +146,25 @@ export class TextractProcessor {
     }
 
     private isBlockInTable(block: Block, blocksMap: BlocksMap): boolean {
+        // First check if this block is directly in a table
         for (const [_, parentBlock] of Object.entries(blocksMap)) {
-            if (parentBlock.BlockType === 'CELL' || parentBlock.BlockType === 'TABLE') {
+            if (parentBlock.BlockType === 'TABLE') {
                 if (parentBlock.Relationships) {
                     for (const relationship of parentBlock.Relationships) {
-                        if (relationship.Type === 'CHILD' &&
-                            relationship.Ids?.includes(block.Id!)) {
-                            return true;
+                        if (relationship.Type === 'CHILD') {
+                            // Check each cell in the table
+                            for (const cellId of relationship.Ids || []) {
+                                const cell = blocksMap[cellId];
+                                if (cell.Relationships) {
+                                    // Check content of each cell
+                                    for (const cellRelation of cell.Relationships) {
+                                        if (cellRelation.Type === 'CHILD' && 
+                                            cellRelation.Ids?.includes(block.Id!)) {
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

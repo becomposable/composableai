@@ -181,18 +181,59 @@ export class TextractProcessor {
         return response.JobStatus!;
     }
 
-
     private getImagePlaceholder(block: Block): string {
         const geometry = block.Geometry?.BoundingBox;
         if (!geometry) return '';
 
-        // Convert relative coordinates to percentage
-        const top = (geometry.Top || 0) * 100;
-        const left = (geometry.Left || 0) * 100;
-        const width = (geometry.Width || 0) * 100;
-        const height = (geometry.Height || 0) * 100;
+        // Determine image position semantically
+        const top = geometry.Top || 0;
+        const left = geometry.Left || 0;
+        
+        let position = '';
+        if (top < 0.3) position += 'TOP_';
+        else if (top > 0.7) position += 'BOTTOM_';
+        
+        if (left < 0.3) position += 'LEFT';
+        else if (left > 0.7) position += 'RIGHT';
+        else position += 'CENTER';
 
-        return `<image top="${top.toFixed(1)}%" left="${left.toFixed(1)}%" width="${width.toFixed(1)}%" height="${height.toFixed(1)}%">[IMAGE]</image>\n`;
+        // Add rough size indication
+        const area = (geometry.Width || 0) * (geometry.Height || 0);
+        let size = '';
+        if (area > 0.1) size = 'LARGE_';
+        else if (area > 0.02) size = 'MEDIUM_';
+        else size = 'SMALL_';
+
+        return `[${size}IMAGE_${position}]\n`;
+    }
+
+    private getIndentationLevel(block: Block): number {
+        const left = block.Geometry?.BoundingBox?.Left || 0;
+        if (left < 0.15) return 0;
+        if (left < 0.25) return 1;
+        return 2;
+    }
+
+    private isLikelyHeader(block: Block, prevBlock: Block | null): boolean {
+        if (!prevBlock) return true;
+        
+        const gap = (block.Geometry?.BoundingBox?.Top || 0) -
+                   ((prevBlock.Geometry?.BoundingBox?.Top || 0) + 
+                    (prevBlock.Geometry?.BoundingBox?.Height || 0));
+        
+        return gap > 0.03;
+    }
+
+    private formatTextBlock(block: Block, prevBlock: Block | null): string {
+        const text = block.Text || '';
+        const indentLevel = this.getIndentationLevel(block);
+        const indent = '    '.repeat(indentLevel);
+        
+        if (this.isLikelyHeader(block, prevBlock)) {
+            return `\n${indent}${text}\n`;
+        }
+        
+        return `${indent}${text}\n`;
     }
 
     async processResults(jobId: string): Promise<string> {
@@ -219,9 +260,9 @@ export class TextractProcessor {
         // Process pages with invoice-specific handling
         const pageContents: PageContent[] = [];
         let currentPage: PageContent | null = null;
-        let lastLineTop: number | null = null;
+        let prevBlock: Block | null = null;
 
-        // Sort blocks by page and position
+        // Sort blocks by page and vertical position
         allBlocks.sort((a, b) => {
             if (a.Page !== b.Page) return (a.Page || 0) - (b.Page || 0);
             return (a.Geometry?.BoundingBox?.Top || 0) - (b.Geometry?.BoundingBox?.Top || 0);
@@ -237,25 +278,13 @@ export class TextractProcessor {
                     text: '',
                     tables: []
                 };
-                lastLineTop = null;
+                prevBlock = null;
             } else if (currentPage && block.Page === currentPage.pageNumber) {
                 if (block.BlockType === 'LINE' && !this.isBlockInTable(block, blocksMap)) {
-                    const lineText = block.Text || '';
-                    const currentTop = block.Geometry?.BoundingBox?.Top || 0;
-                    const currentLeft = block.Geometry?.BoundingBox?.Left || 0;
-                    
-                    currentPage.text += `<line left="${(currentLeft * 100).toFixed(1)}%">${lineText}</line>\n`;
-                    
-                    if (lastLineTop !== null) {
-                        const gap = currentTop - lastLineTop;
-                        if (gap > 0.03) {
-                            currentPage.text += '\n';
-                        }
-                    }
-                    
-                    lastLineTop = currentTop;
+                    currentPage.text += this.formatTextBlock(block, prevBlock);
+                    prevBlock = block;
                 } else if (block.BlockType === 'TABLE') {
-                    currentPage.text = currentPage.text.trim() + '\n\n';
+                    currentPage.text += '\nLine Items:\n';
                     const tableContent = this.generateTableCSV(
                         block,
                         blocksMap,
@@ -263,28 +292,14 @@ export class TextractProcessor {
                         currentPage.pageNumber
                     );
                     currentPage.tables.push(tableContent);
-                    currentPage.text += '\n\n';
+                    currentPage.text += '\n';
                 } else if (block.BlockType === 'SIGNATURE') {
-                    // Add signature placeholder with position
-                    const geometry = block.Geometry?.BoundingBox;
-                    if (geometry) {
-                        const top = (geometry.Top || 0) * 100;
-                        const left = (geometry.Left || 0) * 100;
-                        currentPage.text += `<signature top="${top.toFixed(1)}%" left="${left.toFixed(1)}%">[SIGNATURE]</signature>\n`;
-                    }
-                } else if (block.BlockType === 'KEY_VALUE_SET' && block.EntityTypes?.includes('KEY')) {
-                    // Additional handling for form fields if needed
-                    const keyText = this.getText(block, blocksMap);
-                    const currentLeft = block.Geometry?.BoundingBox?.Left || 0;
-                    currentPage.text += `<key left="${(currentLeft * 100).toFixed(1)}%">${keyText}</key>\n`;
-                } else if (block.BlockType === 'MERGED_CELL' || block.BlockType === 'CELL') {
-                    // Skip individual cells as they're handled in table processing
-                    continue;
+                    currentPage.text += '\n[SIGNATURE]\n';
                 } else {
                     // Handle any other block types that might contain images
                     const geometry = block.Geometry?.BoundingBox;
                     if (geometry && geometry.Width && geometry.Height) {
-                        // Only add image placeholder for blocks that have some size
+                        // Only add image placeholder for significant sized blocks
                         if (geometry.Width > 0.01 && geometry.Height > 0.01) {
                             currentPage.text += this.getImagePlaceholder(block);
                         }

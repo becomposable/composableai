@@ -32,6 +32,7 @@ interface TextractProcessorOptions {
     bucket: string;
     credentials?: AwsCredentialIdentityProvider;
     log?: any;
+    detectImages?: boolean;  // New option for image detection
 }
 
 export class TextractProcessor {
@@ -40,11 +41,20 @@ export class TextractProcessor {
     private fileKey: string;
     private bucket: string;
     private log: any;
+    private detectImages: boolean;
 
-    constructor({ fileKey, region, bucket, credentials, log }: TextractProcessorOptions) {
+    constructor({ 
+        fileKey, 
+        region, 
+        bucket, 
+        credentials, 
+        log,
+        detectImages = false  // Default to false
+    }: TextractProcessorOptions) {
         this.fileKey = fileKey;
         this.bucket = bucket;
         this.log = log;
+        this.detectImages = detectImages;
         this.textractClient = new TextractClient({
             region,
             credentials
@@ -185,7 +195,10 @@ export class TextractProcessor {
         const geometry = block.Geometry?.BoundingBox;
         if (!geometry) return '';
 
-        // Determine image position semantically
+        // Only process large images
+        const area = (geometry.Width || 0) * (geometry.Height || 0);
+        if (area < 0.1) return ''; // Skip small images
+
         const top = geometry.Top || 0;
         const left = geometry.Left || 0;
         
@@ -197,14 +210,7 @@ export class TextractProcessor {
         else if (left > 0.7) position += 'RIGHT';
         else position += 'CENTER';
 
-        // Add rough size indication
-        const area = (geometry.Width || 0) * (geometry.Height || 0);
-        let size = '';
-        if (area > 0.1) size = 'LARGE_';
-        else if (area > 0.02) size = 'MEDIUM_';
-        else size = 'SMALL_';
-
-        return `[${size}IMAGE_${position}]\n`;
+        return `[IMAGE_${position}]\n`;
     }
 
     private getIndentationLevel(block: Block): number {
@@ -257,7 +263,6 @@ export class TextractProcessor {
             blocksMap[block.Id!] = block;
         });
 
-        // Process pages with invoice-specific handling
         const pageContents: PageContent[] = [];
         let currentPage: PageContent | null = null;
         let prevBlock: Block | null = null;
@@ -284,7 +289,6 @@ export class TextractProcessor {
                     currentPage.text += this.formatTextBlock(block, prevBlock);
                     prevBlock = block;
                 } else if (block.BlockType === 'TABLE') {
-                    currentPage.text += '\nLine Items:\n';
                     const tableContent = this.generateTableCSV(
                         block,
                         blocksMap,
@@ -292,17 +296,10 @@ export class TextractProcessor {
                         currentPage.pageNumber
                     );
                     currentPage.tables.push(tableContent);
-                    currentPage.text += '\n';
-                } else if (block.BlockType === 'SIGNATURE') {
-                    currentPage.text += '\n[SIGNATURE]\n';
-                } else {
-                    // Handle any other block types that might contain images
+                } else if (this.detectImages) {  // Only process images if enabled
                     const geometry = block.Geometry?.BoundingBox;
                     if (geometry && geometry.Width && geometry.Height) {
-                        // Only add image placeholder for significant sized blocks
-                        if (geometry.Width > 0.01 && geometry.Height > 0.01) {
-                            currentPage.text += this.getImagePlaceholder(block);
-                        }
+                        currentPage.text += this.getImagePlaceholder(block);
                     }
                 }
             }

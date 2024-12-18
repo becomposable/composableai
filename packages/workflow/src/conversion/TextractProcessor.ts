@@ -39,9 +39,9 @@ export class TextractProcessor {
     private s3Client: S3Client;
     private fileKey: string;
     private bucket: string;
-    private log: any; //type with Logger
+    private log: any;
 
-    constructor( { fileKey, region, bucket, credentials, log }: TextractProcessorOptions) {
+    constructor({ fileKey, region, bucket, credentials, log }: TextractProcessorOptions) {
         this.fileKey = fileKey;
         this.bucket = bucket;
         this.log = log;
@@ -108,44 +108,34 @@ export class TextractProcessor {
         return { rows, scores };
     }
 
-
     private generateTableCSV(tableResult: Block, blocksMap: BlocksMap,
         _tableIndex: number, _pageNumber: number): string {
         const { rows } = this.getRowsColumnsMap(tableResult, blocksMap);
 
-        // Transform the nested object structure into a 2D array for PapaParse
         const csvData: string[][] = [];
 
         Object.entries(rows).forEach(([_rowIndex, cols]) => {
-            // Create a new row array
             const rowData: string[] = [];
-
-            // Fill the row with data from columns
             Object.entries(cols)
-                .sort(([a], [b]) => Number(a) - Number(b)) // Ensure columns are in order
+                .sort(([a], [b]) => Number(a) - Number(b))
                 .forEach(([_, text]) => {
                     rowData.push((text as string).trim());
                 });
-
             csvData.push(rowData);
         });
 
-        // Use PapaParse to generate the CSV string
-        const csvString = Papa.unparse(csvData, {
+        return Papa.unparse(csvData, {
             delimiter: ',',
-            quotes: true,      // Automatically quote fields when necessary
+            quotes: true,
             quoteChar: '"',
             escapeChar: '"',
-            header: false,     // Don't generate header row
-            newline: '\n',     // Specify newline character
+            header: false,
+            newline: '\n',
             skipEmptyLines: false
         });
-
-        return csvString;
     }
 
     private isBlockInTable(block: Block, blocksMap: BlocksMap): boolean {
-        // For each block in the map, check if it's a CELL/TABLE and if this block is its child
         for (const [_, parentBlock] of Object.entries(blocksMap)) {
             if (parentBlock.BlockType === 'CELL' || parentBlock.BlockType === 'TABLE') {
                 if (parentBlock.Relationships) {
@@ -161,7 +151,7 @@ export class TextractProcessor {
         return false;
     }
 
-    async upload(fileBuf: Buffer): Promise<void> { //TODO: change to Readable but issues with the SDK at this time
+    async upload(fileBuf: Buffer): Promise<void> {
         this.log.info('Uploading file to S3', { fileKey: this.fileKey });
         const command = new PutObjectCommand({
             Bucket: this.bucket,
@@ -191,6 +181,20 @@ export class TextractProcessor {
         return response.JobStatus!;
     }
 
+
+    private getImagePlaceholder(block: Block): string {
+        const geometry = block.Geometry?.BoundingBox;
+        if (!geometry) return '';
+
+        // Convert relative coordinates to percentage
+        const top = (geometry.Top || 0) * 100;
+        const left = (geometry.Left || 0) * 100;
+        const width = (geometry.Width || 0) * 100;
+        const height = (geometry.Height || 0) * 100;
+
+        return `<image top="${top.toFixed(1)}%" left="${left.toFixed(1)}%" width="${width.toFixed(1)}%" height="${height.toFixed(1)}%">[IMAGE]</image>\n`;
+    }
+
     async processResults(jobId: string): Promise<string> {
         let nextToken: string | undefined;
         let allBlocks: Block[] = [];
@@ -212,27 +216,20 @@ export class TextractProcessor {
             blocksMap[block.Id!] = block;
         });
 
-        // Process each page
+        // Process pages with invoice-specific handling
         const pageContents: PageContent[] = [];
         let currentPage: PageContent | null = null;
-        let currentLine = '';
+        let lastLineTop: number | null = null;
 
         // Sort blocks by page and position
         allBlocks.sort((a, b) => {
             if (a.Page !== b.Page) return (a.Page || 0) - (b.Page || 0);
-            if (a.Geometry?.BoundingBox?.Top !== b.Geometry?.BoundingBox?.Top) {
-                return (a.Geometry?.BoundingBox?.Top || 0) - (b.Geometry?.BoundingBox?.Top || 0);
-            }
-            return (a.Geometry?.BoundingBox?.Left || 0) - (b.Geometry?.BoundingBox?.Left || 0);
+            return (a.Geometry?.BoundingBox?.Top || 0) - (b.Geometry?.BoundingBox?.Top || 0);
         });
 
         for (const block of allBlocks) {
             if (block.BlockType === 'PAGE') {
                 if (currentPage) {
-                    if (currentLine) {
-                        currentPage.text += currentLine.trim() + '\n';
-                        currentLine = '';
-                    }
                     pageContents.push(currentPage);
                 }
                 currentPage = {
@@ -240,21 +237,25 @@ export class TextractProcessor {
                     text: '',
                     tables: []
                 };
+                lastLineTop = null;
             } else if (currentPage && block.Page === currentPage.pageNumber) {
-                if (block.BlockType === 'WORD') {
-                    if (!this.isBlockInTable(block, blocksMap) && block.Text) {
-                        currentLine += block.Text + ' ';
+                if (block.BlockType === 'LINE' && !this.isBlockInTable(block, blocksMap)) {
+                    const lineText = block.Text || '';
+                    const currentTop = block.Geometry?.BoundingBox?.Top || 0;
+                    const currentLeft = block.Geometry?.BoundingBox?.Left || 0;
+                    
+                    currentPage.text += `<line left="${(currentLeft * 100).toFixed(1)}%">${lineText}</line>\n`;
+                    
+                    if (lastLineTop !== null) {
+                        const gap = currentTop - lastLineTop;
+                        if (gap > 0.03) {
+                            currentPage.text += '\n';
+                        }
                     }
-                } else if (block.BlockType === 'LINE') {
-                    if (currentLine) {
-                        currentPage.text += currentLine.trim() + '\n';
-                        currentLine = '';
-                    }
+                    
+                    lastLineTop = currentTop;
                 } else if (block.BlockType === 'TABLE') {
-                    if (currentLine) {
-                        currentPage.text += currentLine.trim() + '\n';
-                        currentLine = '';
-                    }
+                    currentPage.text = currentPage.text.trim() + '\n\n';
                     const tableContent = this.generateTableCSV(
                         block,
                         blocksMap,
@@ -262,22 +263,46 @@ export class TextractProcessor {
                         currentPage.pageNumber
                     );
                     currentPage.tables.push(tableContent);
+                    currentPage.text += '\n\n';
+                } else if (block.BlockType === 'SIGNATURE') {
+                    // Add signature placeholder with position
+                    const geometry = block.Geometry?.BoundingBox;
+                    if (geometry) {
+                        const top = (geometry.Top || 0) * 100;
+                        const left = (geometry.Left || 0) * 100;
+                        currentPage.text += `<signature top="${top.toFixed(1)}%" left="${left.toFixed(1)}%">[SIGNATURE]</signature>\n`;
+                    }
+                } else if (block.BlockType === 'KEY_VALUE_SET' && block.EntityTypes?.includes('KEY')) {
+                    // Additional handling for form fields if needed
+                    const keyText = this.getText(block, blocksMap);
+                    const currentLeft = block.Geometry?.BoundingBox?.Left || 0;
+                    currentPage.text += `<key left="${(currentLeft * 100).toFixed(1)}%">${keyText}</key>\n`;
+                } else if (block.BlockType === 'MERGED_CELL' || block.BlockType === 'CELL') {
+                    // Skip individual cells as they're handled in table processing
+                    continue;
+                } else {
+                    // Handle any other block types that might contain images
+                    const geometry = block.Geometry?.BoundingBox;
+                    if (geometry && geometry.Width && geometry.Height) {
+                        // Only add image placeholder for blocks that have some size
+                        if (geometry.Width > 0.01 && geometry.Height > 0.01) {
+                            currentPage.text += this.getImagePlaceholder(block);
+                        }
+                    }
                 }
             }
         }
 
-        // Handle last page and any pending line
+        // Handle last page
         if (currentPage) {
-            if (currentLine) {
-                currentPage.text += currentLine.trim() + '\n';
-            }
             pageContents.push(currentPage);
         }
 
+        // Generate final output
         let fulltext = '';
         for (const p of pageContents) {
             fulltext += `<page number="${p.pageNumber}">\n`;
-            fulltext += `<text>${p.text}</text>\n\n`;
+            fulltext += `<text>\n${p.text.trim()}\n</text>\n\n`;
             fulltext += "<tables>\n"
             p.tables.forEach((t, i) => fulltext += `<table number="${i}" type="csv">\n${t}\n</table>\n`)
             fulltext += "</tables>\n\n";
@@ -285,7 +310,6 @@ export class TextractProcessor {
         }
 
         return fulltext;
-
     }
-
+    
 }

@@ -109,7 +109,7 @@ export interface Interaction extends ModelOptions {
     cache_policy?: CachePolicy;
     model: string;
     prompts: PromptSegmentDef[];
-    output_modality: Modalities;
+    output_modality?: Modalities;
     environment: string | ExecutionEnvironmentRef;
     restriction?: RunDataStorageLevel;
     project: string | ProjectRef;

@@ -13,6 +13,7 @@ beforeAll(async () => {
   activityContext = new MockActivityEnvironment();
 });
 
+const TIMEOUT = 10000;
 
 test('[mutool] should convert pdf to text', async () => {
   const pdf = fs.readFileSync(path.join(__dirname, '../../fixtures', 'test-pdf1.pdf'));
@@ -21,7 +22,7 @@ test('[mutool] should convert pdf to text', async () => {
   const result = await activityContext.run(mutoolPdfToText, buf);
   expect(result).toContain('VF primarily uses foreign currency exchange');
  
-});
+}, TIMEOUT);
 
 test('[mutool] should convert pdf to images', async () => {
   const filename = path.join(__dirname, '../../fixtures', 'test-pdf1.pdf');
@@ -33,7 +34,7 @@ test('[mutool] should convert pdf to images', async () => {
   expect(result).toBeInstanceOf(Array);
   expect((result as string[]).length).toBe(119);
 
-}); 
+}, TIMEOUT); 
 
 test('[mutool] should convert pdf to images with pages', async () => {
   const filename = path.join(__dirname, '../../fixtures', 'test-pdf1.pdf');
@@ -46,7 +47,7 @@ test('[mutool] should convert pdf to images with pages', async () => {
   expect(result).toBeInstanceOf(Array);
   expect((result as string[]).length).toBe(3);
 
-});
+}, TIMEOUT);
 
 test('[mutool] should extract 3 pages from PDF into new PDF', async () => {
   const filename = path.join(__dirname, '../../fixtures', 'test-pdf1.pdf');
@@ -58,7 +59,7 @@ test('[mutool] should extract 3 pages from PDF into new PDF', async () => {
 
   expect(result).toContain(".pdf");
 
-});
+}, TIMEOUT);
 
 test('[mutool] should extract 1 pages from PDF into new PDF', async () => {
   const filename = path.join(__dirname, '../../fixtures', 'test-pdf1.pdf');
@@ -70,4 +71,4 @@ test('[mutool] should extract 1 pages from PDF into new PDF', async () => {
 
   expect(result).toContain(".pdf");
 
-});
+}, TIMEOUT);

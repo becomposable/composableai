@@ -1,4 +1,4 @@
-import type { JSONObject } from "@llumiverse/core";
+import type { JSONObject, ModelOptions } from "@llumiverse/core";
 import { JSONSchema4 } from 'json-schema';
 
 import { ExecutionTokenUsage } from '@llumiverse/core';
@@ -79,6 +79,13 @@ export const RunDataStorageOptions: Record<RunDataStorageLevel, RunDataStorageDe
     [RunDataStorageLevel.DEBUG]: RunDataStorageDescription.DEBUG,
 }
 
+/**
+ * Schema can be stored or specified as a reference to an external schema.
+ * We only support "store:" references for now
+ */
+export interface SchemaRef {
+    $uri: string;
+}
 export interface CachePolicy {
     type: "cache" | "no_cache" | "cache_and_refresh";
     refresh_probability: number;
@@ -86,7 +93,7 @@ export interface CachePolicy {
     ttl: number;
 }
 export type InteractionVisibility = 'public' | 'private';
-export interface Interaction {
+export interface Interaction extends ModelOptions {
     readonly id: string;
     name: string;
     endpoint: string;
@@ -98,12 +105,10 @@ export interface Interaction {
     version: number;
     tags: string[];
     test_data?: JSONObject;
-    result_schema?: JSONSchema4;
+    result_schema?: JSONSchema4 | SchemaRef;
     cache_policy?: CachePolicy;
     model: string;
-    temperature?: number;
     prompts: PromptSegmentDef[];
-    max_tokens?: number;
     environment: string | ExecutionEnvironmentRef;
     restriction?: RunDataStorageLevel;
     project: string | ProjectRef;
@@ -133,9 +138,21 @@ export interface InteractionUpdatePayload
         Omit<
             Interaction,
             "result_schema" | "id" | "created_at" | "updated_at" | "created_by" | "updated_by" | "project"
+            | "temperature" | "max_tokens" | "stop_sequence" | "top_k" | "top_p" | "presence_penalty" | "frequency_penalty" | "top_logprobs"
         >
     > {
     result_schema?: JSONSchema4 | null;
+
+    // Change ModelOptions properties to include null as a possible type
+    // Null values indicate that the property should be cleared.
+    temperature?: number | null;
+    max_tokens?: number | null;
+    stop_sequence?: string[] | null;
+    top_k?: number | null;
+    top_p?: number | null;
+    top_logprobs?: number | null;
+    presence_penalty?: number | null;
+    frequency_penalty?: number | null;
 }
 
 export interface InteractionPublishPayload {
@@ -216,8 +233,10 @@ export interface ExecutionRun<P = any, R = any> {
     result_schema: JSONSchema4;
     ttl: number;
     status: ExecutionRunStatus;
+    finish_reason?: string;
     prompt: any;
     token_use?: ExecutionTokenUsage;
+    chunks?: number;
     execution_time?: number; //s
     created_at: Date;
     updated_at: Date;
@@ -237,13 +256,30 @@ export interface ExecutionRunRef
 
 export const ExecutionRunRefSelect = "-result -parameters -result_schema -prompt";
 
-export interface InteractionExecutionConfiguration {
+export enum ConfigModes {
+    RUN_AND_INTERACTION_CONFIG = "RUN_AND_INTERACTION_CONFIG",
+    RUN_CONFIG_ONLY = "RUN_CONFIG_ONLY",
+    INTERACTION_CONFIG_ONLY = "INTERACTION_CONFIG_ONLY"
+};
+
+export enum ConfigModesDescription {
+    RUN_AND_INTERACTION_CONFIG = "This run configuration is used. Undefined options are filled with interaction configuration.",
+    RUN_CONFIG_ONLY = "Only this run configuration is used. Undefined options remain undefined.",
+    INTERACTION_CONFIG_ONLY = "Only interaction configuration is used."
+}
+
+export const ConfigModesOptions: Record<ConfigModes, ConfigModesDescription> = {
+    [ConfigModes.RUN_AND_INTERACTION_CONFIG]: ConfigModesDescription.RUN_AND_INTERACTION_CONFIG,
+    [ConfigModes.RUN_CONFIG_ONLY]: ConfigModesDescription.RUN_CONFIG_ONLY,
+    [ConfigModes.INTERACTION_CONFIG_ONLY]: ConfigModesDescription.INTERACTION_CONFIG_ONLY,
+}
+
+export interface InteractionExecutionConfiguration extends ModelOptions {
     environment?: string;
     model?: string;
-    temperature?: number;
-    max_tokens?: number;
     do_validate?: boolean;
     run_data?: RunDataStorageLevel;
+    configMode?: ConfigModes;
 }
 
 export interface GenerateInteractionPayload {

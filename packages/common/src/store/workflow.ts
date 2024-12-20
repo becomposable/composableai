@@ -80,7 +80,7 @@ export interface ListWorkflowRunsPayload {
     start?: string;
     end?: string;
     status?: string;
-    run_id?: string;
+    search_term?: string;
 }
 
 interface WorkflowRunEvent {

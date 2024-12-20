@@ -1,6 +1,6 @@
 {
     "name": "@becomposable/client",
-    "version": "0.40.0",
+    "version": "0.42.2",
     "type": "module",
     "types": "./lib/types/index.d.ts",
     "files": [
@@ -17,11 +17,11 @@
         "@types/node": "^20.8.9",
         "ts-dual-module": "^0.6.3",
         "typescript": "^5.0.2",
-        "vitest": "^1.4.0"
+        "vitest": "^2.1.6"
     },
     "dependencies": {
-        "@becomposable/common": "workspace:*",
         "@becomposable/api-fetch-client": "workspace:*",
+        "@becomposable/common": "workspace:*",
         "@llumiverse/core": "workspace:*",
         "eventsource": "^2.0.2"
     },

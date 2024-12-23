@@ -146,22 +146,43 @@ export class TextractProcessor {
     }
 
     private isBlockInTable(block: Block, blocksMap: BlocksMap): boolean {
-        // First check if this block is directly in a table
-        for (const [_, parentBlock] of Object.entries(blocksMap)) {
-            if (parentBlock.BlockType === 'TABLE') {
-                if (parentBlock.Relationships) {
-                    for (const relationship of parentBlock.Relationships) {
-                        if (relationship.Type === 'CHILD') {
-                            // Check each cell in the table
-                            for (const cellId of relationship.Ids || []) {
-                                const cell = blocksMap[cellId];
-                                if (cell.Relationships) {
-                                    // Check content of each cell
-                                    for (const cellRelation of cell.Relationships) {
-                                        if (cellRelation.Type === 'CHILD' && 
-                                            cellRelation.Ids?.includes(block.Id!)) {
-                                            return true;
-                                        }
+        if (block.BlockType !== 'LINE') {
+            return false;
+        }
+    
+        // If the LINE block has child WORD(s), check each WORD to see if that WORD 
+        // belongs to a table cell. If any do, we consider the entire LINE to be in a table.
+        if (block.Relationships) {
+            for (const relationship of block.Relationships) {
+                if (relationship.Type === 'CHILD') {
+                    for (const childId of relationship.Ids || []) {
+                        const wordBlock = blocksMap[childId];
+                        if (this.isWordInTableCell(wordBlock, blocksMap)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    
+    private isWordInTableCell(wordBlock: Block, blocksMap: BlocksMap): boolean {
+        // Look up all TABLE blocks, and check if this WORD is present
+        // in any TABLE -> CHILD -> CELL -> CHILD chain.
+        for (const blockId in blocksMap) {
+            const potentialTable = blocksMap[blockId];
+            if (potentialTable.BlockType === 'TABLE' && potentialTable.Relationships) {
+                for (const relationship of potentialTable.Relationships) {
+                    if (relationship.Type === 'CHILD') {
+                        // Each child is a CELL
+                        for (const cellId of relationship.Ids || []) {
+                            const cell = blocksMap[cellId];
+                            if (cell.BlockType === 'CELL' && cell.Relationships) {
+                                // Check if the wordBlock.Id is among the CHILD relationships of this CELL
+                                for (const cellRel of cell.Relationships) {
+                                    if (cellRel.Type === 'CHILD' && cellRel.Ids?.includes(wordBlock.Id!)) {
+                                        return true;
                                     }
                                 }
                             }
@@ -171,7 +192,7 @@ export class TextractProcessor {
             }
         }
         return false;
-    }
+    }    
 
     async upload(fileBuf: Buffer): Promise<void> {
         this.log.info('Uploading file to S3', { fileKey: this.fileKey });

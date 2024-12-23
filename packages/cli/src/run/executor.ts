@@ -1,5 +1,5 @@
 import { ComposableClient } from "@becomposable/client";
-import { ExecutionRun, RunDataStorageLevel } from "@becomposable/common";
+import { ConfigModes, ExecutionRun, RunDataStorageLevel } from "@becomposable/common";
 
 export class ExecutionQueue {
     requests: ExecutionRequest[] = [];
@@ -31,6 +31,11 @@ function convertRunData(raw_run_data: any): RunDataStorageLevel | undefined {
     return Object.values(RunDataStorageLevel).includes(levelStr as RunDataStorageLevel) ? levelStr as RunDataStorageLevel : undefined;
 }
 
+function convertConfigMode(raw_config_mode: any): ConfigModes | undefined {
+    const configStr: string =  typeof raw_config_mode === 'string' ? raw_config_mode.toUpperCase() : "";
+    return Object.values(ConfigModes).includes(configStr as ConfigModes) ? configStr as ConfigModes : undefined;
+}
+
 export class ExecutionRequest {
 
     runNumber?: number;
@@ -52,6 +57,13 @@ export class ExecutionRequest {
                 environment: typeof options.env === 'string' ? options.env : undefined,
                 model: typeof options.model === 'string' ? options.model : undefined,
                 temperature: typeof options.temperature === 'string' ? parseFloat(options.temperature) : undefined,
+                max_tokens: typeof options.maxTokens === 'string' ? parseInt(options.maxTokens) : undefined,
+                top_p: typeof options.topP === 'string' ? parseFloat(options.topP) : undefined,
+                top_k: typeof options.topK === 'string' ? parseInt(options.topK) : undefined,
+                presence_penalty: typeof options.presencePenalty === 'string' ? parseFloat(options.presencePenalty) : undefined,
+                frequency_penalty: typeof options.frequencyPenalty === 'string' ? parseFloat(options.frequencyPenalty) : undefined,
+                stop_sequence: options.stopSequence ? options.stopSequence.trim().split(/\s*,\s*/) : undefined,
+                configMode: convertConfigMode(options.configMode),
                 run_data: convertRunData(options.runData),
             },
             tags: options.tags ? options.tags.trim().split(/\s,*\s*/) : undefined

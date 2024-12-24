@@ -1,10 +1,14 @@
 import { ApiTopic, ClientBase } from '@becomposable/api-fetch-client';
-import { CreateWorkflowRulePayload, DSLWorkflowDefinition, DSLWorkflowSpec, ExecuteWorkflowPayload, ListWorkflowRunsPayload, ListWorkflowRunsResponse, WorkflowDefinitionRef, WorkflowRule, WorkflowRuleItem, WorkflowRunWithDetails } from '@becomposable/common';
+import { ActivityCatalog, CreateWorkflowRulePayload, DSLWorkflowDefinition, DSLWorkflowSpec, ExecuteWorkflowPayload, ListWorkflowRunsPayload, ListWorkflowRunsResponse, WorkflowDefinitionRef, WorkflowRule, WorkflowRuleItem, WorkflowRunWithDetails } from '@becomposable/common';
 
 export class WorkflowsApi extends ApiTopic {
 
     constructor(parent: ClientBase) {
         super(parent, "/api/v1/workflows");
+    }
+
+    getActivityCatalog(): Promise<ActivityCatalog> {
+        return this.get("/activity-catalog");
     }
 
     listRuns(documentId: string, eventName: string, ruleId: string): Promise<ListWorkflowRunsResponse> {

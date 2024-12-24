@@ -22,7 +22,7 @@ const {
 
 const {
     transcribeMedia,
-    convertPdfToStructuredText
+    //convertPdfToStructuredText
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "30 minute",
     retry: {

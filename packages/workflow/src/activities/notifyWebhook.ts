@@ -6,7 +6,7 @@ import { WorkflowParamNotFound } from "../errors.js";
 interface NotifyWebhookParams {
     target_url: string; //URL to send the notification to
     method: 'GET' | 'POST'; //HTTP method to use
-    payload: Record<string, any> | Object; //payload to send (if POST then as JSON body, if GET then as query string)
+    payload: Record<string, any>; //payload to send (if POST then as JSON body, if GET then as query string)
     headers?: Record<string, string>; //additional headers to send
 }
 

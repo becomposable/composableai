@@ -21,6 +21,7 @@ export * from "./activities/generateEmbeddings.js";
 export * from "./activities/generateImageRendition.js";
 export * from "./activities/generateOrAssignContentType.js";
 export * from "./activities/setDocumentStatus.js";
+export * from "./activities/notifyWebhook.js";
 export * from "./iterative-generation/activities/index.js";
 
 export * from "./result-types.js";

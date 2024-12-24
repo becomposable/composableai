@@ -1,4 +1,4 @@
-import { DSLActivitySpec, DSLWorkflowSpec } from "@becomposable/common";
+import { DSLActivitySpec, DSLWorkflowSpec, DSLWorkflowStep } from "@becomposable/common";
 import { Vars, splitPath } from "./vars.js";
 
 export function validateWorkflow(workflow: DSLWorkflowSpec, vars: string[] = []) {
@@ -14,19 +14,29 @@ export function validateWorkflow(workflow: DSLWorkflowSpec, vars: string[] = [])
     if (!workflow.name) {
         errors.push("Workflow 'name' property is required");
     }
-    const activities = workflow.activities;
-    if (!activities || !Array.isArray(activities)) {
-        errors.push("Workflow 'activities' property is required");
+    if (workflow.steps && workflow.activities) {
+        errors.push("You must use either 'steps' or 'activities'. You cannot use both. Prefer using steps.");
         return errors;
     }
-    if (!activities || !Array.isArray(activities)) {
-        errors.push("Workflow 'activities' should be an array");
+    if (!workflow.steps && !workflow.activities) {
+        errors.push("The workflow requires one of 'steps' or 'activities' properties. Neither is present.");
         return errors;
     }
-    if (!activities.length) {
-        errors.push("Workflow should have at least one activity");
+    const stepsPropName = workflow.steps ? "steps" : "activities";
+    const steps = workflow.steps || workflow.activities;
+    if (!steps || !Array.isArray(steps)) {
+        errors.push(`Workflow '${stepsPropName}' property is required`);
+        return errors;
+    }
+    if (!steps || !Array.isArray(steps)) {
+        errors.push(`Workflow '${stepsPropName}' should be an array`);
+        return errors;
+    }
+    if (!steps.length) {
+        errors.push("Workflow should have at least one step or activity");
     }
 
+    const activities: DSLActivitySpec[] = stepsPropName === "steps" ? (steps as DSLWorkflowStep[]).filter(s => s.type === "activity") : steps;
     for (const activity of activities) {
         const activityErrors = validateActivity(activity, workflowVars);
         if (activityErrors.length > 0) {

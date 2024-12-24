@@ -21,7 +21,8 @@ const {
 });
 
 const {
-    transcribeMedia
+    transcribeMedia,
+    convertPdfToStructuredText
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "30 minute",
     retry: {
@@ -60,6 +61,7 @@ export async function generateObjectText(payload: DSLWorkflowExecutionPayload): 
     if (!converter) {
         throw new NoDocumentFound(`No converter found for mimetype ${mimetype}`, objectIds);
     }
+    log.info(`Converting file type ${mimetype} to text with ${converter.name}`);
 
     const res = await converter?.activity({
         ...payload,
@@ -77,6 +79,13 @@ export async function generateObjectText(payload: DSLWorkflowExecutionPayload): 
 
 
 const ConverterActivity = [
+    /* need to be driven by enabled integrations
+    {
+        type: /application\/pdf/,
+        activity: convertPdfToStructuredText,
+        name: "ConvertPdfToStructuredText",
+        params: {},
+    },*/
     {
         type: /audio\/.+/,
         activity: transcribeMedia,

@@ -22,7 +22,7 @@ const {
 
 const {
     transcribeMedia,
-    //convertPdfToStructuredText
+    convertPdfToStructuredText
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "30 minute",
     retry: {
@@ -63,44 +63,46 @@ export async function generateObjectText(payload: DSLWorkflowExecutionPayload): 
     }
     log.info(`Converting file type ${mimetype} to text with ${converter.name}`);
 
-    const res = await converter?.activity({
+    const res = await converter.activity(payload)({
         ...payload,
         activity: {
             name: converter.name,
         },
         params: converter.params,
         workflow_name: "Generate Text",
-    })
+    });
 
     log.info("Generated text for object", {res, objectId});
-    return res; 
+    return res;
 
 } 
 
 
 const ConverterActivity = [
-    /* need to be driven by enabled integrations
     {
         type: /application\/pdf/,
-        activity: convertPdfToStructuredText,
+        activity: (payload: DSLWorkflowExecutionPayload) => {
+            const useTextractForPDF = payload.vars?.useTextractForPDF ?? false;
+            return useTextractForPDF ? convertPdfToStructuredText : extractDocumentText;
+        },
         name: "ConvertPdfToStructuredText",
         params: {},
-    },*/
+    },
     {
         type: /audio\/.+/,
-        activity: transcribeMedia,
+        activity: () => transcribeMedia,
         name: "TranscribeMedia",
         params: {},
     },
     {
         type: /video\/.+/,
-        activity: transcribeMedia,
+        activity: () => transcribeMedia,
         name: "TranscribeMedia",
         params: {},
     },
     {
         type: /.+/,
-        activity: extractDocumentText,
+        activity: () => extractDocumentText,
         name: "extractText",
         params: {},
     }

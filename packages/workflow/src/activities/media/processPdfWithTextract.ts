@@ -67,7 +67,9 @@ export async function convertPdfToStructuredText(payload: DSLActivityExecutionPa
         region: "us-west-2",
         bucket: "cp-textract-tests",
         credentials,
-        log: log
+        log: log,
+        detectImages: true,
+        includeConfidenceInTables: true,
     });
 
 

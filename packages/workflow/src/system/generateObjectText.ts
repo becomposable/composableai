@@ -82,7 +82,7 @@ const ConverterActivity = [
     {
         type: /application\/pdf/,
         activity: (payload: DSLWorkflowExecutionPayload) => {
-            const useTextractForPDF = payload.vars?.useTextractForPDF ?? false;
+            const useTextractForPDF = payload.vars?.useTextractForPdf?? false;
             return useTextractForPDF ? convertPdfToStructuredText : extractDocumentText;
         },
         name: "ConvertPdfToStructuredText",

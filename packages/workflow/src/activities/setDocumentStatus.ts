@@ -1,14 +1,6 @@
 import { ContentObjectStatus, DSLActivityExecutionPayload, DSLActivitySpec } from "@becomposable/common";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
 
-//@ts-ignore
-const JSON: DSLActivitySpec = {
-    name: 'setDocumentStatus',
-    params: {
-        status: "${status}"
-    }
-}
-
 export interface SetDocumentStatusParams {
     status: ContentObjectStatus;
 }

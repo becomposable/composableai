@@ -64,6 +64,7 @@ export interface WorkflowExecutionPayload {
     config?: {
         studio_url: string;
         store_url: string;
+        enabled_integrations?: string[]; //list of enabled integrations
     }
 }
 

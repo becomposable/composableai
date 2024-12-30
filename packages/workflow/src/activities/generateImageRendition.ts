@@ -1,7 +1,7 @@
 import { DSLActivityExecutionPayload, DSLActivitySpec, RenditionProperties } from "@becomposable/common";
 import { log } from "@temporalio/activity";
 import fs from 'fs';
-import sharp from "sharp";
+import sharp, { FormatEnum } from "sharp";
 import { imageResizer } from "../conversion/image.js";
 import { pdfToImages } from "../conversion/mutool.js";
 import { setupActivity } from "../dsl/setup/ActivityContext.js";
@@ -10,7 +10,7 @@ import { fetchBlobAsBuffer, saveBlobToTempFile } from "../utils/blobs.js";
 import { NodeStreamSource } from "../utils/memory.js";
 interface GenerateImageRenditionParams {
     max_hw: number; //maximum size of the longuest side of the image
-    format: keyof sharp.FormatEnum; //format of the output image
+    format: keyof FormatEnum; //format of the output image
     multi_page?: boolean; //if true, generate a multi-page rendition
 }
 

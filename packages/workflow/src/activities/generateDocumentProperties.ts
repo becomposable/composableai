@@ -49,7 +49,7 @@ export async function generateDocumentProperties(payload: DSLActivityExecutionPa
             return "store:" + doc.id;
         }
 
-        log.warn(`Object ${objectId} is not an image or pdf`, { doc });
+        log.info(`Object ${objectId} is not an image or pdf`);
         return undefined
     }
 

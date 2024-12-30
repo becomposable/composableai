@@ -21,7 +21,8 @@ const {
 });
 
 const {
-    transcribeMedia
+    transcribeMedia,
+    convertPdfToStructuredText
 } = proxyActivities<typeof activities>({
     startToCloseTimeout: "30 minute",
     retry: {
@@ -60,38 +61,48 @@ export async function generateObjectText(payload: DSLWorkflowExecutionPayload): 
     if (!converter) {
         throw new NoDocumentFound(`No converter found for mimetype ${mimetype}`, objectIds);
     }
+    log.info(`Converting file type ${mimetype} to text with ${converter.name}`);
 
-    const res = await converter?.activity({
+    const res = await converter.activity(payload)({
         ...payload,
         activity: {
             name: converter.name,
         },
         params: converter.params,
         workflow_name: "Generate Text",
-    })
+    });
 
     log.info("Generated text for object", {res, objectId});
-    return res; 
+    return res;
 
 } 
 
 
 const ConverterActivity = [
     {
+        type: /application\/pdf/,
+        activity: (payload: DSLWorkflowExecutionPayload) => {
+            const useTextractForPDF = payload.vars?.useTextractForPdf?? false;
+            return useTextractForPDF ? convertPdfToStructuredText : extractDocumentText;
+        },
+        name: "ConvertPdfToStructuredText",
+        params: {},
+    },
+    {
         type: /audio\/.+/,
-        activity: transcribeMedia,
+        activity: () => transcribeMedia,
         name: "TranscribeMedia",
         params: {},
     },
     {
         type: /video\/.+/,
-        activity: transcribeMedia,
+        activity: () => transcribeMedia,
         name: "TranscribeMedia",
         params: {},
     },
     {
         type: /.+/,
-        activity: extractDocumentText,
+        activity: () => extractDocumentText,
         name: "extractText",
         params: {},
     }

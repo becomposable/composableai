@@ -32,8 +32,8 @@
     "dependencies": {
         "@vertesia/client": "workspace:*",
         "@vertesia/common": "workspace:*",
-        "@becomposable/memory-cli": "^0.43.0",
-        "@becomposable/memory-commands": "^0.43.0",
+        "@vertesia/memory-cli": "^0.43.0",
+        "@vertesia/memory-commands": "^0.43.0",
         "@vertesia/workflow": "workspace:*",
         "ansi-colors": "^4.1.3",
         "ansi-escapes": "^6.2.0",

@@ -39,7 +39,7 @@
         "@aws-sdk/credential-providers": "^3.693.0",
         "@vertesia/client": "workspace:*",
         "@vertesia/common": "workspace:*",
-        "@becomposable/memory": "^0.43.0",
+        "@vertesia/memory": "^0.43.0",
         "@llumiverse/core": "workspace:*",
         "@opendocsg/pdf2md": "0.2.0",
         "@temporalio/activity": "^1.11.5",

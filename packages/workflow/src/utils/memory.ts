@@ -1,4 +1,4 @@
-import { ComposableClient, StreamSource } from "@becomposable/client";
+import { ComposableClient, StreamSource } from "@vertesia/client";
 import { Commands, MemoryPack, buildMemoryPack as _buildMemoryPack, loadMemoryPack as _loadMemoryPack } from "@becomposable/memory";
 import { createReadStream, createWriteStream } from "fs";
 import { rm } from "fs/promises";

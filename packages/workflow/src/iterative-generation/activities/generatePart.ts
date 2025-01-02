@@ -1,4 +1,4 @@
-import { WorkflowExecutionPayload } from "@becomposable/common";
+import { WorkflowExecutionPayload } from "@vertesia/common";
 import { MemoryPack } from "@becomposable/memory";
 import { ApplicationFailure } from "@temporalio/workflow";
 import { getClient } from "../../utils/client.js";

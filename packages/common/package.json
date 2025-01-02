@@ -1,5 +1,5 @@
 {
-    "name": "@becomposable/common",
+    "name": "@vertesia/common",
     "version": "0.42.2",
     "type": "module",
     "types": "./lib/types/index.d.ts",

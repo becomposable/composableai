@@ -1,5 +1,5 @@
 {
-    "name": "@becomposable/converters",
+    "name": "@vertesia/converters",
     "version": "0.42.2",
     "description": "Image and content converters",
     "type": "module",

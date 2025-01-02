@@ -249,6 +249,25 @@ importers:
         specifier: ^2.1.6
         version: 2.1.8(@types/node@22.10.2)(terser@5.37.0)
 
+  packages/create-agent:
+    dependencies:
+      enquirer:
+        specifier: ^2.4.1
+        version: 2.4.1
+      hasbin:
+        specifier: ^1.2.3
+        version: 1.2.3
+    devDependencies:
+      '@types/hasbin':
+        specifier: ^1.2.2
+        version: 1.2.2
+      '@types/node':
+        specifier: ^22.5.0
+        version: 22.10.2
+      typescript:
+        specifier: ^5.7.2
+        version: 5.7.2
+
   packages/json:
     devDependencies:
       ts-dual-module:
@@ -1652,6 +1671,9 @@ packages:
   '@types/glob@7.2.0':
     resolution: {integrity: sha512-ZUxbzKl0IfJILTS6t7ip5fQQM/J3TJYubDm3nMbgubNNYS62eXeUpoLUC8/7fJNiFYHTrGPQn7hspDUzIHX3UA==}
 
+  '@types/hasbin@1.2.2':
+    resolution: {integrity: sha512-+WjYdtDVxfzvyIkVrLmBikOuChFvTE1jEuz51cTqk7dhemLw1A4DYaJjBwsemNhzS9oDiVWr+bqx/Ld9pUVO5Q==}
+
   '@types/http-assert@1.5.6':
     resolution: {integrity: sha512-TTEwmtjgVbYAzZYWyeHPrrtWnfVkm8tQkP8P21uQifPgMRgjrow3XDEYqucuC8SKZJT7pUnhU/JymvjggxO9vw==}
 
@@ -1952,6 +1974,9 @@ packages:
   assertion-error@2.0.1:
     resolution: {integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==}
     engines: {node: '>=12'}
+
+  async@1.5.2:
+    resolution: {integrity: sha512-nSVgobk4rv61R9PUSDtYt7mPVB2olxNR5RWJcAsH676/ef11bUZwvu7+RGYrYauVdDPcO519v68wRhXQtxsV9w==}
 
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
@@ -2513,6 +2538,10 @@ packages:
 
   has-unicode@2.0.1:
     resolution: {integrity: sha512-8Rf9Y83NBReMnx0gFzA8JImQACstCYWUplepDa9xprwwtmgEZUF0h/i5xSA625zB/I37EtrswSST6OXxwaaIJQ==}
+
+  hasbin@1.2.3:
+    resolution: {integrity: sha512-CCd8e/w2w28G8DyZvKgiHnQJ/5XXDz6qiUHnthvtag/6T5acUeN5lqq+HMoBqcmgWueWDhiCplrw0Kb1zDACRg==}
+    engines: {node: '>=0.10'}
 
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
@@ -5434,6 +5463,8 @@ snapshots:
       '@types/minimatch': 5.1.2
       '@types/node': 22.10.2
 
+  '@types/hasbin@1.2.2': {}
+
   '@types/http-assert@1.5.6': {}
 
   '@types/http-errors@2.0.4': {}
@@ -5765,6 +5796,8 @@ snapshots:
   asap@2.0.6: {}
 
   assertion-error@2.0.1: {}
+
+  async@1.5.2: {}
 
   asynckit@0.4.0: {}
 
@@ -6353,6 +6386,10 @@ snapshots:
       has-symbols: 1.1.0
 
   has-unicode@2.0.1: {}
+
+  hasbin@1.2.3:
+    dependencies:
+      async: 1.5.2
 
   hasown@2.0.2:
     dependencies:

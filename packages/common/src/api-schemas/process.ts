@@ -1201,7 +1201,7 @@ const ProcessTestRunIdempotencyKeySchema = z
             'the request with the same key and the same body returns the run the first request started ' +
             'instead of starting another. Reusing a key with a different body is rejected with 409, and a ' +
             'repeat after that run was deleted with 410. Keys are scoped to the project and remembered for ' +
-            '24 hours; after that the same key starts a new run.',
+            'at least 24 hours; a key can start a new run only once it has been purged, which may be later.',
     });
 
 export const StartProcessTestRunPayloadSchema = z

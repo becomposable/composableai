@@ -7464,6 +7464,7 @@ export type StartProcessTestRunPayload = {
     suite_id: string;
     process_revision_id: string;
     scenario_ids?: string[] | undefined;
+    idempotency_key?: string | undefined;
 };
 export type ProcessTestAssertionResult = {
     assertion: string;
@@ -9837,6 +9838,7 @@ export type ProcessTestTargetWithDefinitionWire = {
 export type SubmitProcessTestRunPayloadWire = {
     process: ProcessTestTargetWire;
     scenarios: ProcessTestScenario[];
+    idempotency_key?: string | undefined;
 };
 export type CreateContentObjectPayloadWire = {
     text?: string | undefined;

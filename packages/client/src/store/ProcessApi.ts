@@ -82,8 +82,15 @@ export class ProcessApi extends ApiTopic {
         return this.del(`/${processId}/test-suites/${suiteId}`);
     }
 
+    /**
+     * Start a test run against a stored process revision. Set `idempotency_key` to make the call
+     * safe to retry: without one, a replay would start a second run, so no client retry applies.
+     */
     startTestRun(processId: string, payload: StartProcessTestRunPayload): Promise<ProcessTestRun> {
-        return this.post(`/${processId}/test-runs`, { payload });
+        return this.post(`/${processId}/test-runs`, {
+            payload,
+            retryPolicy: payload.idempotency_key ? undefined : false,
+        });
     }
 
     listTestRuns(processId: string, query?: ListProcessTestRunsQuery): Promise<ProcessTestRun[]> {

@@ -2,9 +2,10 @@
 
 Audience: apps generated with `npm create @vertesia/plugin` from the release/1.5 template line
 (`@vertesia/ui` 1.5.x). This guide covers configurable authentication, app-owned branding, loading
-screens, and development workspace selection, then, for apps that Vertesia hosts through AppGen only,
-[the sandboxed service runtime](#appgen-apps-hosted-by-vertesia-the-sandboxed-service-runtime)
-for apps that Vertesia hosts. It is a focused template migration, not a complete SDK breaking-change inventory. Apps still on 1.4 should first follow [the 1.4 migration](migrate-from-1.4.md).
+screens, and development workspace selection. Apps that Vertesia hosts through AppGen also move to
+[the sandboxed service runtime](#appgen-apps-hosted-by-vertesia-the-sandboxed-service-runtime).
+It is a focused template migration, not a complete SDK breaking-change inventory. Apps still on 1.4 should first
+follow [the 1.4 migration](migrate-from-1.4.md).
 
 ## Background: what changed
 
@@ -308,7 +309,8 @@ ignores that flag, and the build fails because `lib/server-sandbox.js` is missin
    [the current template version](../src/modules/service/scripts/build-server-esbuild.mjs). Its
    `--sandbox` mode bundles `src/tool-server/server.ts` for the browser platform and swaps
    `@vertesia/tools-sdk` for `@vertesia/tools-sdk/sandbox`.
-2. Add the script and, to validate locally with the same runtime, the pinned workerd:
+2. Add the script and the pinned workerd. No template command runs workerd: `build:sandbox` only
+   bundles. The pin keeps the version you install the same as the one the sandbox runtime uses.
 
 ```json
 {

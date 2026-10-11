@@ -180,6 +180,23 @@ it('does not reuse a cached OAuth token for a different remembered project', asy
     expect(authorize.searchParams.get('project_id')).toBe('preferred-project');
 });
 
+it('does not reuse a cached OAuth token issued for a different resource', async () => {
+    const token = jwt();
+    storage.set('vertesia.oauth.access', JSON.stringify({ token, clientId, issuer }));
+    const sameResource = await setup();
+    await expect(sameResource.getAppOAuthToken()).resolves.toBe(token);
+    expect(replace).not.toHaveBeenCalled();
+
+    const otherResource = await setup(false, { resource: 'https://api.other.vertesia.io/' });
+    void otherResource.getAppOAuthToken();
+    await vi.waitFor(() => expect(replace).toHaveBeenCalledTimes(1));
+    const authorize = new URL(replace.mock.calls[0][0]);
+    expect(authorize.searchParams.get('resource')).toBe('https://api.other.vertesia.io/');
+    expect(JSON.parse(storage.get('vertesia.oauth.transaction') ?? '{}').resource).toBe(
+        'https://api.other.vertesia.io/',
+    );
+});
+
 it('clears a rejected remembered selection and retries once without scope hints', async () => {
     browser.location.href = `${origin}/app/report#chart`;
     local.set('composableai.lastSelectedAccountId', 'stale-account');

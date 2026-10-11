@@ -152,32 +152,45 @@ export function createSandboxScratch(fetchImpl: typeof fetch = (...args) => fetc
         if (response.status === 400) return new ScratchError('invalid_key', detail || 'Invalid scratch key');
         return new ScratchError('unavailable', `Scratch ${operation} failed with status ${response.status}: ${detail}`);
     };
+    // An unreachable runtime, or a response cut off mid-body, is the same `unavailable` as an error status.
+    const run = async <T>(operation: string, exchange: () => Promise<T>): Promise<T> => {
+        try {
+            return await exchange();
+        } catch (error: unknown) {
+            if (error instanceof ScratchError) throw error;
+            throw new ScratchError('unavailable', `Scratch ${operation} failed: ${String(error)}`, { cause: error });
+        }
+    };
     return withHelpers({
-        async put(key, bytes, contentType) {
-            const response = await fetchImpl(url(key), {
-                method: 'PUT',
-                headers: { 'content-type': contentType },
-                body: bytes,
-            });
-            if (!response.ok) throw await failure(response, 'write');
-        },
-        async get(key) {
-            const response = await fetchImpl(url(key));
-            if (response.status === 404) return undefined;
-            if (!response.ok) throw await failure(response, 'read');
-            return new Uint8Array(await response.arrayBuffer());
-        },
-        async delete(key) {
-            const response = await fetchImpl(url(key), { method: 'DELETE' });
-            if (response.status === 404) return false;
-            if (!response.ok) throw await failure(response, 'delete');
-            return true;
-        },
-        async list() {
-            const response = await fetchImpl(url());
-            if (!response.ok) throw await failure(response, 'list');
-            const body = (await response.json()) as { entries: { key: string; size: number; type: string }[] };
-            return body.entries.map(({ key, size, type }) => ({ key, size, contentType: type }));
-        },
+        put: (key, bytes, contentType) =>
+            run('write', async () => {
+                const response = await fetchImpl(url(key), {
+                    method: 'PUT',
+                    headers: { 'content-type': contentType },
+                    body: bytes,
+                });
+                if (!response.ok) throw await failure(response, 'write');
+            }),
+        get: (key) =>
+            run('read', async () => {
+                const response = await fetchImpl(url(key));
+                if (response.status === 404) return undefined;
+                if (!response.ok) throw await failure(response, 'read');
+                return new Uint8Array(await response.arrayBuffer());
+            }),
+        delete: (key) =>
+            run('delete', async () => {
+                const response = await fetchImpl(url(key), { method: 'DELETE' });
+                if (response.status === 404) return false;
+                if (!response.ok) throw await failure(response, 'delete');
+                return true;
+            }),
+        list: () =>
+            run('list', async () => {
+                const response = await fetchImpl(url());
+                if (!response.ok) throw await failure(response, 'list');
+                const body = (await response.json()) as { entries: { key: string; size: number; type: string }[] };
+                return body.entries.map(({ key, size, type }) => ({ key, size, contentType: type }));
+            }),
     });
 }

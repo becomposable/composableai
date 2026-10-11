@@ -116,6 +116,23 @@ describe('sandbox scratch transport', () => {
         await expect(scratch.get('a')).rejects.toMatchObject({ code: 'unavailable' });
         await expect(scratch.put('a', 'x')).rejects.toMatchObject({ code: 'unavailable' });
     });
+
+    it('reports an unreachable runtime as unavailable and keeps the cause', async () => {
+        const unreachable = new TypeError('fetch failed');
+        const scratch = createSandboxScratch(async () => {
+            throw unreachable;
+        });
+        for (const operation of [
+            () => scratch.put('a', 'x'),
+            () => scratch.get('a'),
+            () => scratch.delete('a'),
+            () => scratch.list(),
+        ]) {
+            const error = await operation().catch((cause: unknown) => cause);
+            expect(error).toBeInstanceOf(ScratchError);
+            expect(error).toMatchObject({ code: 'unavailable', cause: unreachable });
+        }
+    });
 });
 
 describe('session scratch on a Node tool server', () => {

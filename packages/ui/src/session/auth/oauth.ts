@@ -13,7 +13,14 @@ const MAX_TRANSACTION_AGE = 10 * 60_000;
 let pending: Promise<string> | undefined;
 // Long-lived credentials never enter browser storage. A reload resumes via the broker when access expires.
 let refreshSession:
-    | { token: string; clientId: string; issuer: string; tokenEndpoint: string; revocationEndpoint?: string }
+    | {
+          token: string;
+          clientId: string;
+          issuer: string;
+          resource?: string;
+          tokenEndpoint: string;
+          revocationEndpoint?: string;
+      }
     | undefined;
 
 export class OAuthLoginError extends Error {}
@@ -61,6 +68,7 @@ interface Transaction {
     clientId: string;
     redirectUri: string;
     issuer: string;
+    resource?: string;
     target: string;
     rememberedScope?: ScopeSelection;
     retryScope?: ScopeSelection;
@@ -90,6 +98,12 @@ async function acquireToken(forceRefresh = false): Promise<string> {
     const redirectUri = redirect.toString();
     if (new URL(redirectUri).origin !== window.location.origin) throw new Error('OAuth callback must be same-origin');
     const issuer = (config.issuer ? httpsUrl(config.issuer).toString() : Env.endpoints.sts).replace(/\/+$/, '');
+    // A token is issued for one audience. The default audience follows the issuer, which is already part of every
+    // stored credential's identity; a configured one is recorded alongside it, so changing it never reuses a token,
+    // refresh session or login transaction issued for the previous audience.
+    const configuredResource = config.resource ? httpsUrl(config.resource).toString() : undefined;
+    const sameClient = (stored: { clientId: string; issuer: string; resource?: string }) =>
+        stored.clientId === clientId && stored.issuer === issuer && stored.resource === configuredResource;
     let current = new URL(window.location.href);
     let { accountId, projectId } = resolveAuthSelection(current);
     const callback = current.origin + current.pathname === new URL(redirectUri).origin + new URL(redirectUri).pathname;
@@ -105,9 +119,8 @@ async function acquireToken(forceRefresh = false): Promise<string> {
         if (
             !transaction ||
             transaction.state !== state ||
-            transaction.clientId !== clientId ||
+            !sameClient(transaction) ||
             transaction.redirectUri !== redirectUri ||
-            transaction.issuer !== issuer ||
             Date.now() - transaction.created > MAX_TRANSACTION_AGE ||
             transaction.created > Date.now()
         ) {
@@ -133,25 +146,21 @@ async function acquireToken(forceRefresh = false): Promise<string> {
                 token: string;
                 clientId: string;
                 issuer: string;
+                resource?: string;
                 refreshToken?: string;
             };
             const claims = jwtDecode<AuthTokenPayload>(cached.token);
             if (
                 config.offlineAccess &&
-                cached.clientId === clientId &&
-                cached.issuer === issuer &&
+                sameClient(cached) &&
                 (!projectId || claims.project?.id === projectId) &&
                 (!accountId || claims.account?.id === accountId)
             )
-                refreshCredential =
-                    refreshSession?.clientId === clientId && refreshSession.issuer === issuer
-                        ? refreshSession.token
-                        : undefined;
+                refreshCredential = refreshSession && sameClient(refreshSession) ? refreshSession.token : undefined;
             // Discard credentials persisted by older SDK versions rather than loading them into the new session.
             if (cached.refreshToken) sessionStorage.removeItem(TOKEN_KEY);
             if (
-                cached.clientId === clientId &&
-                cached.issuer === issuer &&
+                sameClient(cached) &&
                 !forceRefresh &&
                 claims.exp > Date.now() / 1000 + (config.offlineAccess ? 300 : 30) &&
                 (!projectId || claims.project?.id === projectId) &&
@@ -179,7 +188,7 @@ async function acquireToken(forceRefresh = false): Promise<string> {
     const tokenEndpoint = httpsUrl(metadata.token_endpoint);
     const revocationEndpoint =
         metadata.revocation_endpoint === undefined ? undefined : httpsUrl(metadata.revocation_endpoint).toString();
-    const resource = config.resource ? httpsUrl(config.resource).toString() : new URL(metadata.issuer).toString();
+    const resource = configuredResource ?? new URL(metadata.issuer).toString();
     if (refreshCredential) {
         try {
             const response = await fetch(tokenEndpoint, {
@@ -215,12 +224,14 @@ async function acquireToken(forceRefresh = false): Promise<string> {
                         token: grant.access_token,
                         clientId,
                         issuer,
+                        resource: configuredResource,
                     }),
                 );
                 refreshSession = {
                     token: grant.refresh_token ?? refreshCredential,
                     clientId,
                     issuer,
+                    resource: configuredResource,
                     tokenEndpoint: tokenEndpoint.toString(),
                     revocationEndpoint,
                 };
@@ -262,6 +273,7 @@ async function acquireToken(forceRefresh = false): Promise<string> {
                 token: grant.access_token,
                 clientId,
                 issuer,
+                resource: configuredResource,
             }),
         );
         refreshSession =
@@ -270,6 +282,7 @@ async function acquireToken(forceRefresh = false): Promise<string> {
                       token: grant.refresh_token,
                       clientId,
                       issuer,
+                      resource: configuredResource,
                       tokenEndpoint: tokenEndpoint.toString(),
                       revocationEndpoint,
                   }
@@ -307,6 +320,7 @@ async function acquireToken(forceRefresh = false): Promise<string> {
         clientId,
         redirectUri,
         issuer,
+        resource: configuredResource,
         target: current.toString(),
         rememberedScope:
             accountId && explicitScope?.projectId === undefined && (!explicitScope?.accountId || projectId)

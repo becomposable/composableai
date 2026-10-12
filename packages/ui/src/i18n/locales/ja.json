@@ -251,7 +251,7 @@
     "agent.toggleRightSidebar": "右サイドバーの切り替え",
     "agent.typeDifferentResponse": "または別の回答を入力...",
     "agent.typeYourMessage": "メッセージを入力...",
-    "agent.typeYourResponse": "回答を入力...",
+    "agent.typeYourResponse": "または別の回答を入力...",
     "agent.unableToOpenPrint": "印刷プレビューを開けません",
     "agent.unknownError": "不明なエラー",
     "agent.unknownTime": "不明な時刻",

@@ -1395,12 +1395,6 @@ const CONTENT_TYPE_CATALOG_SCHEMAS: {
     readonly ContentObjectTypeItemArray: typeof ContentObjectTypeItemArraySchema;
     readonly ContentObjectTypeCatalogEntry: typeof ContentObjectTypeCatalogEntrySchema;
     readonly ContentObjectTypeCatalogEntryArray: typeof ContentObjectTypeCatalogEntryArraySchema;
-    readonly InCodeTypeDefinition: typeof InCodeTypeDefinitionSchema;
-    readonly CreateContentObjectTypePayload: typeof CreateContentObjectTypePayloadSchema;
-    readonly UpdateContentObjectTypePayload: typeof UpdateContentObjectTypePayloadSchema;
-    readonly ContentObjectType: typeof ContentObjectTypeSchema;
-    readonly ContentObjectTypeCatalogQuery: typeof ContentObjectTypeCatalogQuerySchema;
-    readonly ContentObjectTypeListQuery: typeof ContentObjectTypeListQuerySchema;
 } = {
     ColumnLayout: ColumnLayoutSchema,
     ContentTypeEditingPolicy: ContentTypeEditingPolicySchema,

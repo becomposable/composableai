@@ -1748,6 +1748,9 @@ export const ContentTypeIntakePolicySchema: JSONObject = {
         OpenRouterTextOptions: {
             type: 'object',
             properties: {
+                seed: {
+                    type: 'number',
+                },
                 max_tokens: {
                     type: 'number',
                 },

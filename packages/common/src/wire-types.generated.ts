@@ -5803,6 +5803,7 @@ export type StartProjectReindexPayload = {
     concurrency?: number | undefined;
     bulk_size_bytes?: number | undefined;
     bulk_concurrency?: number | undefined;
+    modified_since?: string | undefined;
 };
 export type ReindexAgentRunsPayload = {
     recreate_index?: boolean | undefined;
@@ -7729,6 +7730,10 @@ export type ContentObjectUserPermissions = {
 };
 export type ContentObjectTextResponse = {
     text?: string | undefined;
+};
+export type SetObjectTextPayload = {
+    text: string;
+    etag?: string | undefined;
 };
 export type DeleteContentObjectResult = {
     id: string;
@@ -11299,6 +11304,7 @@ export interface ApiComponentTypes {
     TranscriptSegment: TranscriptSegment;
     ContentObjectTypeArray: ContentObjectTypeArray;
     ContentObjectTextResponse: ContentObjectTextResponse;
+    SetObjectTextPayload: SetObjectTextPayload;
     DeleteContentObjectResult: DeleteContentObjectResult;
     Transcript: Transcript;
     CreateContentObjectPayload: CreateContentObjectPayloadWire;

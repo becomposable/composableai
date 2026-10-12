@@ -3228,6 +3228,10 @@ interface Checks {
         W.ContentObjectTextResponse,
         z.infer<typeof import('./api-schemas/content.js').ContentObjectTextResponseSchema>
     >;
+    SetObjectTextPayload: Same<
+        W.SetObjectTextPayload,
+        z.infer<typeof import('./api-schemas/content.js').SetObjectTextPayloadSchema>
+    >;
     DeleteContentObjectResult: Same<
         W.DeleteContentObjectResult,
         z.infer<typeof import('./api-schemas/content.js').DeleteContentObjectResultSchema>
@@ -7075,6 +7079,10 @@ interface Checks {
         W.ApiComponentTypes['ContentObjectTextResponse'],
         z.infer<typeof import('./api-schemas/content.js').ContentObjectTextResponseSchema>
     >;
+    'component:SetObjectTextPayload': Same<
+        W.ApiComponentTypes['SetObjectTextPayload'],
+        z.infer<typeof import('./api-schemas/content.js').SetObjectTextPayloadSchema>
+    >;
     'component:DeleteContentObjectResult': Same<
         W.ApiComponentTypes['DeleteContentObjectResult'],
         z.infer<typeof import('./api-schemas/content.js').DeleteContentObjectResultSchema>
@@ -10358,6 +10366,7 @@ const checks: Checks = {
     InheritedPropertyMetadata: true,
     ContentObjectUserPermissions: true,
     ContentObjectTextResponse: true,
+    SetObjectTextPayload: true,
     DeleteContentObjectResult: true,
     SetObjectEmbeddingsResponse: true,
     ContentObjectApiTypeRef: true,
@@ -11373,6 +11382,7 @@ const checks: Checks = {
     'component:TranscriptSegment': true,
     'component:ContentObjectTypeArray': true,
     'component:ContentObjectTextResponse': true,
+    'component:SetObjectTextPayload': true,
     'component:DeleteContentObjectResult': true,
     'component:Transcript': true,
     'component:CreateContentObjectPayload': true,
@@ -11977,6 +11987,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2497);
+        expect(Object.keys(checks)).toHaveLength(2499);
     });
 });

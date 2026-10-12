@@ -1395,12 +1395,6 @@ const CONTENT_TYPE_CATALOG_SCHEMAS: {
     readonly ContentObjectTypeItemArray: typeof ContentObjectTypeItemArraySchema;
     readonly ContentObjectTypeCatalogEntry: typeof ContentObjectTypeCatalogEntrySchema;
     readonly ContentObjectTypeCatalogEntryArray: typeof ContentObjectTypeCatalogEntryArraySchema;
-    readonly InCodeTypeDefinition: typeof InCodeTypeDefinitionSchema;
-    readonly CreateContentObjectTypePayload: typeof CreateContentObjectTypePayloadSchema;
-    readonly UpdateContentObjectTypePayload: typeof UpdateContentObjectTypePayloadSchema;
-    readonly ContentObjectType: typeof ContentObjectTypeSchema;
-    readonly ContentObjectTypeCatalogQuery: typeof ContentObjectTypeCatalogQuerySchema;
-    readonly ContentObjectTypeListQuery: typeof ContentObjectTypeListQuerySchema;
 } = {
     ColumnLayout: ColumnLayoutSchema,
     ContentTypeEditingPolicy: ContentTypeEditingPolicySchema,
@@ -1409,6 +1403,9 @@ const CONTENT_TYPE_CATALOG_SCHEMAS: {
     ContentObjectTypeItemArray: ContentObjectTypeItemArraySchema,
     ContentObjectTypeCatalogEntry: ContentObjectTypeCatalogEntrySchema,
     ContentObjectTypeCatalogEntryArray: ContentObjectTypeCatalogEntryArraySchema,
+} as const satisfies Record<string, z.ZodType>;
+
+const CONTENT_TYPE_AUTHORING_SCHEMAS = {
     InCodeTypeDefinition: InCodeTypeDefinitionSchema,
     CreateContentObjectTypePayload: CreateContentObjectTypePayloadSchema,
     UpdateContentObjectTypePayload: UpdateContentObjectTypePayloadSchema,
@@ -2448,6 +2445,7 @@ const API_SCHEMA_GROUPS = [
     FILE_STORAGE_SCHEMAS,
     DURABLE_TASK_SCHEMAS,
     CONTENT_TYPE_CATALOG_SCHEMAS,
+    CONTENT_TYPE_AUTHORING_SCHEMAS,
     MIGRATION_COMMAND_SCHEMAS,
     PROCESS_DSL_SCHEMAS,
     AGENT_MESSAGE_SCHEMAS,
@@ -2512,6 +2510,7 @@ type ApiSchemaMap = typeof RUN_BUDGET_SCHEMAS &
     typeof FILE_STORAGE_SCHEMAS &
     typeof DURABLE_TASK_SCHEMAS &
     typeof CONTENT_TYPE_CATALOG_SCHEMAS &
+    typeof CONTENT_TYPE_AUTHORING_SCHEMAS &
     typeof MIGRATION_COMMAND_SCHEMAS &
     typeof PROCESS_DSL_SCHEMAS &
     typeof AGENT_MESSAGE_SCHEMAS &

@@ -209,7 +209,7 @@
     "agent.toggleRightSidebar": "Sağ kenar çubuğunu aç/kapat",
     "agent.typeDifferentResponse": "Ya da farklı bir yanıt yazın...",
     "agent.typeYourMessage": "Mesajınızı yazın...",
-    "agent.typeYourResponse": "Yanıtınızı yazın...",
+    "agent.typeYourResponse": "Ya da farklı bir yanıt yazın...",
     "agent.unableToOpenPrint": "Yazdırma önizlemesi açılamadı",
     "agent.unknownError": "Bilinmeyen hata",
     "agent.unknownTime": "Bilinmeyen zaman",

@@ -3390,6 +3390,9 @@
         "type": "string",
         "const": "bedrock-nova"
       },
+      "effort": {
+        "$ref": "#/components/schemas/ReasoningEffort"
+      },
       "max_tokens": {
         "type": "number"
       },
@@ -4042,6 +4045,9 @@
       "image_generation": {
         "$ref": "#/components/schemas/OpenAiImageGenerationOptions"
       },
+      "seed": {
+        "type": "number"
+      },
       "max_tokens": {
         "type": "number"
       },
@@ -4105,6 +4111,9 @@
   "OpenRouterTextOptions": {
     "type": "object",
     "properties": {
+      "seed": {
+        "type": "number"
+      },
       "max_tokens": {
         "type": "number"
       },

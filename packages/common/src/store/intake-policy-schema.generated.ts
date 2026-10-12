@@ -741,6 +741,9 @@ export const ContentTypeIntakePolicySchema: JSONObject = {
                     type: 'string',
                     const: 'bedrock-nova',
                 },
+                effort: {
+                    $ref: '#/$defs/ReasoningEffort',
+                },
                 max_tokens: {
                     type: 'number',
                 },
@@ -1620,6 +1623,9 @@ export const ContentTypeIntakePolicySchema: JSONObject = {
                 image_generation: {
                     $ref: '#/$defs/OpenAiImageGenerationOptions',
                 },
+                seed: {
+                    type: 'number',
+                },
                 max_tokens: {
                     type: 'number',
                 },
@@ -1742,6 +1748,9 @@ export const ContentTypeIntakePolicySchema: JSONObject = {
         OpenRouterTextOptions: {
             type: 'object',
             properties: {
+                seed: {
+                    type: 'number',
+                },
                 max_tokens: {
                     type: 'number',
                 },

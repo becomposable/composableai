@@ -9,6 +9,28 @@ function withAccount(invites: UserInviteToken[]) {
     return invites.filter((i) => i.data.account);
 }
 
+// Invites dismissed in this tab. The modal is mounted on several pages and remounts when the session refreshes,
+// so without this a dismissed modal would keep reopening for the same invites.
+const DISMISSED_INVITES_KEY = 'vertesia.invites.dismissed';
+
+function readDismissedInvites(): Set<string> {
+    try {
+        const ids: unknown = JSON.parse(sessionStorage.getItem(DISMISSED_INVITES_KEY) ?? '[]');
+        return new Set(Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : []);
+    } catch {
+        return new Set();
+    }
+}
+
+function rememberDismissedInvites(invites: UserInviteToken[]) {
+    try {
+        const ids = new Set([...readDismissedInvites(), ...invites.map((i) => i.id)]);
+        sessionStorage.setItem(DISMISSED_INVITES_KEY, JSON.stringify([...ids]));
+    } catch {
+        // Storage can be unavailable; the modal then reopens on the next page, as before.
+    }
+}
+
 export function InviteAcceptModal() {
     const session = useUserSession();
     const { client } = session;
@@ -29,7 +51,8 @@ export function InviteAcceptModal() {
     useEffect(() => {
         loadInvites()
             .then((valid) => {
-                if (valid.length > 0) {
+                const dismissed = readDismissedInvites();
+                if (valid.some((i) => !dismissed.has(i.id))) {
                     console.log('Found valid invites', valid.length);
                     setShowModal(true);
                 }
@@ -39,7 +62,10 @@ export function InviteAcceptModal() {
             });
     }, [loadInvites]);
 
-    const closeModal = () => setShowModal(false);
+    const closeModal = () => {
+        rememberDismissedInvites(invites);
+        setShowModal(false);
+    };
 
     // Refreshing the session re-renders the app around the modal, so it waits until the modal has closed and
     // then picks up every accepted invite at once.

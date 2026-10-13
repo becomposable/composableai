@@ -297,6 +297,11 @@ export async function executeInteraction(payload: DSLActivityExecutionPayload<Ex
             log.warn(`Interaction ${interactionName} is waiting for a rendition`, { error: executionError });
         } else if (executionError.statusCode === 429) {
             log.warn(`Resource exhausted while executing interaction ${interactionName}`, { error: executionError });
+        } else if (isTransientServerFailure(executionError)) {
+            // The activity retry policy handles it; a workflow that still fails is reported as such.
+            log.warn(`Transient server failure while executing interaction ${interactionName}`, {
+                error: executionError,
+            });
         } else {
             log.error(`Failed to execute interaction ${interactionName}`, { error: executionError });
         }
@@ -492,6 +497,12 @@ interface ExecutionError extends Error {
     code?: number;
     retryable?: boolean;
     errorCode?: unknown;
+}
+
+/** A gateway or availability failure (502, 503, 504) that nothing marked permanent. */
+function isTransientServerFailure(error: ExecutionError): boolean {
+    const status = error.statusCode ?? error.status ?? error.code;
+    return (status === 502 || status === 503 || status === 504) && error.retryable !== false;
 }
 
 function isRenditionPending(error: ExecutionError): boolean {

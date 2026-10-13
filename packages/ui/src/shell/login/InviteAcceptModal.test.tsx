@@ -35,8 +35,15 @@ vi.mock('@vertesia/ui/core', () => ({
             {children}
         </button>
     ),
-    Modal: ({ isOpen, children }: { isOpen: boolean; children: ReactNode }) =>
-        isOpen ? <div role="dialog">{children}</div> : null,
+    Modal: ({ isOpen, onClose, children }: { isOpen: boolean; onClose: () => void; children: ReactNode }) =>
+        isOpen ? (
+            <div role="dialog">
+                <button type="button" onClick={onClose}>
+                    close
+                </button>
+                {children}
+            </div>
+        ) : null,
     ModalBody: ({ children }: { children: ReactNode }) => <div>{children}</div>,
     ModalTitle: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
 }));
@@ -65,34 +72,61 @@ afterEach(() => {
     vi.clearAllMocks();
 });
 
-it('refreshes the token before loading the new account projects', async () => {
-    render(<InviteAcceptModal />);
-    fireEvent.click((await screen.findAllByRole('button', { name: 'login.accept' }))[0]);
-
-    await waitFor(() => expect(session.fetchProjects).toHaveBeenCalledWith('account-a'));
-    expect(session.refreshAuthToken.mock.invocationCallOrder[0]).toBeLessThan(
-        session.fetchProjects.mock.invocationCallOrder[0],
-    );
-    expect(screen.queryByText('Alpha')).toBeNull();
-    expect(screen.getByText('Beta')).toBeTruthy();
-});
-
-it('removes an accepted invite even when the session refresh fails', async () => {
-    session.fetchProjects.mockRejectedValue(new Error('Forbidden'));
+it('defers the session refresh while invites remain', async () => {
     render(<InviteAcceptModal />);
     fireEvent.click((await screen.findAllByRole('button', { name: 'login.accept' }))[0]);
 
     await waitFor(() => expect(screen.queryByText('Alpha')).toBeNull());
     expect(screen.getByText('Beta')).toBeTruthy();
-    expect(screen.queryByRole('alert')).toBeNull();
+    expect(session.refreshAuthToken).not.toHaveBeenCalled();
 });
 
-it('closes once the last invite is accepted', async () => {
+it('refreshes the token once, then loads every accepted account, after the last invite', async () => {
+    render(<InviteAcceptModal />);
+    fireEvent.click((await screen.findAllByRole('button', { name: 'login.accept' }))[0]);
+    await waitFor(() => expect(screen.queryByText('Alpha')).toBeNull());
+    fireEvent.click(screen.getByRole('button', { name: 'login.accept' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await waitFor(() => expect(session.fetchProjects).toHaveBeenCalledTimes(2));
+    expect(session.fetchProjects).toHaveBeenNthCalledWith(1, 'account-a');
+    expect(session.fetchProjects).toHaveBeenNthCalledWith(2, 'account-b');
+    expect(session.refreshAuthToken).toHaveBeenCalledTimes(1);
+    expect(session.refreshAuthToken.mock.invocationCallOrder[0]).toBeLessThan(
+        session.fetchProjects.mock.invocationCallOrder[0],
+    );
+});
+
+it('refreshes the session when the modal is closed with invites remaining', async () => {
+    render(<InviteAcceptModal />);
+    fireEvent.click((await screen.findAllByRole('button', { name: 'login.accept' }))[0]);
+    await waitFor(() => expect(screen.queryByText('Alpha')).toBeNull());
+    fireEvent.click(screen.getByRole('button', { name: 'close' }));
+
+    await waitFor(() => expect(session.fetchProjects).toHaveBeenCalledWith('account-a'));
+    expect(session.refreshAuthToken).toHaveBeenCalledTimes(1);
+});
+
+it('does not refresh the session when nothing was accepted', async () => {
+    render(<InviteAcceptModal />);
+    for (const button of await screen.findAllByRole('button', { name: 'login.reject' })) {
+        fireEvent.click(button);
+        await waitFor(() => expect((button as HTMLButtonElement).isConnected).toBe(false));
+    }
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(session.refreshAuthToken).not.toHaveBeenCalled();
+});
+
+it('keeps the modal usable when the session refresh fails', async () => {
+    session.refreshAuthToken.mockRejectedValue(new Error('Forbidden'));
     session.client.account.listInvites.mockResolvedValue([invite('a', 'Alpha')]);
     render(<InviteAcceptModal />);
     fireEvent.click(await screen.findByRole('button', { name: 'login.accept' }));
 
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await waitFor(() => expect(session.refreshAuthToken).toHaveBeenCalled());
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(screen.queryByRole('alert')).toBeNull();
 });
 
 it('disables every action while a request is pending', async () => {
@@ -105,7 +139,11 @@ it('disables every action while a request is pending', async () => {
     render(<InviteAcceptModal />);
     fireEvent.click((await screen.findAllByRole('button', { name: 'login.accept' }))[0]);
 
-    for (const button of screen.getAllByRole('button')) {
+    const actions = [
+        ...screen.getAllByRole('button', { name: 'login.accept' }),
+        ...screen.getAllByRole('button', { name: 'login.reject' }),
+    ];
+    for (const button of actions) {
         expect((button as HTMLButtonElement).disabled).toBe(true);
     }
     finish();

@@ -17,6 +17,8 @@ export function InviteAcceptModal() {
     const [invites, setInvites] = useState<UserInviteToken[]>([]);
     const [pendingId, setPendingId] = useState<string>();
     const [error, setError] = useState<string>();
+    const [acceptedAccountIds, setAcceptedAccountIds] = useState<string[]>([]);
+    const isOpen = showModal && invites.length > 0;
 
     const loadInvites = useCallback(async () => {
         const valid = withAccount(await client.account.listInvites());
@@ -39,6 +41,26 @@ export function InviteAcceptModal() {
 
     const closeModal = () => setShowModal(false);
 
+    // Refreshing the session re-renders the app around the modal, so it waits until the modal has closed and
+    // then picks up every accepted invite at once.
+    useEffect(() => {
+        if (isOpen || acceptedAccountIds.length === 0) return;
+        setAcceptedAccountIds([]);
+        void (async () => {
+            try {
+                // The current token predates the new memberships and does not list the new accounts, so the
+                // server rejects reads of them until a fresh token is minted.
+                await session.refreshAuthToken();
+                await session.fetchAccounts();
+                for (const accountId of acceptedAccountIds) {
+                    await session.fetchProjects(accountId);
+                }
+            } catch (err) {
+                console.error('Failed to refresh the session after accepting invites', err);
+            }
+        })();
+    }, [isOpen, acceptedAccountIds, session]);
+
     const removeInvite = (inviteId: string) => setInvites((current) => current.filter((i) => i.id !== inviteId));
 
     // An accept or reject can fail because the invite was already used, e.g. from another tab: show the server's list.
@@ -53,21 +75,10 @@ export function InviteAcceptModal() {
         setError(undefined);
         try {
             await client.account.acceptInvite(invite.id);
+            removeInvite(invite.id);
+            setAcceptedAccountIds((current) => [...current, invite.data.account.id]);
         } catch (err) {
             await recoverFromFailure('accept', err);
-            setPendingId(undefined);
-            return;
-        }
-        // The invite is consumed: drop it before refreshing, so a refresh failure cannot leave it clickable.
-        removeInvite(invite.id);
-        try {
-            // The current token predates the new membership and does not list the new account, so the
-            // server rejects reads of it until a fresh token is minted.
-            await session.refreshAuthToken();
-            await session.fetchAccounts();
-            await session.fetchProjects(invite.data.account.id);
-        } catch (err) {
-            console.error('Failed to refresh the session after accepting an invite', err);
         } finally {
             setPendingId(undefined);
         }
@@ -114,7 +125,7 @@ export function InviteAcceptModal() {
 
     return (
         <div>
-            <Modal isOpen={showModal && invites.length > 0} onClose={closeModal}>
+            <Modal isOpen={isOpen} onClose={closeModal}>
                 <ModalTitle>{t('login.reviewInvites')}</ModalTitle>
                 <ModalBody>
                     <div className="text-sm pb-4">

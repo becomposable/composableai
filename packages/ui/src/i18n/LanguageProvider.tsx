@@ -5,17 +5,26 @@ import { isRTL, LANGUAGE_STORAGE_KEY, resolveLanguage, type SupportedLanguage } 
 type LanguageProviderProps = {
     children: React.ReactNode;
     defaultLanguage?: SupportedLanguage;
+    /**
+     * Pin the language this app renders in, whatever the saved choice or browser language. The
+     * user's own language is still tracked, and exposed as `preferredLanguage`.
+     */
+    language?: SupportedLanguage;
     storageKey?: string;
 };
 
 type LanguageProviderState = {
+    /** The language the app renders in. */
     language: SupportedLanguage;
+    /** The user's own language (saved choice, then browser); equals `language` unless pinned. */
+    preferredLanguage: SupportedLanguage;
     setLanguage: (language: SupportedLanguage, options?: { persist?: boolean }) => void;
     isRTL: boolean;
 };
 
 const initialState: LanguageProviderState = {
     language: 'en',
+    preferredLanguage: 'en',
     setLanguage: () => null,
     isRTL: false,
 };
@@ -36,12 +45,14 @@ function readInitialLanguage(storageKey: string, defaultLanguage: SupportedLangu
 export function LanguageProvider({
     children,
     defaultLanguage = 'en',
+    language: pinnedLanguage,
     storageKey = LANGUAGE_STORAGE_KEY,
     ...props
 }: LanguageProviderProps) {
-    const [language, setLanguageState] = useState<SupportedLanguage>(() =>
+    const [preferredLanguage, setLanguageState] = useState<SupportedLanguage>(() =>
         readInitialLanguage(storageKey, defaultLanguage),
     );
+    const language = pinnedLanguage ?? preferredLanguage;
 
     const rtl = isRTL(language);
 
@@ -62,10 +73,11 @@ export function LanguageProvider({
     const value = useMemo<LanguageProviderState>(
         () => ({
             language,
+            preferredLanguage,
             isRTL: rtl,
             setLanguage,
         }),
-        [language, rtl, setLanguage],
+        [language, preferredLanguage, rtl, setLanguage],
     );
 
     return (

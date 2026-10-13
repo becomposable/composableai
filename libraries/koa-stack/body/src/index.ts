@@ -232,7 +232,7 @@ async function createBody(koaRequest: Request, opts: LazyBodyOpts) {
     } else if (koaRequest.is('urlencoded')) {
         // by default we use qs. You can replace the querystring parser using opts.form
         raw = await getRawBodyText(koaRequest, opts);
-        data = opts.form ? opts.form(raw) : qs.parse(raw);
+        data = parseBody(koaRequest, 'form', () => (opts.form ? opts.form(raw) : qs.parse(raw)));
         type = FormType.form;
     } else if (koaRequest.is('json', '+json')) {
         // by default we use JSON.parse. You can replace the json parser using opts.json
@@ -245,18 +245,19 @@ async function createBody(koaRequest: Request, opts: LazyBodyOpts) {
             // for JSON we support no content posted
             data = undefined;
         } else {
-            data = opts.json ? opts.json(raw) : JSON.parse(raw);
+            data = parseBody(koaRequest, 'JSON', () => (opts.json ? opts.json(raw) : JSON.parse(raw)));
         }
         type = FormType.json;
     } else if (koaRequest.is('xml', '+xml')) {
         // by default fast-xml-parser is used - to change the parser you should provde an xml parser through opts.xml
         raw = await getRawBodyText(koaRequest, opts);
         if (opts.xml) {
-            data = opts.xml(raw);
+            const parseXml = opts.xml;
+            data = parseBody(koaRequest, 'XML', () => parseXml(raw));
         } else {
             const parser = await tryGetXmlParser();
             if (parser) {
-                data = parser.parse(raw);
+                data = parseBody(koaRequest, 'XML', () => parser.parse(raw));
             }
         }
         type = FormType.xml;
@@ -274,6 +275,23 @@ async function createBody(koaRequest: Request, opts: LazyBodyOpts) {
         }
     }
     return new LazyBody(koaRequest.ctx, type, data, raw, files);
+}
+
+/**
+ * Run a body parser. A body the parser rejects is the client's fault, so it answers 400 with the
+ * parser's reason rather than letting a `SyntaxError` surface as a 500. An error that already carries
+ * an HTTP status (thrown by a custom parser) keeps it.
+ */
+function parseBody<T>(koaRequest: Request, format: string, parse: () => T): T {
+    try {
+        return parse();
+    } catch (err: unknown) {
+        if (err !== null && typeof err === 'object' && ('status' in err || 'statusCode' in err)) {
+            throw err;
+        }
+        const reason = err instanceof Error ? err.message : String(err);
+        return koaRequest.ctx.throw(400, `Invalid ${format} request body: ${reason}`, { cause: err });
+    }
 }
 
 /**

@@ -1,6 +1,6 @@
 import { DirectionProvider } from '@radix-ui/react-direction';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { isRTL, resolveLanguage, type SupportedLanguage } from './rtl.js';
+import { isRTL, LANGUAGE_STORAGE_KEY, resolveLanguage, type SupportedLanguage } from './rtl.js';
 
 type LanguageProviderProps = {
     children: React.ReactNode;
@@ -36,7 +36,7 @@ function readInitialLanguage(storageKey: string, defaultLanguage: SupportedLangu
 export function LanguageProvider({
     children,
     defaultLanguage = 'en',
-    storageKey = 'vertesia-ui-language',
+    storageKey = LANGUAGE_STORAGE_KEY,
     ...props
 }: LanguageProviderProps) {
     const [language, setLanguageState] = useState<SupportedLanguage>(() =>

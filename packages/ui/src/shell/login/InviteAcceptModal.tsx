@@ -52,11 +52,15 @@ export function InviteAcceptModal() {
                 // server rejects reads of them until a fresh token is minted.
                 await session.refreshAuthToken();
                 await session.fetchAccounts();
-                for (const accountId of acceptedAccountIds) {
-                    await session.fetchProjects(accountId);
-                }
             } catch (err) {
                 console.error('Failed to refresh the session after accepting invites', err);
+                return;
+            }
+            // Each account loads on its own, so one failure does not hide the others.
+            for (const accountId of new Set(acceptedAccountIds)) {
+                await session.fetchProjects(accountId).catch((err) => {
+                    console.error('Failed to load projects for an accepted invite', err);
+                });
             }
         })();
     }, [isOpen, acceptedAccountIds, session]);

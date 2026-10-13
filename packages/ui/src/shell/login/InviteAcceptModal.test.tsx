@@ -162,3 +162,25 @@ it('reloads the invites and shows an error when an accept fails', async () => {
     expect(screen.getByRole('alert').textContent).toBe('login.inviteActionFailed');
     expect(session.refreshAuthToken).not.toHaveBeenCalled();
 });
+
+it('loads each accepted account once and keeps going when one fails', async () => {
+    session.client.account.listInvites.mockResolvedValue([
+        invite('a', 'Alpha'),
+        { ...invite('a2', 'Alpha'), data: { account: { id: 'account-a', name: 'Alpha' }, role: 'member' } },
+        invite('b', 'Beta'),
+    ]);
+    session.fetchProjects.mockImplementation(async (accountId: string) => {
+        if (accountId === 'account-a') throw new Error('Forbidden');
+    });
+    render(<InviteAcceptModal />);
+    for (let remaining = 3; remaining > 0; remaining--) {
+        fireEvent.click((await screen.findAllByRole('button', { name: 'login.accept' }))[0]);
+        await waitFor(() =>
+            expect(screen.queryAllByRole('button', { name: 'login.accept' })).toHaveLength(remaining - 1),
+        );
+    }
+
+    await waitFor(() => expect(session.fetchProjects).toHaveBeenCalledWith('account-b'));
+    expect(session.fetchProjects).toHaveBeenCalledTimes(2);
+    expect(session.refreshAuthToken).toHaveBeenCalledTimes(1);
+});

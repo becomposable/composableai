@@ -379,6 +379,7 @@
     "layout.searchPlaceholder": "검색...",
     "layout.toggleNavigationMenu": "탐색 메뉴 전환",
     "login.accept": "수락",
+    "login.inviteActionFailed": "이 초대를 업데이트할 수 없습니다. 목록을 새로 고쳤습니다.",
     "login.reject": "거부",
     "login.reviewInvites": "초대 검토",
     "login.terminal.account": "계정",

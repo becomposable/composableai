@@ -381,6 +381,7 @@
     "layout.searchPlaceholder": "Cerca...",
     "layout.toggleNavigationMenu": "Attiva o disattiva il menu di navigazione",
     "login.accept": "Accetta",
+    "login.inviteActionFailed": "Impossibile aggiornare questo invito. L'elenco è stato aggiornato.",
     "login.reject": "Rifiuta",
     "login.reviewInvites": "Rivedi inviti",
     "login.terminal.account": "Account",

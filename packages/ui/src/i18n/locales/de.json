@@ -379,6 +379,7 @@
     "layout.searchPlaceholder": "Suchen...",
     "layout.toggleNavigationMenu": "Navigationsmenü umschalten",
     "login.accept": "Akzeptieren",
+    "login.inviteActionFailed": "Diese Einladung konnte nicht aktualisiert werden. Die Liste wurde aktualisiert.",
     "login.reject": "Ablehnen",
     "login.reviewInvites": "Einladungen überprüfen",
     "login.terminal.account": "Konto",

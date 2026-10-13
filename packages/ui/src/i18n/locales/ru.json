@@ -385,6 +385,7 @@
     "layout.searchPlaceholder": "Поиск...",
     "layout.toggleNavigationMenu": "Переключить меню навигации",
     "login.accept": "Принять",
+    "login.inviteActionFailed": "Не удалось обновить это приглашение. Список обновлён.",
     "login.reject": "Отклонить",
     "login.reviewInvites": "Просмотреть приглашения",
     "login.terminal.account": "Аккаунт",

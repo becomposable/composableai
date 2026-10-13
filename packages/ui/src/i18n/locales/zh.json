@@ -379,6 +379,7 @@
     "layout.searchPlaceholder": "搜索...",
     "layout.toggleNavigationMenu": "切换导航菜单",
     "login.accept": "接受",
+    "login.inviteActionFailed": "无法更新此邀请。列表已刷新。",
     "login.reject": "拒绝",
     "login.reviewInvites": "查看邀请",
     "login.terminal.account": "账户",

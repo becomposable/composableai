@@ -381,6 +381,7 @@
     "layout.searchPlaceholder": "Pesquisar...",
     "layout.toggleNavigationMenu": "Alternar menu de navegação",
     "login.accept": "Aceitar",
+    "login.inviteActionFailed": "Não foi possível atualizar este convite. A lista foi atualizada.",
     "login.reject": "Rejeitar",
     "login.reviewInvites": "Revisar convites",
     "login.terminal.account": "Conta",

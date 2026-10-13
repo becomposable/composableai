@@ -391,6 +391,7 @@
     "layout.searchPlaceholder": "بحث...",
     "layout.toggleNavigationMenu": "تبديل قائمة التنقل",
     "login.accept": "قبول",
+    "login.inviteActionFailed": "تعذّر تحديث هذه الدعوة. تم تحديث القائمة.",
     "login.reject": "رفض",
     "login.reviewInvites": "مراجعة الدعوات",
     "login.terminal.account": "الحساب",

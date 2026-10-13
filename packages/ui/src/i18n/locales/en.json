@@ -689,6 +689,7 @@
     "layout.searchPlaceholder": "Search...",
     "layout.toggleNavigationMenu": "Toggle navigation menu",
     "login.accept": "Accept",
+    "login.inviteActionFailed": "This invite could not be updated. The list has been refreshed.",
     "login.reject": "Reject",
     "login.reviewInvites": "Review Invites",
     "login.terminal.account": "Account",

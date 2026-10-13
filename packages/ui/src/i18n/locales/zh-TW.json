@@ -379,6 +379,7 @@
     "layout.searchPlaceholder": "搜尋...",
     "layout.toggleNavigationMenu": "切換導覽選單",
     "login.accept": "接受",
+    "login.inviteActionFailed": "無法更新此邀請。清單已重新整理。",
     "login.reject": "拒絕",
     "login.reviewInvites": "查看邀請",
     "login.terminal.account": "帳戶",

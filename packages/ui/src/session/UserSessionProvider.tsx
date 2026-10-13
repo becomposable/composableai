@@ -97,6 +97,7 @@ export function UserSessionProvider({ children, loadOnboardingStatus = false }: 
                 error instanceof CredentialError ||
                 error instanceof AuthenticationServiceError ||
                 error instanceof UserNotFoundError ||
+                (error instanceof Error && error.name === 'PendingInvitesError') ||
                 error instanceof RestrictedEnvironmentError
             )
         ) {

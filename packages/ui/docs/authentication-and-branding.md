@@ -1,5 +1,22 @@
 # Authentication and branding
 
+## Invitation onboarding and rollout
+
+New users review the destination account, project, inviter and role before joining. Login with a
+pending invitation does not grant membership; only the explicit Accept action does. Reject removes
+the selected invitation without completing login.
+
+`InvitationReview` is exported from `@vertesia/ui/shell` and uses the client package's
+`OnboardingInvitesApi`. It authenticates a Firebase ID token against `/auth/invites`, before an
+account-scoped session exists. The login bootstrap recognizes the backend's `409` response with
+`action: invitation_pending` and preserves the provider-token callback in memory for review.
+
+Deploy compatible invitation endpoints and identity verification support with the updated login UI.
+Publish matching `@vertesia/client` and `@vertesia/ui` versions together before rebuilding consumers.
+Older login UIs do not recognize the new pending-invitation response. Existing sessions without
+verified provider evidence must sign in again; account membership is retained. Custom sign-in screens
+must retain the supplied `children` to render invitation review alongside the other recovery flows.
+
 ## Custom authentication screens
 
 `VertesiaShell` accepts optional `authScreens: AuthScreens` components:

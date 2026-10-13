@@ -4,7 +4,7 @@ import { Env } from '@vertesia/ui/env';
 import { useEffect } from 'react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { generateAuthState } from './auth/authState';
-import { getComposableToken } from './auth/composable';
+import { getComposableToken, PendingInvitesError } from './auth/composable';
 import { usesAppOAuth } from './auth/oauth';
 import { useUserSession } from './UserSession';
 import { UserSessionProvider } from './UserSessionProvider';
@@ -22,6 +22,40 @@ afterEach(() => {
     window.history.replaceState(null, '', '/');
     sessionStorage.clear();
     localStorage.clear();
+});
+
+it('surfaces pending invitations and retains the provider callback across a central login handoff', async () => {
+    Env.init({
+        name: 'test',
+        version: '1',
+        type: 'production',
+        isLocalDev: false,
+        isDocker: false,
+        endpoints: {
+            studio: 'https://api.dev1.vertesia.io',
+            zeno: 'https://api.dev1.vertesia.io',
+            sts: 'https://sts.dev1.vertesia.io',
+        },
+    });
+    const state = generateAuthState();
+    window.history.replaceState(null, '', `/#token=provider-token&state=${state}`);
+    const getIdToken = vi.fn(async () => 'provider-token');
+    const error = new PendingInvitesError(getIdToken);
+    vi.mocked(getComposableToken).mockRejectedValue(error);
+    let pending: PendingInvitesError | undefined;
+    function Probe() {
+        const session = useUserSession();
+        if (session.authError instanceof PendingInvitesError) pending = session.authError;
+        return <span>{session.authError?.name}</span>;
+    }
+    const view = render(
+        <UserSessionProvider>
+            <Probe />
+        </UserSessionProvider>,
+    );
+    expect(await view.findByText('PendingInvitesError')).toBeTruthy();
+    expect(window.location.hash).toBe('');
+    expect(await pending?.getIdToken()).toBe('provider-token');
 });
 
 it.each(

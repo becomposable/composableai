@@ -71,7 +71,10 @@ export function InviteAcceptModal() {
     const recoverFromFailure = async (action: string, err: unknown) => {
         console.error(`Failed to ${action} invite`, err);
         setError(t('login.inviteActionFailed'));
-        await loadInvites().catch((reloadErr) => console.error('Error fetching invites', reloadErr));
+        return loadInvites().catch((reloadErr) => {
+            console.error('Error fetching invites', reloadErr);
+            return undefined;
+        });
     };
 
     const accept = async (invite: UserInviteToken) => {
@@ -82,7 +85,12 @@ export function InviteAcceptModal() {
             removeInvite(invite.id);
             setAcceptedAccountIds((current) => [...current, invite.data.account.id]);
         } catch (err) {
-            await recoverFromFailure('accept', err);
+            const remaining = await recoverFromFailure('accept', err);
+            // A gone invite was most likely accepted after all (e.g. the response was lost), so its account
+            // still needs loading. If it was rejected elsewhere instead, that load fails harmlessly.
+            if (remaining && !remaining.some((i) => i.id === invite.id)) {
+                setAcceptedAccountIds((current) => [...current, invite.data.account.id]);
+            }
         } finally {
             setPendingId(undefined);
         }
@@ -104,11 +112,11 @@ export function InviteAcceptModal() {
     const inviteList = invites.map((invite) => (
         <div key={invite.id} className="flex flex-row w-full justify-between border rounded-sm px-2 py-2 ">
             <div className="flex flex-col">
-                <div className="w-full font-semibold">{invite.data.account.name ?? invite.data.account}</div>
+                <div className="w-full font-semibold">{invite.data.account.name}</div>
                 {invite.data.project && <div className="w-full text-base">- {invite.data.project.name}</div>}
-                <div className="text-xs">Role: {invite.data.role}</div>
+                <div className="text-xs">{t('login.inviteRole', { role: invite.data.role })}</div>
                 {invite.data.invited_by && (
-                    <div className="text-xs">by {invite.data.invited_by.name ?? invite.data.invited_by}</div>
+                    <div className="text-xs">{t('login.invitedBy', { name: invite.data.invited_by.name })}</div>
                 )}
             </div>
             <div className="flex flex-col gap-4">
@@ -132,10 +140,7 @@ export function InviteAcceptModal() {
             <Modal isOpen={isOpen} onClose={closeModal}>
                 <ModalTitle>{t('login.reviewInvites')}</ModalTitle>
                 <ModalBody>
-                    <div className="text-sm pb-4">
-                        You have received the following invites to join other accounts. Please review and accept or
-                        declined them.
-                    </div>
+                    <div className="text-sm pb-4">{t('login.invitesIntro')}</div>
                     {error && (
                         <div role="alert" className="text-sm text-destructive pb-4">
                             {error}

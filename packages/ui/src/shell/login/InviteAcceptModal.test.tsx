@@ -161,6 +161,21 @@ it('reloads the invites and shows an error when an accept fails', async () => {
     await waitFor(() => expect(screen.queryByText('Alpha')).toBeNull());
     expect(screen.getByRole('alert').textContent).toBe('login.inviteActionFailed');
     expect(session.refreshAuthToken).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'close' }));
+
+    // The invite left the server's list, so its account is loaded once the modal closes.
+    await waitFor(() => expect(session.fetchProjects).toHaveBeenCalledWith('account-a'));
+});
+
+it('does not load the account of a failed accept whose invite is still pending', async () => {
+    session.client.account.acceptInvite.mockRejectedValue(new Error('Network error'));
+    render(<InviteAcceptModal />);
+    fireEvent.click((await screen.findAllByRole('button', { name: 'login.accept' }))[0]);
+    await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: 'close' }));
+
+    await waitFor(() => expect(session.client.account.listInvites).toHaveBeenCalledTimes(2));
+    expect(session.refreshAuthToken).not.toHaveBeenCalled();
 });
 
 it('loads each accepted account once and keeps going when one fails', async () => {

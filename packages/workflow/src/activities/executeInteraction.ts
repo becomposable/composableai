@@ -499,7 +499,7 @@ interface ExecutionError extends Error {
     errorCode?: unknown;
 }
 
-/** A gateway or availability failure (502, 503, 504) that nothing marked permanent. */
+/** A 502, 503 or 504 response whose error is not explicitly marked `retryable: false`. */
 function isTransientServerFailure(error: ExecutionError): boolean {
     const status = error.statusCode ?? error.status ?? error.code;
     return (status === 502 || status === 503 || status === 504) && error.retryable !== false;

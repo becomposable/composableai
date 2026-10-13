@@ -23,6 +23,10 @@
         ".": {
             "types": "./lib/index.d.ts",
             "default": "./lib/index.js"
+        },
+        "./sandbox": {
+            "types": "./lib/sandbox.d.ts",
+            "default": "./lib/sandbox.js"
         }
     },
     "devDependencies": {
@@ -32,7 +36,7 @@
         "vitest": "catalog:"
     },
     "peerDependencies": {
-        "hono": "^4.13.8"
+        "hono": "^4.13.13"
     },
     "dependencies": {
         "@llumiverse/common": "workspace:*",

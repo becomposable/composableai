@@ -313,6 +313,34 @@ describe('executeInteraction retryability', () => {
         expect(activityLogger.error).not.toHaveBeenCalled();
     });
 
+    it.each([
+        ['statusCode', { statusCode: 502 }],
+        ['status', { status: 503 }],
+        ['code', { code: 504 }],
+    ])('logs a transient server failure reported as %s at warn and retries it', async (_field, statusProps) => {
+        await mockInteractionError(Object.assign(new Error('Service Unavailable'), statusProps));
+
+        await expect(testEnv.run(executeInteraction, createPayload())).rejects.not.toMatchObject({
+            nonRetryable: true,
+        });
+        expect(activityLogger.warn).toHaveBeenCalledWith(
+            'Transient server failure while executing interaction testInteraction',
+            expect.any(Object),
+        );
+        expect(activityLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('keeps an explicitly permanent 503 at error level', async () => {
+        await mockInteractionError(
+            Object.assign(new Error('permanently unavailable'), { status: 503, retryable: false }),
+        );
+
+        await expect(testEnv.run(executeInteraction, createPayload())).rejects.toMatchObject({
+            nonRetryable: true,
+        } satisfies Partial<ApplicationFailure>);
+        expect(activityLogger.error).toHaveBeenCalled();
+    });
+
     it('should mark other 4xx failures as non-retryable', async () => {
         await mockInteractionError(Object.assign(new Error('bad request'), { statusCode: 400 }));
 

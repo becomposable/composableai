@@ -65,7 +65,6 @@ import type {
 } from './store/store.js';
 import type { AgentMessageType, FileProcessingStatus, WorkflowExecutionStatusValues } from './store/workflow.js';
 import type { TransientTokenType } from './transient-tokens-values.js';
-import type { ApiVersions } from './versions.js';
 import type { ViewNavigationNode } from './views.js';
 import type { AgentEvent, LlmCallType } from './workflow-analytics.js';
 
@@ -2543,6 +2542,14 @@ export type AlterTableOperation =
           op: 'modify_column';
           column: string;
           updates: DataColumnUpdate;
+      }
+    | {
+          op: 'add_foreign_key';
+          foreign_key: DataForeignKey;
+      }
+    | {
+          op: 'drop_foreign_key';
+          column: string;
       };
 /**
  * Payload for altering a table schema.
@@ -3515,6 +3522,7 @@ export type UserGroup = {
     clearance?: number | undefined;
     compartments?: string[] | undefined;
     allowed_projects?: string[] | undefined;
+    member_count?: number | undefined;
 };
 export type CreateUserGroupPayload = {
     name: string;
@@ -5795,6 +5803,7 @@ export type StartProjectReindexPayload = {
     concurrency?: number | undefined;
     bulk_size_bytes?: number | undefined;
     bulk_concurrency?: number | undefined;
+    modified_since?: string | undefined;
 };
 export type ReindexAgentRunsPayload = {
     recreate_index?: boolean | undefined;
@@ -6196,30 +6205,6 @@ export type RoleDefinition = RoleDefinitionFromSchema;
  * by the server's `/roles/system` endpoint.
  */
 export type SystemRoleDefinition = SystemRoleDefinitionFromSchema;
-export type RunBudgetOwner = {
-    workflow_id: string;
-    first_run_id: string;
-};
-export type RunBudgetUsage = {
-    input: number;
-    cached_input: number;
-    output: number;
-};
-export type ReadRunBudgetUsagePayload = {
-    account_id: string;
-    project_id: string;
-    agent_run_id: string;
-    owner: RunBudgetOwner;
-    require_estimates?: boolean | undefined;
-};
-export type RunBudgetTotals = {
-    measured: RunBudgetUsage;
-    unpriced: RunBudgetUsage;
-    reported_nano_usd: number;
-    estimated_nano_usd: number;
-    unmeasured_calls: number;
-    missing_usage_calls: number;
-};
 export type RunBudgetCapability = {
     supported: boolean;
     source: 'provider' | 'estimate' | 'unavailable';
@@ -6474,61 +6459,6 @@ export type UpdateSecretRequest = {
     clear_password?: boolean | undefined;
     clear_totp?: boolean | undefined;
     clear_oauth?: boolean | undefined;
-};
-export type EventWebhookSigningSecretRequest = {
-    account_id?: string | undefined;
-    project_id: string;
-};
-export type EventWebhookSigningSecretResponse = {
-    subscription_id: string;
-    secret: string;
-    secret_label: string;
-};
-export type SignEventWebhookRequest = {
-    account_id?: string | undefined;
-    project_id: string;
-    delivery_id: string;
-    body: string;
-    event_id: string;
-    event_category: EventCategory;
-    action: string;
-    timestamp?: number | undefined;
-};
-export type SignEventWebhookResponse = {
-    headers: Record<string, string>;
-    timestamp: number;
-    signature: string;
-};
-export type EventIngestSigningSecretRequest = {
-    account_id?: string | undefined;
-    project_id: string;
-};
-export type EventIngestSigningSecretResponse = {
-    channel_id: string;
-    secret: string;
-    secret_label: string;
-};
-export type VerifyEventIngestSignatureRequest = {
-    account_id?: string | undefined;
-    project_id: string;
-    body: string;
-    signature_header: string;
-    algorithm?: 'sha256' | 'sha1' | undefined;
-    encoding?: 'hex' | 'base64' | undefined;
-    prefix?: string | undefined;
-};
-export type VerifyEventIngestSignatureResponse = {
-    valid: boolean;
-};
-export type GithubInstallationTokenRequest = {
-    account_id?: string | undefined;
-    project_id: string;
-    installation_id: string;
-    repo: string;
-};
-export type GithubInstallationTokenResponse = {
-    token: string;
-    expires_at?: string | undefined;
 };
 export type DeleteSecretResponse = {
     ok: boolean;
@@ -7535,6 +7465,7 @@ export type StartProcessTestRunPayload = {
     suite_id: string;
     process_revision_id: string;
     scenario_ids?: string[] | undefined;
+    idempotency_key?: string | undefined;
 };
 export type ProcessTestAssertionResult = {
     assertion: string;
@@ -7799,6 +7730,10 @@ export type ContentObjectUserPermissions = {
 };
 export type ContentObjectTextResponse = {
     text?: string | undefined;
+};
+export type SetObjectTextPayload = {
+    text: string;
+    etag?: string | undefined;
 };
 export type DeleteContentObjectResult = {
     id: string;
@@ -9248,9 +9183,6 @@ export type SignupPayload = {
     firebaseToken: string;
     signupData: SignupData;
 };
-export type AccountApiVersionPolicy = {
-    default_api_version?: (typeof ApiVersions)[keyof typeof ApiVersions] | undefined;
-};
 /** An author-provided Elasticsearch query subtree validated by the View runtime. */
 export type ViewElasticsearchQuery = {
     [k: string]: unknown;
@@ -9911,6 +9843,7 @@ export type ProcessTestTargetWithDefinitionWire = {
 export type SubmitProcessTestRunPayloadWire = {
     process: ProcessTestTargetWire;
     scenarios: ProcessTestScenario[];
+    idempotency_key?: string | undefined;
 };
 export type CreateContentObjectPayloadWire = {
     text?: string | undefined;
@@ -10576,7 +10509,9 @@ export type TurnEvaluationFlagWire =
     | 'overhead'
     | 'followup_after_answer'
     | 'approval_denied'
-    | 'circuit_breaker';
+    | 'circuit_breaker'
+    | 'no_visible_answer'
+    | 'answer_in_tool_preamble';
 export type ToolErrorClassWire = 'schema' | 'platform' | 'config' | 'environment' | 'other';
 export type EvaluationGateReasonWire = 'signal' | 'sample' | 'opt_in' | 'always_on';
 export type EvaluationOutcomeWire = 'evaluated' | 'skipped_unarchived' | 'failed';
@@ -10706,9 +10641,6 @@ export type AppToolCollectionArray = AppToolCollection[];
 export type SystemPackageQuery = {
     scope?: AppPackageScopeWire[] | undefined;
 };
-export type InternalSecretDeleteResponse = {
-    deleted: true;
-};
 export type SupportedIntegrations_ask_user_webhook = (typeof SupportedIntegrations)['ask_user_webhook'];
 export type SupportedIntegrations_resend = (typeof SupportedIntegrations)['resend'];
 export type SupportedIntegrations_linkup = (typeof SupportedIntegrations)['linkup'];
@@ -10738,7 +10670,6 @@ export type AppInstallationListEntryArray = AppInstallationListEntry[];
 export type BinaryFileResponse = string;
 /** The wire type of every registry component, by component name: what `ApiComponentType<N>` resolves. */
 export interface ApiComponentTypes {
-    AccountApiVersionPolicy: AccountApiVersionPolicy;
     Account: AccountFromSchema;
     UpdateAccountPayload: UpdateAccountPayloadFromSchema;
     StripeBillingStatusResponse: StripeBillingStatusResponseFromSchema;
@@ -11373,6 +11304,7 @@ export interface ApiComponentTypes {
     TranscriptSegment: TranscriptSegment;
     ContentObjectTypeArray: ContentObjectTypeArray;
     ContentObjectTextResponse: ContentObjectTextResponse;
+    SetObjectTextPayload: SetObjectTextPayload;
     DeleteContentObjectResult: DeleteContentObjectResult;
     Transcript: Transcript;
     CreateContentObjectPayload: CreateContentObjectPayloadWire;
@@ -11863,17 +11795,6 @@ export interface ApiComponentTypes {
     SecretProjectQuery: SecretProjectQuery;
     ListSecretsQuery: ListSecretsQuery;
     SecretLookupQuery: SecretLookupQuery;
-    EventWebhookSigningSecretRequest: EventWebhookSigningSecretRequest;
-    EventWebhookSigningSecretResponse: EventWebhookSigningSecretResponse;
-    SignEventWebhookRequest: SignEventWebhookRequest;
-    SignEventWebhookResponse: SignEventWebhookResponse;
-    EventIngestSigningSecretRequest: EventIngestSigningSecretRequest;
-    EventIngestSigningSecretResponse: EventIngestSigningSecretResponse;
-    VerifyEventIngestSignatureRequest: VerifyEventIngestSignatureRequest;
-    VerifyEventIngestSignatureResponse: VerifyEventIngestSignatureResponse;
-    GithubInstallationTokenRequest: GithubInstallationTokenRequest;
-    GithubInstallationTokenResponse: GithubInstallationTokenResponse;
-    InternalSecretDeleteResponse: InternalSecretDeleteResponse;
     SupportedIntegrations_ask_user_webhook: SupportedIntegrations_ask_user_webhook;
     SupportedIntegrations_resend: SupportedIntegrations_resend;
     SupportedIntegrations_linkup: SupportedIntegrations_linkup;
@@ -11981,10 +11902,6 @@ export interface ApiComponentTypes {
     CreateDelegationGrantPayload: CreateDelegationGrantPayload;
     DelegationGrant: DelegationGrant;
     DelegationGrantArray: DelegationGrantArray;
-    RunBudgetOwner: RunBudgetOwner;
-    RunBudgetUsage: RunBudgetUsage;
-    ReadRunBudgetUsagePayload: ReadRunBudgetUsagePayload;
-    RunBudgetTotals: RunBudgetTotals;
     RunBudgetCapability: RunBudgetCapability;
     RunBudgetCapabilityQuery: RunBudgetCapabilityQuery;
 }

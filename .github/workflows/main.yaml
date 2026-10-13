@@ -75,7 +75,7 @@ jobs:
           APT_ACQUIRE="-o Acquire::Retries=3 -o Acquire::http::Timeout=15"
           sudo timeout 90 apt-get update $APT_ACQUIRE ||
             echo "apt-get update timed out or failed; continuing with the runner image's lists"
-          sudo timeout 600 apt-get install -y $APT_ACQUIRE imagemagick mupdf-tools
+          sudo timeout 600 apt-get install -y $APT_ACQUIRE imagemagick mupdf-tools ffmpeg
         shell: bash
       - name: Install workspace dependencies
         timeout-minutes: 5
@@ -97,6 +97,11 @@ jobs:
       - name: Typecheck and run package tests
         timeout-minutes: 10
         run: pnpm ci:test
+      - name: Build standalone environment configuration workspace
+        timeout-minutes: 5
+        run: |
+          pnpm --dir tools/environment-configuration install --frozen-lockfile
+          pnpm --dir tools/environment-configuration build
 
   template-smoke-test:
     name: Template smoke test (Plugin)

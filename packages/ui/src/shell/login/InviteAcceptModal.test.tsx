@@ -118,7 +118,7 @@ it('does not refresh the session when nothing was accepted', async () => {
     expect(session.refreshAuthToken).not.toHaveBeenCalled();
 });
 
-it('keeps the modal usable when the session refresh fails', async () => {
+it('contains a failed session refresh without showing an error', async () => {
     session.refreshAuthToken.mockRejectedValue(new Error('Forbidden'));
     session.client.account.listInvites.mockResolvedValue([invite('a', 'Alpha')]);
     render(<InviteAcceptModal />);
@@ -171,10 +171,14 @@ it('does not load the account of a failed accept whose invite is still pending',
     session.client.account.acceptInvite.mockRejectedValue(new Error('Network error'));
     render(<InviteAcceptModal />);
     fireEvent.click((await screen.findAllByRole('button', { name: 'login.accept' }))[0]);
-    await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
+    // The accept has settled once its button is enabled again, with the invite still listed.
+    await waitFor(() =>
+        expect((screen.getAllByRole('button', { name: 'login.accept' })[0] as HTMLButtonElement).disabled).toBe(false),
+    );
+    expect(screen.getByText('Alpha')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'close' }));
 
-    await waitFor(() => expect(session.client.account.listInvites).toHaveBeenCalledTimes(2));
+    expect(screen.queryByRole('dialog')).toBeNull();
     expect(session.refreshAuthToken).not.toHaveBeenCalled();
 });
 

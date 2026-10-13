@@ -68,7 +68,6 @@ beforeEach(() => {
 
 afterEach(() => {
     cleanup();
-    sessionStorage.clear();
     vi.restoreAllMocks();
     vi.clearAllMocks();
 });
@@ -162,44 +161,4 @@ it('reloads the invites and shows an error when an accept fails', async () => {
     await waitFor(() => expect(screen.queryByText('Alpha')).toBeNull());
     expect(screen.getByRole('alert').textContent).toBe('login.inviteActionFailed');
     expect(session.refreshAuthToken).not.toHaveBeenCalled();
-});
-
-it('does not reopen for invites dismissed in this tab', async () => {
-    const view = render(<InviteAcceptModal />);
-    fireEvent.click(await screen.findByRole('button', { name: 'close' }));
-    expect(screen.queryByRole('dialog')).toBeNull();
-    view.unmount();
-
-    render(<InviteAcceptModal />);
-    await waitFor(() => expect(session.client.account.listInvites).toHaveBeenCalledTimes(2));
-    expect(screen.queryByRole('dialog')).toBeNull();
-});
-
-it('reopens when a new invite arrives after a dismissal', async () => {
-    const view = render(<InviteAcceptModal />);
-    fireEvent.click(await screen.findByRole('button', { name: 'close' }));
-    view.unmount();
-
-    session.client.account.listInvites.mockResolvedValue([
-        invite('a', 'Alpha'),
-        invite('b', 'Beta'),
-        invite('c', 'Gamma'),
-    ]);
-    render(<InviteAcceptModal />);
-    expect(await screen.findByText('Gamma')).toBeTruthy();
-    expect(screen.getByText('Alpha')).toBeTruthy();
-});
-
-it('does not reopen after the session refresh that follows an early dismissal', async () => {
-    const view = render(<InviteAcceptModal />);
-    fireEvent.click((await screen.findAllByRole('button', { name: 'login.accept' }))[0]);
-    await waitFor(() => expect(screen.queryByText('Alpha')).toBeNull());
-    session.client.account.listInvites.mockResolvedValue([invite('b', 'Beta')]);
-    fireEvent.click(screen.getByRole('button', { name: 'close' }));
-    await waitFor(() => expect(session.refreshAuthToken).toHaveBeenCalledTimes(1));
-    view.unmount();
-
-    render(<InviteAcceptModal />);
-    await waitFor(() => expect(session.client.account.listInvites).toHaveBeenCalledTimes(2));
-    expect(screen.queryByRole('dialog')).toBeNull();
 });

@@ -38,6 +38,17 @@ describe('getComposableToken', () => {
         vi.clearAllMocks();
     });
 
+    it('surfaces pending invitations instead of silently retrying token generation', async () => {
+        const { fetchComposableToken, PendingInvitesError } = await importComposableAuth();
+        const fetcher = vi
+            .fn()
+            .mockResolvedValueOnce(Response.json({ error: 'user_not_found' }, { status: 404 }))
+            .mockResolvedValueOnce(Response.json({ action: 'invitation_pending' }, { status: 409 }));
+        vi.stubGlobal('fetch', fetcher);
+        await expect(fetchComposableToken(async () => 'provider-token')).rejects.toBeInstanceOf(PendingInvitesError);
+        expect(fetcher).toHaveBeenCalledTimes(2);
+    });
+
     it.each([false, true])('uses an authorization-bearing STS token directly (branch=%s)', async (branch) => {
         const token = makeJwt({
             iss: 'https://sts.dev1.vertesia.io',

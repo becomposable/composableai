@@ -10,6 +10,8 @@ export function InviteAcceptModal() {
     const { t } = useUITranslation();
     const [showModal, setShowModal] = useState(false);
     const [invites, setInvites] = useState<UserInviteToken[]>([]);
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
         client.account
@@ -39,26 +41,44 @@ export function InviteAcceptModal() {
     const closeModal = () => setShowModal(false);
 
     const accept = async (invite: UserInviteToken) => {
-        await client.account.acceptInvite(invite.id);
-        await session.authCallback;
-        await session.fetchAccounts();
-        await session.fetchProjects(invite.data.account.id);
-        const remainingInvites = invites.filter((i) => i.id !== invite.id);
+        if (busy) return;
+        setBusy(true);
+        setError(false);
+        try {
+            await client.account.acceptInvite(invite.id);
+            await session.authCallback;
+            await session.fetchAccounts();
+            await session.fetchProjects(invite.data.account.id);
+            const remainingInvites = invites.filter((i) => i.id !== invite.id);
 
-        const notLegacyInvites = remainingInvites.filter((i) => i.data.account);
-        if (notLegacyInvites.length > 0) {
-            setInvites(notLegacyInvites);
-        } else {
-            closeModal();
+            const notLegacyInvites = remainingInvites.filter((i) => i.data.account);
+            if (notLegacyInvites.length > 0) {
+                setInvites(notLegacyInvites);
+            } else {
+                closeModal();
+            }
+        } catch {
+            setError(true);
+        } finally {
+            setBusy(false);
         }
     };
 
     const reject = async (invite: UserInviteToken) => {
-        await client.account.rejectInvite(invite.id);
-        const remainingInvites = invites.filter((i) => i.id !== invite.id);
-        setInvites(remainingInvites);
-        if (remainingInvites.length === 0) {
-            closeModal();
+        if (busy) return;
+        setBusy(true);
+        setError(false);
+        try {
+            await client.account.rejectInvite(invite.id);
+            const remainingInvites = invites.filter((i) => i.id !== invite.id);
+            setInvites(remainingInvites);
+            if (remainingInvites.length === 0) {
+                closeModal();
+            }
+        } catch {
+            setError(true);
+        } finally {
+            setBusy(false);
         }
     };
 
@@ -79,10 +99,10 @@ export function InviteAcceptModal() {
                     )}
                 </div>
                 <div className="flex flex-col gap-4">
-                    <Button size={'xs'} onClick={() => accept(invite)}>
+                    <Button size={'xs'} isDisabled={busy} onClick={() => void accept(invite)}>
                         {t('login.accept')}
                     </Button>{' '}
-                    <Button size={'xs'} variant="secondary" onClick={() => reject(invite)}>
+                    <Button size={'xs'} isDisabled={busy} variant="secondary" onClick={() => void reject(invite)}>
                         {t('login.reject')}
                     </Button>
                 </div>
@@ -95,6 +115,11 @@ export function InviteAcceptModal() {
             <Modal isOpen={showModal} onClose={closeModal}>
                 <ModalTitle>{t('login.reviewInvites')}</ModalTitle>
                 <ModalBody>
+                    {error && (
+                        <p role="alert" className="text-destructive">
+                            {t('login.inviteError')}
+                        </p>
+                    )}
                     <div className="text-sm pb-4">
                         You have received the following invites to join other accounts. Please review and accept or
                         declined them.

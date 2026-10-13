@@ -238,6 +238,12 @@ export async function fetchComposableToken(
                 },
             });
 
+            if (ensureResponse.status === 409) {
+                const result = (await ensureResponse.json()) as { action?: string };
+                if (result.action === 'invitation_pending') throw new PendingInvitesError(getIdToken);
+                throw new CredentialError('Your sign-in identity could not be resolved', stsEndpoint);
+            }
+
             if (ensureResponse.status === 412) {
                 // No invite - trigger signup
                 Env.logger.debug('412: No invite found - signup required', {
@@ -400,6 +406,7 @@ export async function fetchComposableToken(
         return token;
     } catch (error) {
         if (
+            error instanceof PendingInvitesError ||
             error instanceof UserNotFoundError ||
             error instanceof STSError ||
             error instanceof RestrictedEnvironmentError
@@ -600,6 +607,13 @@ export class UserNotFoundError extends Error {
         super(message);
         this.name = 'UserNotFoundError';
         this.email = email;
+    }
+}
+
+export class PendingInvitesError extends Error {
+    constructor(readonly getIdToken: () => Promise<string | null | undefined> = getFirebaseAuthToken) {
+        super('Review and explicitly accept an invitation to continue');
+        this.name = 'PendingInvitesError';
     }
 }
 

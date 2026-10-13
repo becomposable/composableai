@@ -16,6 +16,9 @@ const session = vi.hoisted(() => {
         state: { authError: undefined as Error | undefined },
     };
 });
+vi.mock('@vertesia/ui/env', () => ({
+    Env: { endpoints: { studio: 'https://api.example.test' }, logger: { info: vi.fn() } },
+}));
 
 vi.mock('@vertesia/ui/i18n', () => ({
     useUITranslation: () => ({ t: (key: string) => key }),
@@ -24,6 +27,7 @@ vi.mock('@vertesia/ui/i18n', () => ({
 vi.mock('@vertesia/ui/layout', () => ({ RegionTag: () => null }));
 
 vi.mock('@vertesia/ui/session', () => ({
+    getFirebaseAuthToken: vi.fn(),
     UserNotFoundError: session.UserNotFoundError,
     AuthenticationServiceError: session.OtherAuthError,
     CredentialError: session.OtherAuthError,
@@ -40,6 +44,7 @@ vi.mock('@vertesia/ui/session', () => ({
 }));
 
 vi.mock('./SignupForm', () => ({ default: () => <div>signup-form</div> }));
+vi.mock('./InvitationReview', () => ({ InvitationReview: () => <div>invitation-review</div> }));
 
 const { SigninScreen } = await import('./SigninScreen');
 
@@ -82,6 +87,16 @@ describe('first sign-in without an invite', () => {
         render(<SigninScreen />);
 
         expect(await screen.findByText('signup-form')).toBeTruthy();
+        expect(screen.queryByText('auth.blocked.title')).toBeNull();
+    });
+    it('opens explicit invitation review for new users, including tenant sign-ins', async () => {
+        localStorage.setItem('tenantName', 'review');
+        const pending = new Error('Explicit acceptance required');
+        pending.name = 'PendingInvitesError';
+        session.state.authError = pending;
+        render(<SigninScreen />);
+        expect(await screen.findByText('invitation-review')).toBeTruthy();
+        expect(screen.queryByText('signup-form')).toBeNull();
         expect(screen.queryByText('auth.blocked.title')).toBeNull();
     });
 });

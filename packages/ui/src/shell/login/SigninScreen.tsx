@@ -1,9 +1,11 @@
 import { REQUESTED_SCOPE_UNAVAILABLE_ERROR_CODE, type SignupData, type SignupPayload } from '@vertesia/common';
 import { Env } from '@vertesia/ui/env';
 import { useUITranslation } from '@vertesia/ui/i18n';
+import type { PendingInvitesError } from '@vertesia/ui/session';
 import {
     AuthenticationServiceError,
     CredentialError,
+    getFirebaseAuthToken,
     NoAccessibleAccountError,
     RequestedScopeUnavailableError,
     RestrictedEnvironmentError,
@@ -12,6 +14,7 @@ import {
     useUXTracking,
 } from '@vertesia/ui/session';
 import { type ComponentType, type ReactNode, useCallback, useEffect } from 'react';
+import { InvitationReview } from './InvitationReview';
 import { type SignInFlowController, SignInFlowSteps, useSignInFlow } from './SignInFlow';
 import { SignInPageShell } from './SignInPageShell';
 import SignInRecoveryStep, { type SignInRecoveryKind } from './SignInRecoveryStep';
@@ -85,6 +88,7 @@ function matchesPathPrefix(pathname: string, prefix?: string | string[]) {
  * `authError` the session surfaced, which is why they stay here rather than in the shared flow.
  */
 export type SignInRecoveryMode =
+    | 'invitations'
     | 'blocked'
     | 'signup'
     | 'restricted'
@@ -95,6 +99,7 @@ export type SignInRecoveryMode =
 
 function isDedicatedAuthError(error: Error): boolean {
     return (
+        error.name === 'PendingInvitesError' ||
         error instanceof UserNotFoundError ||
         error instanceof RestrictedEnvironmentError ||
         error instanceof RequestedScopeUnavailableError ||
@@ -151,7 +156,9 @@ function SigninScreenImpl({
     // Route based on authError surfaced by the session.
     useEffect(() => {
         if (!authError) return;
-        if (authError instanceof UserNotFoundError) {
+        if (authError.name === 'PendingInvitesError') {
+            setMode('invitations');
+        } else if (authError instanceof UserNotFoundError) {
             if (isTenantSignIn()) {
                 setEmail(authError.email);
                 setMode('blocked');
@@ -232,7 +239,16 @@ function SigninScreenImpl({
     if (isLoading || user || shouldHideTransientAuthError) return null;
 
     let content: React.ReactNode = null;
-    if (mode === 'blocked') {
+    if (mode === 'invitations') {
+        content = (
+            <InvitationReview
+                studioUrl={Env.endpoints.studio}
+                getIdToken={(authError as PendingInvitesError).getIdToken ?? getFirebaseAuthToken}
+                onAccepted={() => window.location.reload()}
+                onBack={startOver}
+            />
+        );
+    } else if (mode === 'blocked') {
         content = (
             <SignInTenantBlockedStep
                 email={email || storedSession?.email || ''}

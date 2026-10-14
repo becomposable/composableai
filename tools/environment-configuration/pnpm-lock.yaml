@@ -11,7 +11,7 @@ catalogs:
       version: 7.0.2
 
 overrides:
-  '@types/node': ^24.19.0
+  '@types/node': ^24.19.1
   minimatch@>=3.0.0 <4.0.0: legacy-v3
   minimatch@>=9.0.0 <10.0.0: legacy-v9
   ajv@>=7.0.0 <8.18.0: ^8.20.0
@@ -40,8 +40,8 @@ importers:
         specifier: ^15.0.0
         version: 15.0.0
       dotenv:
-        specifier: ^18.0.4
-        version: 18.0.4
+        specifier: ^18.0.6
+        version: 18.0.7
       google-auth-library:
         specifier: ^11.1.0
         version: 11.1.0
@@ -56,11 +56,11 @@ importers:
         specifier: ^1.4.2
         version: 1.4.2
       '@types/node':
-        specifier: ^24.19.0
+        specifier: ^24.19.1
         version: 24.19.1
       globals:
-        specifier: ^17.12.0
-        version: 17.12.0
+        specifier: ^17.13.0
+        version: 17.13.0
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
@@ -395,8 +395,8 @@ packages:
       supports-color:
         optional: true
 
-  dotenv@18.0.4:
-    resolution: {integrity: sha512-jGt9uI5BIxpVO15kvy+iEFqNAwxYClKWnkptLjSNPnFLC003Imd0ofr3aEVsbpHdSBdSsbcApNIlz4nbyGMwdA==}
+  dotenv@18.0.7:
+    resolution: {integrity: sha512-QEvMEF8ca3GNZJJnAbOgxpj5ULhBvnMcURp+XKrtvqFNPgjBvYoswQ0Jl2cO7JzCjxZjJhr9ZuIEhlrRxMft/Q==}
     engines: {node: '>=12'}
     hasBin: true
 
@@ -436,8 +436,8 @@ packages:
     resolution: {integrity: sha512-2YYnIlHaKBGT2IPg3G2M57hia9Galz15zsEOvw9T3oRf0lSn6KN6VcHQLqby7x8ksYKnjXvp3rp2KJyLCN6zfQ==}
     engines: {node: '>=22'}
 
-  globals@17.12.0:
-    resolution: {integrity: sha512-cezEd/DTyyht9cvSSURyygXPfy04GtWO/5e6ZPvH7fCtjKz9PYOmuawphw1Ctd1f6C+5JypXfGD7ahNMXvevBA==}
+  globals@17.13.0:
+    resolution: {integrity: sha512-RwMTC61u7hrG3ZJMkZQOK4JLJrKS8QtoTii63EmWvFXHqycY9FObBJQCbsLxSO8kjKhWE5kV1GC+Vb1g3RI0Zg==}
     engines: {node: '>=18'}
 
   google-auth-library@11.1.0:
@@ -841,7 +841,7 @@ snapshots:
     dependencies:
       ms: 2.1.3
 
-  dotenv@18.0.4: {}
+  dotenv@18.0.7: {}
 
   ecdsa-sig-formatter@1.0.11:
     dependencies:
@@ -884,7 +884,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  globals@17.12.0: {}
+  globals@17.13.0: {}
 
   google-auth-library@11.1.0:
     dependencies:

@@ -202,7 +202,7 @@ function defineLibConfig({ command }: ConfigEnv): UserConfig {
  * or to build a standalone application.
  * @returns
  */
-function defineAppConfig({ command }: ConfigEnv): UserConfig {
+function defineAppConfig({ command, isPreview = false }: ConfigEnv): UserConfig {
     // Keep localhost on the same address family as the Studio dev server. Otherwise macOS can bind
     // Studio to 127.0.0.1:5173 and this app to [::1]:5173, bypassing Vite's next-port fallback.
     if (command === 'serve') {
@@ -218,12 +218,12 @@ function defineAppConfig({ command }: ConfigEnv): UserConfig {
     // version-stamped deep path (`/tenants/<t>/apps/<a>/versions/<v>/app/`) that is unknowable at
     // build time, so it needs the relative form and opts in with VITE_RELATIVE_BASE=1.
     //
-    // Vercel serves dist/app at /app/, so its standalone build needs that absolute mount.
-    // Everything else — `vite preview`, `pnpm start`, any plain static host — serves the
+    // Vercel serves dist/app at /app/; preview must use the same mount as that build.
+    // Everything else — any plain static host — serves the
     // app at the origin root and injects no `<base>`. There a relative base breaks the moment the
     // SPA is on a nested route such as `/app/...`, where every asset resolves to
     // `/app/assets/...` and 404s. So the default is an absolute base.
-    const isVercelBuild = command === 'build' && process.env.VERCEL === '1';
+    const isVercelBuild = (command === 'build' || isPreview) && process.env.VERCEL === '1';
     const base = command === 'build' && process.env.VITE_RELATIVE_BASE === '1' ? './' : isVercelBuild ? '/app/' : '/';
 
     return {

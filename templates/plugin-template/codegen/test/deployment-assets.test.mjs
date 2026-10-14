@@ -47,6 +47,8 @@ for (const [name, vercel, relative, mount] of [
             }
             const dev = await loadConfigFromFile({ command: 'serve', mode: 'app' }, configFile);
             assert.equal(dev.config.base, '/');
+            const preview = await loadConfigFromFile({ command: 'serve', mode: 'app', isPreview: true }, configFile);
+            assert.equal(preview.config.base, vercel ? '/app/' : '/');
         } finally {
             for (const [key, value] of Object.entries(previous)) {
                 if (value === undefined) delete process.env[key];

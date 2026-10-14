@@ -10,6 +10,7 @@ import type {
     AppInstallation,
     AppInstallationKind,
     AppInstallationListEntry,
+    AppInstallationOAuthClientParams,
     AppInstallationPayload,
     AppInstallationWithManifest,
     AppManifest,
@@ -328,6 +329,7 @@ export default class AppsApi extends ApiTopic {
         oauthParams?: Record<string, { client_id?: string; client_secret?: string; scopes?: string[] }>,
         oauthProviderParams?: Record<string, { client_id?: string; client_secret?: string; scopes?: string[] }>,
         apiKeyParams?: AppApiKeyCollectionParams,
+        oauthClient?: AppInstallationOAuthClientParams,
     ): Promise<AppInstallation> {
         return this.post(`/install`, {
             payload: {
@@ -336,6 +338,7 @@ export default class AppsApi extends ApiTopic {
                 oauth_params: oauthParams,
                 oauth_provider_params: oauthProviderParams,
                 api_key_params: apiKeyParams,
+                oauth_client: oauthClient,
             } satisfies AppInstallationPayload,
         });
     }

@@ -41,6 +41,8 @@ export interface AppUINavItem {
 }
 
 export type AppUIConfig = Wire.AppUIConfig;
+export type AppInstallationOAuthClientParams = Wire.AppInstallationOAuthClientParams;
+export type AppOAuthClientMode = Wire.AppOAuthClientMode;
 
 export type AppInstallationProjectsQuery = Wire.AppInstallationProjectsQuery;
 

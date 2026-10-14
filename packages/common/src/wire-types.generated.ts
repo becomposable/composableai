@@ -575,6 +575,12 @@ export type AppUIConfig = {
     navigation?: AppUINavItem[] | undefined;
     available_in?: AppAvailableIn[] | undefined;
 };
+export type AppInstallationOAuthClientParams = {
+    mode: AppOAuthClientMode;
+    redirect_uris?: string[] | undefined;
+    client_id?: string | undefined;
+};
+export type AppOAuthClientMode = 'create' | 'reuse' | 'none';
 export type AppInstallationProjectsQuery = {
     name?: string | undefined;
     id?: string | undefined;
@@ -1262,6 +1268,7 @@ export type AppInstallation = {
               approved_at: string;
           }
         | undefined;
+    oauth_client_id?: string | undefined;
     settings?:
         | {
               [k: string]: unknown;
@@ -1284,6 +1291,7 @@ export type AppInstallationWithManifest = {
               approved_at: string;
           }
         | undefined;
+    oauth_client_id?: string | undefined;
     settings?:
         | {
               [k: string]: unknown;
@@ -1308,6 +1316,7 @@ export type AppInstallationListEntry = {
               approved_at: string;
           }
         | undefined;
+    oauth_client_id?: string | undefined;
     settings?:
         | {
               [k: string]: unknown;
@@ -1341,6 +1350,7 @@ export type AppApiKeyCollectionParams = {
 export type AppOAuthProviderParams = AppOAuthCollectionParams;
 export type AppInstallationPayload = {
     app_id: string;
+    oauth_client?: AppInstallationOAuthClientParams | undefined;
     settings?:
         | {
               [k: string]: unknown;
@@ -4630,6 +4640,7 @@ export type OAuthGrantSortField =
 export type OAuthGrantSortOrder = 'asc' | 'desc';
 /** An OAuth client's registration, without the id the server issues for it. */
 export type OAuthClientData = {
+    app_id?: string | undefined;
     client_name: string;
     client_type: OAuthClientType;
     redirect_uris: string[];
@@ -4654,6 +4665,7 @@ export type OAuthClientData = {
     updated_at: string;
 };
 export type OAuthClient = {
+    app_id?: string | undefined;
     client_name: string;
     client_type: OAuthClientType;
     redirect_uris: string[];
@@ -4680,6 +4692,7 @@ export type OAuthClient = {
 };
 /** The read shape plus the client secret, which is returned by the create call and never again. */
 export type OAuthClientCreateResponse = {
+    app_id?: string | undefined;
     client_name: string;
     client_type: OAuthClientType;
     redirect_uris: string[];
@@ -4855,6 +4868,7 @@ export type OAuthAuthorizationRequest = {
     user_code?: string | undefined;
     client_id: string;
     client_name: string;
+    app_id?: string | undefined;
     client_metadata?: OAuthClientDisplayMetadata | undefined;
     client_registration_mode?: OAuthClientRegistrationMode | undefined;
     redirect_uri: string;
@@ -11767,6 +11781,8 @@ export interface ApiComponentTypes {
     AgentRunSearchHit: AgentRunSearchHit;
     UpsertAppVersionRequest: UpsertAppVersionRequest;
     AppInstallationPayload: AppInstallationPayload;
+    AppInstallationOAuthClientParams: AppInstallationOAuthClientParams;
+    AppOAuthClientMode: AppOAuthClientMode;
     AppDevelopmentTaskDetails: AppDevelopmentTaskDetails;
     AppVersionRecordArray: AppVersionRecordArray;
     AppToolCollectionArray: AppToolCollectionArray;

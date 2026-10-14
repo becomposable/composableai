@@ -6791,6 +6791,9 @@
       "client_name": {
         "type": "string"
       },
+      "app_id": {
+        "type": "string"
+      },
       "client_metadata": {
         "$ref": "#/components/schemas/OAuthClientDisplayMetadata"
       },
@@ -7067,6 +7070,10 @@
   "OAuthClient": {
     "type": "object",
     "properties": {
+      "app_id": {
+        "type": "string",
+        "description": "App associated with this client. Authorization requires an installation explicitly enabling this client and current user app access."
+      },
       "client_name": {
         "type": "string"
       },
@@ -7168,6 +7175,10 @@
   "OAuthClientCreateResponse": {
     "type": "object",
     "properties": {
+      "app_id": {
+        "type": "string",
+        "description": "App associated with this client. Authorization requires an installation explicitly enabling this client and current user app access."
+      },
       "client_name": {
         "type": "string"
       },
@@ -20579,11 +20590,48 @@
     ],
     "additionalProperties": false
   },
+  "AppInstallationOAuthClientParams": {
+    "type": "object",
+    "properties": {
+      "mode": {
+        "$ref": "#/components/schemas/AppOAuthClientMode"
+      },
+      "redirect_uris": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Required only for create mode. Exact callback URLs for the public PKCE client."
+      },
+      "client_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Required only for reuse mode. Existing client of the same app and account."
+      }
+    },
+    "required": [
+      "mode"
+    ],
+    "additionalProperties": false,
+    "description": "Configure standalone OAuth. Create requires redirect_uris; reuse requires client_id; none removes the project link. Fields for another mode are rejected."
+  },
+  "AppOAuthClientMode": {
+    "type": "string",
+    "enum": [
+      "create",
+      "reuse",
+      "none"
+    ]
+  },
   "AppInstallationPayload": {
     "type": "object",
     "properties": {
       "app_id": {
         "type": "string"
+      },
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppInstallationOAuthClientParams"
       },
       "settings": {
         "type": "object",
@@ -24649,6 +24697,9 @@
         ],
         "additionalProperties": false
       },
+      "oauth_client_id": {
+        "type": "string"
+      },
       "settings": {
         "type": "object",
         "additionalProperties": true
@@ -24737,6 +24788,9 @@
           "approved_at"
         ],
         "additionalProperties": false
+      },
+      "oauth_client_id": {
+        "type": "string"
       },
       "settings": {
         "type": "object",
@@ -24830,6 +24884,9 @@
           "approved_at"
         ],
         "additionalProperties": false
+      },
+      "oauth_client_id": {
+        "type": "string"
       },
       "settings": {
         "type": "object",

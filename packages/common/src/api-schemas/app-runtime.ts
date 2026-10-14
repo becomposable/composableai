@@ -268,6 +268,7 @@ export const AppInstallationSchema = z
         project: z.string(),
         manifest: z.string(),
         oauth_approval: appOAuthApprovalSchema.optional(),
+        oauth_client_id: z.string().optional(),
         settings: z.looseObject({}).optional(),
         tool_allowlist: z
             .array(z.string())
@@ -640,6 +641,7 @@ export const AppInstallationWithManifestSchema = z
         id: z.string(),
         project: z.string(),
         oauth_approval: appOAuthApprovalSchema.optional(),
+        oauth_client_id: z.string().optional(),
         settings: z.looseObject({}).optional(),
         tool_allowlist: z
             .array(z.string())
@@ -686,6 +688,7 @@ export const AppInstallationListEntrySchema = z
         id: z.string(),
         project: z.string(),
         oauth_approval: appOAuthApprovalSchema.optional(),
+        oauth_client_id: z.string().optional(),
         settings: z.looseObject({}).optional(),
         tool_allowlist: z
             .array(z.string())

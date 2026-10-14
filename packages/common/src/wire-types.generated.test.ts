@@ -299,6 +299,14 @@ interface Checks {
         z.infer<typeof import('./api-schemas/apikey.js').UpdateAccountApiKeyPayloadSchema>
     >;
     AppUIConfig: Same<W.AppUIConfig, z.infer<typeof import('./api-schemas/apps.js').AppUIConfigSchema>>;
+    AppInstallationOAuthClientParams: Same<
+        W.AppInstallationOAuthClientParams,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstallationOAuthClientParamsSchema>
+    >;
+    AppOAuthClientMode: Same<
+        W.AppOAuthClientMode,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppOAuthClientModeSchema>
+    >;
     AppInstallationProjectsQuery: Same<
         W.AppInstallationProjectsQuery,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstallationProjectsQuerySchema>
@@ -8931,6 +8939,14 @@ interface Checks {
         W.ApiComponentTypes['AppInstallationPayload'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstallationPayloadSchema>
     >;
+    'component:AppInstallationOAuthClientParams': Same<
+        W.ApiComponentTypes['AppInstallationOAuthClientParams'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstallationOAuthClientParamsSchema>
+    >;
+    'component:AppOAuthClientMode': Same<
+        W.ApiComponentTypes['AppOAuthClientMode'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppOAuthClientModeSchema>
+    >;
     'component:AppDevelopmentTaskDetails': Same<
         W.ApiComponentTypes['AppDevelopmentTaskDetails'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppDevelopmentTaskDetailsSchema>
@@ -9567,6 +9583,8 @@ const checks: Checks = {
     CreateAccountApiKeyPayload: true,
     UpdateAccountApiKeyPayload: true,
     AppUIConfig: true,
+    AppInstallationOAuthClientParams: true,
+    AppOAuthClientMode: true,
     AppInstallationProjectsQuery: true,
     AppInstallationsQuery: true,
     AppListScope: true,
@@ -11845,6 +11863,8 @@ const checks: Checks = {
     'component:AgentRunSearchHit': true,
     'component:UpsertAppVersionRequest': true,
     'component:AppInstallationPayload': true,
+    'component:AppInstallationOAuthClientParams': true,
+    'component:AppOAuthClientMode': true,
     'component:AppDevelopmentTaskDetails': true,
     'component:AppVersionRecordArray': true,
     'component:AppToolCollectionArray': true,
@@ -11987,6 +12007,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2499);
+        expect(Object.keys(checks)).toHaveLength(2503);
     });
 });

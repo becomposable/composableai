@@ -794,16 +794,32 @@ Explicit `VITE_AUTH_MODE=firebase` deployments retain their configured Firebase 
 
 #### Independently hosted apps
 
-Independent Vercel deployments publish `/.well-known/oauth-client/vertesia-app` through
-`api/oauth-client.ts`. The TypeScript entry lets Vercel compile and package its shared permissions dependency.
-The standalone UI uses this CIMD with OAuth authorization code + PKCE,
-asks the user for consent, and returns to `/app`. There is no client secret or manual client
-registration. Keep the CIMD rewrite before the catch-all API rewrite in `vercel.json`.
-The metadata endpoint must be publicly reachable by the authorization server (Vercel deployment
-protection must not block it). Configure `APP_OAUTH_SCOPES` in Vercel with the space-separated
-permissions the app needs, plus `openid profile` and `account:member` when requesting API permissions;
-the default permits sign-in only. The user
-must hold and consent to each requested permission.
+Declare the standalone authentication mode in `.env.app` or your deployment environment:
+
+```dotenv
+VITE_AUTH_MODE=central
+# Or VITE_AUTH_MODE=firebase with all five VITE_FIREBASE_* settings.
+```
+
+For OAuth (`central`), configure **Standalone sign-in** during app installation or in installation
+settings. Create a public OAuth client with the exact callback `https://your-app.vercel.app/app`,
+or reuse the client ID from another installation of this app in the same account. Set that ID as
+`VITE_OAUTH_CLIENT_ID` in Vercel and rebuild. Each project installation must enable that client;
+STS offers only projects where the app is installed and the user has UI access. The app's
+`oauth_scopes` declares its permissions; API permissions also require `account:member`.
+
+OAuth builds without a client ID show a configuration error instead of choosing CIMD automatically.
+Use a stable production or branch URL for callbacks; arbitrary Vercel version URLs need their own
+exact registered callbacks. There is no client secret: standalone OAuth uses authorization code + PKCE.
+
+Firebase (`VITE_AUTH_MODE=firebase`) remains supported on Vercel and other independent hosts.
+It uses the configured Firebase project and does not require an OAuth client registration.
+Gateway and embedded sessions retain precedence over standalone build configuration.
+
+The public metadata endpoint `api/oauth-client.ts` remains available for explicitly configured CIMD
+clients: use its full HTTPS URL as `VITE_OAUTH_CLIENT_ID` to opt in. It is never selected automatically.
+Its permissions come from `src/app-permissions.ts`, with `APP_OAUTH_SCOPES` as an optional override.
+Declare `account:member` with API permissions.
 
 Vercel builds use `/app/` asset URLs to match `dist/app/`. Gateway builds set `VITE_RELATIVE_BASE=1`
 to emit relative URLs; the gateway injects the versioned mount through `<base href>`. That explicit
@@ -812,15 +828,13 @@ relative-base setting takes precedence over Vercel's build environment.
 Gateway-hosted builds use the gateway's CIMD and HttpOnly cookie session instead. The SDK
 loads user information and calls the platform APIs through same-origin gateway routes; it
 does not read the gateway's access or refresh token. Embedded apps retain host-provided auth.
-Existing applications must upgrade their SDK, adopt the standalone template auth configuration
-and Vercel metadata route, and rebuild to receive these changes.
+Existing applications must upgrade their SDK, adopt the standalone template auth configuration,
+and rebuild to receive these changes.
 
-Vercel can also use a named, registered **public** client instead of CIMD. Create it in the target
-Vertesia environment with authorization code + PKCE and `token_endpoint_auth_method=none`, then set
-these Vercel build environment variables and redeploy:
+After configuring the public client in Vertesia, set these Vercel build environment variables and redeploy:
 
 ```dotenv
-VITE_OAUTH_CLIENT_ID=my-app-production
+VITE_OAUTH_CLIENT_ID=vts_your_registered_client_id
 VITE_OAUTH_REDIRECT_URI=https://my-app.vercel.app/app
 # Optional: otherwise src/app-permissions.ts supplies the requested scopes.
 # VITE_OAUTH_SCOPES=openid profile account:member content:read offline_access

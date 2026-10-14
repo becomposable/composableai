@@ -202,7 +202,7 @@ function defineLibConfig({ command }: ConfigEnv): UserConfig {
  * or to build a standalone application.
  * @returns
  */
-function defineAppConfig({ command, isPreview = false }: ConfigEnv): UserConfig {
+function defineAppConfig({ command }: ConfigEnv): UserConfig {
     // Keep localhost on the same address family as the Studio dev server. Otherwise macOS can bind
     // Studio to 127.0.0.1:5173 and this app to [::1]:5173, bypassing Vite's next-port fallback.
     if (command === 'serve') {
@@ -218,12 +218,13 @@ function defineAppConfig({ command, isPreview = false }: ConfigEnv): UserConfig 
     // version-stamped deep path (`/tenants/<t>/apps/<a>/versions/<v>/app/`) that is unknowable at
     // build time, so it needs the relative form and opts in with VITE_RELATIVE_BASE=1.
     //
-    // Vercel serves dist/app at /app/; preview must use the same mount as that build.
+    // Vercel serves dist/app at /app/, so its standalone build needs that absolute mount.
+    // Preview keeps the root available for the tools admin UI and maps /app/assets below.
     // Everything else — any plain static host — serves the
     // app at the origin root and injects no `<base>`. There a relative base breaks the moment the
     // SPA is on a nested route such as `/app/...`, where every asset resolves to
     // `/app/assets/...` and 404s. So the default is an absolute base.
-    const isVercelBuild = (command === 'build' || isPreview) && process.env.VERCEL === '1';
+    const isVercelBuild = command === 'build' && process.env.VERCEL === '1';
     const base = command === 'build' && process.env.VITE_RELATIVE_BASE === '1' ? './' : isVercelBuild ? '/app/' : '/';
 
     return {
@@ -255,6 +256,15 @@ function defineAppConfig({ command, isPreview = false }: ConfigEnv): UserConfig 
             ]),
             // Mount the Hono tool server API as middleware (includes import transformers)
             ...apiServerPlugin(),
+            {
+                name: 'vertesia-preview-app-assets',
+                configurePreviewServer(server) {
+                    server.middlewares.use((req, _res, next) => {
+                        if (req.url?.startsWith('/app/assets/')) req.url = req.url.slice('/app'.length);
+                        next();
+                    });
+                },
+            },
         ],
         build: {
             outDir: 'dist/app', // App build goes to dist/app/

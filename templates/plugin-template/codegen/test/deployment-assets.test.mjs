@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
-import { build, loadConfigFromFile } from 'vite';
+import { build, loadConfigFromFile, preview as servePreview } from 'vite';
 
 const configFile = new URL('../../vite.config.ts', import.meta.url).pathname;
 
@@ -48,7 +48,38 @@ for (const [name, vercel, relative, mount] of [
             const dev = await loadConfigFromFile({ command: 'serve', mode: 'app' }, configFile);
             assert.equal(dev.config.base, '/');
             const preview = await loadConfigFromFile({ command: 'serve', mode: 'app', isPreview: true }, configFile);
-            assert.equal(preview.config.base, vercel ? '/app/' : '/');
+            assert.equal(preview.config.base, '/');
+            if (!relative) {
+                // Exercise real preview routing: assets retain their build mount, while / remains usable.
+                const server = await servePreview({
+                    configFile: false,
+                    root,
+                    base: preview.config.base,
+                    logLevel: 'silent',
+                    build: { outDir: 'dist/app' },
+                    preview: { host: '127.0.0.1', port: 0 },
+                    plugins: preview.config.plugins.filter((plugin) => plugin?.name === 'vertesia-preview-app-assets'),
+                });
+                try {
+                    const origin = `http://127.0.0.1:${server.httpServer.address().port}`;
+                    const home = await fetch(origin, { redirect: 'manual' });
+                    assert.equal(home.status, 200);
+                    const deep = await fetch(`${origin}/app/deep/route`);
+                    assert.equal(deep.status, 200);
+                    for (const asset of paths) {
+                        const response = await fetch(new URL(asset, `${origin}/app/deep/route`));
+                        assert.equal(response.status, 200);
+                        assert.match(
+                            response.headers.get('content-type'),
+                            asset.endsWith('.css') ? /css/ : /javascript/,
+                        );
+                    }
+                } finally {
+                    await new Promise((resolve, reject) =>
+                        server.httpServer.close((error) => (error ? reject(error) : resolve())),
+                    );
+                }
+            }
         } finally {
             for (const [key, value] of Object.entries(previous)) {
                 if (value === undefined) delete process.env[key];

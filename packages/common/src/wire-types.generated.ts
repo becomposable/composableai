@@ -575,12 +575,9 @@ export type AppUIConfig = {
     navigation?: AppUINavItem[] | undefined;
     available_in?: AppAvailableIn[] | undefined;
 };
-export type AppInstallationOAuthClientParams = {
-    mode: AppOAuthClientMode;
-    redirect_uris?: string[] | undefined;
-    client_id?: string | undefined;
+export type AppOAuthClientConfig = {
+    redirect_uris: string[];
 };
-export type AppOAuthClientMode = 'create' | 'reuse' | 'none';
 export type AppInstallationProjectsQuery = {
     name?: string | undefined;
     id?: string | undefined;
@@ -912,6 +909,7 @@ export type AppScaffoldProgress = {
 export type AppAccessControl = 'all' | 'ui' | 'none';
 export type AppManifestData = {
     oauth_scopes?: string[] | undefined;
+    oauth_client?: AppOAuthClientConfig | undefined;
     name: string;
     visibility: 'public' | 'private' | 'vertesia';
     title: string;
@@ -941,6 +939,7 @@ export type AppManifestData = {
 };
 export type UpdateAppPayload = {
     oauth_scopes?: string[] | undefined;
+    oauth_client?: AppOAuthClientConfig | undefined;
     name: string;
     visibility: 'public' | 'private' | 'vertesia';
     title: string;
@@ -1114,6 +1113,7 @@ export type AppEventSubscriptionDefinition = {
     priority?: EventPriority | undefined;
 };
 export type AppPackage = {
+    oauth_client?: AppOAuthClientConfig | undefined;
     oauth_scopes?: string[] | undefined;
     ui?: AppUIConfig | undefined;
     tools?: AgentToolDefinition[] | undefined;
@@ -1196,6 +1196,7 @@ export type RenderingTemplateDefinitionRef = {
 };
 export type AppManifest = {
     oauth_scopes?: string[] | undefined;
+    oauth_client?: AppOAuthClientConfig | undefined;
     edit_revision: number;
     name: string;
     visibility: 'public' | 'private' | 'vertesia';
@@ -1350,7 +1351,6 @@ export type AppApiKeyCollectionParams = {
 export type AppOAuthProviderParams = AppOAuthCollectionParams;
 export type AppInstallationPayload = {
     app_id: string;
-    oauth_client?: AppInstallationOAuthClientParams | undefined;
     settings?:
         | {
               [k: string]: unknown;
@@ -11781,8 +11781,6 @@ export interface ApiComponentTypes {
     AgentRunSearchHit: AgentRunSearchHit;
     UpsertAppVersionRequest: UpsertAppVersionRequest;
     AppInstallationPayload: AppInstallationPayload;
-    AppInstallationOAuthClientParams: AppInstallationOAuthClientParams;
-    AppOAuthClientMode: AppOAuthClientMode;
     AppDevelopmentTaskDetails: AppDevelopmentTaskDetails;
     AppVersionRecordArray: AppVersionRecordArray;
     AppToolCollectionArray: AppToolCollectionArray;
@@ -11861,6 +11859,7 @@ export interface ApiComponentTypes {
     MCPOAuthConfigMap: MCPOAuthConfigMap;
     AppWidgetInfo: AppWidgetInfo;
     AppDashboardDefinition: AppDashboardDefinition;
+    AppOAuthClientConfig: AppOAuthClientConfig;
     AppManifestData: AppManifestData;
     UpdateAppPayload: UpdateAppPayload;
     AppManifest: AppManifest;

@@ -337,9 +337,20 @@ export const AppDashboardDefinitionSchema = z
             'Dashboard definition contributed by an app package.\n\nApp dashboard IDs are local to the app. The platform exposes them as `app:<app_name>:<id>` when listing or retrieving dashboards.',
     });
 
+export const AppOAuthClientConfigSchema = z
+    .strictObject({
+        redirect_uris: z.array(z.string().url()).min(1),
+    })
+    .meta({
+        id: 'AppOAuthClientConfig',
+        description:
+            'Standalone public PKCE OAuth. Installation automatically provisions an app client with these exact callback URLs.',
+    });
+
 export const AppManifestDataSchema = z
     .strictObject({
         oauth_scopes: z.array(z.string()).optional(),
+        oauth_client: AppOAuthClientConfigSchema.optional(),
         name: z.string().meta({
             description: 'The name of the app, used as the id in the system. Must be in kebab case (e.g. my-app).',
         }),
@@ -521,6 +532,7 @@ export const CompositeAppMessageOverridesSchema = z
 export const AppManifestSchema = z
     .strictObject({
         oauth_scopes: z.array(z.string()).optional(),
+        oauth_client: AppOAuthClientConfigSchema.optional(),
         edit_revision: EditRevisionSchema,
         name: z.string().meta({
             description: 'The name of the app, used as the id in the system. Must be in kebab case (e.g. my-app).',
@@ -925,6 +937,7 @@ export const AppEventSubscriptionDefinitionSchema = z
 
 export const AppPackageSchema = z
     .strictObject({
+        oauth_client: AppOAuthClientConfigSchema.optional(),
         oauth_scopes: z
             .array(z.string())
             .meta({ description: 'OAuth scopes requested by the app. Users must consent to project permissions.' })

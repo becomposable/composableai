@@ -299,13 +299,9 @@ interface Checks {
         z.infer<typeof import('./api-schemas/apikey.js').UpdateAccountApiKeyPayloadSchema>
     >;
     AppUIConfig: Same<W.AppUIConfig, z.infer<typeof import('./api-schemas/apps.js').AppUIConfigSchema>>;
-    AppInstallationOAuthClientParams: Same<
-        W.AppInstallationOAuthClientParams,
-        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstallationOAuthClientParamsSchema>
-    >;
-    AppOAuthClientMode: Same<
-        W.AppOAuthClientMode,
-        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppOAuthClientModeSchema>
+    AppOAuthClientConfig: Same<
+        W.AppOAuthClientConfig,
+        z.infer<typeof import('./api-schemas/app-runtime.js').AppOAuthClientConfigSchema>
     >;
     AppInstallationProjectsQuery: Same<
         W.AppInstallationProjectsQuery,
@@ -8939,14 +8935,6 @@ interface Checks {
         W.ApiComponentTypes['AppInstallationPayload'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstallationPayloadSchema>
     >;
-    'component:AppInstallationOAuthClientParams': Same<
-        W.ApiComponentTypes['AppInstallationOAuthClientParams'],
-        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstallationOAuthClientParamsSchema>
-    >;
-    'component:AppOAuthClientMode': Same<
-        W.ApiComponentTypes['AppOAuthClientMode'],
-        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppOAuthClientModeSchema>
-    >;
     'component:AppDevelopmentTaskDetails': Same<
         W.ApiComponentTypes['AppDevelopmentTaskDetails'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppDevelopmentTaskDetailsSchema>
@@ -9258,6 +9246,10 @@ interface Checks {
     'component:AppDashboardDefinition': Same<
         W.ApiComponentTypes['AppDashboardDefinition'],
         z.infer<typeof import('./api-schemas/app-runtime.js').AppDashboardDefinitionSchema>
+    >;
+    'component:AppOAuthClientConfig': Same<
+        W.ApiComponentTypes['AppOAuthClientConfig'],
+        z.infer<typeof import('./api-schemas/app-runtime.js').AppOAuthClientConfigSchema>
     >;
     'component:AppManifestData': Same<
         W.ApiComponentTypes['AppManifestData'],
@@ -9583,8 +9575,7 @@ const checks: Checks = {
     CreateAccountApiKeyPayload: true,
     UpdateAccountApiKeyPayload: true,
     AppUIConfig: true,
-    AppInstallationOAuthClientParams: true,
-    AppOAuthClientMode: true,
+    AppOAuthClientConfig: true,
     AppInstallationProjectsQuery: true,
     AppInstallationsQuery: true,
     AppListScope: true,
@@ -11863,8 +11854,6 @@ const checks: Checks = {
     'component:AgentRunSearchHit': true,
     'component:UpsertAppVersionRequest': true,
     'component:AppInstallationPayload': true,
-    'component:AppInstallationOAuthClientParams': true,
-    'component:AppOAuthClientMode': true,
     'component:AppDevelopmentTaskDetails': true,
     'component:AppVersionRecordArray': true,
     'component:AppToolCollectionArray': true,
@@ -11943,6 +11932,7 @@ const checks: Checks = {
     'component:MCPOAuthConfigMap': true,
     'component:AppWidgetInfo': true,
     'component:AppDashboardDefinition': true,
+    'component:AppOAuthClientConfig': true,
     'component:AppManifestData': true,
     'component:UpdateAppPayload': true,
     'component:AppManifest': true,
@@ -12007,6 +11997,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2503);
+        expect(Object.keys(checks)).toHaveLength(2501);
     });
 });

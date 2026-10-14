@@ -852,31 +852,9 @@ export const UpsertAppVersionRequestSchema = z
     })
     .meta({ id: 'UpsertAppVersionRequest' });
 
-export const AppOAuthClientModeSchema = z.enum(['create', 'reuse', 'none']).meta({ id: 'AppOAuthClientMode' });
-export const AppInstallationOAuthClientParamsSchema = z
-    .strictObject({
-        mode: AppOAuthClientModeSchema,
-        redirect_uris: z
-            .array(z.string())
-            .min(1)
-            .optional()
-            .meta({ description: 'Required only for create mode. Exact callback URLs for the public PKCE client.' }),
-        client_id: z
-            .string()
-            .min(1)
-            .optional()
-            .meta({ description: 'Required only for reuse mode. Existing client of the same app and account.' }),
-    })
-    .meta({
-        id: 'AppInstallationOAuthClientParams',
-        description:
-            'Configure standalone OAuth. Create requires redirect_uris; reuse requires client_id; none removes the project link. Fields for another mode are rejected.',
-    });
-
 export const AppInstallationPayloadSchema = z
     .strictObject({
         app_id: z.string(),
-        oauth_client: AppInstallationOAuthClientParamsSchema.optional(),
         settings: z.looseObject({}).optional(),
         access_control: z
             .union([AppAccessControlSchema, z.null()])

@@ -801,10 +801,16 @@ VITE_AUTH_MODE=central
 # Or VITE_AUTH_MODE=firebase with all five VITE_FIREBASE_* settings.
 ```
 
-For OAuth (`central`), configure **Standalone sign-in** during app installation or in installation
-settings. Create a public OAuth client with the exact callback `https://your-app.vercel.app/app`,
-or reuse the client ID from another installation of this app in the same account. Set that ID as
-`VITE_OAUTH_CLIENT_ID` in Vercel and rebuild. Each project installation must enable that client;
+For OAuth (`central`), declare exact callback URLs in the Vertesia app manifest:
+
+```json
+{ "oauth_client": { "redirect_uris": ["https://your-app.vercel.app/app"] } }
+```
+
+Install the app normally. Vertesia creates or reuses the account's public OAuth client automatically.
+For an already installed app, saving this declaration initializes its client in the current project.
+Copy the client ID displayed in the installed app's settings to `VITE_OAUTH_CLIENT_ID` in Vercel and rebuild.
+The installation enables that client;
 STS offers only projects where the app is installed and the user has UI access. The app's
 `oauth_scopes` declares its permissions; API permissions also require `account:member`.
 
@@ -831,7 +837,7 @@ does not read the gateway's access or refresh token. Embedded apps retain host-p
 Existing applications must upgrade their SDK, adopt the standalone template auth configuration,
 and rebuild to receive these changes.
 
-After configuring the public client in Vertesia, set these Vercel build environment variables and redeploy:
+After installing the app with its manifest callbacks, set these Vercel build environment variables and redeploy:
 
 ```dotenv
 VITE_OAUTH_CLIENT_ID=vts_your_registered_client_id

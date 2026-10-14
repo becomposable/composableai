@@ -20590,48 +20590,11 @@
     ],
     "additionalProperties": false
   },
-  "AppInstallationOAuthClientParams": {
-    "type": "object",
-    "properties": {
-      "mode": {
-        "$ref": "#/components/schemas/AppOAuthClientMode"
-      },
-      "redirect_uris": {
-        "minItems": 1,
-        "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "description": "Required only for create mode. Exact callback URLs for the public PKCE client."
-      },
-      "client_id": {
-        "type": "string",
-        "minLength": 1,
-        "description": "Required only for reuse mode. Existing client of the same app and account."
-      }
-    },
-    "required": [
-      "mode"
-    ],
-    "additionalProperties": false,
-    "description": "Configure standalone OAuth. Create requires redirect_uris; reuse requires client_id; none removes the project link. Fields for another mode are rejected."
-  },
-  "AppOAuthClientMode": {
-    "type": "string",
-    "enum": [
-      "create",
-      "reuse",
-      "none"
-    ]
-  },
   "AppInstallationPayload": {
     "type": "object",
     "properties": {
       "app_id": {
         "type": "string"
-      },
-      "oauth_client": {
-        "$ref": "#/components/schemas/AppInstallationOAuthClientParams"
       },
       "settings": {
         "type": "object",
@@ -23061,6 +23024,24 @@
     "additionalProperties": false,
     "description": "Dashboard definition contributed by an app package.\n\nApp dashboard IDs are local to the app. The platform exposes them as `app:<app_name>:<id>` when listing or retrieving dashboards."
   },
+  "AppOAuthClientConfig": {
+    "type": "object",
+    "properties": {
+      "redirect_uris": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "required": [
+      "redirect_uris"
+    ],
+    "additionalProperties": false,
+    "description": "Standalone public PKCE OAuth. Installation automatically provisions an app client with these exact callback URLs."
+  },
   "AppManifestData": {
     "type": "object",
     "properties": {
@@ -23069,6 +23050,9 @@
         "items": {
           "type": "string"
         }
+      },
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppOAuthClientConfig"
       },
       "name": {
         "type": "string",
@@ -23205,6 +23189,9 @@
         "items": {
           "type": "string"
         }
+      },
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppOAuthClientConfig"
       },
       "name": {
         "type": "string",
@@ -23347,6 +23334,9 @@
         "items": {
           "type": "string"
         }
+      },
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppOAuthClientConfig"
       },
       "edit_revision": {
         "type": "integer",
@@ -24549,6 +24539,9 @@
   "AppPackage": {
     "type": "object",
     "properties": {
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppOAuthClientConfig"
+      },
       "oauth_scopes": {
         "type": "array",
         "items": {

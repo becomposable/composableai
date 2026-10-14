@@ -55,6 +55,15 @@ catalog:
   rolldown: "1.2.12"
 # These declarations import React types without declaring the type peer.
 packageExtensions:
+  # Development entrypoints import packages omitted from their runtime declarations.
+  "micromark-extension-definition-list@2.0.*":
+    dependencies:
+      devlop: "^1.1.0"
+      debug: "^4.4.3"
+  "mdast-util-definition-list@2.0.0":
+    dependencies:
+      devlop: "^1.1.0"
+      debug: "^4.4.3"
   "cmdk@1.1.1":
     peerDependencies:
       "@types/react": "*"

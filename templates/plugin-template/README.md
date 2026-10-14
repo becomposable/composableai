@@ -778,7 +778,7 @@ Set the client ID and callback in `.env.app.local`, then restart `pnpm dev`:
 VITE_OAUTH_CLIENT_ID=my-app-development
 VITE_OAUTH_REDIRECT_URI=https://localhost:5173/
 # Optional: otherwise src/app-permissions.ts supplies the requested scopes.
-# VITE_OAUTH_SCOPES=openid profile content:read offline_access
+# VITE_OAUTH_SCOPES=openid profile account:member content:read offline_access
 ```
 
 Register that callback with the client. The template's default Vite server uses HTTPS. If running
@@ -795,13 +795,19 @@ Explicit `VITE_AUTH_MODE=firebase` deployments retain their configured Firebase 
 #### Independently hosted apps
 
 Independent Vercel deployments publish `/.well-known/oauth-client/vertesia-app` through
-`api/oauth-client.js`. The standalone UI uses this CIMD with OAuth authorization code + PKCE,
+`api/oauth-client.ts`. The TypeScript entry lets Vercel compile and package its shared permissions dependency.
+The standalone UI uses this CIMD with OAuth authorization code + PKCE,
 asks the user for consent, and returns to `/app`. There is no client secret or manual client
 registration. Keep the CIMD rewrite before the catch-all API rewrite in `vercel.json`.
 The metadata endpoint must be publicly reachable by the authorization server (Vercel deployment
 protection must not block it). Configure `APP_OAUTH_SCOPES` in Vercel with the space-separated
-permissions the app needs, plus `openid profile`; the default permits sign-in only. The user
+permissions the app needs, plus `openid profile` and `account:member` when requesting API permissions;
+the default permits sign-in only. The user
 must hold and consent to each requested permission.
+
+Vercel builds use `/app/` asset URLs to match `dist/app/`. Gateway builds set `VITE_RELATIVE_BASE=1`
+to emit relative URLs; the gateway injects the versioned mount through `<base href>`. That explicit
+relative-base setting takes precedence over Vercel's build environment.
 
 Gateway-hosted builds use the gateway's CIMD and HttpOnly cookie session instead. The SDK
 loads user information and calls the platform APIs through same-origin gateway routes; it
@@ -817,7 +823,7 @@ these Vercel build environment variables and redeploy:
 VITE_OAUTH_CLIENT_ID=my-app-production
 VITE_OAUTH_REDIRECT_URI=https://my-app.vercel.app/app
 # Optional: otherwise src/app-permissions.ts supplies the requested scopes.
-# VITE_OAUTH_SCOPES=openid profile content:read offline_access
+# VITE_OAUTH_SCOPES=openid profile account:member content:read offline_access
 ```
 
 Register the callback and allow the requested scopes on that client. A non-URL client ID avoids

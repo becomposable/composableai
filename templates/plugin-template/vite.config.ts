@@ -218,12 +218,13 @@ function defineAppConfig({ command }: ConfigEnv): UserConfig {
     // version-stamped deep path (`/tenants/<t>/apps/<a>/versions/<v>/app/`) that is unknowable at
     // build time, so it needs the relative form and opts in with VITE_RELATIVE_BASE=1.
     //
-    // Everything else — `vite preview`, `pnpm start`, Vercel, any plain static host — serves the
+    // Vercel serves dist/app at /app/, so its standalone build needs that absolute mount.
+    // Everything else — `vite preview`, `pnpm start`, any plain static host — serves the
     // app at the origin root and injects no `<base>`. There a relative base breaks the moment the
     // SPA is on a nested route such as `/app/...`, where every asset resolves to
     // `/app/assets/...` and 404s. So the default is an absolute base.
-    const base = command === 'build' && process.env.VITE_RELATIVE_BASE === '1' ? './' : '/';
     const isVercelBuild = command === 'build' && process.env.VERCEL === '1';
+    const base = command === 'build' && process.env.VITE_RELATIVE_BASE === '1' ? './' : isVercelBuild ? '/app/' : '/';
 
     return {
         base,

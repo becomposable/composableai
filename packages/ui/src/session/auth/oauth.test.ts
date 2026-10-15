@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest';
 
 const origin = 'https://standalone.vercel.app';
 const issuer = 'https://sts.dev1.vertesia.io';
@@ -7,6 +7,11 @@ const clientId = `${origin}/.well-known/oauth-client/vertesia-app`;
 const storage = new Map<string, string>();
 const local = new Map<string, string>();
 const replace = vi.fn();
+// Transform the real SDK graph in a hook, before the flow's short assertion deadline starts.
+// A timed-out first import otherwise continues into the next test and redirects its browser stub.
+beforeAll(async () => {
+    await import('./oauth');
+}, 30_000);
 let browser: {
     location: { href: string; origin: string; replace: typeof replace };
     parent?: unknown;

@@ -854,6 +854,8 @@ export type StartAppScaffoldRequest = {
     oauth_scopes?: string[] | undefined;
     appgen_package_spec?: string | undefined;
     create_version?: boolean | undefined;
+    source?: AppSourceConfig | undefined;
+    github_connection_id?: string | undefined;
 };
 export type StartAppScaffoldResponse = {
     workflow_id: string;
@@ -862,6 +864,34 @@ export type StartAppScaffoldResponse = {
     app_record_id?: string | undefined;
     git_url?: string | undefined;
     create_version: boolean;
+};
+export type AppGithubConfiguration = {
+    enabled: boolean;
+    app_slug?: string | undefined;
+    install_url?: string | undefined;
+};
+export type StartAppGithubAuthorizationResponse = {
+    authorization_url: string;
+};
+export type AppGithubInstallation = {
+    id: string;
+    account_login: string;
+    account_type?: string | undefined;
+    repository_selection: 'all' | 'selected';
+};
+export type ExchangeAppGithubAuthorizationResponse = {
+    connection_id: string;
+    installations: AppGithubInstallation[];
+};
+export type AppGithubRepository = {
+    name: string;
+    full_name: string;
+    private: boolean;
+    default_branch: string;
+    html_url: string;
+};
+export type AppGithubRepositoryList = {
+    repositories: AppGithubRepository[];
 };
 export type StartAppDevelopmentTaskRequest = {
     prompt: string;
@@ -964,11 +994,15 @@ export type UpdateAppPayload = {
     expected_edit_revision?: number | undefined;
 };
 export type AppGitSourceConfig = {
+    provider?: AppGitSourceProvider | undefined;
     url?: string | undefined;
+    installation_id?: string | undefined;
+    repository?: string | undefined;
     default_branch?: string | undefined;
     production_branch?: string | undefined;
     development_branch?: string | undefined;
 };
+export type AppGitSourceProvider = 'vertesia' | 'github';
 export type AppSourceConfig = {
     kind: 'git';
     git?: AppGitSourceConfig | undefined;
@@ -1225,7 +1259,10 @@ export type AppManifest = {
 export type AppManifestSource = {
     kind: 'git';
     git: {
+        provider?: AppGitSourceProvider | undefined;
         url: string;
+        installation_id?: string | undefined;
+        repository?: string | undefined;
         default_branch?: string | undefined;
         production_branch?: string | undefined;
         development_branch?: string | undefined;
@@ -10636,6 +10673,10 @@ export type AppPackageScopeWire =
     | 'hooks'
     | 'subscriptions'
     | 'all';
+export type ExchangeAppGithubAuthorizationRequest = {
+    code: string;
+    state: string;
+};
 export type AppVersionRecordArray = AppVersionRecord[];
 export type AppToolCollectionArray = AppToolCollection[];
 export type SystemPackageQuery = {
@@ -10748,6 +10789,7 @@ export interface ApiComponentTypes {
     AppCapabilities: AppCapabilities;
     AppAccessControl: AppAccessControl;
     AppSourceConfig: AppSourceConfig;
+    AppGitSourceProvider: AppGitSourceProvider;
     AppManifestSource: AppManifestSource;
     SuccessResponse: SuccessResponse;
     OAuthProvider: OAuthProvider;
@@ -11743,6 +11785,13 @@ export interface ApiComponentTypes {
     AppRepoBranch: AppRepoBranch;
     AppRepoDocumentCommit: AppRepoDocumentCommit;
     AppVersionGitSource: AppVersionGitSource;
+    AppGithubConfiguration: AppGithubConfiguration;
+    StartAppGithubAuthorizationResponse: StartAppGithubAuthorizationResponse;
+    ExchangeAppGithubAuthorizationRequest: ExchangeAppGithubAuthorizationRequest;
+    ExchangeAppGithubAuthorizationResponse: ExchangeAppGithubAuthorizationResponse;
+    AppGithubInstallation: AppGithubInstallation;
+    AppGithubRepository: AppGithubRepository;
+    AppGithubRepositoryList: AppGithubRepositoryList;
     StartAppScaffoldRequest: StartAppScaffoldRequest;
     StartAppDevelopmentTaskRequest: StartAppDevelopmentTaskRequest;
     StartAppBuildRequest: StartAppBuildRequest;

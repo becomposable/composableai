@@ -6,6 +6,8 @@ import type {
     AppDeleteSummary,
     AppDevelopmentTaskDetails,
     AppDevelopmentTaskList,
+    AppGithubConfiguration,
+    AppGithubRepositoryList,
     AppInspectionResult,
     AppInstallation,
     AppInstallationKind,
@@ -29,6 +31,7 @@ import type {
     CountResult,
     CreateAppRepoBranchRequest,
     DeleteAppVersionResponse,
+    ExchangeAppGithubAuthorizationResponse,
     McpApiKeyStatus,
     ProjectRef,
     PromoteAppVersionResponse,
@@ -37,6 +40,7 @@ import type {
     StartAppBuildRequest,
     StartAppBuildResponse,
     StartAppDevelopmentTaskRequest,
+    StartAppGithubAuthorizationResponse,
     StartAppScaffoldRequest,
     StartAppScaffoldResponse,
     UpdateAppInstallationOAuthApprovalPayload,
@@ -147,6 +151,24 @@ export default class AppsApi extends ApiTopic {
 
     getScaffoldProgress(workflowId: string, runId: string): Promise<AppScaffoldProgress> {
         return this.get(`/scaffolds/${encodeURIComponent(workflowId)}/${encodeURIComponent(runId)}/progress`);
+    }
+
+    getGithubConfiguration(): Promise<AppGithubConfiguration> {
+        return this.get('/source-providers/github');
+    }
+
+    startGithubAuthorization(): Promise<StartAppGithubAuthorizationResponse> {
+        return this.post('/source-providers/github/authorize', {});
+    }
+
+    exchangeGithubAuthorization(code: string, state: string): Promise<ExchangeAppGithubAuthorizationResponse> {
+        return this.post('/source-providers/github/exchange', { payload: { code, state } });
+    }
+
+    listGithubRepositories(connectionId: string, installationId: string): Promise<AppGithubRepositoryList> {
+        return this.get('/source-providers/github/repositories', {
+            query: { connection_id: connectionId, installation_id: installationId },
+        });
     }
 
     /**

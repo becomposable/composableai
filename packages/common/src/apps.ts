@@ -198,6 +198,7 @@ export type StartAppScaffoldResponse = Wire.StartAppScaffoldResponse;
 
 export type AppGithubConfiguration = Wire.AppGithubConfiguration;
 export type StartAppGithubAuthorizationResponse = Wire.StartAppGithubAuthorizationResponse;
+export type ExchangeAppGithubAuthorizationRequest = Wire.ExchangeAppGithubAuthorizationRequest;
 export type AppGithubInstallation = Wire.AppGithubInstallation;
 export type ExchangeAppGithubAuthorizationResponse = Wire.ExchangeAppGithubAuthorizationResponse;
 export type AppGithubRepository = Wire.AppGithubRepository;

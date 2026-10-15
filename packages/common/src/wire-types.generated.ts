@@ -876,6 +876,10 @@ export type AppGithubConfiguration = {
 export type StartAppGithubAuthorizationResponse = {
     authorization_url: string;
 };
+export type ExchangeAppGithubAuthorizationRequest = {
+    code: string;
+    state: string;
+};
 export type AppGithubInstallation = {
     id: string;
     account_login: string;
@@ -10687,10 +10691,6 @@ export type AppPackageScopeWire =
     | 'hooks'
     | 'subscriptions'
     | 'all';
-export type ExchangeAppGithubAuthorizationRequest = {
-    code: string;
-    state: string;
-};
 export type AppVersionRecordArray = AppVersionRecord[];
 export type AppToolCollectionArray = AppToolCollection[];
 export type SystemPackageQuery = {

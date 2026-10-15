@@ -433,6 +433,10 @@ interface Checks {
         W.StartAppGithubAuthorizationResponse,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').StartAppGithubAuthorizationResponseSchema>
     >;
+    ExchangeAppGithubAuthorizationRequest: Same<
+        W.ExchangeAppGithubAuthorizationRequest,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').ExchangeAppGithubAuthorizationRequestSchema>
+    >;
     AppGithubInstallation: Same<
         W.AppGithubInstallation,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubInstallationSchema>
@@ -4556,10 +4560,6 @@ interface Checks {
     AppPackageScopeWire: Same<
         W.AppPackageScopeWire,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppPackageScopeSchema>
-    >;
-    ExchangeAppGithubAuthorizationRequest: Same<
-        W.ExchangeAppGithubAuthorizationRequest,
-        z.infer<typeof import('./api-schemas/app-lifecycle.js').ExchangeAppGithubAuthorizationRequestSchema>
     >;
     AppVersionRecordArray: Same<
         W.AppVersionRecordArray,
@@ -9677,6 +9677,7 @@ const checks: Checks = {
     StartAppScaffoldResponse: true,
     AppGithubConfiguration: true,
     StartAppGithubAuthorizationResponse: true,
+    ExchangeAppGithubAuthorizationRequest: true,
     AppGithubInstallation: true,
     ExchangeAppGithubAuthorizationResponse: true,
     AppGithubRepository: true,
@@ -10822,7 +10823,6 @@ const checks: Checks = {
     ViewExperienceArray: true,
     Extract_AppVersionGitRefType_branch_tag_commit: true,
     AppPackageScopeWire: true,
-    ExchangeAppGithubAuthorizationRequest: true,
     AppVersionRecordArray: true,
     AppToolCollectionArray: true,
     SystemPackageQuery: true,

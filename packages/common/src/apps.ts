@@ -3,14 +3,21 @@ import type * as Wire from './wire-types.generated.js';
 /** Allowed values for AppUINavItem.preferredSection */
 export const PREFERRED_SECTIONS = ['default', 'footer', 'settings'] as const;
 
+function trimBoundaryHyphens(value: string): string {
+    let start = 0;
+    let end = value.length;
+    while (start < end && value[start] === '-') start++;
+    while (end > start && value[end - 1] === '-') end--;
+    return value.slice(start, end);
+}
+
 /** Convert an app display/package name into the canonical persisted app id. */
 export function slugifyAppId(value: string): string {
-    const slug = value
+    const normalized = value
         .trim()
         .toLowerCase()
-        .replace(/[^a-z0-9._-]+/g, '-')
-        .replace(/^-+|-+$/g, '')
-        .slice(0, 80);
+        .replace(/[^a-z0-9._-]+/g, '-');
+    const slug = trimBoundaryHyphens(normalized).slice(0, 80);
     if (!slug) throw new Error('App name must contain at least one letter or number');
     return slug;
 }

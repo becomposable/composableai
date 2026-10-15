@@ -15,6 +15,10 @@ describe('slugifyAppId', () => {
     it('rejects names without an id character', () => {
         expect(() => slugifyAppId('!!!')).toThrow('at least one letter or number');
     });
+
+    it('trims long runs of boundary hyphens without regular-expression backtracking', () => {
+        expect(slugifyAppId(`${'-'.repeat(10_000)}App${'-'.repeat(10_000)}`)).toBe('app');
+    });
 });
 
 describe('app capability contracts', () => {

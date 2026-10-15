@@ -462,6 +462,13 @@ export const ExchangeAppGithubAuthorizationRequestSchema = z
     .strictObject({ code: z.string(), state: z.string() })
     .meta({ id: 'ExchangeAppGithubAuthorizationRequest' });
 
+export const AppGithubRepositoriesQuerySchema = z
+    .strictObject({
+        connection_id: z.string().trim().min(1),
+        installation_id: z.string().trim().min(1),
+    })
+    .meta({ id: 'AppGithubRepositoriesQuery' });
+
 export const AppGithubInstallationSchema = z
     .strictObject({
         id: z.string(),

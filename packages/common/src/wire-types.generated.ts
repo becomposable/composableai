@@ -880,6 +880,10 @@ export type ExchangeAppGithubAuthorizationRequest = {
     code: string;
     state: string;
 };
+export type AppGithubRepositoriesQuery = {
+    connection_id: string;
+    installation_id: string;
+};
 export type AppGithubInstallation = {
     id: string;
     account_login: string;
@@ -11802,6 +11806,7 @@ export interface ApiComponentTypes {
     AppGithubConfiguration: AppGithubConfiguration;
     StartAppGithubAuthorizationResponse: StartAppGithubAuthorizationResponse;
     ExchangeAppGithubAuthorizationRequest: ExchangeAppGithubAuthorizationRequest;
+    AppGithubRepositoriesQuery: AppGithubRepositoriesQuery;
     ExchangeAppGithubAuthorizationResponse: ExchangeAppGithubAuthorizationResponse;
     AppGithubInstallation: AppGithubInstallation;
     AppGithubRepository: AppGithubRepository;

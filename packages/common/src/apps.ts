@@ -3,6 +3,18 @@ import type * as Wire from './wire-types.generated.js';
 /** Allowed values for AppUINavItem.preferredSection */
 export const PREFERRED_SECTIONS = ['default', 'footer', 'settings'] as const;
 
+/** Convert an app display/package name into the canonical persisted app id. */
+export function slugifyAppId(value: string): string {
+    const slug = value
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9._-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 80);
+    if (!slug) throw new Error('App name must contain at least one letter or number');
+    return slug;
+}
+
 // The app-manifest closure is declared once, as the Zod schemas in `./api-schemas/apps.ts`, and
 // inferred below. The documentation moved with it: what a published component says about a field now
 // comes from the schema's own `.meta({ description })` rather than from a TSDoc comment a generator
@@ -199,6 +211,7 @@ export type StartAppScaffoldResponse = Wire.StartAppScaffoldResponse;
 export type AppGithubConfiguration = Wire.AppGithubConfiguration;
 export type StartAppGithubAuthorizationResponse = Wire.StartAppGithubAuthorizationResponse;
 export type ExchangeAppGithubAuthorizationRequest = Wire.ExchangeAppGithubAuthorizationRequest;
+export type AppGithubRepositoriesQuery = Wire.AppGithubRepositoriesQuery;
 export type AppGithubInstallation = Wire.AppGithubInstallation;
 export type ExchangeAppGithubAuthorizationResponse = Wire.ExchangeAppGithubAuthorizationResponse;
 export type AppGithubRepository = Wire.AppGithubRepository;

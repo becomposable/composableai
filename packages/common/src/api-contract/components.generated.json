@@ -19739,6 +19739,23 @@
       "state"
     ]
   },
+  "AppGithubRepositoriesQuery": {
+    "type": "object",
+    "properties": {
+      "connection_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "installation_id": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "required": [
+      "connection_id",
+      "installation_id"
+    ]
+  },
   "AppGithubInstallation": {
     "type": "object",
     "properties": {

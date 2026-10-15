@@ -437,6 +437,10 @@ interface Checks {
         W.ExchangeAppGithubAuthorizationRequest,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').ExchangeAppGithubAuthorizationRequestSchema>
     >;
+    AppGithubRepositoriesQuery: Same<
+        W.AppGithubRepositoriesQuery,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoriesQuerySchema>
+    >;
     AppGithubInstallation: Same<
         W.AppGithubInstallation,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubInstallationSchema>
@@ -8887,6 +8891,10 @@ interface Checks {
         W.ApiComponentTypes['ExchangeAppGithubAuthorizationRequest'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').ExchangeAppGithubAuthorizationRequestSchema>
     >;
+    'component:AppGithubRepositoriesQuery': Same<
+        W.ApiComponentTypes['AppGithubRepositoriesQuery'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoriesQuerySchema>
+    >;
     'component:ExchangeAppGithubAuthorizationResponse': Same<
         W.ApiComponentTypes['ExchangeAppGithubAuthorizationResponse'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').ExchangeAppGithubAuthorizationResponseSchema>
@@ -9678,6 +9686,7 @@ const checks: Checks = {
     AppGithubConfiguration: true,
     StartAppGithubAuthorizationResponse: true,
     ExchangeAppGithubAuthorizationRequest: true,
+    AppGithubRepositoriesQuery: true,
     AppGithubInstallation: true,
     ExchangeAppGithubAuthorizationResponse: true,
     AppGithubRepository: true,
@@ -11906,6 +11915,7 @@ const checks: Checks = {
     'component:AppGithubConfiguration': true,
     'component:StartAppGithubAuthorizationResponse': true,
     'component:ExchangeAppGithubAuthorizationRequest': true,
+    'component:AppGithubRepositoriesQuery': true,
     'component:ExchangeAppGithubAuthorizationResponse': true,
     'component:AppGithubInstallation': true,
     'component:AppGithubRepository': true,
@@ -12077,6 +12087,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2517);
+        expect(Object.keys(checks)).toHaveLength(2519);
     });
 });

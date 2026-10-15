@@ -91,7 +91,7 @@
         "vite": "catalog:",
         "vitest": "catalog:",
         "vite-plugin-serve-static": "^2.2.1",
-        "workerd": "1.20261006.1"
+        "workerd": "1.20261007.1"
     },
     "dependencies": {
         "@hono/node-server": "^2.1.3",

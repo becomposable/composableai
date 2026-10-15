@@ -1216,8 +1216,7 @@ export const ContentTypeIntakePolicySchema: JSONObject = {
                     },
                 },
                 effort: {
-                    type: 'string',
-                    enum: ['none', 'high'],
+                    $ref: '#/$defs/ReasoningEffort',
                 },
                 random_seed: {
                     type: 'integer',

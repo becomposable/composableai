@@ -3949,11 +3949,7 @@
         }
       },
       "effort": {
-        "type": "string",
-        "enum": [
-          "none",
-          "high"
-        ]
+        "$ref": "#/components/schemas/ReasoningEffort"
       },
       "random_seed": {
         "type": "integer",

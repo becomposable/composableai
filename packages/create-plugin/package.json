@@ -16,6 +16,7 @@
         "clean": "rimraf ./node_modules ./lib ./tsconfig.tsbuildinfo",
         "dev": "tsc --checkers 1 --watch",
         "test": "node --test ./scripts/*.test.mjs && node ./scripts/run-smoke-test.mjs",
+        "test:vercel": "node ./scripts/test-generated-vercel.mjs",
         "prepublishOnly": "pnpm run build"
     },
     "keywords": [
@@ -44,6 +45,7 @@
         "prompts": "^2.4.2"
     },
     "devDependencies": {
+        "@vercel/node": "23.0.1",
         "@types/degit": "^2.8.6",
         "@types/node": "catalog:",
         "@types/prompts": "^2.4.9",

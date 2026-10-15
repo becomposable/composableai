@@ -299,6 +299,10 @@ interface Checks {
         z.infer<typeof import('./api-schemas/apikey.js').UpdateAccountApiKeyPayloadSchema>
     >;
     AppUIConfig: Same<W.AppUIConfig, z.infer<typeof import('./api-schemas/apps.js').AppUIConfigSchema>>;
+    AppOAuthClientConfig: Same<
+        W.AppOAuthClientConfig,
+        z.infer<typeof import('./api-schemas/app-runtime.js').AppOAuthClientConfigSchema>
+    >;
     AppInstallationProjectsQuery: Same<
         W.AppInstallationProjectsQuery,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstallationProjectsQuerySchema>
@@ -9243,6 +9247,10 @@ interface Checks {
         W.ApiComponentTypes['AppDashboardDefinition'],
         z.infer<typeof import('./api-schemas/app-runtime.js').AppDashboardDefinitionSchema>
     >;
+    'component:AppOAuthClientConfig': Same<
+        W.ApiComponentTypes['AppOAuthClientConfig'],
+        z.infer<typeof import('./api-schemas/app-runtime.js').AppOAuthClientConfigSchema>
+    >;
     'component:AppManifestData': Same<
         W.ApiComponentTypes['AppManifestData'],
         z.infer<typeof import('./api-schemas/app-runtime.js').AppManifestDataSchema>
@@ -9567,6 +9575,7 @@ const checks: Checks = {
     CreateAccountApiKeyPayload: true,
     UpdateAccountApiKeyPayload: true,
     AppUIConfig: true,
+    AppOAuthClientConfig: true,
     AppInstallationProjectsQuery: true,
     AppInstallationsQuery: true,
     AppListScope: true,
@@ -11923,6 +11932,7 @@ const checks: Checks = {
     'component:MCPOAuthConfigMap': true,
     'component:AppWidgetInfo': true,
     'component:AppDashboardDefinition': true,
+    'component:AppOAuthClientConfig': true,
     'component:AppManifestData': true,
     'component:UpdateAppPayload': true,
     'component:AppManifest': true,
@@ -11987,6 +11997,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2499);
+        expect(Object.keys(checks)).toHaveLength(2501);
     });
 });

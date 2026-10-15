@@ -144,14 +144,24 @@ test('local development tokens retain precedence and are excluded from productio
     assert.throws(() => builtApp.validate(), /Set VITE_OAUTH_CLIENT_ID/);
 });
 
-test('independent HTTPS deployments default to CIMD and accept a named client override', async () => {
+test('independent HTTPS deployments require an explicitly configured OAuth client', async () => {
     const origin = 'https://my-app.vercel.app';
-    const metadataApp = await bootstrap({ origin, prod: true });
-    assert.equal(metadataApp.env.oauth.clientId, `${origin}/.well-known/oauth-client/vertesia-app`);
-    assert.equal(metadataApp.env.oauth.redirectUri, `${origin}/app`);
-    const registeredApp = await bootstrap({ origin, prod: true, clientId: 'my-app-production' });
-    assert.equal(registeredApp.env.oauth.clientId, 'my-app-production');
+    const unconfigured = await bootstrap({ origin, prod: true });
+    assert.equal(unconfigured.env.oauth, undefined);
+    assert.throws(() => unconfigured.validate(), /client ID configured in the Vertesia app installation/);
+    const registeredApp = await bootstrap({ origin, prod: true, clientId: 'vts_installed' });
+    assert.equal(registeredApp.env.oauth.clientId, 'vts_installed');
     assert.equal(registeredApp.env.oauth.redirectUri, `${origin}/app`);
+    assert.doesNotThrow(() => registeredApp.validate());
+    const metadataClient = `${origin}/.well-known/oauth-client/vertesia-app`;
+    const explicitCimd = await bootstrap({ origin, prod: true, clientId: metadataClient });
+    assert.equal(explicitCimd.env.oauth.clientId, metadataClient);
+});
+
+test('Firebase on Vercel does not require an OAuth client', async () => {
+    const app = await bootstrap({ origin: 'https://my-app.vercel.app', prod: true, authMode: 'firebase' });
+    assert.equal(app.env.oauth, undefined);
+    assert.doesNotThrow(() => app.validate());
 });
 
 test('local embedded apps retain a host-provided token', async () => {

@@ -6791,6 +6791,9 @@
       "client_name": {
         "type": "string"
       },
+      "app_id": {
+        "type": "string"
+      },
       "client_metadata": {
         "$ref": "#/components/schemas/OAuthClientDisplayMetadata"
       },
@@ -7067,6 +7070,10 @@
   "OAuthClient": {
     "type": "object",
     "properties": {
+      "app_id": {
+        "type": "string",
+        "description": "App associated with this client. Authorization requires an installation explicitly enabling this client and current user app access."
+      },
       "client_name": {
         "type": "string"
       },
@@ -7168,6 +7175,10 @@
   "OAuthClientCreateResponse": {
     "type": "object",
     "properties": {
+      "app_id": {
+        "type": "string",
+        "description": "App associated with this client. Authorization requires an installation explicitly enabling this client and current user app access."
+      },
       "client_name": {
         "type": "string"
       },
@@ -23013,6 +23024,24 @@
     "additionalProperties": false,
     "description": "Dashboard definition contributed by an app package.\n\nApp dashboard IDs are local to the app. The platform exposes them as `app:<app_name>:<id>` when listing or retrieving dashboards."
   },
+  "AppOAuthClientConfig": {
+    "type": "object",
+    "properties": {
+      "redirect_uris": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "required": [
+      "redirect_uris"
+    ],
+    "additionalProperties": false,
+    "description": "Standalone public PKCE OAuth. Installation automatically provisions an app client with these exact callback URLs."
+  },
   "AppManifestData": {
     "type": "object",
     "properties": {
@@ -23021,6 +23050,9 @@
         "items": {
           "type": "string"
         }
+      },
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppOAuthClientConfig"
       },
       "name": {
         "type": "string",
@@ -23157,6 +23189,9 @@
         "items": {
           "type": "string"
         }
+      },
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppOAuthClientConfig"
       },
       "name": {
         "type": "string",
@@ -23299,6 +23334,9 @@
         "items": {
           "type": "string"
         }
+      },
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppOAuthClientConfig"
       },
       "edit_revision": {
         "type": "integer",
@@ -24501,6 +24539,9 @@
   "AppPackage": {
     "type": "object",
     "properties": {
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppOAuthClientConfig"
+      },
       "oauth_scopes": {
         "type": "array",
         "items": {
@@ -24649,6 +24690,9 @@
         ],
         "additionalProperties": false
       },
+      "oauth_client_id": {
+        "type": "string"
+      },
       "settings": {
         "type": "object",
         "additionalProperties": true
@@ -24737,6 +24781,9 @@
           "approved_at"
         ],
         "additionalProperties": false
+      },
+      "oauth_client_id": {
+        "type": "string"
       },
       "settings": {
         "type": "object",
@@ -24830,6 +24877,9 @@
           "approved_at"
         ],
         "additionalProperties": false
+      },
+      "oauth_client_id": {
+        "type": "string"
       },
       "settings": {
         "type": "object",

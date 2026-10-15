@@ -110,6 +110,7 @@ export const OAuthAuthorizationRequestSchema = z
         }),
         client_id: z.string(),
         client_name: z.string(),
+        app_id: z.string().optional(),
         client_metadata: OAuthClientDisplayMetadataSchema.optional(),
         client_registration_mode: OAuthClientRegistrationModeSchema.optional(),
         redirect_uri: z.string(),
@@ -212,6 +213,10 @@ export const OAuthTokenResponseSchema = z
  * publishes these properties inline under `OAuthClient`, with `client_id` last.
  */
 export const OAuthClientDataSchema = z.strictObject({
+    app_id: z.string().optional().meta({
+        description:
+            'App associated with this client. Authorization requires an installation explicitly enabling this client and current user app access.',
+    }),
     client_name: z.string(),
     client_type: OAuthClientTypeSchema,
     redirect_uris: z.array(z.string()),

@@ -153,6 +153,7 @@
             "openid",
             "profile",
             "offline_access",
+            "account:member",
             "content:read"
           ]
         },
@@ -163,6 +164,7 @@
             "openid",
             "profile",
             "offline_access",
+            "account:member",
             "content:read",
             "content:write"
           ]

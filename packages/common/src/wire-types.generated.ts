@@ -575,6 +575,9 @@ export type AppUIConfig = {
     navigation?: AppUINavItem[] | undefined;
     available_in?: AppAvailableIn[] | undefined;
 };
+export type AppOAuthClientConfig = {
+    redirect_uris: string[];
+};
 export type AppInstallationProjectsQuery = {
     name?: string | undefined;
     id?: string | undefined;
@@ -906,6 +909,7 @@ export type AppScaffoldProgress = {
 export type AppAccessControl = 'all' | 'ui' | 'none';
 export type AppManifestData = {
     oauth_scopes?: string[] | undefined;
+    oauth_client?: AppOAuthClientConfig | undefined;
     name: string;
     visibility: 'public' | 'private' | 'vertesia';
     title: string;
@@ -935,6 +939,7 @@ export type AppManifestData = {
 };
 export type UpdateAppPayload = {
     oauth_scopes?: string[] | undefined;
+    oauth_client?: AppOAuthClientConfig | undefined;
     name: string;
     visibility: 'public' | 'private' | 'vertesia';
     title: string;
@@ -1108,6 +1113,7 @@ export type AppEventSubscriptionDefinition = {
     priority?: EventPriority | undefined;
 };
 export type AppPackage = {
+    oauth_client?: AppOAuthClientConfig | undefined;
     oauth_scopes?: string[] | undefined;
     ui?: AppUIConfig | undefined;
     tools?: AgentToolDefinition[] | undefined;
@@ -1190,6 +1196,7 @@ export type RenderingTemplateDefinitionRef = {
 };
 export type AppManifest = {
     oauth_scopes?: string[] | undefined;
+    oauth_client?: AppOAuthClientConfig | undefined;
     edit_revision: number;
     name: string;
     visibility: 'public' | 'private' | 'vertesia';
@@ -1262,6 +1269,7 @@ export type AppInstallation = {
               approved_at: string;
           }
         | undefined;
+    oauth_client_id?: string | undefined;
     settings?:
         | {
               [k: string]: unknown;
@@ -1284,6 +1292,7 @@ export type AppInstallationWithManifest = {
               approved_at: string;
           }
         | undefined;
+    oauth_client_id?: string | undefined;
     settings?:
         | {
               [k: string]: unknown;
@@ -1308,6 +1317,7 @@ export type AppInstallationListEntry = {
               approved_at: string;
           }
         | undefined;
+    oauth_client_id?: string | undefined;
     settings?:
         | {
               [k: string]: unknown;
@@ -4630,6 +4640,7 @@ export type OAuthGrantSortField =
 export type OAuthGrantSortOrder = 'asc' | 'desc';
 /** An OAuth client's registration, without the id the server issues for it. */
 export type OAuthClientData = {
+    app_id?: string | undefined;
     client_name: string;
     client_type: OAuthClientType;
     redirect_uris: string[];
@@ -4654,6 +4665,7 @@ export type OAuthClientData = {
     updated_at: string;
 };
 export type OAuthClient = {
+    app_id?: string | undefined;
     client_name: string;
     client_type: OAuthClientType;
     redirect_uris: string[];
@@ -4680,6 +4692,7 @@ export type OAuthClient = {
 };
 /** The read shape plus the client secret, which is returned by the create call and never again. */
 export type OAuthClientCreateResponse = {
+    app_id?: string | undefined;
     client_name: string;
     client_type: OAuthClientType;
     redirect_uris: string[];
@@ -4855,6 +4868,7 @@ export type OAuthAuthorizationRequest = {
     user_code?: string | undefined;
     client_id: string;
     client_name: string;
+    app_id?: string | undefined;
     client_metadata?: OAuthClientDisplayMetadata | undefined;
     client_registration_mode?: OAuthClientRegistrationMode | undefined;
     redirect_uri: string;
@@ -11845,6 +11859,7 @@ export interface ApiComponentTypes {
     MCPOAuthConfigMap: MCPOAuthConfigMap;
     AppWidgetInfo: AppWidgetInfo;
     AppDashboardDefinition: AppDashboardDefinition;
+    AppOAuthClientConfig: AppOAuthClientConfig;
     AppManifestData: AppManifestData;
     UpdateAppPayload: UpdateAppPayload;
     AppManifest: AppManifest;

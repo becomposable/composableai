@@ -154,7 +154,9 @@ export function VectorSearchWidget({ onChange, isLoading, refresh, searchTypes }
                             <Checkbox
                                 id="search-type-full_text"
                                 checked={selectedTypes.includes(SearchTypes.full_text)}
-                                onCheckedChange={(checked) => handleCheckboxChange(SearchTypes.full_text)(checked === true)}
+                                onCheckedChange={(checked) =>
+                                    handleCheckboxChange(SearchTypes.full_text)(checked === true)
+                                }
                             />
                             <Label htmlFor="search-type-full_text">{t('store.fullText')}</Label>
                         </div>

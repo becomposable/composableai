@@ -9,6 +9,7 @@ import {
     ContentNature,
     type DSLActivityExecutionPayload,
     type DSLActivitySpec,
+    isVideoContentType,
     POSTER_RENDITION_NAME,
     type RenditionWithDimensions,
     type VideoMetadata,
@@ -480,7 +481,7 @@ export async function prepareVideo(
         throw new DocumentNotFoundError(`Document ${objectId} has no source`, [objectId]);
     }
 
-    if (!inputObject.content.type?.startsWith('video/')) {
+    if (!isVideoContentType(inputObject.content.type)) {
         log.error(`Document ${objectId} is not a video: ${inputObject.content.type}`);
         throw new InvalidContentTypeError(objectId, 'video/*', inputObject.content.type || 'unknown');
     }

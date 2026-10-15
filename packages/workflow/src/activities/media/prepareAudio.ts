@@ -10,6 +10,7 @@ import {
     ContentNature,
     type DSLActivityExecutionPayload,
     type DSLActivitySpec,
+    isVideoContentType,
     type Rendition,
 } from '@vertesia/common';
 import { setupActivity } from '../../dsl/setup/ActivityContext.js';
@@ -226,7 +227,7 @@ export async function prepareAudio(
 
     if (
         !inputObject.content.type ||
-        (!inputObject.content.type.startsWith('audio/') && !inputObject.content.type.startsWith('video/'))
+        (!inputObject.content.type.startsWith('audio/') && !isVideoContentType(inputObject.content.type))
     ) {
         log.error(`Document ${objectId} is not an audio file: ${inputObject.content.type}`);
         throw new InvalidContentTypeError(objectId, 'audio/* or video/*', inputObject.content.type || 'unknown');

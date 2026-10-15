@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import { log } from '@temporalio/activity';
 import type { VertesiaClient } from '@vertesia/client';
 import type { ContentObject, DSLActivityExecutionPayload, DSLActivitySpec, WorkflowInputFile } from '@vertesia/common';
@@ -5,9 +6,11 @@ import { markdownWithMarkitdown } from '../conversion/markitdown.js';
 import { mutoolPdfToText } from '../conversion/mutool.js';
 import { markdownWithPandoc } from '../conversion/pandoc.js';
 import { setupActivity } from '../dsl/setup/ActivityContext.js';
-import { DocumentNotFoundError } from '../errors.js';
+import { DocumentNotFoundError, FileTooLargeError } from '../errors.js';
 import { type TextExtractionResult, TextExtractionStatus } from '../result-types.js';
-import { fetchBlobAsBuffer, md5 } from '../utils/blobs.js';
+import { fetchBlobAsBuffer, md5, saveBlobToTempFile } from '../utils/blobs.js';
+import { runCrashPronePhase } from '../utils/crash-prone-phase.js';
+import { getTextExtractionLimits, type TextExtractionLimits } from '../utils/text-extraction-limits.js';
 import { createFileSourceResult, uploadTextPreviewToStorage } from '../utils/text-preview-utils.js';
 import { countTokens } from '../utils/tokens.js';
 
@@ -92,16 +95,15 @@ async function extractFromObject(
     // healthy. A single transient 502 from the signed-URL path was enough to produce one.
     // fetchBlobAsStream already classifies the failure for us: not-found/forbidden become a
     // non-retryable DocumentNotFoundError, and everything else a plain Error the activity's
-    // retry policy will retry. Let that classification through.
-    const fileBuffer = await fetchBlobAsBuffer(client, doc.content.source);
-
-    const txt = await extractTextFromBuffer(fileBuffer, doc.content.type);
+    // retry policy will retry. Let that classification through. Only a file over the size
+    // limits is skipped: retrying reads the same file.
+    const { text: txt, skipped } = await extractTextWithinLimits(client, doc.content.source, doc.content.type);
     if (!txt) {
         return createResponse(
             doc,
             doc.text ?? '',
             TextExtractionStatus.skipped,
-            `Unsupported mime type: ${doc.content.type}`,
+            skipped ?? `Unsupported mime type: ${doc.content.type}`,
         );
     }
 
@@ -135,9 +137,14 @@ async function extractFromFileSource(
     // because createFileSourceResult reports `status: success` — a failed download was
     // indistinguishable from a document that legitimately has no text. Let the error propagate so
     // the retry policy sees it.
-    const fileBuffer = await fetchBlobAsBuffer(client, input_file.url);
-
-    const txt = await extractTextFromBuffer(fileBuffer, input_file.mimetype);
+    const { text: txt, skipped } = await extractTextWithinLimits(client, input_file.url, input_file.mimetype);
+    if (skipped) {
+        return {
+            ...createFileSourceResult(input_file.url, output_storage_path, null),
+            status: TextExtractionStatus.skipped,
+            message: skipped,
+        };
+    }
 
     // Upload extracted text to storage
     if (txt && output_storage_path) {
@@ -147,77 +154,120 @@ async function extractFromFileSource(
     return createFileSourceResult(input_file.url, output_storage_path, txt);
 }
 
-async function extractTextFromBuffer(fileBuffer: Buffer, mimeType: string): Promise<string | null> {
-    let txt: string;
+/** A converter that reads the document from a file, so that the worker never holds it in memory. */
+interface FileConverter {
+    /** Extension of the temporary file, which markitdown uses to recognize the format. */
+    ext: string;
+    convert: (file: string) => Promise<string>;
+}
 
-    switch (mimeType) {
-        case 'application/pdf':
-            txt = await mutoolPdfToText(fileBuffer);
-            break;
+const FILE_CONVERTERS: Record<string, FileConverter> = {
+    'application/pdf': { ext: 'pdf', convert: (file) => mutoolPdfToText(file) },
+    //docx
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': {
+        ext: 'docx',
+        convert: (file) => markdownWithMarkitdown(file),
+    },
+    //pptx
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': {
+        ext: 'pptx',
+        convert: (file) => markdownWithMarkitdown(file),
+    },
+    //html
+    'text/html': { ext: 'html', convert: (file) => markdownWithPandoc(file, 'html') },
+    //opendocument
+    'application/vnd.oasis.opendocument.text': { ext: 'odt', convert: (file) => markdownWithPandoc(file, 'odt') },
+    //rtf
+    'application/rtf': { ext: 'rtf', convert: (file) => markdownWithPandoc(file, 'rtf') },
+};
 
-        case 'text/plain':
-            txt = fileBuffer.toString('utf8');
-            break;
+/** Types whose file is the text itself. */
+const TEXT_MIME_TYPES = new Set([
+    'text/plain',
+    'text/markdown',
+    'text/csv',
+    'application/typescript',
+    'application/javascript',
+    'application/json',
+]);
 
-        //docx
-        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-            txt = await markdownWithMarkitdown(fileBuffer, 'docx');
-            break;
+/** A file of any other type is read up to this size to check whether it holds text: larger, it is not used. */
+const SNIFF_MAX_BYTES = 500 * 1024;
 
-        //pptx
-        case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-            txt = await markdownWithMarkitdown(fileBuffer, 'pptx');
-            break;
+const MiB = 1024 * 1024;
 
-        //html
-        case 'text/html':
-            txt = await markdownWithPandoc(fileBuffer, 'html');
-            break;
-
-        //opendocument
-        case 'application/vnd.oasis.opendocument.text':
-            txt = await markdownWithPandoc(fileBuffer, 'odt');
-            break;
-
-        //rtf
-        case 'application/rtf':
-            txt = await markdownWithPandoc(fileBuffer, 'rtf');
-            break;
-
-        //markdown
-        case 'text/markdown':
-            txt = fileBuffer.toString('utf8');
-            break;
-
-        //csv
-        case 'text/csv':
-            txt = fileBuffer.toString('utf8');
-            break;
-
-        //typescript
-        case 'application/typescript':
-            txt = fileBuffer.toString('utf8');
-            break;
-
-        //javascript
-        case 'application/javascript':
-            txt = fileBuffer.toString('utf8');
-            break;
-
-        //json
-        case 'application/json':
-            txt = fileBuffer.toString('utf8');
-            break;
-
-        default:
-            if (sniffIfText(fileBuffer)) {
-                txt = fileBuffer.toString('utf8'); //TODO: add charset detection
-                break;
+/**
+ * Extracts the text of a file without ever reading more of it than the size limits allow. `text` is null when
+ * there is none, and `skipped` then tells why, unless the type holds no text this activity can read.
+ */
+async function extractTextWithinLimits(
+    client: VertesiaClient,
+    source: string,
+    mimeType: string,
+): Promise<{ text: string | null; skipped?: string }> {
+    const limits = getTextExtractionLimits();
+    return runCrashPronePhase(
+        'text extraction',
+        async () => {
+            try {
+                return { text: await extractText(client, source, mimeType, limits) };
+            } catch (err: unknown) {
+                if (!(err instanceof FileTooLargeError)) {
+                    throw err;
+                }
+                log.warn('Skipping text extraction of a file over the size limit', {
+                    source,
+                    mime_type: mimeType,
+                    max_bytes: err.maxBytes,
+                });
+                return { text: null, skipped: `File too large for text extraction: over ${err.maxBytes / MiB} MiB` };
             }
-            return null;
+        },
+        (deaths) => ({ text: null, skipped: `${deaths} earlier attempts died while extracting text from this file` }),
+    );
+}
+
+/**
+ * Picks how to read the file from its MIME type before downloading anything, so that a file this activity
+ * cannot read (a video under an unregistered type, for instance) costs at most {@link SNIFF_MAX_BYTES}.
+ *
+ * @throws FileTooLargeError when the file is over the limit of its type
+ */
+async function extractText(
+    client: VertesiaClient,
+    source: string,
+    mimeType: string,
+    limits: TextExtractionLimits,
+): Promise<string | null> {
+    const converter = FILE_CONVERTERS[mimeType];
+    if (converter) {
+        const file = await saveBlobToTempFile(client, source, converter.ext, { maxBytes: limits.maxFileBytes });
+        try {
+            return await converter.convert(file);
+        } finally {
+            await fs.rm(file, { force: true });
+        }
     }
 
-    return txt;
+    if (TEXT_MIME_TYPES.has(mimeType)) {
+        const fileBuffer = await fetchBlobAsBuffer(client, source, { maxBytes: limits.maxTextBytes });
+        return fileBuffer.toString('utf8');
+    }
+
+    let fileBuffer: Buffer;
+    try {
+        fileBuffer = await fetchBlobAsBuffer(client, source, { maxBytes: SNIFF_MAX_BYTES });
+    } catch (err: unknown) {
+        if (err instanceof FileTooLargeError) {
+            // Too large to be sniffed as text: an unsupported type, not an oversized document.
+            return null;
+        }
+        throw err;
+    }
+    if (sniffIfText(fileBuffer)) {
+        return fileBuffer.toString('utf8'); //TODO: add charset detection
+    }
+    return null;
 }
 
 function createResponse(
@@ -250,7 +300,7 @@ function getCompleteTokens(doc: ContentObject): TextExtractionResult['tokens'] {
 
 function sniffIfText(buf: Buffer) {
     // If file is too large, don't even try
-    if (buf.length > 500 * 1024) {
+    if (buf.length > SNIFF_MAX_BYTES) {
         return false;
     }
 

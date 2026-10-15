@@ -81,6 +81,20 @@ export class InvalidContentTypeError extends ApplicationFailure {
     }
 }
 
+/** A file is larger than the most an activity is willing to read: retrying reads the same file. */
+export class FileTooLargeError extends ApplicationFailure {
+    constructor(
+        public fileUri: string,
+        public maxBytes: number,
+    ) {
+        super(
+            `File ${fileUri} is larger than the ${maxBytes}-byte limit`,
+            'FileTooLargeError',
+            true, // non-retryable
+        );
+    }
+}
+
 export class ImageConversionError extends ApplicationFailure {
     constructor(message: string, cause?: Error) {
         super(message, 'ImageConversionError', true, undefined, cause);
@@ -119,6 +133,7 @@ export const WF_NON_RETRYABLE_ERRORS = [
     'ActivityParamNotFoundError',
     'WorkflowParamNotFoundError',
     'InvalidContentTypeError',
+    'FileTooLargeError',
     'ImageConversionError',
     'TokenExpiredError',
     'ZenoClientNotFoundError',

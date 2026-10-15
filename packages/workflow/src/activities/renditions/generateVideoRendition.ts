@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { ApplicationFailure, log } from '@temporalio/activity';
-import type { DSLActivityExecutionPayload, DSLActivitySpec } from '@vertesia/common';
+import { type DSLActivityExecutionPayload, type DSLActivitySpec, isVideoContentType } from '@vertesia/common';
 import { setupActivity } from '../../dsl/setup/ActivityContext.js';
 import { DocumentNotFoundError, WorkflowParamNotFoundError } from '../../errors.js';
 import { saveBlobToTempFile } from '../../utils/blobs.js';
@@ -202,7 +202,7 @@ export async function generateVideoRendition(payload: DSLActivityExecutionPayloa
         throw new DocumentNotFoundError(`Document ${objectId} has no source`, [objectId]);
     }
 
-    if (!inputObject.content.type?.startsWith('video/')) {
+    if (!isVideoContentType(inputObject.content.type)) {
         log.error(`Document ${objectId} is not a video: ${inputObject.content.type}`);
         throw new DocumentNotFoundError(`Document ${objectId} is not a video: ${inputObject.content.type}`, [objectId]);
     }

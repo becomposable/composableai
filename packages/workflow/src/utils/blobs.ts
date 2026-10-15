@@ -1,10 +1,10 @@
 import crypto from 'node:crypto';
 import { createWriteStream } from 'node:fs';
-import { Readable } from 'node:stream';
+import { Readable, Transform } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import type { VertesiaClient } from '@vertesia/client';
 import tmp from 'tmp';
-import { DocumentNotFoundError } from '../errors.js';
+import { DocumentNotFoundError, FileTooLargeError } from '../errors.js';
 
 tmp.setGracefulCleanup();
 
@@ -23,10 +23,29 @@ export async function fetchBlobAsStream(client: VertesiaClient, blobUri: string)
         }
     }
 }
-export async function fetchBlobAsBuffer(client: VertesiaClient, blobUri: string): Promise<Buffer> {
+export interface FetchBlobOptions {
+    /**
+     * The most bytes to read. A larger blob stops the download as soon as it goes over, and throws a
+     * {@link FileTooLargeError}, so a huge file costs at most this much memory or disk.
+     */
+    maxBytes?: number;
+}
+
+export async function fetchBlobAsBuffer(
+    client: VertesiaClient,
+    blobUri: string,
+    options: FetchBlobOptions = {},
+): Promise<Buffer> {
+    const { maxBytes } = options;
     const stream = await fetchBlobAsStream(client, blobUri);
     const buffers: Uint8Array[] = [];
+    let size = 0;
+    // Throwing out of the loop cancels the stream, which aborts the download.
     for await (const data of stream) {
+        size += data.byteLength;
+        if (maxBytes !== undefined && size > maxBytes) {
+            throw new FileTooLargeError(blobUri, maxBytes);
+        }
         buffers.push(data);
     }
     return Buffer.concat(buffers);
@@ -37,22 +56,52 @@ export async function fetchBlobAsBase64(client: VertesiaClient, blobUri: string)
     return buffer.toString('base64');
 }
 
-async function saveBlobToFile(client: VertesiaClient, blobUri: string, toFile: string): Promise<void> {
+/** Passes bytes through until more than `maxBytes` went by, then fails the pipeline. */
+function limitBytes(blobUri: string, maxBytes: number): Transform {
+    let size = 0;
+    return new Transform({
+        transform(chunk: Buffer, _encoding, callback) {
+            size += chunk.length;
+            if (size > maxBytes) {
+                callback(new FileTooLargeError(blobUri, maxBytes));
+            } else {
+                callback(null, chunk);
+            }
+        },
+    });
+}
+
+async function saveBlobToFile(
+    client: VertesiaClient,
+    blobUri: string,
+    toFile: string,
+    options: FetchBlobOptions,
+): Promise<void> {
     const stream = await fetchBlobAsStream(client, blobUri);
 
     const nodeReadable = Readable.from(stream);
     const out = createWriteStream(toFile);
 
-    await pipeline(nodeReadable, out); // Ensures completion before continuing
+    // Ensures completion before continuing. On failure, pipeline destroys the source, which aborts the download.
+    if (options.maxBytes === undefined) {
+        await pipeline(nodeReadable, out);
+    } else {
+        await pipeline(nodeReadable, limitBytes(blobUri, options.maxBytes), out);
+    }
 }
 
-export async function saveBlobToTempFile(client: VertesiaClient, blobUri: string, fileExt?: string): Promise<string> {
+export async function saveBlobToTempFile(
+    client: VertesiaClient,
+    blobUri: string,
+    fileExt?: string,
+    options: FetchBlobOptions = {},
+): Promise<string> {
     const tmpFile = tmp.fileSync({
         prefix: 'vertesia-activity-',
         postfix: fileExt ? `.${fileExt}` : '',
     });
     try {
-        await saveBlobToFile(client, blobUri, tmpFile.name);
+        await saveBlobToFile(client, blobUri, tmpFile.name, options);
         return tmpFile.name;
     } catch (err: unknown) {
         try {

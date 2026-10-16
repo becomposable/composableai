@@ -4547,11 +4547,7 @@
         }
       },
       "effort": {
-        "type": "string",
-        "enum": [
-          "none",
-          "high"
-        ]
+        "$ref": "#/components/schemas/ReasoningEffort"
       },
       "random_seed": {
         "type": "integer",
@@ -12692,7 +12688,8 @@
       "fallback_coordination_unavailable",
       "fallback_wait_timeout",
       "minimum_token_rejection",
-      "unusable_resource_recreated"
+      "unusable_resource_recreated",
+      "unsupported_model"
     ]
   },
   "InteractionExecutionError": {

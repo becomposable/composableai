@@ -920,6 +920,14 @@ export const UpsertAppVersionRequestSchema = z
 export const AppInstallationPayloadSchema = z
     .strictObject({
         app_id: z.string(),
+        mcp_shared_parameters: z.record(z.string(), z.string().nullable()).optional().meta({
+            description:
+                'Shared MCP parameter overrides. Omitted values are retained; null clears an override or restores its default.',
+        }),
+        mcp_parameters: z.record(z.string(), z.record(z.string(), z.string().nullable())).optional().meta({
+            description:
+                'Installation parameter overrides by MCP collection id. Omit to preserve; null clears an override. Secret inputs are write-only.',
+        }),
         settings: z.looseObject({}).optional(),
         access_control: z
             .union([AppAccessControlSchema, z.null()])

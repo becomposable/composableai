@@ -208,10 +208,39 @@ const toolCollectionBaseShape = {
     }),
 };
 
+const mcpParameterFields = {
+    title: z.string().optional(),
+    description: z.string().optional(),
+    required: z.boolean().optional(),
+};
+
+// Separate variants forbid plaintext defaults for secret parameters in the emitted contract too.
+export const McpPublicParameterSchema = z
+    .strictObject({
+        ...mcpParameterFields,
+        type: z.literal('string').optional(),
+        default: z.string().optional(),
+    })
+    .meta({ id: 'McpPublicParameter' });
+export const McpSecretParameterSchema = z
+    .strictObject({
+        ...mcpParameterFields,
+        type: z.literal('secret'),
+    })
+    .meta({ id: 'McpSecretParameter' });
+export const McpConnectionParameterSchema = z
+    .union([McpPublicParameterSchema, McpSecretParameterSchema])
+    .meta({ id: 'McpConnectionParameter' });
+
 export const MCPToolCollectionObjectSchema = z
     .strictObject({
         ...toolCollectionBaseShape,
         type: z.literal('mcp'),
+        parameters: z.record(z.string().regex(/^[a-z][a-z0-9_]*$/), McpConnectionParameterSchema).optional(),
+        headers: z.record(z.string(), z.string()).optional().meta({
+            description:
+                'HTTP header templates. Reference declared installation parameters with {{name}}. Never embed secrets.',
+        }),
         id: z.string().meta({
             description:
                 'Stable identifier for this collection. Used to key oauth_bindings on AppInstallation — ' +

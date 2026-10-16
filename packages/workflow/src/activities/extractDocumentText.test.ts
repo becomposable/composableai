@@ -1,6 +1,12 @@
 import { MockActivityEnvironment } from '@temporalio/testing';
 import type { VertesiaClient } from '@vertesia/client';
-import { ContentEventName, type ContentObject, type DSLActivityExecutionPayload } from '@vertesia/common';
+import {
+    ContentEventName,
+    type ContentObject,
+    type DSLActivityExecutionPayload,
+    EXTRACTED_TEXT_TRUNCATION_MARKER,
+    MAX_EXTRACTED_TEXT_BYTES,
+} from '@vertesia/common';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ActivityContext } from '../dsl/setup/ActivityContext.js';
 import { DocumentNotFoundError } from '../errors.js';
@@ -17,6 +23,10 @@ vi.mock('../utils/blobs.js', async (importOriginal) => {
     const actual = await importOriginal<typeof import('../utils/blobs.js')>();
     return { ...actual, fetchBlobAsBuffer: vi.fn() };
 });
+
+vi.mock('../utils/tokens.js', () => ({
+    countTokens: vi.fn(() => ({ count: 2, encoding: 'cl100k_base' })),
+}));
 
 let testEnv: MockActivityEnvironment;
 
@@ -98,6 +108,22 @@ describe('extractDocumentText', () => {
         expect(update).toHaveBeenCalledExactlyOnceWith('object-1', {
             tokens: expect.objectContaining({ etag: 'etag-1' }),
         });
+    });
+
+    it('stores a marked UTF-8-safe prefix when extracted text exceeds the limit', async () => {
+        retrieve.mockResolvedValue(createDoc());
+        vi.mocked(fetchBlobAsBuffer).mockResolvedValue(Buffer.from('x'.repeat(MAX_EXTRACTED_TEXT_BYTES + 1)));
+        setObjectText.mockResolvedValue({});
+        update.mockResolvedValue({});
+
+        await expect(testEnv.run(extractDocumentText, createPayload())).resolves.toMatchObject({
+            status: TextExtractionStatus.success,
+            hasText: true,
+        });
+
+        const storedText = setObjectText.mock.calls[0]?.[1].text;
+        expect(storedText?.endsWith(EXTRACTED_TEXT_TRUNCATION_MARKER)).toBe(true);
+        expect(Buffer.byteLength(storedText ?? '', 'utf8')).toBe(MAX_EXTRACTED_TEXT_BYTES);
     });
 
     it('skips extraction when the text is current for the content etag', async () => {

@@ -79,9 +79,7 @@ Env.init(
         oauth: oauthClientId
             ? {
                   clientId: oauthClientId,
-                  redirectUri:
-                      import.meta.env.VITE_OAUTH_REDIRECT_URI?.trim() ||
-                      `${window.location.origin}${import.meta.env.DEV ? '/' : '/app'}`,
+                  redirectUri: import.meta.env.VITE_OAUTH_REDIRECT_URI?.trim() || `${window.location.origin}/app`,
                   ...appOAuthPermissions(import.meta.env.VITE_OAUTH_SCOPES),
               }
             : undefined,

@@ -1,3 +1,4 @@
+import type { AppManifestData } from '@vertesia/common';
 import { describe, expect, it, vi } from 'vitest';
 import { installStudioUtilsLogger, type StudioUtilsLogger } from '../logger.js';
 import {
@@ -6,6 +7,7 @@ import {
     resolveAppApiBase,
     resolveAppEndpoint,
     resolveAppResource,
+    resolveManifestUrls,
 } from './index.js';
 
 const APPS_MOUNT = 'https://gw.example.com/tenants/1589ba_149d0b/apps/my-app';
@@ -163,4 +165,26 @@ describe('app API base resolution', () => {
             'https://gw.example.com/tenants/1589ba_149d0b/apps/my-app/versions/20260101T000000Z/api/templates/invoice',
         );
     });
+});
+
+it('preserves installation URL parameters during manifest serialization while resolving platform endpoints', () => {
+    const manifest: Partial<AppManifestData> = {
+        tool_collections: [
+            {
+                type: 'mcp',
+                id: 'graph',
+                name: 'Graph',
+                description: 'Graph',
+                namespace: 'graph',
+                url: 'https://example.com/{{store}}/mcp?service={{token}}',
+                parameters: { store: { default: 'tenant' } },
+            },
+        ],
+    };
+    resolveManifestUrls(manifest, {
+        vars: { store: 'https://platform.example.com', token: 'https://token.example.com' },
+    });
+    expect(manifest.tool_collections?.[0].url).toBe(
+        'https://example.com/{{store}}/mcp?service=https://token.example.com',
+    );
 });

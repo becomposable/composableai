@@ -1,3 +1,4 @@
+import type { AppInstallationPayload } from '@vertesia/common';
 import { describe, expect, it, vi } from 'vitest';
 import { VertesiaClient } from './client.js';
 
@@ -130,3 +131,30 @@ describe('AppsApi', () => {
         expect(diagramFile.size).toBe(3);
     });
 });
+
+const mcpParameterUpdates: AppInstallationPayload['mcp_parameters'][] = [
+    undefined,
+    { graph: { key: 'replacement', region: 'east' } },
+    { graph: { key: null } },
+];
+it.each(mcpParameterUpdates)(
+    'forwards MCP settings replacements, clearing and omission: %j',
+    async (mcp_parameters) => {
+        const requests: Request[] = [];
+        const client = new VertesiaClient({
+            serverUrl: 'https://api.example.com',
+            storeUrl: 'https://store.example.com',
+            fetch: vi.fn(async () => Response.json({ id: 'installation-one' })),
+            onRequest: (request) => {
+                requests.push(request.clone());
+            },
+        });
+        await client.apps.updateInstallationSettings({
+            app_id: 'installation-one',
+            ...(mcp_parameters === undefined ? {} : { mcp_parameters }),
+        });
+        const body: unknown = await requests[0].json();
+        if (mcp_parameters === undefined) expect(body).not.toHaveProperty('mcp_parameters');
+        else expect(body).toMatchObject({ mcp_parameters });
+    },
+);

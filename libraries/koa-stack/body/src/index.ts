@@ -10,6 +10,8 @@ declare module 'koa' {
     interface BaseContext {
         payload: Promise<LazyBody>;
         hasPayload: boolean;
+        /** Per-request override applied before the lazy body is first read. */
+        requestBodyLimit?: RawBodyOptions['limit'];
     }
 }
 
@@ -48,14 +50,22 @@ function parseMultipartBody(
 }
 
 async function getRawBodyText(koaRequest: Request, opts: LazyBodyOpts): Promise<string> {
+    // raw-body options are request-specific. In particular, `length` must never leak from one
+    // request to the next when a later request is compressed or uses chunked transfer encoding.
+    const requestOpts = { ...opts };
+    if (koaRequest.ctx.requestBodyLimit !== undefined) {
+        requestOpts.limit = koaRequest.ctx.requestBodyLimit;
+    }
     const len = koaRequest.length;
     const encoding = koaRequest.headers['content-encoding'];
     if (len && !encoding) {
-        opts.length = len;
+        requestOpts.length = len;
+    } else {
+        delete requestOpts.length;
     }
     try {
         // TODO how to detect custom encoding on content type to ser encoding for readRawBody
-        return (await readRawBody(inflate(koaRequest.req, opts.inflate), opts)).toString(/*which charset?*/);
+        return (await readRawBody(inflate(koaRequest.req, requestOpts.inflate), requestOpts)).toString();
     } catch (err: unknown) {
         // A client that hung up before the body was read leaves a destroyed request behind, which
         // raw-body reports as a 500 "stream is not readable". Nothing failed on the server, and no

@@ -1,6 +1,7 @@
 import { log } from '@temporalio/activity';
 import type { VertesiaClient } from '@vertesia/client';
 import type { ContentObject, DSLActivityExecutionPayload, DSLActivitySpec, WorkflowInputFile } from '@vertesia/common';
+import { MAX_EXTRACTED_TEXT_BYTES, truncateExtractedText } from '@vertesia/common';
 import { markdownWithMarkitdown } from '../conversion/markitdown.js';
 import { mutoolPdfToText } from '../conversion/mutool.js';
 import { markdownWithPandoc } from '../conversion/pandoc.js';
@@ -95,14 +96,20 @@ async function extractFromObject(
     // retry policy will retry. Let that classification through.
     const fileBuffer = await fetchBlobAsBuffer(client, doc.content.source);
 
-    const txt = await extractTextFromBuffer(fileBuffer, doc.content.type);
-    if (!txt) {
+    const extractedText = await extractTextFromBuffer(fileBuffer, doc.content.type);
+    if (!extractedText) {
         return createResponse(
             doc,
             doc.text ?? '',
             TextExtractionStatus.skipped,
             `Unsupported mime type: ${doc.content.type}`,
         );
+    }
+
+    const limitedText = truncateExtractedText(extractedText);
+    const txt = limitedText.text;
+    if (limitedText.truncated) {
+        log.warn(`Extracted text for object ${doc.id} exceeded ${MAX_EXTRACTED_TEXT_BYTES} bytes and was truncated`);
     }
 
     const tokensData = countTokens(txt);
@@ -137,7 +144,12 @@ async function extractFromFileSource(
     // the retry policy sees it.
     const fileBuffer = await fetchBlobAsBuffer(client, input_file.url);
 
-    const txt = await extractTextFromBuffer(fileBuffer, input_file.mimetype);
+    const extractedText = await extractTextFromBuffer(fileBuffer, input_file.mimetype);
+    const limitedText = extractedText ? truncateExtractedText(extractedText) : undefined;
+    const txt = limitedText?.text ?? null;
+    if (limitedText?.truncated) {
+        log.warn(`Extracted text for ${input_file.url} exceeded ${MAX_EXTRACTED_TEXT_BYTES} bytes and was truncated`);
+    }
 
     // Upload extracted text to storage
     if (txt && output_storage_path) {

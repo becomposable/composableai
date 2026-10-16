@@ -612,6 +612,8 @@ export type MCPToolCollectionObject = {
     url: string;
     auth?: ToolCollectionAuthType | undefined;
     type: 'mcp';
+    parameters?: Record<string, McpConnectionParameter> | undefined;
+    headers?: Record<string, string> | undefined;
     id: string;
     name: string;
     description: string;
@@ -1262,6 +1264,13 @@ export type AppInstallation = {
     id: string;
     project: string;
     manifest: string;
+    mcp_configuration?:
+        | {
+              revision: string;
+              values: Record<string, Record<string, string>>;
+              configured_secrets: Record<string, string[]>;
+          }
+        | undefined;
     oauth_approval?:
         | {
               scopes: string[];
@@ -1285,6 +1294,13 @@ export type AppInstallation = {
 export type AppInstallationWithManifest = {
     id: string;
     project: string;
+    mcp_configuration?:
+        | {
+              revision: string;
+              values: Record<string, Record<string, string>>;
+              configured_secrets: Record<string, string[]>;
+          }
+        | undefined;
     oauth_approval?:
         | {
               scopes: string[];
@@ -1310,6 +1326,13 @@ export type AppInstallationWithManifest = {
 export type AppInstallationListEntry = {
     id: string;
     project: string;
+    mcp_configuration?:
+        | {
+              revision: string;
+              values: Record<string, Record<string, string>>;
+              configured_secrets: Record<string, string[]>;
+          }
+        | undefined;
     oauth_approval?:
         | {
               scopes: string[];
@@ -1351,6 +1374,7 @@ export type AppApiKeyCollectionParams = {
 export type AppOAuthProviderParams = AppOAuthCollectionParams;
 export type AppInstallationPayload = {
     app_id: string;
+    mcp_parameters?: Record<string, Record<string, string | null>> | undefined;
     settings?:
         | {
               [k: string]: unknown;
@@ -1636,6 +1660,20 @@ export type AppDeleteSummary = {
 export type UpdateAppInstallationOAuthApprovalPayload = {
     approved_scopes: string[];
 };
+export type McpPublicParameter = {
+    title?: string | undefined;
+    description?: string | undefined;
+    required?: boolean | undefined;
+    type?: 'string' | undefined;
+    default?: string | undefined;
+};
+export type McpSecretParameter = {
+    title?: string | undefined;
+    description?: string | undefined;
+    required?: boolean | undefined;
+    type: 'secret';
+};
+export type McpConnectionParameter = McpPublicParameter | McpSecretParameter;
 /**
  * Generic metering entry attached to audit events.
  * Used for cost attribution, usage tracking, and billing.

@@ -262,11 +262,18 @@ const appOAuthApprovalSchema = z.strictObject({
     approved_at: z.string(),
 });
 
+const mcpConfigurationSchema = z.strictObject({
+    revision: z.string(),
+    values: z.record(z.string(), z.record(z.string(), z.string())),
+    configured_secrets: z.record(z.string(), z.array(z.string())),
+});
+
 export const AppInstallationSchema = z
     .strictObject({
         id: z.string(),
         project: z.string(),
         manifest: z.string(),
+        mcp_configuration: mcpConfigurationSchema.optional(),
         oauth_approval: appOAuthApprovalSchema.optional(),
         oauth_client_id: z.string().optional(),
         settings: z.looseObject({}).optional(),
@@ -652,6 +659,7 @@ export const AppInstallationWithManifestSchema = z
     .strictObject({
         id: z.string(),
         project: z.string(),
+        mcp_configuration: mcpConfigurationSchema.optional(),
         oauth_approval: appOAuthApprovalSchema.optional(),
         oauth_client_id: z.string().optional(),
         settings: z.looseObject({}).optional(),
@@ -699,6 +707,7 @@ export const AppInstallationListEntrySchema = z
     .strictObject({
         id: z.string(),
         project: z.string(),
+        mcp_configuration: mcpConfigurationSchema.optional(),
         oauth_approval: appOAuthApprovalSchema.optional(),
         oauth_client_id: z.string().optional(),
         settings: z.looseObject({}).optional(),

@@ -86,7 +86,14 @@ export function normalizeToolCollection(collection: ToolCollectionObject, vars?:
     if (!collection || typeof collection !== 'object') {
         throw new TypeError('Tool collection must be an object');
     }
-    const substitutedUrl = vars && collection.url ? substituteEndpoints(collection.url, vars) : collection.url;
+    const substitutedUrl =
+        vars && collection.url
+            ? substituteEndpoints(
+                  collection.url,
+                  vars,
+                  collection.type === 'mcp' ? Object.keys(collection.parameters ?? {}) : [],
+              )
+            : collection.url;
     const urlChanged = substitutedUrl !== collection.url;
     if (collection.type === 'mcp') {
         const fallbackId = deriveMCPCollectionId(collection.id || collection.name || collection.url);
@@ -263,9 +270,11 @@ export interface Endpoints {
  * with the unresolved placeholder visible, rather than silently pointing nowhere).
  * Trailing slashes on replacement values are stripped to avoid `//api/...` joins.
  */
-function substituteEndpoints(url: string, endpoints?: Endpoints): string {
+function substituteEndpoints(url: string, endpoints?: Endpoints, parameterNames: string[] = []): string {
     if (!url || !endpoints) return url;
     return url.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key: string) => {
+        // Explicit installation parameters take precedence over legacy platform endpoint placeholders.
+        if (parameterNames.includes(key)) return match;
         const value = (endpoints as Record<string, string | undefined>)[key];
         if (typeof value !== 'string' || !value) return match;
         return trimTrailingSlashes(value);
@@ -633,3 +642,7 @@ export type ValidateUrlResponse = Wire.ValidateUrlResponse;
 export type AppDeleteSummary = Wire.AppDeleteSummary;
 
 export type UpdateAppInstallationOAuthApprovalPayload = Wire.UpdateAppInstallationOAuthApprovalPayload;
+
+export type McpPublicParameter = Wire.McpPublicParameter;
+export type McpSecretParameter = Wire.McpSecretParameter;
+export type McpConnectionParameter = Wire.McpConnectionParameter;

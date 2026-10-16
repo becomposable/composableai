@@ -2775,6 +2775,8 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'MCPOAuthConfig',
     'MCPApiKeyConfig',
     'MCPToolCollectionObject',
+    'McpPublicParameter',
+    'McpSecretParameter',
     'VertesiaSDKToolCollectionObject',
     // File, task, content-type and command components. Every one is published closed
     // today; `StringValueMap`, `MigrationListResponse`, `TaskArray`, the two content-type array

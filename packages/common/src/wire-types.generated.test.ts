@@ -1917,6 +1917,10 @@ interface Checks {
         W.UpdateOAuthClientPayload,
         z.infer<typeof import('./api-schemas/oauth-server.js').UpdateOAuthClientPayloadSchema>
     >;
+    UpdateOAuthClientStatusPayload: Same<
+        W.UpdateOAuthClientStatusPayload,
+        z.infer<typeof import('./api-schemas/oauth-server.js').UpdateOAuthClientStatusPayloadSchema>
+    >;
     OAuthAuthorizationServerMetadata: Same<
         W.OAuthAuthorizationServerMetadata,
         z.infer<typeof import('./api-schemas/oauth-server.js').OAuthAuthorizationServerMetadataSchema>
@@ -5113,6 +5117,10 @@ interface Checks {
     'component:UpdateOAuthClientPayload': Same<
         W.ApiComponentTypes['UpdateOAuthClientPayload'],
         z.infer<typeof import('./api-schemas/oauth-server.js').UpdateOAuthClientPayloadSchema>
+    >;
+    'component:UpdateOAuthClientStatusPayload': Same<
+        W.ApiComponentTypes['UpdateOAuthClientStatusPayload'],
+        z.infer<typeof import('./api-schemas/oauth-server.js').UpdateOAuthClientStatusPayloadSchema>
     >;
     'component:OAuthGrant': Same<
         W.ApiComponentTypes['OAuthGrant'],
@@ -10023,6 +10031,7 @@ const checks: Checks = {
     OAuthGrantRevokeResponse: true,
     CreateOAuthClientPayload: true,
     UpdateOAuthClientPayload: true,
+    UpdateOAuthClientStatusPayload: true,
     OAuthAuthorizationServerMetadata: true,
     OAuthClientDisplayMetadata: true,
     OAuthAuthorizeQuery: true,
@@ -10898,6 +10907,7 @@ const checks: Checks = {
     'component:OAuthClientScopeMetadata': true,
     'component:CreateOAuthClientPayload': true,
     'component:UpdateOAuthClientPayload': true,
+    'component:UpdateOAuthClientStatusPayload': true,
     'component:OAuthGrant': true,
     'component:ListOAuthGrantsQuery': true,
     'component:RevokeOAuthGrantQuery': true,
@@ -11997,6 +12007,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2501);
+        expect(Object.keys(checks)).toHaveLength(2503);
     });
 });

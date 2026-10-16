@@ -340,11 +340,15 @@ export const AppDashboardDefinitionSchema = z
 export const AppOAuthClientConfigSchema = z
     .strictObject({
         redirect_uris: z.array(z.string().url()).min(1),
+        require_consent: z.boolean().optional().meta({
+            description:
+                'Show user consent before authorizing this app. Defaults to true. Disabling the prompt preserves installation, app access, scope and project-policy enforcement.',
+        }),
     })
     .meta({
         id: 'AppOAuthClientConfig',
         description:
-            'Standalone public PKCE OAuth. Installation automatically provisions an app client with these exact callback URLs.',
+            'Standalone public PKCE OAuth. The publisher manifest provisions one app-managed registration with these exact callback URLs.',
     });
 
 export const AppManifestDataSchema = z

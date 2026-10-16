@@ -18,3 +18,9 @@ test('should convert docx to markdown', async () => {
     const result: string = await activityContext.run(markdownWithPandoc, Buffer.from(docx), 'docx');
     expect(result).to.include('confidential');
 });
+
+test('should convert a docx file to markdown', async () => {
+    const filepath = path.join(__dirname, '../../fixtures', 'us-ciia.docx');
+    const result: string = await activityContext.run(markdownWithPandoc, filepath, 'docx');
+    expect(result).to.include('confidential');
+});

@@ -5,19 +5,24 @@ import tmp from 'tmp';
 
 /**
  * Convert a pdf file to text
- * TODO: pass file reference instead of Buffer
+ *
+ * @param file the PDF, or the path of a PDF file, which avoids holding a large document in memory
  */
-
-export function mutoolPdfToText(buffer: Buffer): Promise<string> {
-    const inputFile = tmp.fileSync({ postfix: '.pdf' });
+export function mutoolPdfToText(file: Buffer | string): Promise<string> {
+    let inputFileName: string;
+    if (typeof file === 'string') {
+        inputFileName = file;
+    } else {
+        const inputFile = tmp.fileSync({ postfix: '.pdf' });
+        fs.writeSync(inputFile.fd, file);
+        inputFileName = inputFile.name;
+    }
     const targetFileName = tmp.tmpNameSync({ postfix: '.txt' });
 
-    fs.writeSync(inputFile.fd, buffer);
-
     return new Promise((resolve, reject) => {
-        log.info('Converting pdf to text', { inputFile: inputFile.name, targetFileName });
+        log.info('Converting pdf to text', { inputFile: inputFileName, targetFileName });
 
-        const command = spawn('mutool', ['convert', '-o', targetFileName, inputFile.name]);
+        const command = spawn('mutool', ['convert', '-o', targetFileName, inputFileName]);
 
         command.on('exit', (code) => {
             if (code) {

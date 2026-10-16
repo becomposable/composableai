@@ -108,6 +108,10 @@
             "types": "./lib/utils/blobs.d.ts",
             "default": "./lib/utils/blobs.js"
         },
+        "./utils/crash-prone-phase": {
+            "types": "./lib/utils/crash-prone-phase.d.ts",
+            "default": "./lib/utils/crash-prone-phase.js"
+        },
         "./utils/storage": {
             "types": "./lib/utils/storage.d.ts",
             "default": "./lib/utils/storage.js"

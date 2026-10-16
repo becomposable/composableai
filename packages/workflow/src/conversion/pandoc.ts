@@ -2,20 +2,32 @@ import { spawn } from 'node:child_process';
 import { PassThrough } from 'node:stream';
 import { log } from '@temporalio/activity';
 
-export function markdownWithPandoc(buffer: Buffer, fromFormat: string): Promise<string> {
-    const fromType = undefined;
-
+/**
+ * Convert a document to markdown with pandoc
+ *
+ * @param file the document, or the path of a document file, which avoids holding a large document in memory
+ * @param fromFormat the pandoc input format of the document
+ */
+export function markdownWithPandoc(file: Buffer | string, fromFormat: string): Promise<string> {
     return new Promise((resolve, reject) => {
-        log.info(`Converting ${fromType} to markdown`);
-        const input = new PassThrough();
-        input.end(buffer);
+        log.info(`Converting ${fromFormat} to markdown`);
 
         const result: string[] = [];
 
-        const command = spawn('pandoc', ['-t', 'markdown', '-f', fromFormat], {
+        const args = ['-t', 'markdown', '-f', fromFormat];
+        if (typeof file === 'string') {
+            args.push(file);
+        }
+        const command = spawn('pandoc', args, {
             stdio: 'pipe',
         });
-        input.pipe(command.stdin);
+        if (typeof file === 'string') {
+            command.stdin.end();
+        } else {
+            const input = new PassThrough();
+            input.end(file);
+            input.pipe(command.stdin);
+        }
 
         command.stdout.on('data', (data: string) => {
             result.push(data.toString());

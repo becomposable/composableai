@@ -25,6 +25,16 @@ test(
 );
 
 test(
+    'should convert a pdf file to text with mutool',
+    async () => {
+        const filename = path.join(__dirname, '../../fixtures', 'test-pdf1.pdf');
+        const result: string = await activityContext.run(mutoolPdfToText, filename);
+        expect(result).toContain('VF primarily uses foreign currency exchange');
+    },
+    TIMEOUT,
+);
+
+test(
     'should convert pdf to images with mutool',
     async () => {
         const filename = path.join(__dirname, '../../fixtures', 'test-pdf1.pdf');

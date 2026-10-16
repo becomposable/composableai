@@ -445,6 +445,10 @@ interface Checks {
         W.AppGithubInstallation,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubInstallationSchema>
     >;
+    AppGithubAccount: Same<
+        W.AppGithubAccount,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubAccountSchema>
+    >;
     ExchangeAppGithubAuthorizationResponse: Same<
         W.ExchangeAppGithubAuthorizationResponse,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').ExchangeAppGithubAuthorizationResponseSchema>
@@ -8915,6 +8919,10 @@ interface Checks {
         W.ApiComponentTypes['AppGithubInstallation'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubInstallationSchema>
     >;
+    'component:AppGithubAccount': Same<
+        W.ApiComponentTypes['AppGithubAccount'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubAccountSchema>
+    >;
     'component:AppGithubRepository': Same<
         W.ApiComponentTypes['AppGithubRepository'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySchema>
@@ -9700,6 +9708,7 @@ const checks: Checks = {
     ExchangeAppGithubAuthorizationRequest: true,
     AppGithubRepositoriesQuery: true,
     AppGithubInstallation: true,
+    AppGithubAccount: true,
     ExchangeAppGithubAuthorizationResponse: true,
     AppGithubRepository: true,
     AppGithubRepositoryList: true,
@@ -11933,6 +11942,7 @@ const checks: Checks = {
     'component:AppGithubRepositoriesQuery': true,
     'component:ExchangeAppGithubAuthorizationResponse': true,
     'component:AppGithubInstallation': true,
+    'component:AppGithubAccount': true,
     'component:AppGithubRepository': true,
     'component:AppGithubRepositoryList': true,
     'component:StartAppScaffoldRequest': true,
@@ -12102,6 +12112,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2522);
+        expect(Object.keys(checks)).toHaveLength(2524);
     });
 });

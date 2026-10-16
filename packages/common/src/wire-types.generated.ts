@@ -874,6 +874,7 @@ export type AppGithubConfiguration = {
     enabled: boolean;
     app_slug?: string | undefined;
     install_url?: string | undefined;
+    relay_url?: string | undefined;
 };
 export type StartAppGithubAuthorizationResponse = {
     authorization_url: string;
@@ -892,9 +893,15 @@ export type AppGithubInstallation = {
     account_type?: string | undefined;
     repository_selection: 'all' | 'selected';
 };
+export type AppGithubAccount = {
+    login: string;
+    account_type: string;
+    avatar_url?: string | undefined;
+};
 export type ExchangeAppGithubAuthorizationResponse = {
     connection_id: string;
     installations: AppGithubInstallation[];
+    accounts: AppGithubAccount[];
 };
 export type AppGithubRepository = {
     name: string;
@@ -11857,6 +11864,7 @@ export interface ApiComponentTypes {
     AppGithubRepositoriesQuery: AppGithubRepositoriesQuery;
     ExchangeAppGithubAuthorizationResponse: ExchangeAppGithubAuthorizationResponse;
     AppGithubInstallation: AppGithubInstallation;
+    AppGithubAccount: AppGithubAccount;
     AppGithubRepository: AppGithubRepository;
     AppGithubRepositoryList: AppGithubRepositoryList;
     StartAppScaffoldRequest: StartAppScaffoldRequest;

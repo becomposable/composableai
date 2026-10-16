@@ -233,6 +233,7 @@ export type StartAppGithubAuthorizationResponse = Wire.StartAppGithubAuthorizati
 export type ExchangeAppGithubAuthorizationRequest = Wire.ExchangeAppGithubAuthorizationRequest;
 export type AppGithubRepositoriesQuery = Wire.AppGithubRepositoriesQuery;
 export type AppGithubInstallation = Wire.AppGithubInstallation;
+export type AppGithubAccount = Wire.AppGithubAccount;
 export type ExchangeAppGithubAuthorizationResponse = Wire.ExchangeAppGithubAuthorizationResponse;
 export type AppGithubRepository = Wire.AppGithubRepository;
 export type AppGithubRepositoryList = Wire.AppGithubRepositoryList;

@@ -19775,6 +19775,9 @@
       },
       "install_url": {
         "type": "string"
+      },
+      "relay_url": {
+        "type": "string"
       }
     },
     "required": [
@@ -19850,6 +19853,24 @@
       "repository_selection"
     ]
   },
+  "AppGithubAccount": {
+    "type": "object",
+    "properties": {
+      "login": {
+        "type": "string"
+      },
+      "account_type": {
+        "type": "string"
+      },
+      "avatar_url": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "login",
+      "account_type"
+    ]
+  },
   "ExchangeAppGithubAuthorizationResponse": {
     "type": "object",
     "properties": {
@@ -19861,11 +19882,18 @@
         "items": {
           "$ref": "#/components/schemas/AppGithubInstallation"
         }
+      },
+      "accounts": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AppGithubAccount"
+        }
       }
     },
     "required": [
       "connection_id",
-      "installations"
+      "installations",
+      "accounts"
     ]
   },
   "AppGithubRepository": {

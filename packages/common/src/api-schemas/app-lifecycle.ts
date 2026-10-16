@@ -451,6 +451,7 @@ export const AppGithubConfigurationSchema = z
         enabled: z.boolean(),
         app_slug: z.string().optional(),
         install_url: z.string().optional(),
+        relay_url: z.string().optional(),
     })
     .meta({ id: 'AppGithubConfiguration' });
 
@@ -478,10 +479,19 @@ export const AppGithubInstallationSchema = z
     })
     .meta({ id: 'AppGithubInstallation' });
 
+export const AppGithubAccountSchema = z
+    .strictObject({
+        login: z.string(),
+        account_type: z.string(),
+        avatar_url: z.string().optional(),
+    })
+    .meta({ id: 'AppGithubAccount' });
+
 export const ExchangeAppGithubAuthorizationResponseSchema = z
     .strictObject({
         connection_id: z.string(),
         installations: z.array(AppGithubInstallationSchema),
+        accounts: z.array(AppGithubAccountSchema),
     })
     .meta({ id: 'ExchangeAppGithubAuthorizationResponse' });
 

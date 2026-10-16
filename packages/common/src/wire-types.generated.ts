@@ -613,6 +613,8 @@ export type MCPToolCollectionObject = {
     url: string;
     auth?: ToolCollectionAuthType | undefined;
     type: 'mcp';
+    parameters?: Record<string, McpConnectionParameter> | undefined;
+    headers?: Record<string, string> | undefined;
     id: string;
     name: string;
     description: string;
@@ -909,6 +911,7 @@ export type AppScaffoldProgress = {
  */
 export type AppAccessControl = 'all' | 'ui' | 'none';
 export type AppManifestData = {
+    parameters?: Record<string, McpConnectionParameter> | undefined;
     oauth_scopes?: string[] | undefined;
     oauth_client?: AppOAuthClientConfig | undefined;
     name: string;
@@ -939,6 +942,7 @@ export type AppManifestData = {
     access_control?: AppAccessControl | undefined;
 };
 export type UpdateAppPayload = {
+    parameters?: Record<string, McpConnectionParameter> | undefined;
     oauth_scopes?: string[] | undefined;
     oauth_client?: AppOAuthClientConfig | undefined;
     name: string;
@@ -1196,6 +1200,7 @@ export type RenderingTemplateDefinitionRef = {
     tags?: string[] | undefined;
 };
 export type AppManifest = {
+    parameters?: Record<string, McpConnectionParameter> | undefined;
     oauth_scopes?: string[] | undefined;
     oauth_client?: AppOAuthClientConfig | undefined;
     edit_revision: number;
@@ -1263,6 +1268,15 @@ export type AppInstallation = {
     id: string;
     project: string;
     manifest: string;
+    mcp_configuration?:
+        | {
+              revision: string;
+              values: Record<string, Record<string, string>>;
+              configured_secrets: Record<string, string[]>;
+              shared_values?: Record<string, string> | undefined;
+              configured_shared_secrets?: string[] | undefined;
+          }
+        | undefined;
     oauth_approval?:
         | {
               scopes: string[];
@@ -1286,6 +1300,15 @@ export type AppInstallation = {
 export type AppInstallationWithManifest = {
     id: string;
     project: string;
+    mcp_configuration?:
+        | {
+              revision: string;
+              values: Record<string, Record<string, string>>;
+              configured_secrets: Record<string, string[]>;
+              shared_values?: Record<string, string> | undefined;
+              configured_shared_secrets?: string[] | undefined;
+          }
+        | undefined;
     oauth_approval?:
         | {
               scopes: string[];
@@ -1311,6 +1334,15 @@ export type AppInstallationWithManifest = {
 export type AppInstallationListEntry = {
     id: string;
     project: string;
+    mcp_configuration?:
+        | {
+              revision: string;
+              values: Record<string, Record<string, string>>;
+              configured_secrets: Record<string, string[]>;
+              shared_values?: Record<string, string> | undefined;
+              configured_shared_secrets?: string[] | undefined;
+          }
+        | undefined;
     oauth_approval?:
         | {
               scopes: string[];
@@ -1352,6 +1384,8 @@ export type AppApiKeyCollectionParams = {
 export type AppOAuthProviderParams = AppOAuthCollectionParams;
 export type AppInstallationPayload = {
     app_id: string;
+    mcp_shared_parameters?: Record<string, string | null> | undefined;
+    mcp_parameters?: Record<string, Record<string, string | null>> | undefined;
     settings?:
         | {
               [k: string]: unknown;
@@ -1637,6 +1671,20 @@ export type AppDeleteSummary = {
 export type UpdateAppInstallationOAuthApprovalPayload = {
     approved_scopes: string[];
 };
+export type McpPublicParameter = {
+    title?: string | undefined;
+    description?: string | undefined;
+    required?: boolean | undefined;
+    type?: 'string' | undefined;
+    default?: string | undefined;
+};
+export type McpSecretParameter = {
+    title?: string | undefined;
+    description?: string | undefined;
+    required?: boolean | undefined;
+    type: 'secret';
+};
+export type McpConnectionParameter = McpPublicParameter | McpSecretParameter;
 /**
  * Generic metering entry attached to audit events.
  * Used for cost attribution, usage tracking, and billing.

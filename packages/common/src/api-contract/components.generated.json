@@ -5848,6 +5848,23 @@
         "type": "string",
         "const": "mcp"
       },
+      "parameters": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/McpConnectionParameter"
+        }
+      },
+      "headers": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "HTTP header templates. Reference declared installation parameters with {{name}}. Never embed secrets."
+      },
       "id": {
         "type": "string",
         "description": "Stable identifier for this collection. Used to key oauth_bindings on AppInstallation — protects against collection renames. Required for new manifests."
@@ -5908,6 +5925,50 @@
       "other"
     ],
     "description": "Authentication type for tool collections.\n- 'none': connect directly without credentials for MCP collections; does not disable authentication for Vertesia SDK collections\n- 'oauth': the runtime resolves a per-user or per-project OAuth access token\n- 'api_key': a static key held in the project's secret store is sent as the RFC 6750 bearer token (`Authorization: Bearer <key>`)\n- 'other' or omitted: use the legacy provider connection-details flow for MCP collections"
+  },
+  "McpPublicParameter": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "required": {
+        "type": "boolean"
+      },
+      "type": {
+        "type": "string",
+        "const": "string"
+      },
+      "default": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  },
+  "McpSecretParameter": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "required": {
+        "type": "boolean"
+      },
+      "type": {
+        "type": "string",
+        "const": "secret"
+      }
+    },
+    "required": [
+      "type"
+    ],
+    "additionalProperties": false
   },
   "MCPOAuthConfig": {
     "type": "object",
@@ -6014,6 +6075,16 @@
     ],
     "additionalProperties": false,
     "description": "Vertesia SDK tool collection configuration"
+  },
+  "McpConnectionParameter": {
+    "anyOf": [
+      {
+        "$ref": "#/components/schemas/McpPublicParameter"
+      },
+      {
+        "$ref": "#/components/schemas/McpSecretParameter"
+      }
+    ]
   },
   "ToolCollectionObject": {
     "oneOf": [
@@ -20605,6 +20676,37 @@
       "app_id": {
         "type": "string"
       },
+      "mcp_shared_parameters": {
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description": "Shared MCP parameter overrides. Omitted values are retained; null clears an override or restores its default."
+      },
+      "mcp_parameters": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "description": "Installation parameter overrides by MCP collection id. Omit to preserve; null clears an override. Secret inputs are write-only."
+      },
       "settings": {
         "type": "object",
         "additionalProperties": true
@@ -23058,6 +23160,17 @@
   "AppManifestData": {
     "type": "object",
     "properties": {
+      "parameters": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/McpConnectionParameter"
+        },
+        "description": "Shared MCP installation parameters available to every collection. Collection-local names must not overlap."
+      },
       "oauth_scopes": {
         "type": "array",
         "items": {
@@ -23198,6 +23311,17 @@
   "UpdateAppPayload": {
     "type": "object",
     "properties": {
+      "parameters": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/McpConnectionParameter"
+        },
+        "description": "Shared MCP installation parameters available to every collection. Collection-local names must not overlap."
+      },
       "oauth_scopes": {
         "type": "array",
         "items": {
@@ -23344,6 +23468,17 @@
   "AppManifest": {
     "type": "object",
     "properties": {
+      "parameters": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/McpConnectionParameter"
+        },
+        "description": "Shared MCP installation parameters available to every collection. Collection-local names must not overlap."
+      },
       "oauth_scopes": {
         "type": "array",
         "items": {
@@ -24683,6 +24818,50 @@
       "manifest": {
         "type": "string"
       },
+      "mcp_configuration": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "configured_secrets": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "shared_values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "configured_shared_secrets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "revision",
+          "values",
+          "configured_secrets"
+        ],
+        "additionalProperties": false
+      },
       "oauth_approval": {
         "type": "object",
         "properties": {
@@ -24774,6 +24953,50 @@
       },
       "project": {
         "type": "string"
+      },
+      "mcp_configuration": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "configured_secrets": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "shared_values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "configured_shared_secrets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "revision",
+          "values",
+          "configured_secrets"
+        ],
+        "additionalProperties": false
       },
       "oauth_approval": {
         "type": "object",
@@ -24870,6 +25093,50 @@
       },
       "project": {
         "type": "string"
+      },
+      "mcp_configuration": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "configured_secrets": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "shared_values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "configured_shared_secrets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "revision",
+          "values",
+          "configured_secrets"
+        ],
+        "additionalProperties": false
       },
       "oauth_approval": {
         "type": "object",

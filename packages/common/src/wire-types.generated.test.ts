@@ -702,6 +702,18 @@ interface Checks {
         W.UpdateAppInstallationOAuthApprovalPayload,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').UpdateAppInstallationOAuthApprovalPayloadSchema>
     >;
+    McpPublicParameter: Same<
+        W.McpPublicParameter,
+        z.infer<typeof import('./api-schemas/apps.js').McpPublicParameterSchema>
+    >;
+    McpSecretParameter: Same<
+        W.McpSecretParameter,
+        z.infer<typeof import('./api-schemas/apps.js').McpSecretParameterSchema>
+    >;
+    McpConnectionParameter: Same<
+        W.McpConnectionParameter,
+        z.infer<typeof import('./api-schemas/apps.js').McpConnectionParameterSchema>
+    >;
     AuditMeter: Same<W.AuditMeter, z.infer<typeof import('./api-schemas/audit-trail.js').AuditMeterSchema>>;
     AuditTrailEvent: Same<
         W.AuditTrailEvent,
@@ -9698,6 +9710,9 @@ const checks: Checks = {
     ValidateUrlResponse: true,
     AppDeleteSummary: true,
     UpdateAppInstallationOAuthApprovalPayload: true,
+    McpPublicParameter: true,
+    McpSecretParameter: true,
+    McpConnectionParameter: true,
     AuditMeter: true,
     AuditTrailEvent: true,
     AuditTrailQuery: true,
@@ -12007,6 +12022,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2503);
+        expect(Object.keys(checks)).toHaveLength(2506);
     });
 });

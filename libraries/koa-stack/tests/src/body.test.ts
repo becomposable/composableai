@@ -1,3 +1,4 @@
+import { gzipSync } from 'node:zlib';
 import { LazyBody } from '@koa-stack/body';
 import Koa from 'koa';
 import request from 'supertest';
@@ -42,5 +43,25 @@ describe('Malformed request bodies', () => {
         const res = await request(app).post('/').set('Content-Type', 'application/json').send('{"a":1}');
         expect(res.status).toBe(422);
         expect(res.text).toBe('Too deeply nested');
+    });
+
+    test('does not reuse Content-Length for a later compressed request', async () => {
+        const koa = new Koa();
+        LazyBody.install(koa);
+        koa.use(async (ctx) => {
+            ctx.body = (await ctx.payload).text;
+        });
+        const app = koa.callback();
+        await request(app).post('/').set('Content-Type', 'text/plain').send('short').expect(200);
+
+        const text = 'a different uncompressed length';
+        const res = await request(app)
+            .post('/')
+            .set('Content-Type', 'application/octet-stream')
+            .set('Content-Encoding', 'gzip')
+            .send(gzipSync(text))
+            .expect(200);
+
+        expect(res.text).toBe(text);
     });
 });

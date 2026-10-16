@@ -124,7 +124,7 @@ for (const origin of [
     test(`${origin} uses an explicitly configured development client`, async () => {
         const app = await bootstrap({ origin, clientId: '  my-app-development  ' });
         assert.equal(app.env.oauth.clientId, 'my-app-development');
-        assert.equal(app.env.oauth.redirectUri, `${origin}/app`);
+        assert.equal(app.env.oauth.redirectUri, `${origin}/`);
         assert.doesNotThrow(() => app.validate());
     });
 }

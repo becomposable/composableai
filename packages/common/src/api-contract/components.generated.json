@@ -23062,7 +23062,8 @@
         "type": "array",
         "items": {
           "type": "string"
-        }
+        },
+        "description": "Publisher-managed maximum OAuth scopes this app may request. App code and version promotion cannot expand this permission ceiling."
       },
       "oauth_client": {
         "$ref": "#/components/schemas/AppOAuthClientConfig"
@@ -23201,7 +23202,8 @@
         "type": "array",
         "items": {
           "type": "string"
-        }
+        },
+        "description": "Publisher-managed maximum OAuth scopes this app may request. App code and version promotion cannot expand this permission ceiling."
       },
       "oauth_client": {
         "$ref": "#/components/schemas/AppOAuthClientConfig"
@@ -23346,7 +23348,8 @@
         "type": "array",
         "items": {
           "type": "string"
-        }
+        },
+        "description": "Publisher-managed maximum OAuth scopes this app may request. App code and version promotion cannot expand this permission ceiling."
       },
       "oauth_client": {
         "$ref": "#/components/schemas/AppOAuthClientConfig"
@@ -24560,7 +24563,7 @@
         "items": {
           "type": "string"
         },
-        "description": "OAuth scopes requested by the app. Users must consent to project permissions."
+        "description": "Scopes requested by app code. These do not replace the publisher-managed permission ceiling in the app manifest."
       },
       "ui": {
         "$ref": "#/components/schemas/AppUIConfig",

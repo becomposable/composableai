@@ -353,7 +353,13 @@ export const AppOAuthClientConfigSchema = z
 
 export const AppManifestDataSchema = z
     .strictObject({
-        oauth_scopes: z.array(z.string()).optional(),
+        oauth_scopes: z
+            .array(z.string())
+            .meta({
+                description:
+                    'Publisher-managed maximum OAuth scopes this app may request. App code and version promotion cannot expand this permission ceiling.',
+            })
+            .optional(),
         oauth_client: AppOAuthClientConfigSchema.optional(),
         name: z.string().meta({
             description: 'The name of the app, used as the id in the system. Must be in kebab case (e.g. my-app).',
@@ -535,7 +541,13 @@ export const CompositeAppMessageOverridesSchema = z
 
 export const AppManifestSchema = z
     .strictObject({
-        oauth_scopes: z.array(z.string()).optional(),
+        oauth_scopes: z
+            .array(z.string())
+            .meta({
+                description:
+                    'Publisher-managed maximum OAuth scopes this app may request. App code and version promotion cannot expand this permission ceiling.',
+            })
+            .optional(),
         oauth_client: AppOAuthClientConfigSchema.optional(),
         edit_revision: EditRevisionSchema,
         name: z.string().meta({
@@ -944,7 +956,10 @@ export const AppPackageSchema = z
         oauth_client: AppOAuthClientConfigSchema.optional(),
         oauth_scopes: z
             .array(z.string())
-            .meta({ description: 'OAuth scopes requested by the app. Users must consent to project permissions.' })
+            .meta({
+                description:
+                    'Scopes requested by app code. These do not replace the publisher-managed permission ceiling in the app manifest.',
+            })
             .optional(),
         ui: AppUIConfigSchema.meta({ description: 'The UI configuration of the app' }).optional(),
         tools: z

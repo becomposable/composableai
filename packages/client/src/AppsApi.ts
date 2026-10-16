@@ -329,6 +329,7 @@ export default class AppsApi extends ApiTopic {
         oauthProviderParams?: Record<string, { client_id?: string; client_secret?: string; scopes?: string[] }>,
         apiKeyParams?: AppApiKeyCollectionParams,
         mcpParameters?: AppInstallationPayload['mcp_parameters'],
+        mcpSharedParameters?: AppInstallationPayload['mcp_shared_parameters'],
     ): Promise<AppInstallation> {
         return this.post(`/install`, {
             payload: {
@@ -338,6 +339,7 @@ export default class AppsApi extends ApiTopic {
                 oauth_provider_params: oauthProviderParams,
                 api_key_params: apiKeyParams,
                 mcp_parameters: mcpParameters,
+                mcp_shared_parameters: mcpSharedParameters,
             } satisfies AppInstallationPayload,
         });
     }
@@ -429,6 +431,9 @@ export default class AppsApi extends ApiTopic {
                 // "leave unchanged" from "clear", so only spread the key when it was supplied.
                 ...('access_control' in settingsPayload ? { access_control: settingsPayload.access_control } : {}),
                 ...('mcp_parameters' in settingsPayload ? { mcp_parameters: settingsPayload.mcp_parameters } : {}),
+                ...('mcp_shared_parameters' in settingsPayload
+                    ? { mcp_shared_parameters: settingsPayload.mcp_shared_parameters }
+                    : {}),
             } satisfies AppInstallationPayload,
         });
     }

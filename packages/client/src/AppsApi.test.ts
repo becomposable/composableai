@@ -158,3 +158,27 @@ it.each(mcpParameterUpdates)(
         else expect(body).toMatchObject({ mcp_parameters });
     },
 );
+
+it('forwards shared parameter replacements and clears through installation and settings updates', async () => {
+    const requests: Request[] = [];
+    const client = new VertesiaClient({
+        serverUrl: 'https://api.example.com',
+        storeUrl: 'https://store.example.com',
+        fetch: vi.fn(async () => Response.json({ id: 'installed' })),
+        onRequest: (request) => {
+            requests.push(request.clone());
+        },
+    });
+    await client.apps.install('app', undefined, undefined, undefined, undefined, undefined, {
+        tenant: 'one',
+        key: 'private',
+    });
+    await client.apps.updateInstallationSettings({
+        app_id: 'installed',
+        mcp_shared_parameters: { tenant: null, key: 'replacement' },
+    });
+    expect(await Promise.all(requests.map((request) => request.json()))).toEqual([
+        { app_id: 'app', mcp_shared_parameters: { tenant: 'one', key: 'private' } },
+        { app_id: 'installed', mcp_shared_parameters: { tenant: null, key: 'replacement' } },
+    ]);
+});

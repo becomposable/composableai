@@ -82,7 +82,11 @@ function deriveMCPCollectionId(input: string): string {
  * @param vars - Optional endpoint variables to substitute in URLs
  * @returns Normalized ToolCollectionObject
  */
-export function normalizeToolCollection(collection: ToolCollectionObject, vars?: Endpoints): ToolCollectionObject {
+export function normalizeToolCollection(
+    collection: ToolCollectionObject,
+    vars?: Endpoints,
+    sharedParameters?: MCPToolCollectionObject['parameters'],
+): ToolCollectionObject {
     if (!collection || typeof collection !== 'object') {
         throw new TypeError('Tool collection must be an object');
     }
@@ -91,7 +95,9 @@ export function normalizeToolCollection(collection: ToolCollectionObject, vars?:
             ? substituteEndpoints(
                   collection.url,
                   vars,
-                  collection.type === 'mcp' ? Object.keys(collection.parameters ?? {}) : [],
+                  collection.type === 'mcp'
+                      ? [...Object.keys(sharedParameters ?? {}), ...Object.keys(collection.parameters ?? {})]
+                      : [],
               )
             : collection.url;
     const urlChanged = substitutedUrl !== collection.url;

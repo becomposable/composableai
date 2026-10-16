@@ -188,3 +188,21 @@ it('preserves installation URL parameters during manifest serialization while re
         'https://example.com/{{store}}/mcp?service=https://token.example.com',
     );
 });
+
+it('preserves shared MCP parameters matching endpoint aliases during manifest serialization', () => {
+    const manifest: Partial<AppManifestData> = {
+        parameters: { store: { default: 'tenant' } },
+        tool_collections: [
+            {
+                type: 'mcp',
+                id: 'graph',
+                namespace: 'graph',
+                name: 'Graph',
+                description: 'Graph',
+                url: 'https://example.com/{{store}}/mcp',
+            },
+        ],
+    };
+    resolveManifestUrls(manifest, { vars: { store: 'https://platform.example.com' } });
+    expect(manifest.tool_collections?.[0].url).toBe('https://example.com/{{store}}/mcp');
+});

@@ -182,7 +182,7 @@ export function resolveManifestUrls(
         for (let i = 0; i < toolCollections.length; i++) {
             const item = toolCollections[i];
             if (item && typeof item === 'object' && item.url) {
-                const sub = normalizeToolCollection(item, vars).url;
+                const sub = normalizeToolCollection(item, vars, manifest.parameters).url;
                 if (sub !== item.url) item.url = sub;
             }
         }

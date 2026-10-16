@@ -20664,6 +20664,20 @@
       "app_id": {
         "type": "string"
       },
+      "mcp_shared_parameters": {
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description": "Shared MCP parameter overrides. Omitted values are retained; null clears an override or restores its default."
+      },
       "mcp_parameters": {
         "type": "object",
         "additionalProperties": {
@@ -23130,6 +23144,17 @@
   "AppManifestData": {
     "type": "object",
     "properties": {
+      "parameters": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/McpConnectionParameter"
+        },
+        "description": "Shared MCP installation parameters available to every collection. Collection-local names must not overlap."
+      },
       "oauth_scopes": {
         "type": "array",
         "items": {
@@ -23269,6 +23294,17 @@
   "UpdateAppPayload": {
     "type": "object",
     "properties": {
+      "parameters": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/McpConnectionParameter"
+        },
+        "description": "Shared MCP installation parameters available to every collection. Collection-local names must not overlap."
+      },
       "oauth_scopes": {
         "type": "array",
         "items": {
@@ -23414,6 +23450,17 @@
   "AppManifest": {
     "type": "object",
     "properties": {
+      "parameters": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/McpConnectionParameter"
+        },
+        "description": "Shared MCP installation parameters available to every collection. Collection-local names must not overlap."
+      },
       "oauth_scopes": {
         "type": "array",
         "items": {
@@ -24775,6 +24822,18 @@
                 "type": "string"
               }
             }
+          },
+          "shared_values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "configured_shared_secrets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -24898,6 +24957,18 @@
               "items": {
                 "type": "string"
               }
+            }
+          },
+          "shared_values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "configured_shared_secrets": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
         },
@@ -25026,6 +25097,18 @@
               "items": {
                 "type": "string"
               }
+            }
+          },
+          "shared_values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "configured_shared_secrets": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
         },

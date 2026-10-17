@@ -1,3 +1,4 @@
+import { log } from '@temporalio/activity';
 import { MockActivityEnvironment } from '@temporalio/testing';
 import type { VertesiaClient } from '@vertesia/client';
 import {
@@ -169,9 +170,11 @@ describe('Webhook should be notified', () => {
         const payload = createTestPayload();
 
         // Expect the function to throw an error with response payload
-        await expect(testEnv.run(notifyWebhook, payload)).rejects.toThrow(
-            `Webhook Notification to ${defaultParams.webhook} failed with status: 500 Internal Server Error - Response: {"error": "Database connection failed", "code": "DB_ERROR"}`,
-        );
+        await expect(testEnv.run(notifyWebhook, payload)).rejects.toMatchObject({
+            message: `Webhook Notification to ${defaultParams.webhook} failed with status: 500 Internal Server Error - Response: {"error": "Database connection failed", "code": "DB_ERROR"}`,
+            type: 'WebhookEndpointError',
+            nonRetryable: false,
+        });
 
         // Verify fetch was called with correct parameters (old format wraps detail in result)
         expect(mockFetch).toHaveBeenCalledWith(defaultParams.webhook, {
@@ -216,6 +219,56 @@ describe('Webhook should be notified', () => {
             },
             redirect: 'manual',
         });
+    });
+
+    it('warns with the network cause when the endpoint cannot be reached', async () => {
+        const warn = vi.spyOn(log, 'warn');
+        const errorLog = vi.spyOn(log, 'error');
+        const connectFailure = new TypeError('fetch failed', {
+            cause: Object.assign(new Error('connect ECONNREFUSED'), { code: 'ECONNREFUSED' }),
+        });
+        mockFetch.mockRejectedValueOnce(connectFailure);
+
+        await expect(testEnv.run(notifyWebhook, createTestPayload())).rejects.toMatchObject({
+            type: 'WebhookEndpointUnreachable',
+            nonRetryable: false,
+            cause: connectFailure,
+        });
+
+        expect(warn).toHaveBeenCalledWith(
+            'An error occurred while notifying webhook',
+            expect.objectContaining({ error: 'fetch failed', cause: 'ECONNREFUSED', workflow_id: 'wf_id' }),
+        );
+        expect(errorLog).not.toHaveBeenCalled();
+        warn.mockRestore();
+        errorLog.mockRestore();
+    });
+
+    it('types a request timeout as an unreachable endpoint', async () => {
+        const timeoutAbort = new DOMException('This operation was aborted', 'AbortError');
+        mockFetch.mockRejectedValueOnce(timeoutAbort);
+
+        await expect(testEnv.run(notifyWebhook, createTestPayload())).rejects.toMatchObject({
+            type: 'WebhookEndpointUnreachable',
+            cause: timeoutAbort,
+        });
+    });
+
+    it('keeps a request fetch rejects before contacting the receiver at error, unclassified', async () => {
+        const warn = vi.spyOn(log, 'warn');
+        const errorLog = vi.spyOn(log, 'error');
+        const invalidHeader = new TypeError('Headers.append: "Bad Header" is an invalid header name.');
+        mockFetch.mockRejectedValueOnce(invalidHeader);
+
+        await expect(testEnv.run(notifyWebhook, createTestPayload())).rejects.toBe(invalidHeader);
+
+        expect(errorLog).toHaveBeenCalledWith(
+            'An error occurred while notifying webhook',
+            expect.objectContaining({ error: invalidHeader.message, workflow_id: 'wf_id' }),
+        );
+        expect(warn).not.toHaveBeenCalledWith('An error occurred while notifying webhook', expect.anything());
+        warn.mockRestore();
+        errorLog.mockRestore();
     });
 
     it('should block URLs rejected by central URL validation', async () => {

@@ -21,7 +21,9 @@ import {
     execActivityFile,
     execActivityFileWithProgress,
     initializeActivityCommandDeadline,
+    isUnusableVideoContent,
     rethrowIfActivityStopped,
+    UNUSABLE_VIDEO_CONTENT,
 } from './exec.js';
 
 // Default configuration constants
@@ -110,7 +112,7 @@ async function getVideoMetadata(videoPath: string): Promise<VideoMetadataExtende
         const videoStream = metadata.streams.find((stream) => stream.codec_type === 'video');
 
         if (!videoStream) {
-            throw ApplicationFailure.nonRetryable('No video stream found in file');
+            throw ApplicationFailure.nonRetryable('No video stream found in file', UNUSABLE_VIDEO_CONTENT);
         }
 
         const duration = parseFloat(metadata.format.duration ?? '0') || 0;
@@ -133,10 +135,13 @@ async function getVideoMetadata(videoPath: string): Promise<VideoMetadataExtende
         return { duration, width, height, codec, bitrate, fps, hasAudio };
     } catch (error) {
         rethrowIfActivityStopped(error);
-        log.error(`Failed to get video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        const message = `Failed to get video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`;
         if (error instanceof ApplicationFailure) {
+            // Raised above: the file has no usable video stream, a property of the content.
+            log.warn(message);
             throw error;
         }
+        log.error(message);
         throw new Error(`Failed to probe video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
@@ -614,6 +619,10 @@ export async function prepareVideo(
         };
     } catch (error) {
         rethrowIfActivityStopped(error);
+        // The metadata probe already logged it at warn; keep its type and non-retryable flag.
+        if (isUnusableVideoContent(error)) {
+            throw error;
+        }
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         log.error(`Error preparing video: ${errorMessage}`, { error });
 

@@ -5005,6 +5005,7 @@ export type OidcFederationConnectionPayload = {
     allowed_project_ids: string[];
     allowed_scopes: string[];
     max_token_ttl_seconds: number;
+    max_subject_token_age_seconds?: number | undefined;
     enabled: boolean;
 };
 export type OidcFederationConnection = {
@@ -5022,6 +5023,7 @@ export type OidcFederationConnection = {
     allowed_project_ids: string[];
     allowed_scopes: string[];
     max_token_ttl_seconds: number;
+    max_subject_token_age_seconds: number;
     enabled: boolean;
     id: string;
     account_id: string;
@@ -5042,12 +5044,9 @@ export type OAuthTokenExchangeRequest = {
 };
 export type OAuthTokenExchangeResponse = {
     access_token: string;
-    token_type: string;
+    token_type: 'Bearer';
     expires_in: number;
     scope?: string | undefined;
-    refresh_token?: string | undefined;
-    refresh_token_expires_in?: number | undefined;
-    id_token?: string | undefined;
     issued_token_type: 'urn:ietf:params:oauth:token-type:access_token';
 };
 /**

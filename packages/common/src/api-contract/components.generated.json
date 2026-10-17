@@ -7209,12 +7209,19 @@
         "items": {
           "type": "string",
           "minLength": 1
-        }
+        },
+        "description": "Delegable permission scopes, excluding account:admin. Current user permissions also limit the grant."
       },
       "max_token_ttl_seconds": {
         "type": "integer",
         "minimum": 30,
         "maximum": 300
+      },
+      "max_subject_token_age_seconds": {
+        "type": "integer",
+        "minimum": 30,
+        "maximum": 86400,
+        "description": "Maximum age since the signed iat claim. Defaults to 3600 seconds; 60 seconds of clock tolerance applies."
       },
       "enabled": {
         "type": "boolean"
@@ -7309,12 +7316,18 @@
         "items": {
           "type": "string",
           "minLength": 1
-        }
+        },
+        "description": "Delegable permission scopes, excluding account:admin. Current user permissions also limit the grant."
       },
       "max_token_ttl_seconds": {
         "type": "integer",
         "minimum": 30,
         "maximum": 300
+      },
+      "max_subject_token_age_seconds": {
+        "type": "integer",
+        "minimum": 30,
+        "maximum": 86400
       },
       "enabled": {
         "type": "boolean"
@@ -7338,6 +7351,7 @@
       "allowed_project_ids",
       "allowed_scopes",
       "max_token_ttl_seconds",
+      "max_subject_token_age_seconds",
       "enabled",
       "id",
       "account_id"
@@ -7411,21 +7425,12 @@
       },
       "token_type": {
         "type": "string",
-        "pattern": "^bearer$"
+        "const": "Bearer"
       },
       "expires_in": {
         "type": "number"
       },
       "scope": {
-        "type": "string"
-      },
-      "refresh_token": {
-        "type": "string"
-      },
-      "refresh_token_expires_in": {
-        "type": "number"
-      },
-      "id_token": {
         "type": "string"
       },
       "issued_token_type": {
@@ -7438,7 +7443,8 @@
       "token_type",
       "expires_in",
       "issued_token_type"
-    ]
+    ],
+    "additionalProperties": false
   },
   "OAuthClient": {
     "type": "object",

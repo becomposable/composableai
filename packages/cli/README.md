@@ -67,7 +67,8 @@ vertesia oidc-federation delete <connection-id> --yes
 `create` and `update` accept a complete `OidcFederationConnectionPayload` JSON object;
 `--file -` reads it from stdin. It specifies issuer/audience trust, optional JWKS URL and exact
 signed-claim requirements, the claim matching SCIM `externalId`, allowed projects/scopes, token
-lifetime (30–300 seconds), and enabled status. The issuer is immutable. Management uses the current
+lifetime (30–300 seconds), optional `max_subject_token_age_seconds` (30–86400; defaults to 3600),
+and enabled status. The issuer is immutable. Management uses the current
 profile's account and requires account administrator access.
 
 Exchange does not require a Vertesia login or client secret. Read the IdP token from a file or stdin

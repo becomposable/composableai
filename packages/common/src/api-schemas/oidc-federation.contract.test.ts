@@ -27,6 +27,18 @@ describe('OIDC federation wire contracts', () => {
             false,
         );
     });
+    it('excludes refresh and ID tokens from the exchange response contract', () => {
+        const response = {
+            access_token: 'access',
+            token_type: 'Bearer',
+            expires_in: 300,
+            issued_token_type: 'urn:ietf:params:oauth:token-type:access_token',
+        };
+        expect(validateApiRequest('OAuthTokenExchangeResponse', response).valid).toBe(true);
+        for (const extra of [{ refresh_token: 'refresh' }, { refresh_token_expires_in: 3600 }, { id_token: 'id' }]) {
+            expect(validateApiRequest('OAuthTokenExchangeResponse', { ...response, ...extra }).valid).toBe(false);
+        }
+    });
     it('rejects excessive output lifetimes and symmetric signing algorithms', () => {
         const connection = {
             name: 'Customer',
@@ -41,6 +53,12 @@ describe('OIDC federation wire contracts', () => {
             enabled: true,
         };
         expect(validateApiRequest('OidcFederationConnectionPayload', connection).valid).toBe(true);
+        for (const max_subject_token_age_seconds of [0, 29, 86401, 90.5]) {
+            expect(
+                validateApiRequest('OidcFederationConnectionPayload', { ...connection, max_subject_token_age_seconds })
+                    .valid,
+            ).toBe(false);
+        }
         for (const external_id_claim of [undefined, '', '   ', 42]) {
             expect(
                 validateApiRequest('OidcFederationConnectionPayload', { ...connection, external_id_claim }).valid,

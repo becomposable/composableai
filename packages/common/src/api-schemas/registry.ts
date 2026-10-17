@@ -2572,6 +2572,7 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'OidcFederationConnectionPayload',
     'OidcFederationConnection',
     'OAuthTokenExchangeRequest',
+    'OAuthTokenExchangeResponse',
     'UpdateInteractionConfigurationPayload',
     'InteractionConfigurationRecord',
     'InteractionConfigurationResult',

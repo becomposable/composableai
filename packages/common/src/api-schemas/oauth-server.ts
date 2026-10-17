@@ -436,14 +436,22 @@ export const OidcFederationConnectionPayloadSchema = z
             description: 'Exact string matches against verified top-level IdP claims, such as tenant or azp.',
         }),
         allowed_project_ids: z.array(federationId).min(1).max(100),
-        allowed_scopes: z.array(z.string().min(1)).min(1).max(100),
+        allowed_scopes: z.array(z.string().min(1)).min(1).max(100).meta({
+            description:
+                'Delegable permission scopes, excluding account:admin. Current user permissions also limit the grant.',
+        }),
         max_token_ttl_seconds: z.number().int().min(30).max(300),
+        max_subject_token_age_seconds: z.number().int().min(30).max(86400).optional().meta({
+            description:
+                'Maximum age since the signed iat claim. Defaults to 3600 seconds; 60 seconds of clock tolerance applies.',
+        }),
         enabled: z.boolean(),
     })
     .meta({ id: 'OidcFederationConnectionPayload' });
 export const OidcFederationConnectionSchema = OidcFederationConnectionPayloadSchema.extend({
     id: federationId,
     account_id: federationId,
+    max_subject_token_age_seconds: z.number().int().min(30).max(86400),
 }).meta({ id: 'OidcFederationConnection' });
 export const OidcFederationConnectionArraySchema = z
     .array(OidcFederationConnectionSchema)
@@ -460,6 +468,13 @@ export const OAuthTokenExchangeRequestSchema = z
         scope: z.string().min(1).max(4096),
     })
     .meta({ id: 'OAuthTokenExchangeRequest' });
-export const OAuthTokenExchangeResponseSchema = OAuthTokenResponseSchema.extend({
-    issued_token_type: z.literal('urn:ietf:params:oauth:token-type:access_token'),
-}).meta({ id: 'OAuthTokenExchangeResponse' });
+export const OAuthTokenExchangeResponseSchema = OAuthTokenResponseSchema.omit({
+    refresh_token: true,
+    refresh_token_expires_in: true,
+    id_token: true,
+})
+    .extend({
+        token_type: z.literal('Bearer'),
+        issued_token_type: z.literal('urn:ietf:params:oauth:token-type:access_token'),
+    })
+    .meta({ id: 'OAuthTokenExchangeResponse' });

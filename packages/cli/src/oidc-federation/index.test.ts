@@ -68,7 +68,7 @@ describe('oidc-federation CLI', () => {
         expect(mocks.update).toHaveBeenCalledWith('connection', policy);
     });
     it('rejects malformed policies before resolving a client', async () => {
-        mocks.readFile.mockReturnValue(JSON.stringify({ ...policy, allowed_client_ids: ['caller'] }));
+        mocks.readFile.mockReturnValue(JSON.stringify({ ...policy, unknown_configuration: ['caller'] }));
         await expect(command('create', '--file', 'bad.json')).rejects.toThrow('Invalid federation');
         expect(mocks.getClient).not.toHaveBeenCalled();
     });
@@ -119,6 +119,39 @@ describe('oidc-federation CLI', () => {
             resource: 'https://api.example.com/',
             scope: 'content:read',
         });
+    });
+    it.each(['client_secret_post', 'client_secret_basic'])('reads %s credentials from a file', async (method) => {
+        mocks.readStdin.mockResolvedValue('signed-user-token');
+        mocks.readFile.mockReturnValue('middleware-secret\n');
+        await command(
+            ...exchangeOptions,
+            '--client-id',
+            'vts_client',
+            '--client-secret-file',
+            'secret.txt',
+            '--client-auth-method',
+            method,
+        );
+        const [payload, basic] = mocks.exchangeToken.mock.calls[0];
+        expect(payload.client_id).toBe('vts_client');
+        if (method === 'client_secret_post') {
+            expect(payload.client_secret).toBe('middleware-secret');
+            expect(basic).toBeUndefined();
+        } else {
+            expect(payload.client_secret).toBeUndefined();
+            expect(basic).toEqual({ client_id: 'vts_client', client_secret: 'middleware-secret' });
+        }
+    });
+    it('reads a signed client assertion without handling private signing keys', async () => {
+        mocks.readStdin.mockResolvedValue('signed-user-token');
+        mocks.readFile.mockReturnValue('signed-client-assertion');
+        await command(...exchangeOptions, '--client-id', 'vts_client', '--client-assertion-file', 'assertion.jwt');
+        expect(mocks.exchangeToken).toHaveBeenCalledWith(
+            expect.objectContaining({
+                client_assertion: 'signed-client-assertion',
+                client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+            }),
+        );
     });
     it('rejects untrusted STS URLs and empty assertions before sending credentials', async () => {
         await expect(

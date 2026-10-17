@@ -6587,7 +6587,8 @@
     "enum": [
       "none",
       "client_secret_post",
-      "client_secret_basic"
+      "client_secret_basic",
+      "private_key_jwt"
     ]
   },
   "OAuthGrantType": {
@@ -6684,6 +6685,12 @@
         }
       },
       "token_endpoint_auth_methods_supported": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "token_endpoint_auth_signing_alg_values_supported": {
         "type": "array",
         "items": {
           "type": "string"
@@ -7202,6 +7209,17 @@
           "pattern": "^[a-fA-F0-9]{24}$"
         }
       },
+      "allowed_client_ids": {
+        "minItems": 1,
+        "maxItems": 20,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "description": "When set, require authentication by one of these account-owned confidential OAuth clients. Omit to allow exchanges without separate client authentication."
+      },
       "allowed_scopes": {
         "minItems": 1,
         "maxItems": 100,
@@ -7308,6 +7326,17 @@
           "pattern": "^[a-fA-F0-9]{24}$"
         }
       },
+      "allowed_client_ids": {
+        "minItems": 1,
+        "maxItems": 20,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "description": "When set, require authentication by one of these account-owned confidential OAuth clients. Omit to allow exchanges without separate client authentication."
+      },
       "allowed_scopes": {
         "minItems": 1,
         "maxItems": 100,
@@ -7389,6 +7418,25 @@
       "federation_connection_id": {
         "type": "string",
         "pattern": "^[a-fA-F0-9]{24}$"
+      },
+      "client_id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      },
+      "client_secret": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      },
+      "client_assertion": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 16384
+      },
+      "client_assertion_type": {
+        "type": "string",
+        "const": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
       },
       "project_id": {
         "type": "string",
@@ -7477,6 +7525,10 @@
       },
       "token_endpoint_auth_method": {
         "$ref": "#/components/schemas/OAuthTokenEndpointAuthMethod"
+      },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
       },
       "allowed_scopes": {
         "type": "array",
@@ -7582,6 +7634,10 @@
       },
       "token_endpoint_auth_method": {
         "$ref": "#/components/schemas/OAuthTokenEndpointAuthMethod"
+      },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
       },
       "allowed_scopes": {
         "type": "array",
@@ -7696,6 +7752,10 @@
       "token_endpoint_auth_method": {
         "$ref": "#/components/schemas/OAuthTokenEndpointAuthMethod"
       },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
+      },
       "allowed_scopes": {
         "type": "array",
         "items": {
@@ -7757,6 +7817,10 @@
       },
       "token_endpoint_auth_method": {
         "$ref": "#/components/schemas/OAuthTokenEndpointAuthMethod"
+      },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
       },
       "allowed_scopes": {
         "type": "array",

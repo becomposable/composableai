@@ -20,7 +20,7 @@ export const OAuthRegistrationSourceSchema = z.enum(['admin', 'dynamic']).meta({
 export const OAuthProjectBindingModeSchema = z.enum(['user_select', 'fixed']).meta({ id: 'OAuthProjectBindingMode' });
 
 export const OAuthTokenEndpointAuthMethodSchema = z
-    .enum(['none', 'client_secret_post', 'client_secret_basic'])
+    .enum(['none', 'client_secret_post', 'client_secret_basic', 'private_key_jwt'])
     .meta({ id: 'OAuthTokenEndpointAuthMethod' });
 
 export const OAuthGrantTypeSchema = z
@@ -58,6 +58,7 @@ export const OAuthAuthorizationServerMetadataSchema = z
         grant_types_supported: z.array(z.string()),
         code_challenge_methods_supported: z.array(z.string()),
         token_endpoint_auth_methods_supported: z.array(z.string()),
+        token_endpoint_auth_signing_alg_values_supported: z.array(z.string()).optional(),
         scopes_supported: z.array(z.string()),
         client_id_metadata_document_supported: z.boolean().optional(),
         authorization_response_iss_parameter_supported: z.boolean().optional(),
@@ -223,6 +224,7 @@ export const OAuthClientDataSchema = z.strictObject({
     grant_types: z.array(OAuthGrantTypeSchema),
     response_types: z.array(OAuthResponseTypeSchema),
     token_endpoint_auth_method: OAuthTokenEndpointAuthMethodSchema,
+    jwks_uri: z.string().url().optional(),
     allowed_scopes: z.array(z.string()),
     default_scopes: z.array(z.string()).optional(),
     registration_source: OAuthRegistrationSourceSchema,
@@ -274,6 +276,7 @@ export const CreateOAuthClientPayloadSchema = z
         grant_types: z.array(OAuthGrantTypeSchema).optional(),
         response_types: z.array(OAuthResponseTypeSchema).optional(),
         token_endpoint_auth_method: OAuthTokenEndpointAuthMethodSchema.optional(),
+        jwks_uri: z.string().url().optional(),
         allowed_scopes: z.array(z.string()).optional(),
         default_scopes: z.array(z.string()).optional(),
         project_binding_mode: OAuthProjectBindingModeSchema.optional(),
@@ -297,6 +300,7 @@ export const UpdateOAuthClientPayloadSchema = z
         grant_types: z.array(OAuthGrantTypeSchema).optional(),
         response_types: z.array(OAuthResponseTypeSchema).optional(),
         token_endpoint_auth_method: OAuthTokenEndpointAuthMethodSchema.optional(),
+        jwks_uri: z.string().url().optional(),
         allowed_scopes: z.array(z.string()).optional(),
         default_scopes: z.array(z.string()).optional(),
         status: OAuthClientStatusSchema.optional(),
@@ -436,6 +440,10 @@ export const OidcFederationConnectionPayloadSchema = z
             description: 'Exact string matches against verified top-level IdP claims, such as tenant or azp.',
         }),
         allowed_project_ids: z.array(federationId).min(1).max(100),
+        allowed_client_ids: z.array(z.string().min(1).max(256)).min(1).max(20).optional().meta({
+            description:
+                'When set, require authentication by one of these account-owned confidential OAuth clients. Omit to allow exchanges without separate client authentication.',
+        }),
         allowed_scopes: z.array(z.string().min(1)).min(1).max(100).optional().meta({
             description:
                 'Optional restriction on delegable Vertesia permissions, excluding account:admin. Omit to use the user’s current permissions. An explicit list further restricts the grant.',
@@ -463,6 +471,10 @@ export const OAuthTokenExchangeRequestSchema = z
         subject_token_type: OidcFederationConnectionPayloadSchema.shape.subject_token_type,
         requested_token_type: z.literal('urn:ietf:params:oauth:token-type:access_token').optional(),
         federation_connection_id: federationId,
+        client_id: z.string().min(1).max(256).optional(),
+        client_secret: z.string().min(1).max(4096).optional(),
+        client_assertion: z.string().min(1).max(16384).optional(),
+        client_assertion_type: z.literal('urn:ietf:params:oauth:client-assertion-type:jwt-bearer').optional(),
         project_id: federationId,
         resource: z.string().min(1),
         scope: z.string().min(1).max(4096).optional().meta({

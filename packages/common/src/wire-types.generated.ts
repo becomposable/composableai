@@ -4671,7 +4671,7 @@ export type OAuthClientType = 'public' | 'confidential';
 export type OAuthClientStatus = 'active' | 'disabled';
 export type OAuthRegistrationSource = 'admin' | 'dynamic';
 export type OAuthProjectBindingMode = 'user_select' | 'fixed';
-export type OAuthTokenEndpointAuthMethod = 'none' | 'client_secret_post' | 'client_secret_basic';
+export type OAuthTokenEndpointAuthMethod = 'none' | 'client_secret_post' | 'client_secret_basic' | 'private_key_jwt';
 export type OAuthGrantType = 'authorization_code' | 'refresh_token' | 'urn:ietf:params:oauth:grant-type:device_code';
 export type OAuthResponseType = 'code';
 export type OAuthAuthorizationRequestStatus = 'pending' | 'denied' | 'consumed';
@@ -4695,6 +4695,7 @@ export type OAuthClientData = {
     grant_types: OAuthGrantType[];
     response_types: OAuthResponseType[];
     token_endpoint_auth_method: OAuthTokenEndpointAuthMethod;
+    jwks_uri?: string | undefined;
     allowed_scopes: string[];
     default_scopes?: string[] | undefined;
     registration_source: OAuthRegistrationSource;
@@ -4720,6 +4721,7 @@ export type OAuthClient = {
     grant_types: OAuthGrantType[];
     response_types: OAuthResponseType[];
     token_endpoint_auth_method: OAuthTokenEndpointAuthMethod;
+    jwks_uri?: string | undefined;
     allowed_scopes: string[];
     default_scopes?: string[] | undefined;
     registration_source: OAuthRegistrationSource;
@@ -4747,6 +4749,7 @@ export type OAuthClientCreateResponse = {
     grant_types: OAuthGrantType[];
     response_types: OAuthResponseType[];
     token_endpoint_auth_method: OAuthTokenEndpointAuthMethod;
+    jwks_uri?: string | undefined;
     allowed_scopes: string[];
     default_scopes?: string[] | undefined;
     registration_source: OAuthRegistrationSource;
@@ -4834,6 +4837,7 @@ export type CreateOAuthClientPayload = {
     grant_types?: OAuthGrantType[] | undefined;
     response_types?: OAuthResponseType[] | undefined;
     token_endpoint_auth_method?: OAuthTokenEndpointAuthMethod | undefined;
+    jwks_uri?: string | undefined;
     allowed_scopes?: string[] | undefined;
     default_scopes?: string[] | undefined;
     project_binding_mode?: OAuthProjectBindingMode | undefined;
@@ -4852,6 +4856,7 @@ export type UpdateOAuthClientPayload = {
     grant_types?: OAuthGrantType[] | undefined;
     response_types?: OAuthResponseType[] | undefined;
     token_endpoint_auth_method?: OAuthTokenEndpointAuthMethod | undefined;
+    jwks_uri?: string | undefined;
     allowed_scopes?: string[] | undefined;
     default_scopes?: string[] | undefined;
     status?: OAuthClientStatus | undefined;
@@ -4876,6 +4881,7 @@ export type OAuthAuthorizationServerMetadata = {
     grant_types_supported: string[];
     code_challenge_methods_supported: string[];
     token_endpoint_auth_methods_supported: string[];
+    token_endpoint_auth_signing_alg_values_supported?: string[] | undefined;
     scopes_supported: string[];
     client_id_metadata_document_supported?: boolean | undefined;
     authorization_response_iss_parameter_supported?: boolean | undefined;
@@ -5003,6 +5009,7 @@ export type OidcFederationConnectionPayload = {
         | 'urn:ietf:params:oauth:token-type:access_token';
     required_claims?: Record<string, string> | undefined;
     allowed_project_ids: string[];
+    allowed_client_ids?: string[] | undefined;
     allowed_scopes?: string[] | undefined;
     max_token_ttl_seconds: number;
     max_subject_token_age_seconds?: number | undefined;
@@ -5021,6 +5028,7 @@ export type OidcFederationConnection = {
         | 'urn:ietf:params:oauth:token-type:access_token';
     required_claims?: Record<string, string> | undefined;
     allowed_project_ids: string[];
+    allowed_client_ids?: string[] | undefined;
     allowed_scopes?: string[] | undefined;
     max_token_ttl_seconds: number;
     max_subject_token_age_seconds: number;
@@ -5038,6 +5046,10 @@ export type OAuthTokenExchangeRequest = {
         | 'urn:ietf:params:oauth:token-type:access_token';
     requested_token_type?: 'urn:ietf:params:oauth:token-type:access_token' | undefined;
     federation_connection_id: string;
+    client_id?: string | undefined;
+    client_secret?: string | undefined;
+    client_assertion?: string | undefined;
+    client_assertion_type?: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer' | undefined;
     project_id: string;
     resource: string;
     scope?: string | undefined;

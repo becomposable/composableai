@@ -75,6 +75,10 @@ export function registerOidcFederationCommand(program: Command) {
             '--subject-token-file <path>',
             'IdP JWT file; - reads stdin (token is never a command argument)',
         )
+        .option('--client-id <id>', 'Registered OAuth client ID')
+        .option('--client-secret-file <path>', 'Client secret file (not a command argument)')
+        .option('--client-auth-method <method>', 'client_secret_post or client_secret_basic', 'client_secret_post')
+        .option('--client-assertion-file <path>', 'Signed private_key_jwt assertion file')
         .option('--subject-token-type <type>', 'Configured subject token type', 'urn:ietf:params:oauth:token-type:jwt')
         .action(
             async (options: {
@@ -83,6 +87,10 @@ export function registerOidcFederationCommand(program: Command) {
                 project: string;
                 resource: string;
                 scope?: string;
+                clientId?: string;
+                clientSecretFile?: string;
+                clientAssertionFile?: string;
+                clientAuthMethod: string;
                 subjectTokenFile: string;
                 subjectTokenType: string;
             }) => {
@@ -101,9 +109,31 @@ export function registerOidcFederationCommand(program: Command) {
                 const subjectToken = (
                     options.subjectTokenFile === '-' ? await readStdin() : readFile(options.subjectTokenFile)
                 ).trim();
+                if (
+                    !['client_secret_post', 'client_secret_basic'].includes(options.clientAuthMethod) ||
+                    (options.clientSecretFile && options.clientAssertionFile) ||
+                    ((options.clientSecretFile || options.clientAssertionFile) && !options.clientId)
+                )
+                    throw new Error('Choose one client authentication method and provide --client-id');
+                const secret = options.clientSecretFile ? readFile(options.clientSecretFile).trim() : undefined;
+                const assertion = options.clientAssertionFile
+                    ? readFile(options.clientAssertionFile).trim()
+                    : undefined;
+                const basic =
+                    options.clientAuthMethod === 'client_secret_basic' && secret && options.clientId
+                        ? { client_id: options.clientId, client_secret: secret }
+                        : undefined;
                 const result = validateApiRequest('OAuthTokenExchangeRequest', {
                     grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
                     subject_token: subjectToken,
+                    ...(options.clientId ? { client_id: options.clientId } : {}),
+                    ...(secret && !basic ? { client_secret: secret } : {}),
+                    ...(assertion
+                        ? {
+                              client_assertion: assertion,
+                              client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+                          }
+                        : {}),
                     subject_token_type: options.subjectTokenType,
                     federation_connection_id: options.connection,
                     project_id: options.project,
@@ -116,7 +146,11 @@ export function registerOidcFederationCommand(program: Command) {
                     storeUrl: url.origin,
                     tokenServerUrl: url.origin,
                 });
-                print(await client.oauthServer.exchangeToken(result.data));
+                print(
+                    await (basic
+                        ? client.oauthServer.exchangeToken(result.data, basic)
+                        : client.oauthServer.exchangeToken(result.data)),
+                );
             },
         );
 }

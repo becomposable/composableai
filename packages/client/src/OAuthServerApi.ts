@@ -25,9 +25,28 @@ export default class OAuthServerApi extends ClientBase {
         this.verboseErrors = parent.verboseErrors;
     }
 
-    /** Exchange a signed IdP assertion under an account-owned trust policy; no client secret is required. */
-    exchangeToken(payload: OAuthTokenExchangeRequest): Promise<OAuthTokenExchangeResponse> {
-        return this.post('/token', { payload });
+    /** Exchange a signed IdP assertion; optional client authentication follows the connection policy. */
+    exchangeToken(
+        payload: OAuthTokenExchangeRequest,
+        basic?: { client_id: string; client_secret: string },
+    ): Promise<OAuthTokenExchangeResponse> {
+        if (
+            basic &&
+            (payload.client_secret !== undefined ||
+                payload.client_assertion !== undefined ||
+                (payload.client_id !== undefined && payload.client_id !== basic.client_id))
+        )
+            throw new Error('Use exactly one client authentication method');
+        return this.post('/token', {
+            payload,
+            ...(basic
+                ? {
+                      headers: {
+                          Authorization: `Basic ${btoa(`${encodeURIComponent(basic.client_id)}:${encodeURIComponent(basic.client_secret)}`)}`,
+                      },
+                  }
+                : {}),
+        });
     }
 
     login(requestId: string, payload: OAuthLoginPayload): Promise<OAuthLoginDecisionResponse> {

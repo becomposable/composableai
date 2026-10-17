@@ -16,8 +16,15 @@ describe('OIDC federation wire contracts', () => {
         const { scope: _scope, ...defaultRequest } = request;
         expect(validateApiRequest('OAuthTokenExchangeRequest', defaultRequest).valid).toBe(true);
         expect(validateApiRequest('OAuthTokenExchangeRequest', { ...request, scope: '' }).valid).toBe(false);
-        for (const credentials of [{ client_id: 'integration' }, { client_secret: 'secret' }]) {
-            expect(validateApiRequest('OAuthTokenExchangeRequest', { ...request, ...credentials }).valid).toBe(false);
+        for (const credentials of [
+            { client_id: 'integration', client_secret: 'secret' },
+            {
+                client_id: 'integration',
+                client_assertion: 'signed',
+                client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+            },
+        ]) {
+            expect(validateApiRequest('OAuthTokenExchangeRequest', { ...request, ...credentials }).valid).toBe(true);
         }
         expect(validateApiRequest('OAuthTokenExchangeRequest', { ...request, project_id: undefined }).valid).toBe(
             false,

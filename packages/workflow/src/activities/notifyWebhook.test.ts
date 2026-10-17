@@ -244,6 +244,33 @@ describe('Webhook should be notified', () => {
         errorLog.mockRestore();
     });
 
+    it('types a request timeout as an unreachable endpoint', async () => {
+        const timeoutAbort = new DOMException('This operation was aborted', 'AbortError');
+        mockFetch.mockRejectedValueOnce(timeoutAbort);
+
+        await expect(testEnv.run(notifyWebhook, createTestPayload())).rejects.toMatchObject({
+            type: 'WebhookEndpointUnreachable',
+            cause: timeoutAbort,
+        });
+    });
+
+    it('keeps a request fetch rejects before contacting the receiver at error, unclassified', async () => {
+        const warn = vi.spyOn(log, 'warn');
+        const errorLog = vi.spyOn(log, 'error');
+        const invalidHeader = new TypeError('Headers.append: "Bad Header" is an invalid header name.');
+        mockFetch.mockRejectedValueOnce(invalidHeader);
+
+        await expect(testEnv.run(notifyWebhook, createTestPayload())).rejects.toBe(invalidHeader);
+
+        expect(errorLog).toHaveBeenCalledWith(
+            'An error occurred while notifying webhook',
+            expect.objectContaining({ error: invalidHeader.message, workflow_id: 'wf_id' }),
+        );
+        expect(warn).not.toHaveBeenCalledWith('An error occurred while notifying webhook', expect.anything());
+        warn.mockRestore();
+        errorLog.mockRestore();
+    });
+
     it('should block URLs rejected by central URL validation', async () => {
         mockValidateUrl.mockRejectedValueOnce(new Error('Access to internal hosts is not allowed'));
 

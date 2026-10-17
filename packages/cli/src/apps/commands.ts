@@ -24,6 +24,9 @@ type ManifestOptions = CliOptions<{
 type SettingsOptions = CliOptions<{
     settings?: string;
     settingsFile?: string;
+    instanceKey?: string;
+    displayName?: string;
+    namespaces?: string;
 }>;
 
 type InstalledAppsOptions = CliOptions<{
@@ -328,7 +331,18 @@ export async function installApp(program: Command, appId: string, options: Setti
         }
     }
 
-    const result = await client.apps.install(appId, settings);
+    const namespaces = options.namespaces ? readSettings(JSON.parse(options.namespaces)) : undefined;
+    if (namespaces && Object.values(namespaces).some((value) => typeof value !== 'string')) {
+        throw new Error('Namespaces must be a JSON object mapping collection IDs to string prefixes');
+    }
+    const namespaceOverrides = namespaces
+        ? Object.fromEntries(Object.entries(namespaces).map(([key, value]) => [key, String(value)]))
+        : undefined;
+    const result = await client.apps.install(appId, settings, undefined, undefined, undefined, undefined, undefined, {
+        instance_key: options.instanceKey,
+        display_name: options.displayName,
+        namespace_overrides: namespaceOverrides,
+    });
     console.log(`${colors.green('✓')} App installed successfully`);
     console.log(`  Installation ID: ${result.id}`);
     console.log(`  App Manifest ID: ${result.manifest}`);

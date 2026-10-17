@@ -141,6 +141,9 @@ ${JSON.stringify(exampleManifest, null, 2)}
 
     apps.command('install <appId>')
         .description('Install an app in the current project')
+        .option('--instance-key <key>', 'Immutable installation key; omitted for the default instance')
+        .option('--display-name <name>', 'Display label for this installation')
+        .option('--namespaces <json>', 'JSON map of MCP collection IDs to permanent tool prefixes')
         .option('-s, --settings <json>', 'Settings as JSON string')
         .option('-f, --settings-file <file>', 'Settings from a JSON file')
         .action(async (appId: string, options: Record<string, unknown>) => {

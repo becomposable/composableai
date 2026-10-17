@@ -12,6 +12,7 @@ export { default as OAuthClientsApi } from './OAuthClientsApi.js';
 export { default as OAuthGrantsApi } from './OAuthGrantsApi.js';
 export { default as OAuthProvidersApi } from './OAuthProvidersApi.js';
 export { default as OAuthServerApi } from './OAuthServerApi.js';
+export { default as OidcFederationApi } from './OidcFederationApi.js';
 export type { ComputePromptFacetsResponse, ListInteractionsResponse } from './PromptsApi.js';
 export { default as RemoteMcpConnectionsApi } from './RemoteMcpConnectionsApi.js';
 export type { ComputeRunFacetsResponse, FilterOption } from './RunsApi.js';

@@ -1,0 +1,129 @@
+import { Command } from 'commander';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { registerOidcFederationCommand } from './index.js';
+
+const mocks = vi.hoisted(() => ({
+    list: vi.fn(),
+    retrieve: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    remove: vi.fn(),
+    exchangeToken: vi.fn(),
+    getClient: vi.fn(),
+    construct: vi.fn(),
+    readFile: vi.fn(),
+    readStdin: vi.fn(),
+}));
+vi.mock('../client.js', () => ({ getClient: mocks.getClient }));
+vi.mock('../utils/stdio.js', () => ({ readFile: mocks.readFile, readStdin: mocks.readStdin }));
+vi.mock('@vertesia/client', () => ({
+    VertesiaClient: class {
+        constructor(options: unknown) {
+            mocks.construct(options);
+        }
+        oauthServer = { exchangeToken: mocks.exchangeToken };
+    },
+}));
+const policy = {
+    name: 'Example integration',
+    issuer: 'https://identity.example.com',
+    external_id_claim: 'oid',
+    allowed_audiences: ['integration'],
+    allowed_algorithms: ['RS256'],
+    subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
+    required_claims: { azp: 'trusted-app' },
+    allowed_project_ids: ['012345678901234567890123'],
+    allowed_scopes: ['content:read'],
+    max_token_ttl_seconds: 300,
+    enabled: false,
+};
+async function command(...args: string[]) {
+    const program = new Command().exitOverride();
+    registerOidcFederationCommand(program);
+    await program.parseAsync(['oidc-federation', ...args], { from: 'user' });
+}
+beforeEach(() => {
+    vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    mocks.getClient.mockResolvedValue({ oidcFederation: mocks });
+    mocks.readFile.mockReturnValue(JSON.stringify(policy));
+    mocks.readStdin.mockResolvedValue(JSON.stringify(policy));
+    mocks.retrieve.mockResolvedValue({ ...policy, id: 'connection', account_id: 'account' });
+});
+afterEach(() => {
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
+});
+describe('oidc-federation CLI', () => {
+    it('lists and inspects account-owned connections', async () => {
+        await command('list');
+        await command('get', 'connection');
+        expect(mocks.list).toHaveBeenCalledOnce();
+        expect(mocks.retrieve).toHaveBeenCalledWith('connection');
+    });
+    it('creates from a file and replaces from stdin without extra fields', async () => {
+        await command('create', '--file', 'policy.json');
+        expect(mocks.create).toHaveBeenCalledWith(policy);
+        await command('update', 'connection', '--file', '-');
+        expect(mocks.readStdin).toHaveBeenCalledOnce();
+        expect(mocks.update).toHaveBeenCalledWith('connection', policy);
+    });
+    it('rejects malformed policies before resolving a client', async () => {
+        mocks.readFile.mockReturnValue(JSON.stringify({ ...policy, allowed_client_ids: ['caller'] }));
+        await expect(command('create', '--file', 'bad.json')).rejects.toThrow('Invalid federation');
+        expect(mocks.getClient).not.toHaveBeenCalled();
+    });
+    it.each([
+        ['enable', true],
+        ['disable', false],
+    ] as const)('sets %s without losing signed claim or scope restrictions', async (action, enabled) => {
+        await command(action, 'connection');
+        expect(mocks.update).toHaveBeenCalledWith('connection', { ...policy, enabled });
+    });
+    it('requires explicit deletion confirmation', async () => {
+        await expect(command('delete', 'connection')).rejects.toThrow('--yes');
+        expect(mocks.remove).not.toHaveBeenCalled();
+        await command('delete', 'connection', '--yes');
+        expect(mocks.remove).toHaveBeenCalledWith('connection');
+    });
+    const exchangeOptions = [
+        'exchange',
+        '--sts-url',
+        'https://sts.example.com',
+        '--connection',
+        '012345678901234567890124',
+        '--project',
+        '012345678901234567890123',
+        '--resource',
+        'https://api.example.com/',
+        '--scope',
+        'content:read',
+        '--subject-token-file',
+        '-',
+    ];
+    it('exchanges a JWT from stdin without loading an authenticated client or supplying a secret', async () => {
+        mocks.readStdin.mockResolvedValue('signed-idp-token\n');
+        mocks.exchangeToken.mockResolvedValue({ access_token: 'result' });
+        await command(...exchangeOptions);
+        expect(mocks.getClient).not.toHaveBeenCalled();
+        expect(mocks.construct).toHaveBeenCalledWith({ tokenServerUrl: 'https://sts.example.com' });
+        expect(mocks.exchangeToken).toHaveBeenCalledWith({
+            grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
+            subject_token: 'signed-idp-token',
+            subject_token_type: policy.subject_token_type,
+            federation_connection_id: '012345678901234567890124',
+            project_id: policy.allowed_project_ids[0],
+            resource: 'https://api.example.com/',
+            scope: 'content:read',
+        });
+    });
+    it('rejects untrusted STS URLs and empty assertions before sending credentials', async () => {
+        await expect(
+            command(
+                ...exchangeOptions.map((v) => (v === 'https://sts.example.com' ? 'http://untrusted.example.com' : v)),
+            ),
+        ).rejects.toThrow('HTTPS');
+        mocks.readStdin.mockResolvedValue('');
+        await expect(command(...exchangeOptions)).rejects.toThrow('Invalid exchange');
+        expect(mocks.exchangeToken).not.toHaveBeenCalled();
+    });
+});

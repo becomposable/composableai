@@ -659,13 +659,13 @@ export function hasAppInstallationAccess(
     if (token.project?.id !== installation.project) return false;
     const grants = token.app_installations;
     if (grants !== undefined) {
-        return (
-            grants.version === 1 &&
-            grants.project_id === installation.project &&
-            grants.ids.includes(installation.id) &&
-            (!ui || !grants.ui_restrictions?.includes(installation.id))
-        );
+        if (grants.version !== 1 || grants.project_id !== installation.project) return false;
+        if (grants.ids.includes(installation.id)) {
+            return !ui || !grants.ui_restrictions?.includes(installation.id);
+        }
     }
+    // Default app-name grants survive reinstalling the same app with a new installation ID.
+    // Named instances never inherit these grants, including on refreshed running-agent tokens.
     return (
         (!installation.instance_key || installation.instance_key === 'default') &&
         (token.apps ?? []).includes(installation.manifest.name) &&

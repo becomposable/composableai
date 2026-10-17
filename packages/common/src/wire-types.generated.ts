@@ -5013,6 +5013,7 @@ export type OidcFederationConnectionPayload = {
         | 'urn:ietf:params:oauth:token-type:id_token'
         | 'urn:ietf:params:oauth:token-type:access_token';
     required_claims?: Record<string, string> | undefined;
+    all_projects?: boolean | undefined;
     allowed_project_ids: string[];
     allowed_client_ids?: string[] | undefined;
     allowed_scopes?: string[] | undefined;
@@ -5032,6 +5033,7 @@ export type OidcFederationConnection = {
         | 'urn:ietf:params:oauth:token-type:id_token'
         | 'urn:ietf:params:oauth:token-type:access_token';
     required_claims?: Record<string, string> | undefined;
+    all_projects?: boolean | undefined;
     allowed_project_ids: string[];
     allowed_client_ids?: string[] | undefined;
     allowed_scopes?: string[] | undefined;

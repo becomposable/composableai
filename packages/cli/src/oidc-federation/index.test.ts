@@ -67,6 +67,17 @@ describe('oidc-federation CLI', () => {
         expect(mocks.readStdin).toHaveBeenCalledOnce();
         expect(mocks.update).toHaveBeenCalledWith('connection', policy);
     });
+    it('preserves all-project mode through create, replacement and emergency disable', async () => {
+        const all = { ...policy, all_projects: true, allowed_project_ids: [] };
+        mocks.readFile.mockReturnValue(JSON.stringify(all));
+        await command('create', '--file', 'all-projects.json');
+        expect(mocks.create).toHaveBeenCalledWith(all);
+        await command('update', 'connection', '--file', 'all-projects.json');
+        expect(mocks.update).toHaveBeenCalledWith('connection', all);
+        mocks.retrieve.mockResolvedValue({ ...all, id: 'connection', account_id: 'account' });
+        await command('disable', 'connection');
+        expect(mocks.update).toHaveBeenLastCalledWith('connection', { ...all, enabled: false });
+    });
     it('rejects malformed policies before resolving a client', async () => {
         mocks.readFile.mockReturnValue(JSON.stringify({ ...policy, unknown_configuration: ['caller'] }));
         await expect(command('create', '--file', 'bad.json')).rejects.toThrow('Invalid federation');

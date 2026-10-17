@@ -63,6 +63,16 @@ describe('OIDC federation wire contracts', () => {
             enabled: true,
         };
         expect(validateApiRequest('OidcFederationConnectionPayload', connection).valid).toBe(true);
+        expect(
+            validateApiRequest('OidcFederationConnectionPayload', {
+                ...connection,
+                all_projects: true,
+                allowed_project_ids: [],
+            }).valid,
+        ).toBe(true);
+        expect(
+            validateApiRequest('OidcFederationConnectionPayload', { ...connection, all_projects: 'true' }).valid,
+        ).toBe(false);
         const { allowed_scopes: _scopes, ...defaultPolicy } = connection;
         expect(validateApiRequest('OidcFederationConnectionPayload', defaultPolicy).valid).toBe(true);
         expect(validateApiRequest('OidcFederationConnectionPayload', { ...connection, allowed_scopes: [] }).valid).toBe(

@@ -447,7 +447,13 @@ export const OidcFederationConnectionPayloadSchema = z
         required_claims: z.record(z.string(), z.string()).optional().meta({
             description: 'Exact string matches against verified top-level IdP claims, such as tenant or azp.',
         }),
-        allowed_project_ids: z.array(federationId).min(1).max(100),
+        all_projects: z.boolean().optional().meta({
+            description:
+                'Explicitly allow all current and future projects in the owning organization, subject to the user’s current access. Defaults to false for existing allowlists. When true, allowed_project_ids must be empty.',
+        }),
+        allowed_project_ids: z.array(federationId).max(100).meta({
+            description: 'Explicit project allowlist. Must contain 1–100 projects unless all_projects is true.',
+        }),
         allowed_client_ids: z.array(z.string().min(1).max(256)).min(1).max(20).optional().meta({
             description:
                 'When set, require authentication by one of these account-owned confidential OAuth clients. Omit to allow exchanges without separate client authentication.',

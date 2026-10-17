@@ -7201,14 +7201,18 @@
         },
         "description": "Exact string matches against verified top-level IdP claims, such as tenant or azp."
       },
+      "all_projects": {
+        "type": "boolean",
+        "description": "Explicitly allow all current and future projects in the owning organization, subject to the user’s current access. Defaults to false for existing allowlists. When true, allowed_project_ids must be empty."
+      },
       "allowed_project_ids": {
-        "minItems": 1,
         "maxItems": 100,
         "type": "array",
         "items": {
           "type": "string",
           "pattern": "^[a-fA-F0-9]{24}$"
-        }
+        },
+        "description": "Explicit project allowlist. Must contain 1–100 projects unless all_projects is true."
       },
       "allowed_client_ids": {
         "minItems": 1,
@@ -7318,14 +7322,18 @@
         },
         "description": "Exact string matches against verified top-level IdP claims, such as tenant or azp."
       },
+      "all_projects": {
+        "type": "boolean",
+        "description": "Explicitly allow all current and future projects in the owning organization, subject to the user’s current access. Defaults to false for existing allowlists. When true, allowed_project_ids must be empty."
+      },
       "allowed_project_ids": {
-        "minItems": 1,
         "maxItems": 100,
         "type": "array",
         "items": {
           "type": "string",
           "pattern": "^[a-fA-F0-9]{24}$"
-        }
+        },
+        "description": "Explicit project allowlist. Must contain 1–100 projects unless all_projects is true."
       },
       "allowed_client_ids": {
         "minItems": 1,

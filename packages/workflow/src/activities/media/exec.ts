@@ -1,6 +1,6 @@
 import { type ExecFileOptions, execFile as execFileCallback, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
-import { Context } from '@temporalio/activity';
+import { ApplicationFailure, Context } from '@temporalio/activity';
 
 const execFileAsync = promisify(execFileCallback);
 
@@ -251,6 +251,14 @@ export async function execActivityFileWithProgress(
             }),
         );
     });
+}
+
+/** Failure `type` of a file without a usable video stream: a property of the content, logged at warn. */
+export const UNUSABLE_VIDEO_CONTENT = 'UnusableVideoContent';
+
+/** Whether a failure is the {@link UNUSABLE_VIDEO_CONTENT} raised by a metadata probe, which already logged it. */
+export function isUnusableVideoContent(error: unknown): error is ApplicationFailure {
+    return error instanceof ApplicationFailure && error.type === UNUSABLE_VIDEO_CONTENT;
 }
 
 /**

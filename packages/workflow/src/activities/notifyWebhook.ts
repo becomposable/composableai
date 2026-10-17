@@ -50,6 +50,17 @@ export interface NotifyWebhookResult {
 
 const APP_HOOK_TOKEN_REFRESH_THRESHOLD_MS = 5 * 60_000;
 
+/**
+ * Why a webhook request never got an answer, as plain log fields. Node's fetch rejects with a bare
+ * `TypeError: fetch failed` and keeps the reason (ECONNREFUSED, ENOTFOUND, a connect timeout) on `cause`.
+ */
+function describeFetchFailure(err: unknown): { error: string; cause?: string } {
+    const error = err instanceof Error ? err.message : String(err);
+    const cause = err instanceof Error ? (err.cause as { code?: unknown; message?: unknown } | undefined) : undefined;
+    const detail = cause?.code ?? cause?.message;
+    return typeof detail === 'string' ? { error, cause: detail } : { error };
+}
+
 export function webhookLogTarget(url: string): string {
     try {
         const parsed = new URL(url);
@@ -161,7 +172,15 @@ export async function notifyWebhook(
                     nonRetryable: true,
                 });
             }
-            log.error('An error occurred while notifying webhook', { url: logTarget, err });
+            // The receiving endpoint could not be reached (DNS, refused or reset connection, timeout). That is
+            // the receiver's availability, not a Vertesia failure, and the activity retries it: warn, like the
+            // non-2xx answer below. The activity logger does not serialize an Error, so the cause rides as text.
+            log.warn('An error occurred while notifying webhook', {
+                url: logTarget,
+                workflow_id: params.workflow_id,
+                workflow_run_id: params.workflow_run_id,
+                ...describeFetchFailure(err),
+            });
             throw err;
         });
     } finally {

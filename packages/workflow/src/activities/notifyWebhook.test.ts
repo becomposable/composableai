@@ -1,3 +1,4 @@
+import { log } from '@temporalio/activity';
 import { MockActivityEnvironment } from '@temporalio/testing';
 import type { VertesiaClient } from '@vertesia/client';
 import {
@@ -216,6 +217,25 @@ describe('Webhook should be notified', () => {
             },
             redirect: 'manual',
         });
+    });
+
+    it('warns with the network cause when the endpoint cannot be reached', async () => {
+        const warn = vi.spyOn(log, 'warn');
+        const errorLog = vi.spyOn(log, 'error');
+        const connectFailure = new TypeError('fetch failed', {
+            cause: Object.assign(new Error('connect ECONNREFUSED'), { code: 'ECONNREFUSED' }),
+        });
+        mockFetch.mockRejectedValueOnce(connectFailure);
+
+        await expect(testEnv.run(notifyWebhook, createTestPayload())).rejects.toBe(connectFailure);
+
+        expect(warn).toHaveBeenCalledWith(
+            'An error occurred while notifying webhook',
+            expect.objectContaining({ error: 'fetch failed', cause: 'ECONNREFUSED', workflow_id: 'wf_id' }),
+        );
+        expect(errorLog).not.toHaveBeenCalled();
+        warn.mockRestore();
+        errorLog.mockRestore();
     });
 
     it('should block URLs rejected by central URL validation', async () => {

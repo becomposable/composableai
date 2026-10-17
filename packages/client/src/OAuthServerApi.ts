@@ -9,6 +9,8 @@ import type {
     OAuthGrantableScopesResponse,
     OAuthLoginDecisionResponse,
     OAuthLoginPayload,
+    OAuthTokenExchangeRequest,
+    OAuthTokenExchangeResponse,
     ProjectRef,
 } from '@vertesia/common';
 
@@ -21,6 +23,11 @@ export default class OAuthServerApi extends ClientBase {
         this.createServerError = parent.createServerError;
         this.errorFactory = parent.errorFactory;
         this.verboseErrors = parent.verboseErrors;
+    }
+
+    /** Exchange a signed IdP assertion under an account-owned trust policy; no client secret is required. */
+    exchangeToken(payload: OAuthTokenExchangeRequest): Promise<OAuthTokenExchangeResponse> {
+        return this.post('/token', { payload });
     }
 
     login(requestId: string, payload: OAuthLoginPayload): Promise<OAuthLoginDecisionResponse> {

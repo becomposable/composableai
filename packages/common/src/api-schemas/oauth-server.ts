@@ -24,7 +24,12 @@ export const OAuthTokenEndpointAuthMethodSchema = z
     .meta({ id: 'OAuthTokenEndpointAuthMethod' });
 
 export const OAuthGrantTypeSchema = z
-    .enum(['authorization_code', 'refresh_token', 'urn:ietf:params:oauth:grant-type:device_code'])
+    .enum([
+        'authorization_code',
+        'refresh_token',
+        'urn:ietf:params:oauth:grant-type:device_code',
+        'urn:ietf:params:oauth:grant-type:token-exchange',
+    ])
     .meta({ id: 'OAuthGrantType' });
 
 export const OAuthResponseTypeSchema = z.literal('code').meta({ id: 'OAuthResponseType' });
@@ -411,3 +416,55 @@ export const OAuthLoginUserNotFoundResponseSchema = z
         ensure_user_url: z.string(),
     })
     .meta({ id: 'OAuthLoginUserNotFoundResponse' });
+
+const federationId = z.string().regex(/^[a-fA-F0-9]{24}$/);
+export const OidcFederationConnectionPayloadSchema = z
+    .strictObject({
+        name: z.string().min(1).max(200),
+        issuer: z.string().url(),
+        jwks_uri: z.string().url().optional(),
+        external_id_claim: z.string().min(1).max(256).regex(/\S/).meta({
+            description:
+                'Exact top-level verified token claim matched to SCIM externalId within the owning provisioning account.',
+        }),
+        allowed_audiences: z.array(z.string().min(1)).min(1).max(20),
+        allowed_algorithms: z
+            .array(z.enum(['RS256', 'ES256']))
+            .min(1)
+            .max(2),
+        subject_token_type: z.enum([
+            'urn:ietf:params:oauth:token-type:jwt',
+            'urn:ietf:params:oauth:token-type:id_token',
+            'urn:ietf:params:oauth:token-type:access_token',
+        ]),
+        required_claims: z.record(z.string(), z.string()).optional().meta({
+            description: 'Exact string matches against verified top-level IdP claims, such as tenant or azp.',
+        }),
+        allowed_project_ids: z.array(federationId).min(1).max(100),
+        allowed_scopes: z.array(z.string().min(1)).min(1).max(100),
+        max_token_ttl_seconds: z.number().int().min(30).max(300),
+        enabled: z.boolean(),
+    })
+    .meta({ id: 'OidcFederationConnectionPayload' });
+export const OidcFederationConnectionSchema = OidcFederationConnectionPayloadSchema.extend({
+    id: federationId,
+    account_id: federationId,
+}).meta({ id: 'OidcFederationConnection' });
+export const OidcFederationConnectionArraySchema = z
+    .array(OidcFederationConnectionSchema)
+    .meta({ id: 'OidcFederationConnectionArray' });
+export const OAuthTokenExchangeRequestSchema = z
+    .strictObject({
+        grant_type: z.literal('urn:ietf:params:oauth:grant-type:token-exchange'),
+        subject_token: z.string().min(1).max(65536),
+        subject_token_type: OidcFederationConnectionPayloadSchema.shape.subject_token_type,
+        requested_token_type: z.literal('urn:ietf:params:oauth:token-type:access_token').optional(),
+        federation_connection_id: federationId,
+        project_id: federationId,
+        resource: z.string().min(1),
+        scope: z.string().min(1).max(4096),
+    })
+    .meta({ id: 'OAuthTokenExchangeRequest' });
+export const OAuthTokenExchangeResponseSchema = OAuthTokenResponseSchema.extend({
+    issued_token_type: z.literal('urn:ietf:params:oauth:token-type:access_token'),
+}).meta({ id: 'OAuthTokenExchangeResponse' });

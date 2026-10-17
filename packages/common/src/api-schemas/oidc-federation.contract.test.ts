@@ -13,6 +13,9 @@ const request = {
 describe('OIDC federation wire contracts', () => {
     it('accepts secretless exchanges and rejects missing selectors and unsupported token requests', () => {
         expect(validateApiRequest('OAuthTokenExchangeRequest', request).valid).toBe(true);
+        const { scope: _scope, ...defaultRequest } = request;
+        expect(validateApiRequest('OAuthTokenExchangeRequest', defaultRequest).valid).toBe(true);
+        expect(validateApiRequest('OAuthTokenExchangeRequest', { ...request, scope: '' }).valid).toBe(false);
         for (const credentials of [{ client_id: 'integration' }, { client_secret: 'secret' }]) {
             expect(validateApiRequest('OAuthTokenExchangeRequest', { ...request, ...credentials }).valid).toBe(false);
         }
@@ -53,6 +56,11 @@ describe('OIDC federation wire contracts', () => {
             enabled: true,
         };
         expect(validateApiRequest('OidcFederationConnectionPayload', connection).valid).toBe(true);
+        const { allowed_scopes: _scopes, ...defaultPolicy } = connection;
+        expect(validateApiRequest('OidcFederationConnectionPayload', defaultPolicy).valid).toBe(true);
+        expect(validateApiRequest('OidcFederationConnectionPayload', { ...connection, allowed_scopes: [] }).valid).toBe(
+            false,
+        );
         for (const max_subject_token_age_seconds of [0, 29, 86401, 90.5]) {
             expect(
                 validateApiRequest('OidcFederationConnectionPayload', { ...connection, max_subject_token_age_seconds })

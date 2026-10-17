@@ -5003,7 +5003,7 @@ export type OidcFederationConnectionPayload = {
         | 'urn:ietf:params:oauth:token-type:access_token';
     required_claims?: Record<string, string> | undefined;
     allowed_project_ids: string[];
-    allowed_scopes: string[];
+    allowed_scopes?: string[] | undefined;
     max_token_ttl_seconds: number;
     max_subject_token_age_seconds?: number | undefined;
     enabled: boolean;
@@ -5021,7 +5021,7 @@ export type OidcFederationConnection = {
         | 'urn:ietf:params:oauth:token-type:access_token';
     required_claims?: Record<string, string> | undefined;
     allowed_project_ids: string[];
-    allowed_scopes: string[];
+    allowed_scopes?: string[] | undefined;
     max_token_ttl_seconds: number;
     max_subject_token_age_seconds: number;
     enabled: boolean;
@@ -5040,7 +5040,7 @@ export type OAuthTokenExchangeRequest = {
     federation_connection_id: string;
     project_id: string;
     resource: string;
-    scope: string;
+    scope?: string | undefined;
 };
 export type OAuthTokenExchangeResponse = {
     access_token: string;

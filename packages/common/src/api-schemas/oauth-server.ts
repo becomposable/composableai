@@ -436,9 +436,9 @@ export const OidcFederationConnectionPayloadSchema = z
             description: 'Exact string matches against verified top-level IdP claims, such as tenant or azp.',
         }),
         allowed_project_ids: z.array(federationId).min(1).max(100),
-        allowed_scopes: z.array(z.string().min(1)).min(1).max(100).meta({
+        allowed_scopes: z.array(z.string().min(1)).min(1).max(100).optional().meta({
             description:
-                'Delegable permission scopes, excluding account:admin. Current user permissions also limit the grant.',
+                'Optional restriction on delegable Vertesia permissions, excluding account:admin. Omit to use the user’s current permissions. An explicit list further restricts the grant.',
         }),
         max_token_ttl_seconds: z.number().int().min(30).max(300),
         max_subject_token_age_seconds: z.number().int().min(30).max(86400).optional().meta({
@@ -465,7 +465,10 @@ export const OAuthTokenExchangeRequestSchema = z
         federation_connection_id: federationId,
         project_id: federationId,
         resource: z.string().min(1),
-        scope: z.string().min(1).max(4096),
+        scope: z.string().min(1).max(4096).optional().meta({
+            description:
+                'Optional space-separated permission subset. Omit to use current user permissions within the connection policy.',
+        }),
     })
     .meta({ id: 'OAuthTokenExchangeRequest' });
 export const OAuthTokenExchangeResponseSchema = OAuthTokenResponseSchema.omit({

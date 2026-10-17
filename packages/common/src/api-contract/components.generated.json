@@ -7210,7 +7210,7 @@
           "type": "string",
           "minLength": 1
         },
-        "description": "Delegable permission scopes, excluding account:admin. Current user permissions also limit the grant."
+        "description": "Optional restriction on delegable Vertesia permissions, excluding account:admin. Omit to use the user’s current permissions. An explicit list further restricts the grant."
       },
       "max_token_ttl_seconds": {
         "type": "integer",
@@ -7235,7 +7235,6 @@
       "allowed_algorithms",
       "subject_token_type",
       "allowed_project_ids",
-      "allowed_scopes",
       "max_token_ttl_seconds",
       "enabled"
     ],
@@ -7317,7 +7316,7 @@
           "type": "string",
           "minLength": 1
         },
-        "description": "Delegable permission scopes, excluding account:admin. Current user permissions also limit the grant."
+        "description": "Optional restriction on delegable Vertesia permissions, excluding account:admin. Omit to use the user’s current permissions. An explicit list further restricts the grant."
       },
       "max_token_ttl_seconds": {
         "type": "integer",
@@ -7349,7 +7348,6 @@
       "allowed_algorithms",
       "subject_token_type",
       "allowed_project_ids",
-      "allowed_scopes",
       "max_token_ttl_seconds",
       "max_subject_token_age_seconds",
       "enabled",
@@ -7403,7 +7401,8 @@
       "scope": {
         "type": "string",
         "minLength": 1,
-        "maxLength": 4096
+        "maxLength": 4096,
+        "description": "Optional space-separated permission subset. Omit to use current user permissions within the connection policy."
       }
     },
     "required": [
@@ -7412,8 +7411,7 @@
       "subject_token_type",
       "federation_connection_id",
       "project_id",
-      "resource",
-      "scope"
+      "resource"
     ],
     "additionalProperties": false
   },

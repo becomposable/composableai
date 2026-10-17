@@ -18,7 +18,7 @@ afterEach(() => {
 });
 
 describe('federation exchange with the real SDK', () => {
-    it('constructs the client and posts a credential-free exchange request to STS', async () => {
+    it.each([undefined, 'content:read'])('posts a credential-free exchange with optional scope %s', async (scope) => {
         const requests: Request[] = [];
         const response = {
             access_token: 'scoped-access-token',
@@ -49,8 +49,7 @@ describe('federation exchange with the real SDK', () => {
                 '012345678901234567890123',
                 '--resource',
                 'https://api.example.com/',
-                '--scope',
-                'content:read',
+                ...(scope ? ['--scope', scope] : []),
                 '--subject-token-file',
                 '-',
             ],
@@ -67,7 +66,7 @@ describe('federation exchange with the real SDK', () => {
             federation_connection_id: '012345678901234567890124',
             project_id: '012345678901234567890123',
             resource: 'https://api.example.com/',
-            scope: 'content:read',
+            ...(scope ? { scope } : {}),
         });
         expect(JSON.parse(output.mock.calls[0][0])).toEqual(response);
     });

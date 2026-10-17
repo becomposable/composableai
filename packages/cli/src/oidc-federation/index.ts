@@ -67,7 +67,10 @@ export function registerOidcFederationCommand(program: Command) {
         .requiredOption('--connection <id>', 'Federation connection ID')
         .requiredOption('--project <id>', 'Target project ID')
         .requiredOption('--resource <uri>', 'Target Vertesia API audience')
-        .requiredOption('--scope <scopes>', 'Space-separated permission scopes')
+        .option(
+            '--scope <scopes>',
+            'Optional permission subset; defaults to the user’s current permissions within the trust policy',
+        )
         .requiredOption(
             '--subject-token-file <path>',
             'IdP JWT file; - reads stdin (token is never a command argument)',
@@ -79,7 +82,7 @@ export function registerOidcFederationCommand(program: Command) {
                 connection: string;
                 project: string;
                 resource: string;
-                scope: string;
+                scope?: string;
                 subjectTokenFile: string;
                 subjectTokenType: string;
             }) => {

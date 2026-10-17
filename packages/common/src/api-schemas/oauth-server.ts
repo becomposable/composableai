@@ -24,12 +24,7 @@ export const OAuthTokenEndpointAuthMethodSchema = z
     .meta({ id: 'OAuthTokenEndpointAuthMethod' });
 
 export const OAuthGrantTypeSchema = z
-    .enum([
-        'authorization_code',
-        'refresh_token',
-        'urn:ietf:params:oauth:grant-type:device_code',
-        'urn:ietf:params:oauth:grant-type:token-exchange',
-    ])
+    .enum(['authorization_code', 'refresh_token', 'urn:ietf:params:oauth:grant-type:device_code'])
     .meta({ id: 'OAuthGrantType' });
 
 export const OAuthResponseTypeSchema = z.literal('code').meta({ id: 'OAuthResponseType' });

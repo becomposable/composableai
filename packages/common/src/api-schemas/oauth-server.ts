@@ -24,7 +24,12 @@ export const OAuthTokenEndpointAuthMethodSchema = z
     .meta({ id: 'OAuthTokenEndpointAuthMethod' });
 
 export const OAuthGrantTypeSchema = z
-    .enum(['authorization_code', 'refresh_token', 'urn:ietf:params:oauth:grant-type:device_code'])
+    .enum([
+        'authorization_code',
+        'refresh_token',
+        'urn:ietf:params:oauth:grant-type:device_code',
+        'urn:ietf:params:oauth:grant-type:token-exchange',
+    ])
     .meta({ id: 'OAuthGrantType' });
 
 export const OAuthResponseTypeSchema = z.literal('code').meta({ id: 'OAuthResponseType' });
@@ -304,6 +309,9 @@ export const UpdateOAuthClientPayloadSchema = z
         allowed_scopes: z.array(z.string()).optional(),
         default_scopes: z.array(z.string()).optional(),
         status: OAuthClientStatusSchema.optional(),
+        revoke_previous_client_secret: z.boolean().optional().meta({
+            description: 'Immediately revoke the previous rotation secret while retaining the current secret.',
+        }),
         project_binding_mode: OAuthProjectBindingModeSchema.optional(),
         fixed_project_id: z.string().optional(),
         restrict_to_owner_account: z.boolean().optional(),

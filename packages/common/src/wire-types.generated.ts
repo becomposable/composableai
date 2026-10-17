@@ -4672,7 +4672,11 @@ export type OAuthClientStatus = 'active' | 'disabled';
 export type OAuthRegistrationSource = 'admin' | 'dynamic';
 export type OAuthProjectBindingMode = 'user_select' | 'fixed';
 export type OAuthTokenEndpointAuthMethod = 'none' | 'client_secret_post' | 'client_secret_basic' | 'private_key_jwt';
-export type OAuthGrantType = 'authorization_code' | 'refresh_token' | 'urn:ietf:params:oauth:grant-type:device_code';
+export type OAuthGrantType =
+    | 'authorization_code'
+    | 'refresh_token'
+    | 'urn:ietf:params:oauth:grant-type:device_code'
+    | 'urn:ietf:params:oauth:grant-type:token-exchange';
 export type OAuthResponseType = 'code';
 export type OAuthAuthorizationRequestStatus = 'pending' | 'denied' | 'consumed';
 export type OAuthClientRegistrationMode = 'registered' | 'client_id_metadata_document';
@@ -4860,6 +4864,7 @@ export type UpdateOAuthClientPayload = {
     allowed_scopes?: string[] | undefined;
     default_scopes?: string[] | undefined;
     status?: OAuthClientStatus | undefined;
+    revoke_previous_client_secret?: boolean | undefined;
     project_binding_mode?: OAuthProjectBindingMode | undefined;
     fixed_project_id?: string | undefined;
     restrict_to_owner_account?: boolean | undefined;

@@ -6596,7 +6596,8 @@
     "enum": [
       "authorization_code",
       "refresh_token",
-      "urn:ietf:params:oauth:grant-type:device_code"
+      "urn:ietf:params:oauth:grant-type:device_code",
+      "urn:ietf:params:oauth:grant-type:token-exchange"
     ]
   },
   "OAuthResponseType": {
@@ -7836,6 +7837,10 @@
       },
       "status": {
         "$ref": "#/components/schemas/OAuthClientStatus"
+      },
+      "revoke_previous_client_secret": {
+        "type": "boolean",
+        "description": "Immediately revoke the previous rotation secret while retaining the current secret."
       },
       "project_binding_mode": {
         "$ref": "#/components/schemas/OAuthProjectBindingMode"

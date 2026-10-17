@@ -105,7 +105,11 @@ describe('oidc-federation CLI', () => {
         mocks.exchangeToken.mockResolvedValue({ access_token: 'result' });
         await command(...exchangeOptions);
         expect(mocks.getClient).not.toHaveBeenCalled();
-        expect(mocks.construct).toHaveBeenCalledWith({ tokenServerUrl: 'https://sts.example.com' });
+        expect(mocks.construct).toHaveBeenCalledWith({
+            serverUrl: 'https://sts.example.com',
+            storeUrl: 'https://sts.example.com',
+            tokenServerUrl: 'https://sts.example.com',
+        });
         expect(mocks.exchangeToken).toHaveBeenCalledWith({
             grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange',
             subject_token: 'signed-idp-token',

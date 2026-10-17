@@ -108,7 +108,11 @@ export function registerOidcFederationCommand(program: Command) {
                     scope: options.scope,
                 });
                 if (!result.valid) throw new Error('Invalid exchange options or empty IdP token');
-                const client = new VertesiaClient({ tokenServerUrl: url.origin });
+                const client = new VertesiaClient({
+                    serverUrl: url.origin,
+                    storeUrl: url.origin,
+                    tokenServerUrl: url.origin,
+                });
                 print(await client.oauthServer.exchangeToken(result.data));
             },
         );

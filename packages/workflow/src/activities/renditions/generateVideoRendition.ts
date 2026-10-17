@@ -31,7 +31,7 @@ interface VideoMetadata {
     height: number;
 }
 
-async function getVideoMetadata(videoPath: string): Promise<VideoMetadata> {
+export async function getVideoMetadata(videoPath: string): Promise<VideoMetadata> {
     try {
         const args = ['-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videoPath];
         const { stdout } = await execActivityFile('ffprobe', args);
@@ -46,16 +46,19 @@ async function getVideoMetadata(videoPath: string): Promise<VideoMetadata> {
         const height = videoStream?.height || 0;
 
         if (!videoStream || duration <= 0) {
-            throw ApplicationFailure.nonRetryable('Video has no usable stream or duration');
+            throw ApplicationFailure.nonRetryable('Video has no usable stream or duration', 'UnusableVideoContent');
         }
 
         return { duration, width, height };
     } catch (error) {
         rethrowIfActivityStopped(error);
-        log.error(`Failed to get video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        const message = `Failed to get video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`;
         if (error instanceof ApplicationFailure) {
+            // Raised above: the file has no usable video stream, a property of the content.
+            log.warn(message);
             throw error;
         }
+        log.error(message);
         throw ApplicationFailure.nonRetryable(
             `Failed to probe video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );

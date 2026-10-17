@@ -1,10 +1,49 @@
+import { ApplicationFailure, log } from '@temporalio/activity';
 import { describe, expect, it, vi } from 'vitest';
+import { execActivityFile } from '../media/exec.js';
 import {
     calculateThumbnailTimestamps,
     generateThumbnailsWithFallback,
+    getVideoMetadata,
     requireGeneratedThumbnails,
     resolveVideoDuration,
 } from './generateVideoRendition.js';
+
+vi.mock('@temporalio/activity', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('@temporalio/activity')>()),
+    log: { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() },
+}));
+
+vi.mock('../media/exec.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('../media/exec.js')>()),
+    execActivityFile: vi.fn(),
+    rethrowIfActivityStopped: vi.fn(),
+}));
+
+describe('getVideoMetadata', () => {
+    it('logs a file without a usable video stream at warn, as a content failure', async () => {
+        vi.mocked(execActivityFile).mockResolvedValue({
+            stdout: JSON.stringify({ streams: [{ codec_type: 'audio' }], format: { duration: '12' } }),
+            stderr: '',
+        } as Awaited<ReturnType<typeof execActivityFile>>);
+
+        const failure = await getVideoMetadata('/tmp/audio-only.mp4').catch((error: unknown) => error);
+
+        expect(failure).toBeInstanceOf(ApplicationFailure);
+        expect(failure).toMatchObject({ type: 'UnusableVideoContent', nonRetryable: true });
+        expect(log.warn).toHaveBeenCalledWith('Failed to get video metadata: Video has no usable stream or duration');
+        expect(log.error).not.toHaveBeenCalled();
+    });
+
+    it('logs a probe that cannot run at error', async () => {
+        vi.mocked(log.error).mockClear();
+        vi.mocked(execActivityFile).mockRejectedValue(new Error('spawn ffprobe ENOENT'));
+
+        await expect(getVideoMetadata('/tmp/video.mp4')).rejects.toThrow('Failed to probe video metadata');
+
+        expect(log.error).toHaveBeenCalledWith('Failed to get video metadata: spawn ffprobe ENOENT');
+    });
+});
 
 describe('resolveVideoDuration', () => {
     it('prefers the video stream duration over a longer container duration', () => {

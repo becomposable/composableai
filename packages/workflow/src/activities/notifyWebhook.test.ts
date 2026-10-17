@@ -170,9 +170,11 @@ describe('Webhook should be notified', () => {
         const payload = createTestPayload();
 
         // Expect the function to throw an error with response payload
-        await expect(testEnv.run(notifyWebhook, payload)).rejects.toThrow(
-            `Webhook Notification to ${defaultParams.webhook} failed with status: 500 Internal Server Error - Response: {"error": "Database connection failed", "code": "DB_ERROR"}`,
-        );
+        await expect(testEnv.run(notifyWebhook, payload)).rejects.toMatchObject({
+            message: `Webhook Notification to ${defaultParams.webhook} failed with status: 500 Internal Server Error - Response: {"error": "Database connection failed", "code": "DB_ERROR"}`,
+            type: 'WebhookEndpointError',
+            nonRetryable: false,
+        });
 
         // Verify fetch was called with correct parameters (old format wraps detail in result)
         expect(mockFetch).toHaveBeenCalledWith(defaultParams.webhook, {
@@ -227,7 +229,11 @@ describe('Webhook should be notified', () => {
         });
         mockFetch.mockRejectedValueOnce(connectFailure);
 
-        await expect(testEnv.run(notifyWebhook, createTestPayload())).rejects.toBe(connectFailure);
+        await expect(testEnv.run(notifyWebhook, createTestPayload())).rejects.toMatchObject({
+            type: 'WebhookEndpointUnreachable',
+            nonRetryable: false,
+            cause: connectFailure,
+        });
 
         expect(warn).toHaveBeenCalledWith(
             'An error occurred while notifying webhook',

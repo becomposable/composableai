@@ -54,6 +54,11 @@ const APP_HOOK_TOKEN_REFRESH_THRESHOLD_MS = 5 * 60_000;
  * Why a webhook request never got an answer, as plain log fields. Node's fetch rejects with a bare
  * `TypeError: fetch failed` and keeps the reason (ECONNREFUSED, ENOTFOUND, a connect timeout) on `cause`.
  */
+/** Failure `type` of a webhook receiver that could not be reached (DNS, refused or reset connection, timeout). */
+export const WEBHOOK_ENDPOINT_UNREACHABLE = 'WebhookEndpointUnreachable';
+/** Failure `type` of a webhook receiver that answered with a non-2xx status. */
+export const WEBHOOK_ENDPOINT_ERROR = 'WebhookEndpointError';
+
 function describeFetchFailure(err: unknown): { error: string; cause?: string } {
     const error = err instanceof Error ? err.message : String(err);
     const cause = err instanceof Error ? (err.cause as { code?: unknown; message?: unknown } | undefined) : undefined;
@@ -181,7 +186,12 @@ export async function notifyWebhook(
                 workflow_run_id: params.workflow_run_id,
                 ...describeFetchFailure(err),
             });
-            throw err;
+            // Still retried. The type lets the workflow's failure log tell the receiver's outage from ours.
+            throw ApplicationFailure.create({
+                message: err instanceof Error ? err.message : String(err),
+                type: WEBHOOK_ENDPOINT_UNREACHABLE,
+                cause: err instanceof Error ? err : undefined,
+            });
         });
     } finally {
         if (timeout) {
@@ -206,7 +216,7 @@ export async function notifyWebhook(
             log.debug('Could not read response body for error', { readError });
         }
 
-        throw new Error(errorMessage);
+        throw ApplicationFailure.create({ message: errorMessage, type: WEBHOOK_ENDPOINT_ERROR });
     }
 
     return { status: res.status, message: res.statusText, url: res.url };

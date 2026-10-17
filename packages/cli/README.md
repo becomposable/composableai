@@ -124,15 +124,26 @@ installation. For OAuth, inspect and manage the same installation's connection:
 vertesia apps connections status INSTALLATION_ID
 vertesia apps connections status INSTALLATION_ID COLLECTION_ID
 vertesia apps connections authorize INSTALLATION_ID COLLECTION_ID
-# Open authorization_url; save the callback's code and state in callback.json.
-vertesia apps connections exchange --response-file callback.json
+# Open authorization_url in a browser signed in as the same user and project.
+# The callback completes the exchange; confirm the result:
+vertesia apps connections status INSTALLATION_ID COLLECTION_ID
 vertesia apps connections connect INSTALLATION_ID COLLECTION_ID
 vertesia apps connections disconnect INSTALLATION_ID COLLECTION_ID
 ```
 
-`authorize` starts interactive OAuth and prints its authorization URL. `exchange` consumes a JSON object
-with `code` and `state`; the server validates the state and its installation binding. `connect` is for
-providers using the `client_credentials` grant. Status never retrieves an access or refresh token.
+`authorize` starts interactive OAuth and prints its authorization URL (or reports an existing connection).
+The browser callback completes the exchange. Use the same user and project in the browser as in the CLI
+profile, then check connection status. Do not exchange a code that the callback has already processed.
+
+For a callback captured without browser completion, the manual alternative is:
+
+```bash
+vertesia apps connections exchange --response-file callback.json
+```
+
+The file contains `{"code":"REPLACE_ME","state":"REPLACE_ME"}`. The server validates the state and its
+installation binding. `connect` is for providers using the `client_credentials` grant. Status never
+retrieves an access or refresh token.
 
 Uninstall uses the installation ID and leaves siblings installed:
 

@@ -11,7 +11,9 @@ import {
     execActivityFile,
     execActivityFileWithProgress,
     initializeActivityCommandDeadline,
+    isUnusableVideoContent,
     rethrowIfActivityStopped,
+    UNUSABLE_VIDEO_CONTENT,
 } from '../media/exec.js';
 
 interface GenerateVideoRenditionParams extends ImageRenditionParams {}
@@ -46,7 +48,7 @@ export async function getVideoMetadata(videoPath: string): Promise<VideoMetadata
         const height = videoStream?.height || 0;
 
         if (!videoStream || duration <= 0) {
-            throw ApplicationFailure.nonRetryable('Video has no usable stream or duration', 'UnusableVideoContent');
+            throw ApplicationFailure.nonRetryable('Video has no usable stream or duration', UNUSABLE_VIDEO_CONTENT);
         }
 
         return { duration, width, height };
@@ -262,6 +264,10 @@ export async function generateVideoRendition(payload: DSLActivityExecutionPayloa
         };
     } catch (error) {
         rethrowIfActivityStopped(error);
+        // The metadata probe already logged it at warn.
+        if (isUnusableVideoContent(error)) {
+            throw error;
+        }
         log.error(`Error generating thumbnails for video: ${error instanceof Error ? error.message : 'Unknown error'}`);
         if (error instanceof ApplicationFailure) {
             throw error;

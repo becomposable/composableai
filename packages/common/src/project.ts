@@ -317,6 +317,12 @@ export interface IndexShardParams {
     bulk_size_bytes?: number;
     bulk_concurrency?: number;
     updated_since?: string;
+    /**
+     * Before reporting success, also remove from the target index the documents in this shard's range whose objects
+     * no longer exist. Set it when retrying a shard: an earlier attempt may have written documents of objects deleted
+     * since, which the retry no longer reads. It scans the target index, so leave it unset on a first attempt.
+     */
+    reconcile_target?: boolean;
 }
 
 export interface IndexShardRequest {

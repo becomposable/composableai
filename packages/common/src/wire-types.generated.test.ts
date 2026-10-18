@@ -702,6 +702,10 @@ interface Checks {
         W.UpdateAppInstallationOAuthApprovalPayload,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').UpdateAppInstallationOAuthApprovalPayloadSchema>
     >;
+    AppInstanceAvailability: Same<
+        W.AppInstanceAvailability,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstanceAvailabilitySchema>
+    >;
     McpPublicParameter: Same<
         W.McpPublicParameter,
         z.infer<typeof import('./api-schemas/apps.js').McpPublicParameterSchema>
@@ -8987,6 +8991,10 @@ interface Checks {
         W.ApiComponentTypes['AppInstallationPayload'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstallationPayloadSchema>
     >;
+    'component:AppInstanceAvailability': Same<
+        W.ApiComponentTypes['AppInstanceAvailability'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstanceAvailabilitySchema>
+    >;
     'component:AppDevelopmentTaskDetails': Same<
         W.ApiComponentTypes['AppDevelopmentTaskDetails'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppDevelopmentTaskDetailsSchema>
@@ -9742,6 +9750,7 @@ const checks: Checks = {
     ValidateUrlResponse: true,
     AppDeleteSummary: true,
     UpdateAppInstallationOAuthApprovalPayload: true,
+    AppInstanceAvailability: true,
     McpPublicParameter: true,
     McpSecretParameter: true,
     McpConnectionParameter: true,
@@ -11919,6 +11928,7 @@ const checks: Checks = {
     'component:AgentRunSearchHit': true,
     'component:UpsertAppVersionRequest': true,
     'component:AppInstallationPayload': true,
+    'component:AppInstanceAvailability': true,
     'component:AppDevelopmentTaskDetails': true,
     'component:AppVersionRecordArray': true,
     'component:AppToolCollectionArray': true,
@@ -12062,6 +12072,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2514);
+        expect(Object.keys(checks)).toHaveLength(2516);
     });
 });

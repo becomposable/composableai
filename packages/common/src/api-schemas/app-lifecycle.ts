@@ -860,7 +860,9 @@ export const AppInstallationPayloadSchema = z
             .string()
             .regex(/^[a-z][a-z0-9_-]{0,31}$/)
             .optional(),
-        display_name: z.string().min(1).max(120).optional(),
+        display_name: z.string().max(120).optional().meta({
+            description: 'Optional instance label. Send an empty string to clear the saved label; omit to preserve it.',
+        }),
         namespace_overrides: z
             .record(
                 z.string(),

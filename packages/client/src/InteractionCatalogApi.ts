@@ -1,5 +1,12 @@
 import { ApiTopic, type ClientBase } from '@vertesia/api-fetch-client';
-import type { CatalogInteractionRef, InteractionStatus, ResolvedCatalogInteraction } from '@vertesia/common';
+import type {
+    CatalogAgentSearchQuery,
+    CatalogCallSearchQuery,
+    CatalogInteractionRef,
+    CatalogSearchResult,
+    InteractionStatus,
+    ResolvedCatalogInteraction,
+} from '@vertesia/common';
 
 export class InteractionCatalogApi extends ApiTopic {
     constructor(parent: ClientBase) {
@@ -33,6 +40,23 @@ export class InteractionCatalogApi extends ApiTopic {
                 tag,
             },
         });
+    }
+
+    /**
+     * Search the system and stored project interactions configured as agents
+     * (`agent_runner_options.is_agent`). Returns the matching agents with their tag counts and total.
+     * App-provided interactions are not included.
+     */
+    listAgents(query: CatalogAgentSearchQuery = {}): Promise<CatalogSearchResult> {
+        return this.get('/agents', { query });
+    }
+
+    /**
+     * Search the system and stored project interactions that are not agents: basic, tool and skill calls.
+     * Returns the matching calls with their tag counts and total. App-provided interactions are not included.
+     */
+    listCalls(query: CatalogCallSearchQuery = {}): Promise<CatalogSearchResult> {
+        return this.get('/calls', { query });
     }
 
     /**

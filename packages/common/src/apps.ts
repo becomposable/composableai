@@ -224,6 +224,8 @@ export type AppBuildProgress = Wire.AppBuildProgress;
 
 export type AppScaffoldModule = Wire.AppScaffoldModule;
 
+export type AppScaffoldSourceMode = Wire.AppScaffoldSourceMode;
+
 export type StartAppScaffoldRequest = Wire.StartAppScaffoldRequest;
 
 export type StartAppScaffoldResponse = Wire.StartAppScaffoldResponse;
@@ -237,6 +239,9 @@ export type AppGithubAccount = Wire.AppGithubAccount;
 export type ExchangeAppGithubAuthorizationResponse = Wire.ExchangeAppGithubAuthorizationResponse;
 export type AppGithubRepository = Wire.AppGithubRepository;
 export type AppGithubRepositoryList = Wire.AppGithubRepositoryList;
+export type AppGithubRepositorySetupQuery = Wire.AppGithubRepositorySetupQuery;
+export type AppGithubBranchState = Wire.AppGithubBranchState;
+export type AppGithubRepositorySetup = Wire.AppGithubRepositorySetup;
 
 export type StartAppDevelopmentTaskRequest = Wire.StartAppDevelopmentTaskRequest;
 

@@ -8,6 +8,7 @@ import type {
     AppDevelopmentTaskList,
     AppGithubConfiguration,
     AppGithubRepositoryList,
+    AppGithubRepositorySetup,
     AppInspectionResult,
     AppInstallation,
     AppInstallationKind,
@@ -187,6 +188,26 @@ export default class AppsApi extends ApiTopic {
     listGithubRepositories(connectionId: string, installationId: string): Promise<AppGithubRepositoryList> {
         return this.get('/source-providers/github/repositories', {
             query: { connection_id: connectionId, installation_id: installationId },
+        });
+    }
+
+    /**
+     * List branches and verify whether a selected branch can safely receive generated source.
+     * The verified connection remains reusable until app creation consumes it.
+     */
+    getGithubRepositorySetup(
+        connectionId: string,
+        installationId: string,
+        repository: string,
+        branch: string,
+    ): Promise<AppGithubRepositorySetup> {
+        return this.get('/source-providers/github/repository-setup', {
+            query: {
+                connection_id: connectionId,
+                installation_id: installationId,
+                repository,
+                branch,
+            },
         });
     }
 

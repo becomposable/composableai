@@ -851,6 +851,7 @@ export type AppBuildProgress = {
     updated_at: string;
 };
 export type AppScaffoldModule = 'service' | 'assistant' | 'content-app' | 'examples';
+export type AppScaffoldSourceMode = 'generate' | 'existing';
 export type StartAppScaffoldRequest = {
     app_id: string;
     title?: string | undefined;
@@ -859,6 +860,7 @@ export type StartAppScaffoldRequest = {
     oauth_scopes?: string[] | undefined;
     appgen_package_spec?: string | undefined;
     create_version?: boolean | undefined;
+    source_mode?: AppScaffoldSourceMode | undefined;
     source?: AppSourceConfig | undefined;
     github_connection_id?: string | undefined;
 };
@@ -912,6 +914,22 @@ export type AppGithubRepository = {
 };
 export type AppGithubRepositoryList = {
     repositories: AppGithubRepository[];
+};
+export type AppGithubRepositorySetupQuery = {
+    connection_id: string;
+    installation_id: string;
+    repository: string;
+    branch: string;
+};
+export type AppGithubBranchState = {
+    name: string;
+    exists: boolean;
+    empty: boolean;
+};
+export type AppGithubRepositorySetup = {
+    default_branch: string;
+    branches: string[];
+    selected_branch: AppGithubBranchState;
 };
 export type StartAppDevelopmentTaskRequest = {
     prompt: string;
@@ -11867,6 +11885,10 @@ export interface ApiComponentTypes {
     AppGithubAccount: AppGithubAccount;
     AppGithubRepository: AppGithubRepository;
     AppGithubRepositoryList: AppGithubRepositoryList;
+    AppGithubRepositorySetupQuery: AppGithubRepositorySetupQuery;
+    AppGithubBranchState: AppGithubBranchState;
+    AppGithubRepositorySetup: AppGithubRepositorySetup;
+    AppScaffoldSourceMode: AppScaffoldSourceMode;
     StartAppScaffoldRequest: StartAppScaffoldRequest;
     StartAppDevelopmentTaskRequest: StartAppDevelopmentTaskRequest;
     StartAppBuildRequest: StartAppBuildRequest;

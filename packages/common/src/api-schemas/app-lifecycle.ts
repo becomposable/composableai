@@ -100,6 +100,12 @@ export const AppScaffoldModuleSchema = z
     .enum(['service', 'assistant', 'content-app', 'examples'])
     .meta({ id: 'AppScaffoldModule' });
 
+export const AppScaffoldSourceModeSchema = z.enum(['generate', 'existing']).meta({
+    id: 'AppScaffoldSourceMode',
+    description:
+        'How App Builder should use a connected source repository. `generate` writes a starter app to an empty branch; `existing` only binds the repository.',
+});
+
 export const AppBuildTriggerSchema = z.enum(['ui', 'git_push', 'agent', 'api']).meta({ id: 'AppBuildTrigger' });
 
 export const Extract_AppVersionGitRefType_branch_tag_commitSchema = z
@@ -436,6 +442,10 @@ export const StartAppScaffoldRequestSchema = z
                 description: 'Start an initial app version build after the source has been pushed. Defaults to true.',
             })
             .optional(),
+        source_mode: AppScaffoldSourceModeSchema.optional().meta({
+            description:
+                'Explicit source setup behavior for external repositories. Omit to retain the legacy automatic behavior.',
+        }),
         source: AppSourceConfigSchema.optional().meta({
             description:
                 'Source repository to bind to the app. Omit to create and scaffold a Vertesia-managed repository.',
@@ -508,6 +518,34 @@ export const AppGithubRepositorySchema = z
 export const AppGithubRepositoryListSchema = z
     .strictObject({ repositories: z.array(AppGithubRepositorySchema) })
     .meta({ id: 'AppGithubRepositoryList' });
+
+export const AppGithubRepositorySetupQuerySchema = z
+    .strictObject({
+        connection_id: z.string().trim().min(1),
+        installation_id: z.string().trim().min(1),
+        repository: z.string().trim().min(1),
+        branch: z.string().trim().min(1),
+    })
+    .meta({ id: 'AppGithubRepositorySetupQuery' });
+
+export const AppGithubBranchStateSchema = z
+    .strictObject({
+        name: z.string(),
+        exists: z.boolean(),
+        empty: z.boolean(),
+    })
+    .meta({ id: 'AppGithubBranchState' });
+
+export const AppGithubRepositorySetupSchema = z
+    .strictObject({
+        default_branch: z.string(),
+        branches: z.array(z.string()),
+        selected_branch: AppGithubBranchStateSchema,
+    })
+    .meta({
+        id: 'AppGithubRepositorySetup',
+        description: 'Branch choices and write-safety state for a verified GitHub repository.',
+    });
 
 export const StartAppDevelopmentTaskRequestSchema = z
     .strictObject({

@@ -19937,6 +19937,83 @@
       "repositories"
     ]
   },
+  "AppGithubRepositorySetupQuery": {
+    "type": "object",
+    "properties": {
+      "connection_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "installation_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "repository": {
+        "type": "string",
+        "minLength": 1
+      },
+      "branch": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "required": [
+      "connection_id",
+      "installation_id",
+      "repository",
+      "branch"
+    ]
+  },
+  "AppGithubBranchState": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "exists": {
+        "type": "boolean"
+      },
+      "empty": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "name",
+      "exists",
+      "empty"
+    ]
+  },
+  "AppGithubRepositorySetup": {
+    "type": "object",
+    "properties": {
+      "default_branch": {
+        "type": "string"
+      },
+      "branches": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "selected_branch": {
+        "$ref": "#/components/schemas/AppGithubBranchState"
+      }
+    },
+    "required": [
+      "default_branch",
+      "branches",
+      "selected_branch"
+    ],
+    "description": "Branch choices and write-safety state for a verified GitHub repository."
+  },
+  "AppScaffoldSourceMode": {
+    "type": "string",
+    "enum": [
+      "generate",
+      "existing"
+    ],
+    "description": "How App Builder should use a connected source repository. `generate` writes a starter app to an empty branch; `existing` only binds the repository."
+  },
   "StartAppScaffoldRequest": {
     "type": "object",
     "properties": {
@@ -19971,6 +20048,10 @@
       "create_version": {
         "type": "boolean",
         "description": "Start an initial app version build after the source has been pushed. Defaults to true."
+      },
+      "source_mode": {
+        "$ref": "#/components/schemas/AppScaffoldSourceMode",
+        "description": "Explicit source setup behavior for external repositories. Omit to retain the legacy automatic behavior."
       },
       "source": {
         "$ref": "#/components/schemas/AppSourceConfig",

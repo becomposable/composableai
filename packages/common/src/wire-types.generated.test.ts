@@ -417,6 +417,10 @@ interface Checks {
         W.AppScaffoldModule,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppScaffoldModuleSchema>
     >;
+    AppScaffoldSourceMode: Same<
+        W.AppScaffoldSourceMode,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppScaffoldSourceModeSchema>
+    >;
     StartAppScaffoldRequest: Same<
         W.StartAppScaffoldRequest,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').StartAppScaffoldRequestSchema>
@@ -460,6 +464,18 @@ interface Checks {
     AppGithubRepositoryList: Same<
         W.AppGithubRepositoryList,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoryListSchema>
+    >;
+    AppGithubRepositorySetupQuery: Same<
+        W.AppGithubRepositorySetupQuery,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySetupQuerySchema>
+    >;
+    AppGithubBranchState: Same<
+        W.AppGithubBranchState,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubBranchStateSchema>
+    >;
+    AppGithubRepositorySetup: Same<
+        W.AppGithubRepositorySetup,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySetupSchema>
     >;
     StartAppDevelopmentTaskRequest: Same<
         W.StartAppDevelopmentTaskRequest,
@@ -8931,6 +8947,22 @@ interface Checks {
         W.ApiComponentTypes['AppGithubRepositoryList'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoryListSchema>
     >;
+    'component:AppGithubRepositorySetupQuery': Same<
+        W.ApiComponentTypes['AppGithubRepositorySetupQuery'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySetupQuerySchema>
+    >;
+    'component:AppGithubBranchState': Same<
+        W.ApiComponentTypes['AppGithubBranchState'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubBranchStateSchema>
+    >;
+    'component:AppGithubRepositorySetup': Same<
+        W.ApiComponentTypes['AppGithubRepositorySetup'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySetupSchema>
+    >;
+    'component:AppScaffoldSourceMode': Same<
+        W.ApiComponentTypes['AppScaffoldSourceMode'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppScaffoldSourceModeSchema>
+    >;
     'component:StartAppScaffoldRequest': Same<
         W.ApiComponentTypes['StartAppScaffoldRequest'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').StartAppScaffoldRequestSchema>
@@ -9701,6 +9733,7 @@ const checks: Checks = {
     AppBuildProgressStatus: true,
     AppBuildProgress: true,
     AppScaffoldModule: true,
+    AppScaffoldSourceMode: true,
     StartAppScaffoldRequest: true,
     StartAppScaffoldResponse: true,
     AppGithubConfiguration: true,
@@ -9712,6 +9745,9 @@ const checks: Checks = {
     ExchangeAppGithubAuthorizationResponse: true,
     AppGithubRepository: true,
     AppGithubRepositoryList: true,
+    AppGithubRepositorySetupQuery: true,
+    AppGithubBranchState: true,
+    AppGithubRepositorySetup: true,
     StartAppDevelopmentTaskRequest: true,
     AppScaffoldProgressStatus: true,
     AppScaffoldProgress: true,
@@ -11945,6 +11981,10 @@ const checks: Checks = {
     'component:AppGithubAccount': true,
     'component:AppGithubRepository': true,
     'component:AppGithubRepositoryList': true,
+    'component:AppGithubRepositorySetupQuery': true,
+    'component:AppGithubBranchState': true,
+    'component:AppGithubRepositorySetup': true,
+    'component:AppScaffoldSourceMode': true,
     'component:StartAppScaffoldRequest': true,
     'component:StartAppDevelopmentTaskRequest': true,
     'component:StartAppBuildRequest': true,
@@ -12112,6 +12152,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2524);
+        expect(Object.keys(checks)).toHaveLength(2532);
     });
 });

@@ -1,7 +1,14 @@
 import { createRequire } from 'node:module';
-import type { TiktokenEncoding } from 'tiktoken';
+import { get_encoding as importedGetEncoding, type TiktokenEncoding } from 'tiktoken';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { countTokens, truncByMaxTokens } from './tokens.js';
+
+// tokens.ts imports get_encoding statically, so a spy on the CommonJS export would never see its
+// calls. Wrap the ES module export instead; the reference helpers below use the unmocked module.
+vi.mock('tiktoken', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('tiktoken')>();
+    return { ...actual, get_encoding: vi.fn(actual.get_encoding) };
+});
 
 const tiktoken = createRequire(import.meta.url)('tiktoken') as typeof import('tiktoken');
 
@@ -95,7 +102,8 @@ describe('truncByMaxTokens', () => {
     it('builds each encoding once and reuses it', () => {
         truncByMaxTokens('warm up', 10);
         countTokens('warm up', 'p50k_base');
-        const getEncoding = vi.spyOn(tiktoken, 'get_encoding');
+        const getEncoding = vi.mocked(importedGetEncoding);
+        getEncoding.mockClear();
 
         for (let i = 0; i < 5; i++) {
             truncByMaxTokens(prose, 50);

@@ -16028,10 +16028,14 @@
       },
       "limit": {
         "type": "number",
+        "minimum": 0,
+        "multipleOf": 1,
         "description": "Maximum number of prompts to return. Defaults to 100."
       },
       "offset": {
         "type": "number",
+        "minimum": 0,
+        "multipleOf": 1,
         "description": "Number of prompts to skip."
       },
       "role": {
@@ -17861,10 +17865,14 @@
       },
       "limit": {
         "type": "number",
+        "minimum": 0,
+        "multipleOf": 1,
         "description": "Pagination: number of items to return (default 50, max 200)"
       },
       "offset": {
         "type": "number",
+        "minimum": 0,
+        "multipleOf": 1,
         "description": "Pagination: offset"
       }
     },

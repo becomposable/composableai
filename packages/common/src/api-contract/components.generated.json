@@ -6615,7 +6615,8 @@
     "enum": [
       "none",
       "client_secret_post",
-      "client_secret_basic"
+      "client_secret_basic",
+      "private_key_jwt"
     ]
   },
   "OAuthGrantType": {
@@ -6623,7 +6624,8 @@
     "enum": [
       "authorization_code",
       "refresh_token",
-      "urn:ietf:params:oauth:grant-type:device_code"
+      "urn:ietf:params:oauth:grant-type:device_code",
+      "urn:ietf:params:oauth:grant-type:token-exchange"
     ]
   },
   "OAuthResponseType": {
@@ -6712,6 +6714,12 @@
         }
       },
       "token_endpoint_auth_methods_supported": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "token_endpoint_auth_signing_alg_values_supported": {
         "type": "array",
         "items": {
           "type": "string"
@@ -7162,6 +7170,365 @@
       "expires_in"
     ]
   },
+  "OidcFederationConnectionPayload": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "issuer": {
+        "type": "string",
+        "format": "uri"
+      },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
+      },
+      "external_id_claim": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "\\S",
+        "description": "Exact top-level verified token claim matched to SCIM externalId within the owning provisioning account."
+      },
+      "allowed_audiences": {
+        "minItems": 1,
+        "maxItems": 20,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allowed_algorithms": {
+        "minItems": 1,
+        "maxItems": 2,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "RS256",
+            "ES256"
+          ]
+        }
+      },
+      "subject_token_type": {
+        "type": "string",
+        "enum": [
+          "urn:ietf:params:oauth:token-type:jwt",
+          "urn:ietf:params:oauth:token-type:id_token",
+          "urn:ietf:params:oauth:token-type:access_token"
+        ]
+      },
+      "required_claims": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "Exact string matches against verified top-level IdP claims, such as tenant or azp."
+      },
+      "all_projects": {
+        "type": "boolean",
+        "description": "Explicitly allow all current and future projects in the owning organization, subject to the user’s current access. Defaults to false for existing allowlists. When true, allowed_project_ids must be empty."
+      },
+      "allowed_project_ids": {
+        "maxItems": 100,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{24}$"
+        },
+        "description": "Explicit project allowlist. Must contain 1–100 projects unless all_projects is true."
+      },
+      "allowed_client_ids": {
+        "minItems": 1,
+        "maxItems": 20,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "description": "When set, require authentication by one of these account-owned confidential OAuth clients. Omit to allow exchanges without separate client authentication."
+      },
+      "allowed_scopes": {
+        "minItems": 1,
+        "maxItems": 100,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Optional restriction on delegable Vertesia permissions, excluding account:admin. Omit to use the user’s current permissions. An explicit list further restricts the grant."
+      },
+      "max_token_ttl_seconds": {
+        "type": "integer",
+        "minimum": 30,
+        "maximum": 300
+      },
+      "max_subject_token_age_seconds": {
+        "type": "integer",
+        "minimum": 30,
+        "maximum": 86400,
+        "description": "Maximum age since the signed iat claim. Defaults to 3600 seconds; 60 seconds of clock tolerance applies."
+      },
+      "enabled": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "name",
+      "issuer",
+      "external_id_claim",
+      "allowed_audiences",
+      "allowed_algorithms",
+      "subject_token_type",
+      "allowed_project_ids",
+      "max_token_ttl_seconds",
+      "enabled"
+    ],
+    "additionalProperties": false
+  },
+  "OidcFederationConnection": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "issuer": {
+        "type": "string",
+        "format": "uri"
+      },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
+      },
+      "external_id_claim": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "\\S",
+        "description": "Exact top-level verified token claim matched to SCIM externalId within the owning provisioning account."
+      },
+      "allowed_audiences": {
+        "minItems": 1,
+        "maxItems": 20,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allowed_algorithms": {
+        "minItems": 1,
+        "maxItems": 2,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "RS256",
+            "ES256"
+          ]
+        }
+      },
+      "subject_token_type": {
+        "type": "string",
+        "enum": [
+          "urn:ietf:params:oauth:token-type:jwt",
+          "urn:ietf:params:oauth:token-type:id_token",
+          "urn:ietf:params:oauth:token-type:access_token"
+        ]
+      },
+      "required_claims": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "Exact string matches against verified top-level IdP claims, such as tenant or azp."
+      },
+      "all_projects": {
+        "type": "boolean",
+        "description": "Explicitly allow all current and future projects in the owning organization, subject to the user’s current access. Defaults to false for existing allowlists. When true, allowed_project_ids must be empty."
+      },
+      "allowed_project_ids": {
+        "maxItems": 100,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{24}$"
+        },
+        "description": "Explicit project allowlist. Must contain 1–100 projects unless all_projects is true."
+      },
+      "allowed_client_ids": {
+        "minItems": 1,
+        "maxItems": 20,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "description": "When set, require authentication by one of these account-owned confidential OAuth clients. Omit to allow exchanges without separate client authentication."
+      },
+      "allowed_scopes": {
+        "minItems": 1,
+        "maxItems": 100,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Optional restriction on delegable Vertesia permissions, excluding account:admin. Omit to use the user’s current permissions. An explicit list further restricts the grant."
+      },
+      "max_token_ttl_seconds": {
+        "type": "integer",
+        "minimum": 30,
+        "maximum": 300
+      },
+      "max_subject_token_age_seconds": {
+        "type": "integer",
+        "minimum": 30,
+        "maximum": 86400
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$"
+      },
+      "account_id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$"
+      }
+    },
+    "required": [
+      "name",
+      "issuer",
+      "external_id_claim",
+      "allowed_audiences",
+      "allowed_algorithms",
+      "subject_token_type",
+      "allowed_project_ids",
+      "max_token_ttl_seconds",
+      "max_subject_token_age_seconds",
+      "enabled",
+      "id",
+      "account_id"
+    ],
+    "additionalProperties": false
+  },
+  "OidcFederationConnectionArray": {
+    "type": "array",
+    "items": {
+      "$ref": "#/components/schemas/OidcFederationConnection"
+    }
+  },
+  "OAuthTokenExchangeRequest": {
+    "type": "object",
+    "properties": {
+      "grant_type": {
+        "type": "string",
+        "const": "urn:ietf:params:oauth:grant-type:token-exchange"
+      },
+      "subject_token": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 65536
+      },
+      "subject_token_type": {
+        "type": "string",
+        "enum": [
+          "urn:ietf:params:oauth:token-type:jwt",
+          "urn:ietf:params:oauth:token-type:id_token",
+          "urn:ietf:params:oauth:token-type:access_token"
+        ]
+      },
+      "requested_token_type": {
+        "type": "string",
+        "const": "urn:ietf:params:oauth:token-type:access_token"
+      },
+      "federation_connection_id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$"
+      },
+      "client_id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      },
+      "client_secret": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      },
+      "client_assertion": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 16384
+      },
+      "client_assertion_type": {
+        "type": "string",
+        "const": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+      },
+      "project_id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$"
+      },
+      "resource": {
+        "type": "string",
+        "minLength": 1
+      },
+      "scope": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096,
+        "description": "Optional space-separated permission subset. Omit to use current user permissions within the connection policy."
+      }
+    },
+    "required": [
+      "grant_type",
+      "subject_token",
+      "subject_token_type",
+      "federation_connection_id",
+      "project_id",
+      "resource"
+    ],
+    "additionalProperties": false
+  },
+  "OAuthTokenExchangeResponse": {
+    "type": "object",
+    "properties": {
+      "access_token": {
+        "type": "string"
+      },
+      "token_type": {
+        "type": "string",
+        "const": "Bearer"
+      },
+      "expires_in": {
+        "type": "number"
+      },
+      "scope": {
+        "type": "string"
+      },
+      "issued_token_type": {
+        "type": "string",
+        "const": "urn:ietf:params:oauth:token-type:access_token"
+      }
+    },
+    "required": [
+      "access_token",
+      "token_type",
+      "expires_in",
+      "issued_token_type"
+    ],
+    "additionalProperties": false
+  },
   "OAuthClient": {
     "type": "object",
     "properties": {
@@ -7195,6 +7562,10 @@
       },
       "token_endpoint_auth_method": {
         "$ref": "#/components/schemas/OAuthTokenEndpointAuthMethod"
+      },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
       },
       "allowed_scopes": {
         "type": "array",
@@ -7300,6 +7671,10 @@
       },
       "token_endpoint_auth_method": {
         "$ref": "#/components/schemas/OAuthTokenEndpointAuthMethod"
+      },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
       },
       "allowed_scopes": {
         "type": "array",
@@ -7414,6 +7789,10 @@
       "token_endpoint_auth_method": {
         "$ref": "#/components/schemas/OAuthTokenEndpointAuthMethod"
       },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
+      },
       "allowed_scopes": {
         "type": "array",
         "items": {
@@ -7476,6 +7855,10 @@
       "token_endpoint_auth_method": {
         "$ref": "#/components/schemas/OAuthTokenEndpointAuthMethod"
       },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
+      },
       "allowed_scopes": {
         "type": "array",
         "items": {
@@ -7490,6 +7873,10 @@
       },
       "status": {
         "$ref": "#/components/schemas/OAuthClientStatus"
+      },
+      "revoke_previous_client_secret": {
+        "type": "boolean",
+        "description": "Immediately revoke the previous rotation secret while retaining the current secret."
       },
       "project_binding_mode": {
         "$ref": "#/components/schemas/OAuthProjectBindingMode"
@@ -10581,10 +10968,14 @@
     "type": "object",
     "properties": {
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "status": {
         "$ref": "#/components/schemas/InteractionStatus"
@@ -13399,13 +13790,13 @@
     "properties": {
       "limit": {
         "type": "integer",
-        "minimum": -9007199254740991,
+        "minimum": 0,
         "maximum": 9007199254740991,
         "description": "Maximum number of runs to return."
       },
       "offset": {
         "type": "integer",
-        "minimum": -9007199254740991,
+        "minimum": 0,
         "maximum": 9007199254740991,
         "description": "Number of runs to skip."
       },
@@ -13489,10 +13880,14 @@
         "$ref": "#/components/schemas/RunSearchQuery"
       },
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "select": {
         "type": "string"
@@ -15661,10 +16056,14 @@
       },
       "limit": {
         "type": "number",
+        "minimum": 0,
+        "multipleOf": 1,
         "description": "Maximum number of prompts to return. Defaults to 100."
       },
       "offset": {
         "type": "number",
+        "minimum": 0,
+        "multipleOf": 1,
         "description": "Number of prompts to skip."
       },
       "role": {
@@ -17494,10 +17893,14 @@
       },
       "limit": {
         "type": "number",
+        "minimum": 0,
+        "multipleOf": 1,
         "description": "Pagination: number of items to return (default 50, max 200)"
       },
       "offset": {
         "type": "number",
+        "minimum": 0,
+        "multipleOf": 1,
         "description": "Pagination: offset"
       }
     },
@@ -20492,6 +20895,9 @@
         "type": "string",
         "description": "The collection name"
       },
+      "collection_id": {
+        "type": "string"
+      },
       "description": {
         "type": "string",
         "description": "Optional collection description"
@@ -20954,6 +21360,23 @@
       "app_id": {
         "type": "string"
       },
+      "instance_key": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_-]{0,31}$"
+      },
+      "display_name": {
+        "type": "string",
+        "maxLength": 120,
+        "description": "Optional instance label. Send an empty string to clear the saved label; omit to preserve it."
+      },
+      "namespace_overrides": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 24,
+          "pattern": "^[a-z]([a-z0-9]|_[a-z0-9])*_?$"
+        }
+      },
       "mcp_shared_parameters": {
         "type": "object",
         "additionalProperties": {
@@ -21025,6 +21448,18 @@
     },
     "required": [
       "app_id"
+    ],
+    "additionalProperties": false
+  },
+  "AppInstanceAvailability": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "enabled"
     ],
     "additionalProperties": false
   },
@@ -25086,6 +25521,35 @@
       "project": {
         "type": "string"
       },
+      "instance_key": {
+        "type": "string"
+      },
+      "display_name": {
+        "type": "string"
+      },
+      "installation_version": {
+        "type": "number",
+        "const": 1
+      },
+      "namespace_overrides": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "reserved_namespaces": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "namespace_conflicts": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
       "manifest": {
         "type": "string"
       },
@@ -25224,6 +25688,35 @@
       },
       "project": {
         "type": "string"
+      },
+      "instance_key": {
+        "type": "string"
+      },
+      "display_name": {
+        "type": "string"
+      },
+      "installation_version": {
+        "type": "number",
+        "const": 1
+      },
+      "namespace_overrides": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "reserved_namespaces": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "namespace_conflicts": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       },
       "mcp_configuration": {
         "type": "object",
@@ -25364,6 +25857,35 @@
       },
       "project": {
         "type": "string"
+      },
+      "instance_key": {
+        "type": "string"
+      },
+      "display_name": {
+        "type": "string"
+      },
+      "installation_version": {
+        "type": "number",
+        "const": 1
+      },
+      "namespace_overrides": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "reserved_namespaces": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "namespace_conflicts": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       },
       "mcp_configuration": {
         "type": "object",
@@ -27154,10 +27676,14 @@
         ]
       },
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       }
     },
     "additionalProperties": false
@@ -27547,10 +28073,14 @@
         "type": "boolean"
       },
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       }
     },
     "additionalProperties": false
@@ -27571,10 +28101,14 @@
         "type": "boolean"
       },
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       }
     },
     "additionalProperties": false
@@ -28918,6 +29452,12 @@
       "comment": {
         "type": "string",
         "description": "Optional publish note."
+      },
+      "idempotency_key": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "description": "Client-chosen key that makes this request safe to retry. Publishing is otherwise not idempotent: a repeat of a publish that already succeeded is rejected because the revision is no longer a draft. When the revision was published by a request with the same key and the same body, the repeat returns that revision instead. Reusing the key with a different body is rejected with 409. The key is bound to the revision it published."
       }
     },
     "required": [
@@ -34778,10 +35318,14 @@
         "$ref": "#/components/schemas/CollectionStatus"
       },
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "name": {
         "type": "string"
@@ -34967,10 +35511,14 @@
         "type": "string"
       },
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       }
     }
   },
@@ -37062,10 +37610,14 @@
       },
       "limit": {
         "type": "number",
+        "minimum": 0,
+        "multipleOf": 1,
         "description": "Maximum number of results (default: 50)"
       },
       "offset": {
         "type": "number",
+        "minimum": 0,
+        "multipleOf": 1,
         "description": "Offset for pagination"
       },
       "cursor": {

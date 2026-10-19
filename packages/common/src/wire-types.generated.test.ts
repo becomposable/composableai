@@ -758,6 +758,10 @@ interface Checks {
         W.UpdateAppInstallationOAuthApprovalPayload,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').UpdateAppInstallationOAuthApprovalPayloadSchema>
     >;
+    AppInstanceAvailability: Same<
+        W.AppInstanceAvailability,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstanceAvailabilitySchema>
+    >;
     McpPublicParameter: Same<
         W.McpPublicParameter,
         z.infer<typeof import('./api-schemas/apps.js').McpPublicParameterSchema>
@@ -2044,6 +2048,26 @@ interface Checks {
     OAuthLoginUserNotFoundResponse: Same<
         W.OAuthLoginUserNotFoundResponse,
         z.infer<typeof import('./api-schemas/oauth-server.js').OAuthLoginUserNotFoundResponseSchema>
+    >;
+    OidcFederationConnectionPayload: Same<
+        W.OidcFederationConnectionPayload,
+        z.infer<typeof import('./api-schemas/oauth-server.js').OidcFederationConnectionPayloadSchema>
+    >;
+    OidcFederationConnection: Same<
+        W.OidcFederationConnection,
+        z.infer<typeof import('./api-schemas/oauth-server.js').OidcFederationConnectionSchema>
+    >;
+    OidcFederationConnectionArray: Same<
+        W.OidcFederationConnectionArray,
+        z.infer<typeof import('./api-schemas/oauth-server.js').OidcFederationConnectionArraySchema>
+    >;
+    OAuthTokenExchangeRequest: Same<
+        W.OAuthTokenExchangeRequest,
+        z.infer<typeof import('./api-schemas/oauth-server.js').OAuthTokenExchangeRequestSchema>
+    >;
+    OAuthTokenExchangeResponse: Same<
+        W.OAuthTokenExchangeResponse,
+        z.infer<typeof import('./api-schemas/oauth-server.js').OAuthTokenExchangeResponseSchema>
     >;
     OAuthProviderData: Same<
         W.OAuthProviderData,
@@ -5161,6 +5185,26 @@ interface Checks {
     'component:OAuthTokenResponse': Same<
         W.ApiComponentTypes['OAuthTokenResponse'],
         z.infer<typeof import('./api-schemas/oauth-server.js').OAuthTokenResponseSchema>
+    >;
+    'component:OidcFederationConnectionPayload': Same<
+        W.ApiComponentTypes['OidcFederationConnectionPayload'],
+        z.infer<typeof import('./api-schemas/oauth-server.js').OidcFederationConnectionPayloadSchema>
+    >;
+    'component:OidcFederationConnection': Same<
+        W.ApiComponentTypes['OidcFederationConnection'],
+        z.infer<typeof import('./api-schemas/oauth-server.js').OidcFederationConnectionSchema>
+    >;
+    'component:OidcFederationConnectionArray': Same<
+        W.ApiComponentTypes['OidcFederationConnectionArray'],
+        z.infer<typeof import('./api-schemas/oauth-server.js').OidcFederationConnectionArraySchema>
+    >;
+    'component:OAuthTokenExchangeRequest': Same<
+        W.ApiComponentTypes['OAuthTokenExchangeRequest'],
+        z.infer<typeof import('./api-schemas/oauth-server.js').OAuthTokenExchangeRequestSchema>
+    >;
+    'component:OAuthTokenExchangeResponse': Same<
+        W.ApiComponentTypes['OAuthTokenExchangeResponse'],
+        z.infer<typeof import('./api-schemas/oauth-server.js').OAuthTokenExchangeResponseSchema>
     >;
     'component:OAuthClient': Same<
         W.ApiComponentTypes['OAuthClient'],
@@ -9059,6 +9103,10 @@ interface Checks {
         W.ApiComponentTypes['AppInstallationPayload'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstallationPayloadSchema>
     >;
+    'component:AppInstanceAvailability': Same<
+        W.ApiComponentTypes['AppInstanceAvailability'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstanceAvailabilitySchema>
+    >;
     'component:AppDevelopmentTaskDetails': Same<
         W.ApiComponentTypes['AppDevelopmentTaskDetails'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppDevelopmentTaskDetailsSchema>
@@ -9828,6 +9876,7 @@ const checks: Checks = {
     ValidateUrlResponse: true,
     AppDeleteSummary: true,
     UpdateAppInstallationOAuthApprovalPayload: true,
+    AppInstanceAvailability: true,
     McpPublicParameter: true,
     McpSecretParameter: true,
     McpConnectionParameter: true,
@@ -10179,6 +10228,11 @@ const checks: Checks = {
     OAuthLoginPayload: true,
     OAuthLoginDecisionResponse: true,
     OAuthLoginUserNotFoundResponse: true,
+    OidcFederationConnectionPayload: true,
+    OidcFederationConnection: true,
+    OidcFederationConnectionArray: true,
+    OAuthTokenExchangeRequest: true,
+    OAuthTokenExchangeResponse: true,
     OAuthProviderData: true,
     OAuthProvider: true,
     CreateOAuthProviderPayload: true,
@@ -11034,6 +11088,11 @@ const checks: Checks = {
     'component:OAuthDeviceAuthorizationRequest': true,
     'component:OAuthDeviceAuthorizationResponse': true,
     'component:OAuthTokenResponse': true,
+    'component:OidcFederationConnectionPayload': true,
+    'component:OidcFederationConnection': true,
+    'component:OidcFederationConnectionArray': true,
+    'component:OAuthTokenExchangeRequest': true,
+    'component:OAuthTokenExchangeResponse': true,
     'component:OAuthClient': true,
     'component:OAuthClientArray': true,
     'component:OAuthClientCreateResponse': true,
@@ -12009,6 +12068,7 @@ const checks: Checks = {
     'component:AgentRunSearchHit': true,
     'component:UpsertAppVersionRequest': true,
     'component:AppInstallationPayload': true,
+    'component:AppInstanceAvailability': true,
     'component:AppDevelopmentTaskDetails': true,
     'component:AppVersionRecordArray': true,
     'component:AppToolCollectionArray': true,
@@ -12152,6 +12212,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2532);
+        expect(Object.keys(checks)).toHaveLength(2544);
     });
 });

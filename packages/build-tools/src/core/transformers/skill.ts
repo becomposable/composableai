@@ -140,6 +140,7 @@ export const SkillDefinitionSchema = z
         tools: z.array(z.string()).optional(),
         scripts: z.array(z.string()).optional(),
         files: z.array(z.string()).optional(),
+        files_namespace: z.string().optional(),
         widgets: z.array(z.string()).optional(),
         license: z.string().optional(),
         compatibility: z.string().optional(),
@@ -212,6 +213,8 @@ function buildSkillDefinition(
         widgets: widgets.length > 0 ? widgets : undefined,
         scripts: scripts.length > 0 ? scripts : undefined,
         files: files.length > 0 ? files : undefined,
+        // Keep copied asset URLs stable when properties.ts overrides the runtime skill name.
+        files_namespace: files.length > 0 ? frontmatter.name : undefined,
     };
 
     // Agent Skills specification fields. `allowed-tools` is experimental in the spec and Vertesia does not

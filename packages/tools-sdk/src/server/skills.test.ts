@@ -59,6 +59,33 @@ describe('skills route', () => {
         });
     });
 
+    it('keeps resource URLs on their build namespace when the runtime skill name is overridden', async () => {
+        const renamed = new SkillCollection({
+            name: 'docs',
+            skills: [
+                {
+                    ...specSkill,
+                    name: 'renamed-pdf',
+                    files_namespace: 'pdf-processing',
+                },
+            ],
+        });
+        const res = await makeApp({ skills: [renamed] }).request(
+            'https://tools.test/api/skills/docs/renamed-pdf/files',
+        );
+        expect(res.status).toBe(200);
+        expect(await res.json()).toEqual({
+            skill_name: 'renamed-pdf',
+            files: [
+                { path: 'scripts/extract.py', url: 'https://tools.test/skill-files/pdf-processing/scripts/extract.py' },
+                {
+                    path: 'references/REFERENCE.md',
+                    url: 'https://tools.test/skill-files/pdf-processing/references/REFERENCE.md',
+                },
+            ],
+        });
+    });
+
     it('returns no files for a skill without resource directories', async () => {
         const res = await makeApp({ skills: [collection] }).request('https://tools.test/api/skills/docs/legacy/files');
         expect(res.status).toBe(200);

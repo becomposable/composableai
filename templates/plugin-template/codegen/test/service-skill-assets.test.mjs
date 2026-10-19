@@ -23,6 +23,7 @@ for (const sandbox of [false, true]) {
                 join(skillDir, 'SKILL.md'),
                 '---\nname: pdf\ndescription: Process PDFs\n---\nRun scripts/helpers/extract.py\n',
             );
+            writeFileSync(join(skillDir, 'properties.ts'), "export default { name: 'renamed-pdf' };");
             const files = {
                 'scripts/helpers/extract.py': Buffer.from('print("pdf")'),
                 'references/REFERENCE.md': Buffer.from('# PDF'),
@@ -60,6 +61,8 @@ for (const sandbox of [false, true]) {
             const bundle = sandbox ? 'server-sandbox.js' : 'config.js';
             const { ServerConfig } = await import(pathToFileURL(join(root, 'lib', bundle)).href);
             assert.deepEqual(ServerConfig.skills[0].files, Object.keys(files));
+            assert.equal(ServerConfig.skills[0].name, 'renamed-pdf');
+            assert.equal(ServerConfig.skills[0].files_namespace, 'pdf');
         } finally {
             rmSync(root, { recursive: true, force: true });
         }

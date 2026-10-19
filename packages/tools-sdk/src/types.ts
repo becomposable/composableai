@@ -385,6 +385,8 @@ export interface SkillDefinition {
      * under the skill's directory with these relative paths.
      */
     files?: string[];
+    /** Build-time directory under `skill-files/`, independent of a runtime name override. Defaults to `name`. */
+    files_namespace?: string;
     /**
      * License from the Agent Skills `license` frontmatter field.
      */

@@ -137,7 +137,7 @@ function createSkillEndpoints(coll: SkillCollection): Hono {
             skill_name: skill.name,
             files: (skill.files ?? []).map((path) => ({
                 path,
-                url: makeSkillFileUrl(url.origin, skill.name, path),
+                url: makeSkillFileUrl(url.origin, skill.files_namespace ?? skill.name, path),
             })),
         });
     });

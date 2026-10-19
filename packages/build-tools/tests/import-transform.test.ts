@@ -9,7 +9,7 @@
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path, { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { rawTransformer } from '../src/core/transformers/raw.js';
 import { skillTransformer } from '../src/core/transformers/skill.js';
@@ -117,6 +117,28 @@ describe('transformImports — end to end', () => {
 
         const chunk = readFileSync(join(libDir, 'spec-skill', 'SKILL.md.js'), 'utf-8');
         expect(chunk).toContain('"references/REFERENCE.md"');
+    });
+
+    it('preserves the copied resource namespace when properties.ts overrides the skill name', async () => {
+        const skillDir = join(srcDir, 'spec-skill');
+        const compiledSkillDir = join(libDir, 'spec-skill');
+        cpSync(join(FIXTURE_ROOT, 'spec-skill'), skillDir, { recursive: true });
+        mkdirSync(compiledSkillDir);
+        writeFileSync(join(workDir, 'package.json'), '{"type":"module"}');
+        writeFileSync(join(skillDir, 'properties.ts'), "export default { name: 'renamed-pdf' };\n");
+        writeFileSync(join(compiledSkillDir, 'properties.js'), "export default { name: 'renamed-pdf' };\n");
+        writeFileSync(join(libDir, 'index.js'), 'import skill from "./spec-skill/SKILL.md"; export default skill;\n');
+
+        await transformImports({ libDir, srcDir, transformers: [skillTransformer] });
+        const { default: skill } = await import(pathToFileURL(join(compiledSkillDir, 'SKILL.md.js')).href);
+
+        expect(skill.name).toBe('renamed-pdf');
+        expect(skill.files_namespace).toBe('pdf-processing');
+        expect(skill.files).toContain('assets/template.txt');
+        expect(readFileSync(join(libDir, 'skill-files', skill.files_namespace, 'assets/template.txt'), 'utf8')).toBe(
+            'template\n',
+        );
+        expect(existsSync(join(libDir, 'skill-files', skill.name))).toBe(false);
     });
 
     it('deduplicates chunk emission when the same import appears in multiple files', async () => {

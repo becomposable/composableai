@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import { log } from '@temporalio/activity';
 import { NodeStreamSource } from '@vertesia/client/node';
 import type { DSLActivityExecutionPayload, DSLActivitySpec } from '@vertesia/common';
@@ -60,27 +61,39 @@ export async function createPdfDocumentFromSource(
         throw new DocumentNotFoundError(`Type ${params.target_object_type} not found`);
     }
 
-    const tmpFile = await saveBlobToTempFile(client, inputObject.content.source, '.pdf');
-    const newPdf = await pdfExtractPages(tmpFile, pages);
-    log.info(`PDF created from pages ${pages.join(', ')} `, { newPdf });
-    const name = `pages-${pages.join('-')}.pdf`;
+    const tmpFile = await saveBlobToTempFile(client, inputObject.content.source, 'pdf');
+    let newPdf: string | undefined;
+    try {
+        newPdf = await pdfExtractPages(tmpFile, pages);
+        log.info(`PDF created from pages ${pages.join(', ')} `, { newPdf });
+        const name = `pages-${pages.join('-')}.pdf`;
 
-    const sourceToUpload = new NodeStreamSource(fs.createReadStream(newPdf), name, 'application/pdf');
+        const sourceToUpload = new NodeStreamSource(fs.createReadStream(newPdf), name, 'application/pdf');
 
-    log.info(`Uploading file ${newPdf} `);
-    const upload = await client.objects.upload(sourceToUpload);
-    log.info(`File uploaded ${upload.source} `);
+        log.info(`Uploading file ${newPdf} `);
+        const upload = await client.objects.upload(sourceToUpload);
+        log.info(`File uploaded ${upload.source} `);
 
-    const newObject = await client.objects.create({
-        type: targetType.id,
-        name: title || targetType.name,
-        parent: objectId,
-        content: {
-            source: upload.source,
-            name: upload.name,
-            type: 'application/pdf',
-        },
-    });
+        const newObject = await client.objects.create({
+            type: targetType.id,
+            name: title || targetType.name,
+            parent: objectId,
+            content: {
+                source: upload.source,
+                name: upload.name,
+                type: 'application/pdf',
+            },
+        });
 
-    return { newObjectId: newObject.id, uploadedFile: upload.name };
+        return { newObjectId: newObject.id, uploadedFile: upload.name };
+    } finally {
+        // pdfExtractPages writes its output into a work directory of its own.
+        for (const temporaryPath of [tmpFile, newPdf && path.dirname(newPdf)]) {
+            if (temporaryPath) {
+                await fs.promises.rm(temporaryPath, { recursive: true, force: true }).catch((err: unknown) => {
+                    log.warn('Failed to clean up temporary PDF path', { err, temporaryPath });
+                });
+            }
+        }
+    }
 }

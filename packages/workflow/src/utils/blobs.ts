@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { createWriteStream } from 'node:fs';
+import { rm } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import type { VertesiaClient } from '@vertesia/client';
@@ -41,25 +42,29 @@ async function saveBlobToFile(client: VertesiaClient, blobUri: string, toFile: s
     const stream = await fetchBlobAsStream(client, blobUri);
 
     const nodeReadable = Readable.from(stream);
-    const out = createWriteStream(toFile);
+    // 'wx' creates the file exclusively; the stream closes its own descriptor once the pipeline settles.
+    const out = createWriteStream(toFile, { flags: 'wx', mode: 0o600 });
 
     await pipeline(nodeReadable, out); // Ensures completion before continuing
 }
 
+/**
+ * Download a blob to a new temporary file and return its path.
+ *
+ * The caller owns the file and must remove it (e.g. `fs.promises.rm(path, { force: true })` in a `finally`).
+ * No descriptor is left open and nothing is registered for exit-time cleanup, so removing the path frees its space.
+ */
 export async function saveBlobToTempFile(client: VertesiaClient, blobUri: string, fileExt?: string): Promise<string> {
-    const tmpFile = tmp.fileSync({
+    const fileName = tmp.tmpNameSync({
         prefix: 'vertesia-activity-',
         postfix: fileExt ? `.${fileExt}` : '',
     });
     try {
-        await saveBlobToFile(client, blobUri, tmpFile.name);
-        return tmpFile.name;
+        await saveBlobToFile(client, blobUri, fileName);
+        return fileName;
     } catch (err: unknown) {
-        try {
-            tmpFile.removeCallback();
-        } catch {
-            // Preserve the download failure, which is the actionable error for the caller.
-        }
+        // Preserve the download failure, which is the actionable error for the caller.
+        await rm(fileName, { force: true }).catch(() => undefined);
         throw err;
     }
 }

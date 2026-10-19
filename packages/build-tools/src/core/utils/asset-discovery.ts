@@ -2,7 +2,7 @@
  * Utilities for discovering asset files (scripts, widgets) in skill directories
  */
 
-import { readdirSync, statSync } from 'node:fs';
+import { lstatSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import type { AssetFile } from '../types.js';
 
@@ -76,12 +76,14 @@ export const SKILL_FILES_DIR = 'skill-files';
 
 /**
  * List the files under a directory recursively, as POSIX paths relative to `rootDir`.
- * Hidden files and directories are skipped.
+ * Hidden entries and symlinks are skipped so resources cannot escape the skill directory or form cycles.
  */
 function listFilesRecursive(rootDir: string, relDir: string): string[] {
     const absDir = path.join(rootDir, relDir);
     let entries: string[];
     try {
+        // Reject linked resource roots as well as symlinks encountered below.
+        if (!lstatSync(absDir).isDirectory()) return [];
         entries = readdirSync(absDir);
     } catch {
         return [];
@@ -92,7 +94,7 @@ function listFilesRecursive(rootDir: string, relDir: string): string[] {
         const rel = path.posix.join(relDir, entry);
         const abs = path.join(rootDir, rel);
         try {
-            const stat = statSync(abs);
+            const stat = lstatSync(abs);
             if (stat.isDirectory()) {
                 out.push(...listFilesRecursive(rootDir, rel));
             } else if (stat.isFile()) {

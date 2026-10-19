@@ -2,6 +2,8 @@
  * Tests for asset discovery utilities
  */
 
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -93,5 +95,45 @@ describe('Asset Discovery', () => {
     it('should reject a skill name that would escape the resource directory', () => {
         const skillPath = join(__dirname, 'fixtures', 'spec-skill', 'SKILL.md');
         expect(() => discoverSkillAssets(skillPath, { skillName: '../escape' })).toThrow(/Invalid skill name/);
+    });
+
+    it('should skip linked files, directories and cycles inside resource directories', () => {
+        const root = mkdtempSync(join(tmpdir(), 'skill-symlinks-'));
+        try {
+            const skillDir = join(root, 'skill');
+            mkdirSync(join(skillDir, 'assets'), { recursive: true });
+            mkdirSync(join(root, 'private'));
+            writeFileSync(join(root, 'private', 'secret.txt'), 'private build data');
+            writeFileSync(join(skillDir, 'assets', 'safe.txt'), 'public');
+            symlinkSync(join(root, 'private', 'secret.txt'), join(skillDir, 'assets', 'linked.txt'));
+            symlinkSync(join(root, 'private'), join(skillDir, 'assets', 'linked-dir'));
+            symlinkSync(skillDir, join(skillDir, 'assets', 'cycle'));
+            symlinkSync(join(skillDir, 'assets', 'safe.txt'), join(skillDir, 'assets', 'internal-link.txt'));
+
+            const assets = discoverSkillAssets(join(skillDir, 'SKILL.md'));
+
+            expect(assets.files).toEqual(['assets/safe.txt']);
+            expect(assets.assetFiles.map((asset) => asset.sourcePath)).toEqual([join(skillDir, 'assets', 'safe.txt')]);
+        } finally {
+            rmSync(root, { recursive: true, force: true });
+        }
+    });
+
+    it.each(['scripts', 'references', 'assets'])('should skip a linked %s resource root', (directory) => {
+        const root = mkdtempSync(join(tmpdir(), 'skill-root-symlink-'));
+        try {
+            const skillDir = join(root, 'skill');
+            mkdirSync(skillDir);
+            mkdirSync(join(root, 'private'));
+            writeFileSync(join(root, 'private', 'secret.txt'), 'private build data');
+            symlinkSync(join(root, 'private'), join(skillDir, directory));
+
+            const assets = discoverSkillAssets(join(skillDir, 'SKILL.md'));
+
+            expect(assets.files).toEqual([]);
+            expect(assets.assetFiles).toEqual([]);
+        } finally {
+            rmSync(root, { recursive: true, force: true });
+        }
     });
 });

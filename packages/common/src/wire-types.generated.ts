@@ -7515,6 +7515,7 @@ export type PublishProcessDefinitionPayload = {
     tags?: string[] | undefined;
     label?: string | undefined;
     comment?: string | undefined;
+    idempotency_key?: string | undefined;
 };
 export type RevertProcessDefinitionPayload = {
     confirmed: boolean;

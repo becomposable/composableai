@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { validateApiRequest } from '../api-contract/index.js';
 
 // The list contracts whose `limit`/`offset` reach a Mongo `$skip`/`$limit` stage, a find `skip` or an analytics
-// query's LIMIT/OFFSET, where a fraction or a negative count failed as a 500. `PageCountSchema` makes the contract enforcer answer 400.
+// query's LIMIT/OFFSET, where a fraction or a negative count failed as a 500. `PageCountSchema` makes the
+// contract enforcer answer 400.
 const PAGED_COMPONENTS = [
     'ListTasksQuery',
     'ListAgentRunsQuery',

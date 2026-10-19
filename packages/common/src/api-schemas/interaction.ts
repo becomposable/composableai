@@ -28,7 +28,7 @@ import { InferenceProfileIdSchema, InferenceProfileSnapshotSchema } from './infe
 import { AccountRefSchema } from './invites.js';
 import { ProcessAgentExecutionPolicySchema } from './process-agent-policy.js';
 import { AgentBudgetConfigurationSchema, AgentCheckpointConfigurationSchema } from './project-configuration.js';
-import { EditRevisionSchema, ExpectedEditRevisionSchema } from './schema-primitives.js';
+import { EditRevisionSchema, ExpectedEditRevisionSchema, PageCountSchema } from './schema-primitives.js';
 import { InteractionExecutionConfigurationSchema, RunDataStorageLevelSchema } from './store.js';
 
 /**
@@ -498,8 +498,8 @@ export const InteractionForkPayloadSchema = z
 
 export const InteractionEndpointQuerySchema = z
     .strictObject({
-        limit: z.number().optional(),
-        offset: z.number().optional(),
+        limit: PageCountSchema.optional(),
+        offset: PageCountSchema.optional(),
         status: InteractionStatusSchema.optional(),
         visibility: InteractionVisibilitySchema.optional(),
         version: z.number().optional(),
@@ -1144,8 +1144,8 @@ export const RunSearchPayloadSchema = z
             })
             .optional(),
         query: RunSearchQuerySchema.optional(),
-        limit: z.number().optional(),
-        offset: z.number().optional(),
+        limit: PageCountSchema.optional(),
+        offset: PageCountSchema.optional(),
         select: z.string().optional(),
         all_revisions: z.boolean().optional(),
         from_root: z.string().optional(),

@@ -56,7 +56,8 @@ function base64url(bytes: Uint8Array): string {
 function randomValue(): string {
     return base64url(crypto.getRandomValues(new Uint8Array(32)));
 }
-function trustedOAuthUrl(value: string): URL {
+/** Validate a public protocol endpoint URL. The returned URL is routing metadata, not a credential. */
+function validatedEndpointUrl(value: string): URL {
     const url = new URL(value);
     const localHttp = Env.isLocalDev && url.protocol === 'http:' && isLoopbackHostname(url.hostname);
     if ((url.protocol !== 'https:' && !localHttp) || url.username || url.password) {
@@ -101,13 +102,13 @@ async function acquireToken(forceRefresh = false): Promise<string> {
     }
     const redirectUri = redirect.toString();
     if (new URL(redirectUri).origin !== window.location.origin) throw new Error('OAuth callback must be same-origin');
-    const issuer = trustedOAuthUrl(config.issuer ?? Env.endpoints.sts)
+    const issuer = validatedEndpointUrl(config.issuer ?? Env.endpoints.sts)
         .toString()
         .replace(/\/+$/, '');
     // A token is issued for one audience. The default audience follows the issuer, which is already part of every
     // stored credential's identity; a configured one is recorded alongside it, so changing it never reuses a token,
     // refresh session or login transaction issued for the previous audience.
-    const configuredResource = config.resource ? trustedOAuthUrl(config.resource).toString() : undefined;
+    const configuredResource = config.resource ? validatedEndpointUrl(config.resource).toString() : undefined;
     const sameClient = (stored: { clientId: string; issuer: string; resource?: string }) =>
         stored.clientId === clientId && stored.issuer === issuer && stored.resource === configuredResource;
     let current = new URL(window.location.href);
@@ -190,12 +191,12 @@ async function acquireToken(forceRefresh = false): Promise<string> {
         revocation_endpoint?: string;
     } = await discovery.json();
     if (metadata.issuer.replace(/\/+$/, '') !== issuer) throw new Error('OAuth issuer mismatch');
-    const authorize = trustedOAuthUrl(metadata.authorization_endpoint);
-    const tokenEndpoint = trustedOAuthUrl(metadata.token_endpoint);
+    const authorize = validatedEndpointUrl(metadata.authorization_endpoint);
+    const tokenEndpoint = validatedEndpointUrl(metadata.token_endpoint);
     const revocationEndpoint =
         metadata.revocation_endpoint === undefined
             ? undefined
-            : trustedOAuthUrl(metadata.revocation_endpoint).toString();
+            : validatedEndpointUrl(metadata.revocation_endpoint).toString();
     const resource = configuredResource ?? new URL(metadata.issuer).toString();
     if (refreshCredential) {
         try {
@@ -307,7 +308,7 @@ async function acquireToken(forceRefresh = false): Promise<string> {
     }
     let scopes = config.scopes ?? ['openid', 'profile'];
     if (clientId.startsWith('https://')) {
-        const documentResponse = await fetch(trustedOAuthUrl(clientId), { cache: 'no-store' });
+        const documentResponse = await fetch(validatedEndpointUrl(clientId), { cache: 'no-store' });
         if (!documentResponse.ok) throw new Error(`Application CIMD unavailable (${documentResponse.status})`);
         const document: { scope?: string; redirect_uris?: string[] } = await documentResponse.json();
         if (!document.redirect_uris?.includes(redirectUri))
@@ -376,7 +377,7 @@ export async function revokeAppOAuthSession(): Promise<void> {
     const cached = refreshSession;
     clearAppOAuth();
     if (!cached) return;
-    const revoke = trustedOAuthUrl(cached.revocationEndpoint ?? cached.tokenEndpoint);
+    const revoke = validatedEndpointUrl(cached.revocationEndpoint ?? cached.tokenEndpoint);
     if (cached.revocationEndpoint === undefined) revoke.pathname = revoke.pathname.replace(/\/token$/, '/revoke');
     await fetch(revoke, {
         method: 'POST',

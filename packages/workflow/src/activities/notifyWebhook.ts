@@ -50,6 +50,33 @@ export interface NotifyWebhookResult {
 
 const APP_HOOK_TOKEN_REFRESH_THRESHOLD_MS = 5 * 60_000;
 
+/**
+ * Why a webhook request never got an answer, as plain log fields. Node's fetch rejects with a bare
+ * `TypeError: fetch failed` and keeps the reason (ECONNREFUSED, ENOTFOUND, a connect timeout) on `cause`.
+ */
+/** Failure `type` of a webhook receiver that could not be reached (DNS, refused or reset connection, timeout). */
+export const WEBHOOK_ENDPOINT_UNREACHABLE = 'WebhookEndpointUnreachable';
+/** Failure `type` of a webhook receiver that answered with a non-2xx status. */
+export const WEBHOOK_ENDPOINT_ERROR = 'WebhookEndpointError';
+
+/**
+ * Whether fetch failed on the way to the receiver: undici reports every network failure (DNS, refused or
+ * reset connection, TLS) as `TypeError: fetch failed`, and the request timeout aborts it. Anything else,
+ * such as an invalid header name, is rejected before the receiver is contacted.
+ */
+function isEndpointTransportFailure(err: unknown): boolean {
+    if (!(err instanceof Error)) return false;
+    if (err.name === 'AbortError' || err.name === 'TimeoutError') return true;
+    return err instanceof TypeError && err.message === 'fetch failed';
+}
+
+function describeFetchFailure(err: unknown): { error: string; cause?: string } {
+    const error = err instanceof Error ? err.message : String(err);
+    const cause = err instanceof Error ? (err.cause as { code?: unknown; message?: unknown } | undefined) : undefined;
+    const detail = cause?.code ?? cause?.message;
+    return typeof detail === 'string' ? { error, cause: detail } : { error };
+}
+
 export function webhookLogTarget(url: string): string {
     try {
         const parsed = new URL(url);
@@ -161,8 +188,28 @@ export async function notifyWebhook(
                     nonRetryable: true,
                 });
             }
-            log.error('An error occurred while notifying webhook', { url: logTarget, err });
-            throw err;
+            const failure = {
+                url: logTarget,
+                workflow_id: params.workflow_id,
+                workflow_run_id: params.workflow_run_id,
+                // The activity logger does not serialize an Error, so the cause rides as text.
+                ...describeFetchFailure(err),
+            };
+            if (!isEndpointTransportFailure(err)) {
+                // fetch rejected before reaching the receiver (e.g. an invalid header): the request is ours.
+                log.error('An error occurred while notifying webhook', failure);
+                throw err;
+            }
+            // The receiving endpoint could not be reached (DNS, refused or reset connection, timeout). That is
+            // the receiver's availability, not a Vertesia failure, and the activity retries it: warn, like the
+            // non-2xx answer below.
+            log.warn('An error occurred while notifying webhook', failure);
+            // Still retried. The type lets the workflow's failure log tell the receiver's outage from ours.
+            throw ApplicationFailure.create({
+                message: err instanceof Error ? err.message : String(err),
+                type: WEBHOOK_ENDPOINT_UNREACHABLE,
+                cause: err instanceof Error ? err : undefined,
+            });
         });
     } finally {
         if (timeout) {
@@ -187,7 +234,7 @@ export async function notifyWebhook(
             log.debug('Could not read response body for error', { readError });
         }
 
-        throw new Error(errorMessage);
+        throw ApplicationFailure.create({ message: errorMessage, type: WEBHOOK_ENDPOINT_ERROR });
     }
 
     return { status: res.status, message: res.statusText, url: res.url };

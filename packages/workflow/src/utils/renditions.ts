@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { log } from '@temporalio/activity';
+import { Context, log } from '@temporalio/activity';
 import type { VertesiaClient } from '@vertesia/client';
 import { NodeStreamSource } from '@vertesia/client/node';
 import { getRenditionPagePath, getRenditionsPath, type ImageRenditionFormat } from '@vertesia/common';
@@ -82,9 +82,16 @@ export async function uploadRenditionPages(
 
                 return result;
             } catch (err: unknown) {
-                log.error(`Failed to upload rendition for ${contentEtag} page ${i}`, {
-                    error: err,
-                });
+                if (isActivityStopping()) {
+                    // A worker shutdown or cancellation aborts the upload; Temporal retries the activity.
+                    log.info(`Rendition upload for ${contentEtag} page ${i} interrupted: the activity is stopping`, {
+                        error: err,
+                    });
+                } else {
+                    log.error(`Failed to upload rendition for ${contentEtag} page ${i}`, {
+                        error: err,
+                    });
+                }
                 throw err;
             } finally {
                 if (resizedImagePath) {
@@ -99,4 +106,13 @@ export async function uploadRenditionPages(
     );
 
     return Promise.all(uploads);
+}
+
+/** Whether the current activity was cancelled or its worker is shutting down. False outside an activity. */
+function isActivityStopping(): boolean {
+    try {
+        return Context.current().cancellationSignal.aborted;
+    } catch {
+        return false;
+    }
 }

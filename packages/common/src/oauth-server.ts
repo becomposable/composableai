@@ -64,3 +64,13 @@ export type OAuthLoginPayload = Wire.OAuthLoginPayload;
 export type OAuthLoginDecisionResponse = Wire.OAuthLoginDecisionResponse;
 
 export type OAuthLoginUserNotFoundResponse = Wire.OAuthLoginUserNotFoundResponse;
+
+export type OidcFederationConnectionPayload = Wire.OidcFederationConnectionPayload;
+
+export type OidcFederationConnection = Wire.OidcFederationConnection;
+
+export type OidcFederationConnectionArray = Wire.OidcFederationConnectionArray;
+
+export type OAuthTokenExchangeRequest = Wire.OAuthTokenExchangeRequest;
+
+export type OAuthTokenExchangeResponse = Wire.OAuthTokenExchangeResponse;

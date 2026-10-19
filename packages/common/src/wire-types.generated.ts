@@ -1267,6 +1267,12 @@ export type AppInstallationProviderBinding = {
 export type AppInstallation = {
     id: string;
     project: string;
+    instance_key?: string | undefined;
+    display_name?: string | undefined;
+    installation_version?: 1 | undefined;
+    namespace_overrides?: Record<string, string> | undefined;
+    reserved_namespaces?: string[] | undefined;
+    namespace_conflicts?: string[] | undefined;
     manifest: string;
     mcp_configuration?:
         | {
@@ -1300,6 +1306,12 @@ export type AppInstallation = {
 export type AppInstallationWithManifest = {
     id: string;
     project: string;
+    instance_key?: string | undefined;
+    display_name?: string | undefined;
+    installation_version?: 1 | undefined;
+    namespace_overrides?: Record<string, string> | undefined;
+    reserved_namespaces?: string[] | undefined;
+    namespace_conflicts?: string[] | undefined;
     mcp_configuration?:
         | {
               revision: string;
@@ -1334,6 +1346,12 @@ export type AppInstallationWithManifest = {
 export type AppInstallationListEntry = {
     id: string;
     project: string;
+    instance_key?: string | undefined;
+    display_name?: string | undefined;
+    installation_version?: 1 | undefined;
+    namespace_overrides?: Record<string, string> | undefined;
+    reserved_namespaces?: string[] | undefined;
+    namespace_conflicts?: string[] | undefined;
     mcp_configuration?:
         | {
               revision: string;
@@ -1384,6 +1402,9 @@ export type AppApiKeyCollectionParams = {
 export type AppOAuthProviderParams = AppOAuthCollectionParams;
 export type AppInstallationPayload = {
     app_id: string;
+    instance_key?: string | undefined;
+    display_name?: string | undefined;
+    namespace_overrides?: Record<string, string> | undefined;
     mcp_shared_parameters?: Record<string, string | null> | undefined;
     mcp_parameters?: Record<string, Record<string, string | null>> | undefined;
     settings?:
@@ -1405,6 +1426,7 @@ export type AppInstallationKind = 'ui' | 'tools' | 'all';
  */
 export type AppToolCollection = {
     name: string;
+    collection_id?: string | undefined;
     description?: string | undefined;
     tools: AgentToolDefinition[];
 };
@@ -1670,6 +1692,9 @@ export type AppDeleteSummary = {
 };
 export type UpdateAppInstallationOAuthApprovalPayload = {
     approved_scopes: string[];
+};
+export type AppInstanceAvailability = {
+    enabled: boolean;
 };
 export type McpPublicParameter = {
     title?: string | undefined;
@@ -4672,8 +4697,12 @@ export type OAuthClientType = 'public' | 'confidential';
 export type OAuthClientStatus = 'active' | 'disabled';
 export type OAuthRegistrationSource = 'admin' | 'dynamic';
 export type OAuthProjectBindingMode = 'user_select' | 'fixed';
-export type OAuthTokenEndpointAuthMethod = 'none' | 'client_secret_post' | 'client_secret_basic';
-export type OAuthGrantType = 'authorization_code' | 'refresh_token' | 'urn:ietf:params:oauth:grant-type:device_code';
+export type OAuthTokenEndpointAuthMethod = 'none' | 'client_secret_post' | 'client_secret_basic' | 'private_key_jwt';
+export type OAuthGrantType =
+    | 'authorization_code'
+    | 'refresh_token'
+    | 'urn:ietf:params:oauth:grant-type:device_code'
+    | 'urn:ietf:params:oauth:grant-type:token-exchange';
 export type OAuthResponseType = 'code';
 export type OAuthAuthorizationRequestStatus = 'pending' | 'denied' | 'consumed';
 export type OAuthClientRegistrationMode = 'registered' | 'client_id_metadata_document';
@@ -4696,6 +4725,7 @@ export type OAuthClientData = {
     grant_types: OAuthGrantType[];
     response_types: OAuthResponseType[];
     token_endpoint_auth_method: OAuthTokenEndpointAuthMethod;
+    jwks_uri?: string | undefined;
     allowed_scopes: string[];
     default_scopes?: string[] | undefined;
     registration_source: OAuthRegistrationSource;
@@ -4721,6 +4751,7 @@ export type OAuthClient = {
     grant_types: OAuthGrantType[];
     response_types: OAuthResponseType[];
     token_endpoint_auth_method: OAuthTokenEndpointAuthMethod;
+    jwks_uri?: string | undefined;
     allowed_scopes: string[];
     default_scopes?: string[] | undefined;
     registration_source: OAuthRegistrationSource;
@@ -4748,6 +4779,7 @@ export type OAuthClientCreateResponse = {
     grant_types: OAuthGrantType[];
     response_types: OAuthResponseType[];
     token_endpoint_auth_method: OAuthTokenEndpointAuthMethod;
+    jwks_uri?: string | undefined;
     allowed_scopes: string[];
     default_scopes?: string[] | undefined;
     registration_source: OAuthRegistrationSource;
@@ -4835,6 +4867,7 @@ export type CreateOAuthClientPayload = {
     grant_types?: OAuthGrantType[] | undefined;
     response_types?: OAuthResponseType[] | undefined;
     token_endpoint_auth_method?: OAuthTokenEndpointAuthMethod | undefined;
+    jwks_uri?: string | undefined;
     allowed_scopes?: string[] | undefined;
     default_scopes?: string[] | undefined;
     project_binding_mode?: OAuthProjectBindingMode | undefined;
@@ -4853,9 +4886,11 @@ export type UpdateOAuthClientPayload = {
     grant_types?: OAuthGrantType[] | undefined;
     response_types?: OAuthResponseType[] | undefined;
     token_endpoint_auth_method?: OAuthTokenEndpointAuthMethod | undefined;
+    jwks_uri?: string | undefined;
     allowed_scopes?: string[] | undefined;
     default_scopes?: string[] | undefined;
     status?: OAuthClientStatus | undefined;
+    revoke_previous_client_secret?: boolean | undefined;
     project_binding_mode?: OAuthProjectBindingMode | undefined;
     fixed_project_id?: string | undefined;
     restrict_to_owner_account?: boolean | undefined;
@@ -4880,6 +4915,7 @@ export type OAuthAuthorizationServerMetadata = {
     grant_types_supported: string[];
     code_challenge_methods_supported: string[];
     token_endpoint_auth_methods_supported: string[];
+    token_endpoint_auth_signing_alg_values_supported?: string[] | undefined;
     scopes_supported: string[];
     client_id_metadata_document_supported?: boolean | undefined;
     authorization_response_iss_parameter_supported?: boolean | undefined;
@@ -4993,6 +5029,73 @@ export type OAuthLoginDecisionResponse = {
 export type OAuthLoginUserNotFoundResponse = {
     error: 'user_not_found';
     ensure_user_url: string;
+};
+export type OidcFederationConnectionPayload = {
+    name: string;
+    issuer: string;
+    jwks_uri?: string | undefined;
+    external_id_claim: string;
+    allowed_audiences: string[];
+    allowed_algorithms: ('RS256' | 'ES256')[];
+    subject_token_type:
+        | 'urn:ietf:params:oauth:token-type:jwt'
+        | 'urn:ietf:params:oauth:token-type:id_token'
+        | 'urn:ietf:params:oauth:token-type:access_token';
+    required_claims?: Record<string, string> | undefined;
+    all_projects?: boolean | undefined;
+    allowed_project_ids: string[];
+    allowed_client_ids?: string[] | undefined;
+    allowed_scopes?: string[] | undefined;
+    max_token_ttl_seconds: number;
+    max_subject_token_age_seconds?: number | undefined;
+    enabled: boolean;
+};
+export type OidcFederationConnection = {
+    name: string;
+    issuer: string;
+    jwks_uri?: string | undefined;
+    external_id_claim: string;
+    allowed_audiences: string[];
+    allowed_algorithms: ('RS256' | 'ES256')[];
+    subject_token_type:
+        | 'urn:ietf:params:oauth:token-type:jwt'
+        | 'urn:ietf:params:oauth:token-type:id_token'
+        | 'urn:ietf:params:oauth:token-type:access_token';
+    required_claims?: Record<string, string> | undefined;
+    all_projects?: boolean | undefined;
+    allowed_project_ids: string[];
+    allowed_client_ids?: string[] | undefined;
+    allowed_scopes?: string[] | undefined;
+    max_token_ttl_seconds: number;
+    max_subject_token_age_seconds: number;
+    enabled: boolean;
+    id: string;
+    account_id: string;
+};
+export type OidcFederationConnectionArray = OidcFederationConnection[];
+export type OAuthTokenExchangeRequest = {
+    grant_type: 'urn:ietf:params:oauth:grant-type:token-exchange';
+    subject_token: string;
+    subject_token_type:
+        | 'urn:ietf:params:oauth:token-type:jwt'
+        | 'urn:ietf:params:oauth:token-type:id_token'
+        | 'urn:ietf:params:oauth:token-type:access_token';
+    requested_token_type?: 'urn:ietf:params:oauth:token-type:access_token' | undefined;
+    federation_connection_id: string;
+    client_id?: string | undefined;
+    client_secret?: string | undefined;
+    client_assertion?: string | undefined;
+    client_assertion_type?: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer' | undefined;
+    project_id: string;
+    resource: string;
+    scope?: string | undefined;
+};
+export type OAuthTokenExchangeResponse = {
+    access_token: string;
+    token_type: 'Bearer';
+    expires_in: number;
+    scope?: string | undefined;
+    issued_token_type: 'urn:ietf:params:oauth:token-type:access_token';
 };
 /**
  * OAuth Provider data stored in MongoDB.
@@ -10851,6 +10954,11 @@ export interface ApiComponentTypes {
     OAuthDeviceAuthorizationRequest: OAuthDeviceAuthorizationRequest;
     OAuthDeviceAuthorizationResponse: OAuthDeviceAuthorizationResponse;
     OAuthTokenResponse: OAuthTokenResponse;
+    OidcFederationConnectionPayload: OidcFederationConnectionPayload;
+    OidcFederationConnection: OidcFederationConnection;
+    OidcFederationConnectionArray: OidcFederationConnectionArray;
+    OAuthTokenExchangeRequest: OAuthTokenExchangeRequest;
+    OAuthTokenExchangeResponse: OAuthTokenExchangeResponse;
     OAuthClient: OAuthClient;
     OAuthClientArray: OAuthClientArray;
     OAuthClientCreateResponse: OAuthClientCreateResponse;
@@ -11834,6 +11942,7 @@ export interface ApiComponentTypes {
     AgentRunSearchHit: AgentRunSearchHit;
     UpsertAppVersionRequest: UpsertAppVersionRequest;
     AppInstallationPayload: AppInstallationPayload;
+    AppInstanceAvailability: AppInstanceAvailability;
     AppDevelopmentTaskDetails: AppDevelopmentTaskDetails;
     AppVersionRecordArray: AppVersionRecordArray;
     AppToolCollectionArray: AppToolCollectionArray;

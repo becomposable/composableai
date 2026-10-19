@@ -89,6 +89,36 @@ describe('transformImports — end to end', () => {
         expect(existsSync(join(libDir, 'widgets', 'widget.js'))).toBe(true);
     });
 
+    it('copies Agent Skills resource directories under skill-files/<skill name>, keeping relative paths', async () => {
+        cpSync(join(FIXTURE_ROOT, 'spec-skill'), join(srcDir, 'spec-skill'), { recursive: true });
+        writeFileSync(join(libDir, 'index.js'), `import skill from "./spec-skill/SKILL.md";\nexport default skill;\n`);
+
+        const result = await transformImports({ libDir, srcDir, transformers: [skillTransformer] });
+
+        // One flat script plus four resource files; the hidden file is skipped.
+        expect(result.assetsCopied).toBe(5);
+        expect(readFileSync(join(libDir, 'scripts', 'helper.py'), 'utf-8')).toBe(
+            readFileSync(join(srcDir, 'spec-skill', 'helper.py'), 'utf-8'),
+        );
+        // Namespaced by the frontmatter name, not the directory name.
+        const skillFiles = join(libDir, 'skill-files', 'pdf-processing');
+        for (const file of [
+            'scripts/extract.py',
+            'scripts/helpers/util.py',
+            'references/REFERENCE.md',
+            'assets/template.txt',
+        ]) {
+            expect(readFileSync(join(skillFiles, file), 'utf-8')).toBe(
+                readFileSync(join(srcDir, 'spec-skill', file), 'utf-8'),
+            );
+        }
+        expect(existsSync(join(skillFiles, 'scripts', '.hidden'))).toBe(false);
+        expect(existsSync(join(libDir, 'skill-files', 'spec-skill'))).toBe(false);
+
+        const chunk = readFileSync(join(libDir, 'spec-skill', 'SKILL.md.js'), 'utf-8');
+        expect(chunk).toContain('"references/REFERENCE.md"');
+    });
+
     it('deduplicates chunk emission when the same import appears in multiple files', async () => {
         cpSync(join(FIXTURE_ROOT, 'skill-with-assets'), join(srcDir, 'skill-with-assets'), { recursive: true });
         mkdirSync(join(libDir, 'skill-with-assets'), { recursive: true });

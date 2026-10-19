@@ -257,9 +257,24 @@ export class SkillCollection implements ICollection<SkillDefinition> {
 
         return {
             name: skill.name,
-            instructions,
+            instructions: instructions + describeSkillFiles(skill),
         };
     }
+}
+
+/**
+ * Tell the agent where an Agent Skills skill's resource files live in the sandbox. Spec skills refer to
+ * them by paths relative to the skill directory (`scripts/extract.py`), which resolve from there.
+ */
+function describeSkillFiles(skill: SkillDefinition): string {
+    if (!skill.files || skill.files.length === 0) {
+        return '';
+    }
+    const list = skill.files.map((file) => `- \`${file}\``).join('\n');
+    return (
+        `\n\n---\n\nThis skill's files are in the sandbox under \`~/skills/${skill.name}/\`. ` +
+        `Resolve relative paths in these instructions from that directory:\n${list}`
+    );
 }
 
 // ================== Skill Parser ==================

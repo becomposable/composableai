@@ -52,5 +52,46 @@ describe('Asset Discovery', () => {
         expect(assets.scripts).toHaveLength(0);
         expect(assets.widgets).toHaveLength(0);
         expect(assets.assetFiles).toHaveLength(0);
+        expect(assets.files).toHaveLength(0);
+    });
+
+    it('should discover Agent Skills resource directories recursively, keeping relative paths', () => {
+        const skillPath = join(__dirname, 'fixtures', 'spec-skill', 'SKILL.md');
+        const assets = discoverSkillAssets(skillPath, { skillName: 'pdf-processing' });
+
+        expect(assets.files).toEqual([
+            'scripts/extract.py',
+            'scripts/helpers/util.py',
+            'references/REFERENCE.md',
+            'assets/template.txt',
+        ]);
+        const resourceAssets = assets.assetFiles.filter((a) => a.type === 'skill-file');
+        expect(resourceAssets.map((a) => a.destPath)).toEqual([
+            join('skill-files', 'pdf-processing', 'scripts', 'extract.py'),
+            join('skill-files', 'pdf-processing', 'scripts', 'helpers', 'util.py'),
+            join('skill-files', 'pdf-processing', 'references', 'REFERENCE.md'),
+            join('skill-files', 'pdf-processing', 'assets', 'template.txt'),
+        ]);
+    });
+
+    it('should keep flat scripts beside SKILL.md on the legacy path', () => {
+        const skillPath = join(__dirname, 'fixtures', 'spec-skill', 'SKILL.md');
+        const assets = discoverSkillAssets(skillPath, { skillName: 'pdf-processing' });
+
+        expect(assets.scripts).toEqual(['helper.py']);
+        const scriptAssets = assets.assetFiles.filter((a) => a.type === 'script');
+        expect(scriptAssets.map((a) => a.destPath)).toEqual([join('scripts', 'helper.py')]);
+    });
+
+    it('should not attribute resource directories to a skill that shares its directory', () => {
+        const skillPath = join(__dirname, 'fixtures', 'spec-skill', 'other.md');
+        const assets = discoverSkillAssets(skillPath);
+
+        expect(assets.files).toHaveLength(0);
+    });
+
+    it('should reject a skill name that would escape the resource directory', () => {
+        const skillPath = join(__dirname, 'fixtures', 'spec-skill', 'SKILL.md');
+        expect(() => discoverSkillAssets(skillPath, { skillName: '../escape' })).toThrow(/Invalid skill name/);
     });
 });

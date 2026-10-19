@@ -25,4 +25,11 @@ describe('createPathMatcherUnsafe', () => {
         });
         expectParams(matcher('/'), {});
     });
+
+    test('answers 400 for a malformed percent-encoded param', () => {
+        const matcher = createPathMatcherUnsafe('/resolve/:nameOrId');
+
+        expectParams(matcher('/resolve/a%40v1'), { nameOrId: 'a@v1' });
+        expect(() => matcher('/resolve/%E0%A4%A')).toThrow(expect.objectContaining({ statusCode: 400, expose: true }));
+    });
 });

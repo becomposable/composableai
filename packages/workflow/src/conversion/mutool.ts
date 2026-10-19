@@ -2,46 +2,50 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import { log } from '@temporalio/activity';
 import tmp from 'tmp';
+import { removeTempFiles } from './temp-files.js';
 
 /**
  * Convert a pdf file to text
  * TODO: pass file reference instead of Buffer
  */
 
-export function mutoolPdfToText(buffer: Buffer): Promise<string> {
-    const inputFile = tmp.fileSync({ postfix: '.pdf' });
+export async function mutoolPdfToText(buffer: Buffer): Promise<string> {
+    const inputFile = tmp.tmpNameSync({ postfix: '.pdf' });
     const targetFileName = tmp.tmpNameSync({ postfix: '.txt' });
 
-    fs.writeSync(inputFile.fd, buffer);
+    try {
+        await fs.promises.writeFile(inputFile, buffer, { flag: 'wx', mode: 0o600 });
+        return await new Promise((resolve, reject) => {
+            log.info('Converting pdf to text', { inputFile, targetFileName });
 
-    return new Promise((resolve, reject) => {
-        log.info('Converting pdf to text', { inputFile: inputFile.name, targetFileName });
+            const command = spawn('mutool', ['convert', '-o', targetFileName, inputFile]);
 
-        const command = spawn('mutool', ['convert', '-o', targetFileName, inputFile.name]);
+            command.on('exit', (code) => {
+                if (code) {
+                    reject(new Error(`mutool exited with code ${code}`));
+                }
+            });
 
-        command.on('exit', (code) => {
-            if (code) {
-                reject(new Error(`mutool exited with code ${code}`));
-            }
+            command.on('close', (code) => {
+                if (code) {
+                    reject(new Error(`mutool exited with code ${code}`));
+                } else {
+                    return fs.readFile(targetFileName, 'utf8', (err, data) => {
+                        if (err) {
+                            reject(err);
+                        }
+                        return resolve(data);
+                    });
+                }
+            });
+
+            command.on('error', (err) => {
+                reject(err);
+            });
         });
-
-        command.on('close', (code) => {
-            if (code) {
-                reject(new Error(`mutool exited with code ${code}`));
-            } else {
-                return fs.readFile(targetFileName, 'utf8', (err, data) => {
-                    if (err) {
-                        reject(err);
-                    }
-                    return resolve(data);
-                });
-            }
-        });
-
-        command.on('error', (err) => {
-            reject(err);
-        });
-    });
+    } finally {
+        await removeTempFiles(inputFile, targetFileName);
+    }
 }
 
 /**

@@ -47,7 +47,8 @@ export async function imageResizer(
 
     //check that inputPath exists
     // Create a temporary file
-    const { path: outputPath, cleanup } = await file({ postfix: `.${format}` });
+    // The caller owns the returned path; discard the descriptor so removing the path frees its space.
+    const { path: outputPath, cleanup } = await file({ postfix: `.${format}`, discardDescriptor: true });
     try {
         // Check if input file exists
         if (!fs.existsSync(inputPath)) {

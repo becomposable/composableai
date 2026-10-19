@@ -1,6 +1,5 @@
 import { spawn } from 'node:child_process';
-import fs from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { readFile, rm, writeFile } from 'node:fs/promises';
 import tmp from 'tmp';
 
 tmp.setGracefulCleanup();
@@ -31,13 +30,15 @@ export function pdfFileToText(input: string, output: string) {
 export function pdfToText(buffer: Buffer): Promise<string> {
     return pdfToTextBuffer(buffer).then((buffer) => buffer.toString('utf-8'));
 }
-export function pdfToTextBuffer(buffer: Buffer): Promise<Buffer> {
-    const inputFile = tmp.fileSync({ postfix: '.pdf' });
+export async function pdfToTextBuffer(buffer: Buffer): Promise<Buffer> {
+    const inputFile = tmp.tmpNameSync({ postfix: '.pdf' });
     const targetFileName = tmp.tmpNameSync({ postfix: '.txt' });
 
-    fs.writeSync(inputFile.fd, buffer);
-
-    return pdfFileToText(inputFile.name, targetFileName).then(() => {
-        return readFile(targetFileName);
-    });
+    try {
+        await writeFile(inputFile, buffer, { flag: 'wx', mode: 0o600 });
+        await pdfFileToText(inputFile, targetFileName);
+        return await readFile(targetFileName);
+    } finally {
+        await Promise.all([inputFile, targetFileName].map((file) => rm(file, { force: true })));
+    }
 }

@@ -232,9 +232,6 @@ export type StripeBillingStatusResponseFromSchema = StripeBillingEnabled | Strip
 export type ApiKeyListQueryFromSchema = {
     level?: 'account' | 'project' | undefined;
 };
-export type ApiKeyReadQueryFromSchema = {
-    withValue?: boolean | undefined;
-};
 export type ProjectRefArrayFromSchema = ProjectRef[];
 export type ApiKeyFromSchema = {
     id: string;
@@ -277,27 +274,6 @@ export type ApiKeyWithValueFromSchema = {
     clearance?: number | undefined;
     compartments?: string[] | undefined;
     value: string;
-};
-export type ApiKeyReadResponseFromSchema = {
-    id: string;
-    name: string;
-    type: (typeof ApiKeyTypes)['secret'];
-    role: (typeof SystemRoles)[keyof typeof SystemRoles];
-    maskedValue?: string | undefined;
-    can_retrieve_value?: boolean | undefined;
-    account: string;
-    project: ProjectRef;
-    enabled: boolean;
-    scim_provisioning?: boolean | undefined;
-    created_by: string;
-    updated_by: string;
-    created_at: string;
-    updated_at: string;
-    expires_at?: string | undefined;
-    properties?: Record<string, unknown> | undefined;
-    clearance?: number | undefined;
-    compartments?: string[] | undefined;
-    value?: string | undefined;
 };
 export type CreateApiKeyPayloadFromSchema = {
     name: string;
@@ -525,10 +501,8 @@ export type ApiKeyArray = ApiKeyArrayFromSchema;
 export type CreateApiKeyPayload = CreateApiKeyPayloadFromSchema;
 export type UpdateApiKeyPayload = UpdateApiKeyPayloadFromSchema;
 export type ApiKeyWithValue = ApiKeyWithValueFromSchema;
-export type ApiKeyReadResponse = ApiKeyReadResponseFromSchema;
 export type AuthTokenResponse = AuthTokenResponseFromSchema;
 export type ApiKeyListQuery = ApiKeyListQueryFromSchema;
-export type ApiKeyReadQuery = ApiKeyReadQueryFromSchema;
 export type AccountApiKey = {
     id: string;
     name: string;
@@ -10872,8 +10846,6 @@ export interface ApiComponentTypes {
     AccountApiKeyArray: AccountApiKeyArray;
     CreateAccountApiKeyPayload: CreateAccountApiKeyPayload;
     UpdateAccountApiKeyPayload: UpdateAccountApiKeyPayload;
-    ApiKeyReadResponse: ApiKeyReadResponseFromSchema;
-    ApiKeyReadQuery: ApiKeyReadQueryFromSchema;
     CreateApiKeyPayload: CreateApiKeyPayloadFromSchema;
     UpdateApiKeyPayload: UpdateApiKeyPayloadFromSchema;
     AuthTokenResponse: AuthTokenResponseFromSchema;

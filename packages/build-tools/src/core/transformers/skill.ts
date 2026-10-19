@@ -168,7 +168,7 @@ type SkillFrontmatter = z.infer<typeof SkillFrontmatterSchema>;
 
 /**
  * Build a SkillDefinition from frontmatter and markdown content.
- * This mirrors the logic in @vertesia/tools-sdk parseSkillFile function.
+ * Includes Agent Skills frontmatter and resources discovered at build time.
  *
  * Supports two frontmatter structures:
  *

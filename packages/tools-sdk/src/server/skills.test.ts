@@ -30,9 +30,9 @@ function makeApp(config: ToolServerConfig): Hono {
     return app;
 }
 
-async function executeSkill(name: string): Promise<{ content: string }> {
+async function executeSkill(name: string, skills = collection): Promise<{ content: string }> {
     const app = new Hono();
-    app.post('/', (c) => collection.execute(c, { tool_use: { id: 't1', tool_name: `learn_${name}`, tool_input: {} } }));
+    app.post('/', (c) => skills.execute(c, { tool_use: { id: 't1', tool_name: `learn_${name}`, tool_input: {} } }));
     const res = await app.request('/', { method: 'POST' });
     expect(res.status).toBe(200);
     return (await res.json()) as { content: string };
@@ -88,6 +88,31 @@ describe('skill execution', () => {
         expect(body.content).toContain('Run `scripts/extract.py`.');
         expect(body.content).toContain('`~/skills/pdf-processing/`');
         expect(body.content).toContain('- `references/REFERENCE.md`');
+    });
+
+    it.each([20, 21, 250])('bounds the instruction file list for %i resources', async (count) => {
+        const files = Array.from({ length: count }, (_, index) => `assets/file-${index}.bin`);
+        const skills = new SkillCollection({ name: 'docs', skills: [{ ...specSkill, files }] });
+
+        const body = await executeSkill(specSkill.name, skills);
+
+        expect(body.content).toContain('`assets/file-19.bin`');
+        expect(body.content).not.toContain('`assets/file-20.bin`');
+        if (count > 20) expect(body.content).toContain(`${count - 20} more file`);
+        else expect(body.content).not.toContain('more files');
+        expect(body.content.length).toBeLessThan(3000);
+        expect(skills.getSkill(specSkill.name)?.files).toHaveLength(count);
+    });
+
+    it('bounds long resource paths without flooding the learned instructions', async () => {
+        const skills = new SkillCollection({
+            name: 'docs',
+            skills: [{ ...specSkill, files: [`assets/${'a'.repeat(3000)}`] }],
+        });
+        const body = await executeSkill(specSkill.name, skills);
+        expect(body.content.length).toBeLessThan(1000);
+        expect(body.content).toContain('1 more file.');
+        expect(body.content).toContain('Use execute_shell to list this directory');
     });
 
     it('returns the instructions unchanged when the skill has no resource files', async () => {

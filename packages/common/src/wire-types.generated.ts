@@ -17,6 +17,7 @@ import type {
     JSONSchema,
     JSONValue,
     JsonResult,
+    // biome-ignore lint/suspicious/noDeprecatedImports: Legacy output_modality contracts require Modalities.
     Modalities,
     ModelOptions,
     ModelSearchPayload,

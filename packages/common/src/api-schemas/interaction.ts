@@ -701,8 +701,10 @@ export const RunSearchQuerySchema = z
  */
 export const RunListQuerySchema = z
     .strictObject({
-        limit: z.number().int().meta({ description: 'Maximum number of runs to return.' }).optional(),
-        offset: z.number().int().meta({ description: 'Number of runs to skip.' }).optional(),
+        // Already published as `integer`, so these keep that type and only gain the lower bound a find
+        // `skip` needs; a negative count failed there as a 500.
+        limit: z.number().int().min(0).meta({ description: 'Maximum number of runs to return.' }).optional(),
+        offset: z.number().int().min(0).meta({ description: 'Number of runs to skip.' }).optional(),
         interaction: z
             .array(z.string())
             .meta({ description: 'Interaction ids, or in-code interaction names, to filter by.' })

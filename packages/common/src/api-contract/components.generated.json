@@ -13762,13 +13762,13 @@
     "properties": {
       "limit": {
         "type": "integer",
-        "minimum": -9007199254740991,
+        "minimum": 0,
         "maximum": 9007199254740991,
         "description": "Maximum number of runs to return."
       },
       "offset": {
         "type": "integer",
-        "minimum": -9007199254740991,
+        "minimum": 0,
         "maximum": 9007199254740991,
         "description": "Number of runs to skip."
       },

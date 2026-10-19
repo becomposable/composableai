@@ -10940,10 +10940,14 @@
     "type": "object",
     "properties": {
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "status": {
         "$ref": "#/components/schemas/InteractionStatus"
@@ -13758,13 +13762,13 @@
     "properties": {
       "limit": {
         "type": "integer",
-        "minimum": -9007199254740991,
+        "minimum": 0,
         "maximum": 9007199254740991,
         "description": "Maximum number of runs to return."
       },
       "offset": {
         "type": "integer",
-        "minimum": -9007199254740991,
+        "minimum": 0,
         "maximum": 9007199254740991,
         "description": "Number of runs to skip."
       },
@@ -13848,10 +13852,14 @@
         "$ref": "#/components/schemas/RunSearchQuery"
       },
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "select": {
         "type": "string"
@@ -27370,10 +27378,14 @@
         ]
       },
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       }
     },
     "additionalProperties": false
@@ -27763,10 +27775,14 @@
         "type": "boolean"
       },
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       }
     },
     "additionalProperties": false
@@ -27787,10 +27803,14 @@
         "type": "boolean"
       },
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       }
     },
     "additionalProperties": false
@@ -35000,10 +35020,14 @@
         "$ref": "#/components/schemas/CollectionStatus"
       },
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "name": {
         "type": "string"
@@ -35189,10 +35213,14 @@
         "type": "string"
       },
       "limit": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       },
       "offset": {
-        "type": "number"
+        "type": "number",
+        "minimum": 0,
+        "multipleOf": 1
       }
     }
   },
@@ -37284,10 +37312,14 @@
       },
       "limit": {
         "type": "number",
+        "minimum": 0,
+        "multipleOf": 1,
         "description": "Maximum number of results (default: 50)"
       },
       "offset": {
         "type": "number",
+        "minimum": 0,
+        "multipleOf": 1,
         "description": "Offset for pagination"
       },
       "cursor": {

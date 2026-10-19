@@ -11829,7 +11829,7 @@
         "items": {
           "$ref": "#/components/schemas/CatalogSearchInteractionRef"
         },
-        "description": "The matching interactions: system interactions first, then stored interactions, most recently updated first."
+        "description": "The matching interactions: stored interactions first, most recently updated first, then system interactions."
       }
     },
     "required": [

@@ -1549,8 +1549,8 @@ export const CatalogSearchResultSchema = z
         }),
         interactions: z.array(CatalogSearchInteractionRefSchema).meta({
             description:
-                'The matching interactions: system interactions first, then stored interactions, most recently ' +
-                'updated first.',
+                'The matching interactions: stored interactions first, most recently updated first, then system ' +
+                'interactions.',
         }),
     })
     .meta({ id: 'CatalogSearchResult' });

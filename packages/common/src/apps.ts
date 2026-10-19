@@ -239,6 +239,7 @@ export type AppGithubInstallation = Wire.AppGithubInstallation;
 export type AppGithubAccount = Wire.AppGithubAccount;
 export type ExchangeAppGithubAuthorizationResponse = Wire.ExchangeAppGithubAuthorizationResponse;
 export type AppGithubRepository = Wire.AppGithubRepository;
+export type AppGithubRepositoryCreation = Wire.AppGithubRepositoryCreation;
 export type AppGithubRepositoryList = Wire.AppGithubRepositoryList;
 export type AppGithubRepositorySetupQuery = Wire.AppGithubRepositorySetupQuery;
 export type AppGithubBranchState = Wire.AppGithubBranchState;

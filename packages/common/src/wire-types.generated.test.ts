@@ -461,6 +461,10 @@ interface Checks {
         W.AppGithubRepository,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySchema>
     >;
+    AppGithubRepositoryCreation: Same<
+        W.AppGithubRepositoryCreation,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoryCreationSchema>
+    >;
     AppGithubRepositoryList: Same<
         W.AppGithubRepositoryList,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoryListSchema>
@@ -8987,6 +8991,10 @@ interface Checks {
         W.ApiComponentTypes['AppGithubRepository'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySchema>
     >;
+    'component:AppGithubRepositoryCreation': Same<
+        W.ApiComponentTypes['AppGithubRepositoryCreation'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoryCreationSchema>
+    >;
     'component:AppGithubRepositoryList': Same<
         W.ApiComponentTypes['AppGithubRepositoryList'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoryListSchema>
@@ -9792,6 +9800,7 @@ const checks: Checks = {
     AppGithubAccount: true,
     ExchangeAppGithubAuthorizationResponse: true,
     AppGithubRepository: true,
+    AppGithubRepositoryCreation: true,
     AppGithubRepositoryList: true,
     AppGithubRepositorySetupQuery: true,
     AppGithubBranchState: true,
@@ -12039,6 +12048,7 @@ const checks: Checks = {
     'component:AppGithubInstallation': true,
     'component:AppGithubAccount': true,
     'component:AppGithubRepository': true,
+    'component:AppGithubRepositoryCreation': true,
     'component:AppGithubRepositoryList': true,
     'component:AppGithubRepositorySetupQuery': true,
     'component:AppGithubBranchState': true,
@@ -12212,6 +12222,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2544);
+        expect(Object.keys(checks)).toHaveLength(2546);
     });
 });

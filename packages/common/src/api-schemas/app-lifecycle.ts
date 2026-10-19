@@ -416,6 +416,22 @@ export const AppVersionGitSourceSchema = z
     })
     .meta({ id: 'AppVersionGitSource' });
 
+export const AppGithubRepositoryCreationSchema = z
+    .strictObject({
+        name: z
+            .string()
+            .trim()
+            .min(1)
+            .max(100)
+            .regex(/^[A-Za-z0-9][A-Za-z0-9._-]*$/)
+            .meta({ description: 'Name of the empty GitHub repository to create in the verified installation.' }),
+        private: z
+            .boolean()
+            .optional()
+            .meta({ description: 'Create a private repository. Defaults to true when omitted.' }),
+    })
+    .meta({ id: 'AppGithubRepositoryCreation' });
+
 export const StartAppScaffoldRequestSchema = z
     .strictObject({
         app_id: z.string().meta({
@@ -452,6 +468,10 @@ export const StartAppScaffoldRequestSchema = z
         }),
         github_connection_id: z.string().optional().meta({
             description: 'Short-lived proof that the current user verified the selected GitHub installation.',
+        }),
+        github_repository_creation: AppGithubRepositoryCreationSchema.optional().meta({
+            description:
+                'Create an empty repository in the verified GitHub installation before generating the app source.',
         }),
     })
     .meta({ id: 'StartAppScaffoldRequest' });

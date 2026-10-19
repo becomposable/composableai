@@ -20326,6 +20326,25 @@
       "html_url"
     ]
   },
+  "AppGithubRepositoryCreation": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+        "description": "Name of the empty GitHub repository to create in the verified installation."
+      },
+      "private": {
+        "type": "boolean",
+        "description": "Create a private repository. Defaults to true when omitted."
+      }
+    },
+    "required": [
+      "name"
+    ]
+  },
   "AppGithubRepositoryList": {
     "type": "object",
     "properties": {
@@ -20463,6 +20482,10 @@
       "github_connection_id": {
         "type": "string",
         "description": "Short-lived proof that the current user verified the selected GitHub installation."
+      },
+      "github_repository_creation": {
+        "$ref": "#/components/schemas/AppGithubRepositoryCreation",
+        "description": "Create an empty repository in the verified GitHub installation before generating the app source."
       }
     },
     "required": [

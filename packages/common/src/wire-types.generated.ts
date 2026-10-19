@@ -864,6 +864,7 @@ export type StartAppScaffoldRequest = {
     source_mode?: AppScaffoldSourceMode | undefined;
     source?: AppSourceConfig | undefined;
     github_connection_id?: string | undefined;
+    github_repository_creation?: AppGithubRepositoryCreation | undefined;
 };
 export type StartAppScaffoldResponse = {
     workflow_id: string;
@@ -912,6 +913,10 @@ export type AppGithubRepository = {
     private: boolean;
     default_branch: string;
     html_url: string;
+};
+export type AppGithubRepositoryCreation = {
+    name: string;
+    private?: boolean | undefined;
 };
 export type AppGithubRepositoryList = {
     repositories: AppGithubRepository[];
@@ -11994,6 +11999,7 @@ export interface ApiComponentTypes {
     AppGithubInstallation: AppGithubInstallation;
     AppGithubAccount: AppGithubAccount;
     AppGithubRepository: AppGithubRepository;
+    AppGithubRepositoryCreation: AppGithubRepositoryCreation;
     AppGithubRepositoryList: AppGithubRepositoryList;
     AppGithubRepositorySetupQuery: AppGithubRepositorySetupQuery;
     AppGithubBranchState: AppGithubBranchState;

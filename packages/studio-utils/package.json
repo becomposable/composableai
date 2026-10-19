@@ -1,6 +1,6 @@
 {
     "name": "@vertesia/studio-utils",
-    "version": "1.6.0-dev.20261004.085740Z",
+    "version": "1.6.0-dev.20261014.015055Z",
     "type": "module",
     "description": "Shared utilities for Vertesia studio: prompt template rendering, schema-based mock data generation, prompt and interaction validation helpers.",
     "main": "./lib/index.js",
@@ -65,7 +65,7 @@
         "@llumiverse/common": "workspace:*",
         "@vertesia/common": "workspace:*",
         "@vertesia/jst": "workspace:*",
-        "handlebars": "^4.7.9"
+        "handlebars": "^4.7.10"
     },
-    "gitHead": "b51b6dc9262f81f55e2424d1e57190060f6068d7"
+    "gitHead": "468240ecf939f968e1324116be26386cdf5ada49"
 }

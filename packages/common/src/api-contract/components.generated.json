@@ -888,6 +888,12 @@
           "type": "string"
         },
         "description": "Projects this group is allowed to be used in. When empty or absent the group is org-wide (usable in any project). When set, the group may only be used to grant permissions in the listed projects."
+      },
+      "member_count": {
+        "type": "integer",
+        "minimum": -9007199254740991,
+        "maximum": 9007199254740991,
+        "description": "Number of users in the group. Returned by the group listing only."
       }
     },
     "required": [
@@ -3340,6 +3346,20 @@
           "type": "string"
         }
       },
+      "effort": {
+        "$ref": "#/components/schemas/ReasoningEffort"
+      },
+      "reasoning_effort": {
+        "$ref": "#/components/schemas/ReasoningEffort"
+      },
+      "verbosity": {
+        "type": "string",
+        "enum": [
+          "low",
+          "medium",
+          "high"
+        ]
+      },
       "include_thoughts": {
         "type": "boolean"
       },
@@ -3351,12 +3371,27 @@
     },
     "additionalProperties": false
   },
+  "ReasoningEffort": {
+    "type": "string",
+    "enum": [
+      "none",
+      "minimal",
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max"
+    ]
+  },
   "BedrockNovaOptions": {
     "type": "object",
     "properties": {
       "_option_id": {
         "type": "string",
         "const": "bedrock-nova"
+      },
+      "effort": {
+        "$ref": "#/components/schemas/ReasoningEffort"
       },
       "max_tokens": {
         "type": "number"
@@ -4000,18 +4035,6 @@
     },
     "additionalProperties": false
   },
-  "ReasoningEffort": {
-    "type": "string",
-    "enum": [
-      "none",
-      "minimal",
-      "low",
-      "medium",
-      "high",
-      "xhigh",
-      "max"
-    ]
-  },
   "OpenAiTextOptions": {
     "type": "object",
     "properties": {
@@ -4021,6 +4044,9 @@
       },
       "image_generation": {
         "$ref": "#/components/schemas/OpenAiImageGenerationOptions"
+      },
+      "seed": {
+        "type": "number"
       },
       "max_tokens": {
         "type": "number"
@@ -4085,6 +4111,9 @@
   "OpenRouterTextOptions": {
     "type": "object",
     "properties": {
+      "seed": {
+        "type": "number"
+      },
       "max_tokens": {
         "type": "number"
       },
@@ -4518,11 +4547,7 @@
         }
       },
       "effort": {
-        "type": "string",
-        "enum": [
-          "none",
-          "high"
-        ]
+        "$ref": "#/components/schemas/ReasoningEffort"
       },
       "random_seed": {
         "type": "integer",
@@ -5823,6 +5848,23 @@
         "type": "string",
         "const": "mcp"
       },
+      "parameters": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/McpConnectionParameter"
+        }
+      },
+      "headers": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "HTTP header templates. Reference declared installation parameters with {{name}}. Never embed secrets."
+      },
       "id": {
         "type": "string",
         "description": "Stable identifier for this collection. Used to key oauth_bindings on AppInstallation — protects against collection renames. Required for new manifests."
@@ -5883,6 +5925,50 @@
       "other"
     ],
     "description": "Authentication type for tool collections.\n- 'none': connect directly without credentials for MCP collections; does not disable authentication for Vertesia SDK collections\n- 'oauth': the runtime resolves a per-user or per-project OAuth access token\n- 'api_key': a static key held in the project's secret store is sent as the RFC 6750 bearer token (`Authorization: Bearer <key>`)\n- 'other' or omitted: use the legacy provider connection-details flow for MCP collections"
+  },
+  "McpPublicParameter": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "required": {
+        "type": "boolean"
+      },
+      "type": {
+        "type": "string",
+        "const": "string"
+      },
+      "default": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  },
+  "McpSecretParameter": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "required": {
+        "type": "boolean"
+      },
+      "type": {
+        "type": "string",
+        "const": "secret"
+      }
+    },
+    "required": [
+      "type"
+    ],
+    "additionalProperties": false
   },
   "MCPOAuthConfig": {
     "type": "object",
@@ -5989,6 +6075,16 @@
     ],
     "additionalProperties": false,
     "description": "Vertesia SDK tool collection configuration"
+  },
+  "McpConnectionParameter": {
+    "anyOf": [
+      {
+        "$ref": "#/components/schemas/McpPublicParameter"
+      },
+      {
+        "$ref": "#/components/schemas/McpSecretParameter"
+      }
+    ]
   },
   "ToolCollectionObject": {
     "oneOf": [
@@ -6491,7 +6587,8 @@
     "enum": [
       "none",
       "client_secret_post",
-      "client_secret_basic"
+      "client_secret_basic",
+      "private_key_jwt"
     ]
   },
   "OAuthGrantType": {
@@ -6499,7 +6596,8 @@
     "enum": [
       "authorization_code",
       "refresh_token",
-      "urn:ietf:params:oauth:grant-type:device_code"
+      "urn:ietf:params:oauth:grant-type:device_code",
+      "urn:ietf:params:oauth:grant-type:token-exchange"
     ]
   },
   "OAuthResponseType": {
@@ -6588,6 +6686,12 @@
         }
       },
       "token_endpoint_auth_methods_supported": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "token_endpoint_auth_signing_alg_values_supported": {
         "type": "array",
         "items": {
           "type": "string"
@@ -6760,6 +6864,9 @@
         "type": "string"
       },
       "client_name": {
+        "type": "string"
+      },
+      "app_id": {
         "type": "string"
       },
       "client_metadata": {
@@ -7035,9 +7142,372 @@
       "expires_in"
     ]
   },
+  "OidcFederationConnectionPayload": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "issuer": {
+        "type": "string",
+        "format": "uri"
+      },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
+      },
+      "external_id_claim": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "\\S",
+        "description": "Exact top-level verified token claim matched to SCIM externalId within the owning provisioning account."
+      },
+      "allowed_audiences": {
+        "minItems": 1,
+        "maxItems": 20,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allowed_algorithms": {
+        "minItems": 1,
+        "maxItems": 2,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "RS256",
+            "ES256"
+          ]
+        }
+      },
+      "subject_token_type": {
+        "type": "string",
+        "enum": [
+          "urn:ietf:params:oauth:token-type:jwt",
+          "urn:ietf:params:oauth:token-type:id_token",
+          "urn:ietf:params:oauth:token-type:access_token"
+        ]
+      },
+      "required_claims": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "Exact string matches against verified top-level IdP claims, such as tenant or azp."
+      },
+      "all_projects": {
+        "type": "boolean",
+        "description": "Explicitly allow all current and future projects in the owning organization, subject to the user’s current access. Defaults to false for existing allowlists. When true, allowed_project_ids must be empty."
+      },
+      "allowed_project_ids": {
+        "maxItems": 100,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{24}$"
+        },
+        "description": "Explicit project allowlist. Must contain 1–100 projects unless all_projects is true."
+      },
+      "allowed_client_ids": {
+        "minItems": 1,
+        "maxItems": 20,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "description": "When set, require authentication by one of these account-owned confidential OAuth clients. Omit to allow exchanges without separate client authentication."
+      },
+      "allowed_scopes": {
+        "minItems": 1,
+        "maxItems": 100,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Optional restriction on delegable Vertesia permissions, excluding account:admin. Omit to use the user’s current permissions. An explicit list further restricts the grant."
+      },
+      "max_token_ttl_seconds": {
+        "type": "integer",
+        "minimum": 30,
+        "maximum": 300
+      },
+      "max_subject_token_age_seconds": {
+        "type": "integer",
+        "minimum": 30,
+        "maximum": 86400,
+        "description": "Maximum age since the signed iat claim. Defaults to 3600 seconds; 60 seconds of clock tolerance applies."
+      },
+      "enabled": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "name",
+      "issuer",
+      "external_id_claim",
+      "allowed_audiences",
+      "allowed_algorithms",
+      "subject_token_type",
+      "allowed_project_ids",
+      "max_token_ttl_seconds",
+      "enabled"
+    ],
+    "additionalProperties": false
+  },
+  "OidcFederationConnection": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "issuer": {
+        "type": "string",
+        "format": "uri"
+      },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
+      },
+      "external_id_claim": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "\\S",
+        "description": "Exact top-level verified token claim matched to SCIM externalId within the owning provisioning account."
+      },
+      "allowed_audiences": {
+        "minItems": 1,
+        "maxItems": 20,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allowed_algorithms": {
+        "minItems": 1,
+        "maxItems": 2,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "RS256",
+            "ES256"
+          ]
+        }
+      },
+      "subject_token_type": {
+        "type": "string",
+        "enum": [
+          "urn:ietf:params:oauth:token-type:jwt",
+          "urn:ietf:params:oauth:token-type:id_token",
+          "urn:ietf:params:oauth:token-type:access_token"
+        ]
+      },
+      "required_claims": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "Exact string matches against verified top-level IdP claims, such as tenant or azp."
+      },
+      "all_projects": {
+        "type": "boolean",
+        "description": "Explicitly allow all current and future projects in the owning organization, subject to the user’s current access. Defaults to false for existing allowlists. When true, allowed_project_ids must be empty."
+      },
+      "allowed_project_ids": {
+        "maxItems": 100,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{24}$"
+        },
+        "description": "Explicit project allowlist. Must contain 1–100 projects unless all_projects is true."
+      },
+      "allowed_client_ids": {
+        "minItems": 1,
+        "maxItems": 20,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "description": "When set, require authentication by one of these account-owned confidential OAuth clients. Omit to allow exchanges without separate client authentication."
+      },
+      "allowed_scopes": {
+        "minItems": 1,
+        "maxItems": 100,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Optional restriction on delegable Vertesia permissions, excluding account:admin. Omit to use the user’s current permissions. An explicit list further restricts the grant."
+      },
+      "max_token_ttl_seconds": {
+        "type": "integer",
+        "minimum": 30,
+        "maximum": 300
+      },
+      "max_subject_token_age_seconds": {
+        "type": "integer",
+        "minimum": 30,
+        "maximum": 86400
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$"
+      },
+      "account_id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$"
+      }
+    },
+    "required": [
+      "name",
+      "issuer",
+      "external_id_claim",
+      "allowed_audiences",
+      "allowed_algorithms",
+      "subject_token_type",
+      "allowed_project_ids",
+      "max_token_ttl_seconds",
+      "max_subject_token_age_seconds",
+      "enabled",
+      "id",
+      "account_id"
+    ],
+    "additionalProperties": false
+  },
+  "OidcFederationConnectionArray": {
+    "type": "array",
+    "items": {
+      "$ref": "#/components/schemas/OidcFederationConnection"
+    }
+  },
+  "OAuthTokenExchangeRequest": {
+    "type": "object",
+    "properties": {
+      "grant_type": {
+        "type": "string",
+        "const": "urn:ietf:params:oauth:grant-type:token-exchange"
+      },
+      "subject_token": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 65536
+      },
+      "subject_token_type": {
+        "type": "string",
+        "enum": [
+          "urn:ietf:params:oauth:token-type:jwt",
+          "urn:ietf:params:oauth:token-type:id_token",
+          "urn:ietf:params:oauth:token-type:access_token"
+        ]
+      },
+      "requested_token_type": {
+        "type": "string",
+        "const": "urn:ietf:params:oauth:token-type:access_token"
+      },
+      "federation_connection_id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$"
+      },
+      "client_id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256
+      },
+      "client_secret": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096
+      },
+      "client_assertion": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 16384
+      },
+      "client_assertion_type": {
+        "type": "string",
+        "const": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer"
+      },
+      "project_id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$"
+      },
+      "resource": {
+        "type": "string",
+        "minLength": 1
+      },
+      "scope": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 4096,
+        "description": "Optional space-separated permission subset. Omit to use current user permissions within the connection policy."
+      }
+    },
+    "required": [
+      "grant_type",
+      "subject_token",
+      "subject_token_type",
+      "federation_connection_id",
+      "project_id",
+      "resource"
+    ],
+    "additionalProperties": false
+  },
+  "OAuthTokenExchangeResponse": {
+    "type": "object",
+    "properties": {
+      "access_token": {
+        "type": "string"
+      },
+      "token_type": {
+        "type": "string",
+        "const": "Bearer"
+      },
+      "expires_in": {
+        "type": "number"
+      },
+      "scope": {
+        "type": "string"
+      },
+      "issued_token_type": {
+        "type": "string",
+        "const": "urn:ietf:params:oauth:token-type:access_token"
+      }
+    },
+    "required": [
+      "access_token",
+      "token_type",
+      "expires_in",
+      "issued_token_type"
+    ],
+    "additionalProperties": false
+  },
   "OAuthClient": {
     "type": "object",
     "properties": {
+      "app_id": {
+        "type": "string",
+        "description": "App associated with this client. Authorization requires an installation explicitly enabling this client and current user app access."
+      },
       "client_name": {
         "type": "string"
       },
@@ -7064,6 +7534,10 @@
       },
       "token_endpoint_auth_method": {
         "$ref": "#/components/schemas/OAuthTokenEndpointAuthMethod"
+      },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
       },
       "allowed_scopes": {
         "type": "array",
@@ -7139,6 +7613,10 @@
   "OAuthClientCreateResponse": {
     "type": "object",
     "properties": {
+      "app_id": {
+        "type": "string",
+        "description": "App associated with this client. Authorization requires an installation explicitly enabling this client and current user app access."
+      },
       "client_name": {
         "type": "string"
       },
@@ -7165,6 +7643,10 @@
       },
       "token_endpoint_auth_method": {
         "$ref": "#/components/schemas/OAuthTokenEndpointAuthMethod"
+      },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
       },
       "allowed_scopes": {
         "type": "array",
@@ -7279,6 +7761,10 @@
       "token_endpoint_auth_method": {
         "$ref": "#/components/schemas/OAuthTokenEndpointAuthMethod"
       },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
+      },
       "allowed_scopes": {
         "type": "array",
         "items": {
@@ -7341,6 +7827,10 @@
       "token_endpoint_auth_method": {
         "$ref": "#/components/schemas/OAuthTokenEndpointAuthMethod"
       },
+      "jwks_uri": {
+        "type": "string",
+        "format": "uri"
+      },
       "allowed_scopes": {
         "type": "array",
         "items": {
@@ -7355,6 +7845,10 @@
       },
       "status": {
         "$ref": "#/components/schemas/OAuthClientStatus"
+      },
+      "revoke_previous_client_secret": {
+        "type": "boolean",
+        "description": "Immediately revoke the previous rotation secret while retaining the current secret."
       },
       "project_binding_mode": {
         "$ref": "#/components/schemas/OAuthProjectBindingMode"
@@ -12553,7 +13047,8 @@
       "fallback_coordination_unavailable",
       "fallback_wait_timeout",
       "minimum_token_rejection",
-      "unusable_resource_recreated"
+      "unusable_resource_recreated",
+      "unsupported_model"
     ]
   },
   "InteractionExecutionError": {
@@ -20094,6 +20589,9 @@
         "type": "string",
         "description": "The collection name"
       },
+      "collection_id": {
+        "type": "string"
+      },
       "description": {
         "type": "string",
         "description": "Optional collection description"
@@ -20556,6 +21054,54 @@
       "app_id": {
         "type": "string"
       },
+      "instance_key": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_-]{0,31}$"
+      },
+      "display_name": {
+        "type": "string",
+        "maxLength": 120,
+        "description": "Optional instance label. Send an empty string to clear the saved label; omit to preserve it."
+      },
+      "namespace_overrides": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "maxLength": 24,
+          "pattern": "^[a-z]([a-z0-9]|_[a-z0-9])*_?$"
+        }
+      },
+      "mcp_shared_parameters": {
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description": "Shared MCP parameter overrides. Omitted values are retained; null clears an override or restores its default."
+      },
+      "mcp_parameters": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "description": "Installation parameter overrides by MCP collection id. Omit to preserve; null clears an override. Secret inputs are write-only."
+      },
       "settings": {
         "type": "object",
         "additionalProperties": true
@@ -20596,6 +21142,18 @@
     },
     "required": [
       "app_id"
+    ],
+    "additionalProperties": false
+  },
+  "AppInstanceAvailability": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "enabled"
     ],
     "additionalProperties": false
   },
@@ -22984,14 +23542,46 @@
     "additionalProperties": false,
     "description": "Dashboard definition contributed by an app package.\n\nApp dashboard IDs are local to the app. The platform exposes them as `app:<app_name>:<id>` when listing or retrieving dashboards."
   },
+  "AppOAuthClientConfig": {
+    "type": "object",
+    "properties": {
+      "redirect_uris": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "required": [
+      "redirect_uris"
+    ],
+    "additionalProperties": false,
+    "description": "Standalone public PKCE OAuth. Installation automatically provisions an app client with these exact callback URLs."
+  },
   "AppManifestData": {
     "type": "object",
     "properties": {
+      "parameters": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/McpConnectionParameter"
+        },
+        "description": "Shared MCP installation parameters available to every collection. Collection-local names must not overlap."
+      },
       "oauth_scopes": {
         "type": "array",
         "items": {
           "type": "string"
         }
+      },
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppOAuthClientConfig"
       },
       "name": {
         "type": "string",
@@ -23123,11 +23713,25 @@
   "UpdateAppPayload": {
     "type": "object",
     "properties": {
+      "parameters": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/McpConnectionParameter"
+        },
+        "description": "Shared MCP installation parameters available to every collection. Collection-local names must not overlap."
+      },
       "oauth_scopes": {
         "type": "array",
         "items": {
           "type": "string"
         }
+      },
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppOAuthClientConfig"
       },
       "name": {
         "type": "string",
@@ -23265,11 +23869,25 @@
   "AppManifest": {
     "type": "object",
     "properties": {
+      "parameters": {
+        "type": "object",
+        "propertyNames": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/McpConnectionParameter"
+        },
+        "description": "Shared MCP installation parameters available to every collection. Collection-local names must not overlap."
+      },
       "oauth_scopes": {
         "type": "array",
         "items": {
           "type": "string"
         }
+      },
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppOAuthClientConfig"
       },
       "edit_revision": {
         "type": "integer",
@@ -24472,6 +25090,9 @@
   "AppPackage": {
     "type": "object",
     "properties": {
+      "oauth_client": {
+        "$ref": "#/components/schemas/AppOAuthClientConfig"
+      },
       "oauth_scopes": {
         "type": "array",
         "items": {
@@ -24594,8 +25215,81 @@
       "project": {
         "type": "string"
       },
+      "instance_key": {
+        "type": "string"
+      },
+      "display_name": {
+        "type": "string"
+      },
+      "installation_version": {
+        "type": "number",
+        "const": 1
+      },
+      "namespace_overrides": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "reserved_namespaces": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "namespace_conflicts": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
       "manifest": {
         "type": "string"
+      },
+      "mcp_configuration": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "configured_secrets": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "shared_values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "configured_shared_secrets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "revision",
+          "values",
+          "configured_secrets"
+        ],
+        "additionalProperties": false
       },
       "oauth_approval": {
         "type": "object",
@@ -24619,6 +25313,9 @@
           "approved_at"
         ],
         "additionalProperties": false
+      },
+      "oauth_client_id": {
+        "type": "string"
       },
       "settings": {
         "type": "object",
@@ -24686,6 +25383,79 @@
       "project": {
         "type": "string"
       },
+      "instance_key": {
+        "type": "string"
+      },
+      "display_name": {
+        "type": "string"
+      },
+      "installation_version": {
+        "type": "number",
+        "const": 1
+      },
+      "namespace_overrides": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "reserved_namespaces": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "namespace_conflicts": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "mcp_configuration": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "configured_secrets": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "shared_values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "configured_shared_secrets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "revision",
+          "values",
+          "configured_secrets"
+        ],
+        "additionalProperties": false
+      },
       "oauth_approval": {
         "type": "object",
         "properties": {
@@ -24708,6 +25478,9 @@
           "approved_at"
         ],
         "additionalProperties": false
+      },
+      "oauth_client_id": {
+        "type": "string"
       },
       "settings": {
         "type": "object",
@@ -24779,6 +25552,79 @@
       "project": {
         "type": "string"
       },
+      "instance_key": {
+        "type": "string"
+      },
+      "display_name": {
+        "type": "string"
+      },
+      "installation_version": {
+        "type": "number",
+        "const": 1
+      },
+      "namespace_overrides": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "reserved_namespaces": {
+        "minItems": 1,
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "namespace_conflicts": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "mcp_configuration": {
+        "type": "object",
+        "properties": {
+          "revision": {
+            "type": "string"
+          },
+          "values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "configured_secrets": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "shared_values": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "configured_shared_secrets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "revision",
+          "values",
+          "configured_secrets"
+        ],
+        "additionalProperties": false
+      },
       "oauth_approval": {
         "type": "object",
         "properties": {
@@ -24801,6 +25647,9 @@
           "approved_at"
         ],
         "additionalProperties": false
+      },
+      "oauth_client_id": {
+        "type": "string"
       },
       "settings": {
         "type": "object",
@@ -28697,6 +29546,24 @@
       }
     },
     "additionalProperties": false
+  },
+  "SetObjectTextPayload": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string",
+        "description": "The extracted text to store for the object."
+      },
+      "etag": {
+        "type": "string",
+        "description": "The etag of the content the text was extracted from. When provided, the server records it as the object text_etag so extraction can be skipped while the content is unchanged."
+      }
+    },
+    "required": [
+      "text"
+    ],
+    "additionalProperties": false,
+    "description": "Payload for storing the extracted text of a content object as a text artifact."
   },
   "DeleteContentObjectResult": {
     "type": "object",
@@ -32693,6 +33560,12 @@
         "items": {
           "type": "string"
         }
+      },
+      "idempotency_key": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "description": "Client-chosen key, unique per intended run, that makes this request safe to retry. A repeat of the request with the same key and the same body returns the run the first request started instead of starting another. Reusing a key with a different body is rejected with 409. Keys are scoped to the project and stay bound to their run for as long as it exists; once the run is deleted, the same key starts a new one."
       }
     },
     "required": [
@@ -32829,6 +33702,12 @@
         "items": {
           "$ref": "#/components/schemas/ProcessTestScenario"
         }
+      },
+      "idempotency_key": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "description": "Client-chosen key, unique per intended run, that makes this request safe to retry. A repeat of the request with the same key and the same body returns the run the first request started instead of starting another. Reusing a key with a different body is rejected with 409. Keys are scoped to the project and stay bound to their run for as long as it exists; once the run is deleted, the same key starts a new one."
       }
     },
     "required": [
@@ -34739,7 +35618,9 @@
       "overhead",
       "followup_after_answer",
       "approval_denied",
-      "circuit_breaker"
+      "circuit_breaker",
+      "no_visible_answer",
+      "answer_in_tool_preamble"
     ],
     "description": "Reason behind an evaluation severity."
   },
@@ -37133,6 +38014,14 @@
           "toolUseCount": {
             "type": "number"
           },
+          "finishReason": {
+            "type": "string"
+          },
+          "outputTextChars": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
           "callType": {
             "type": "string",
             "enum": [
@@ -37592,6 +38481,16 @@
             "maximum": 9007199254740991
           },
           "stallTrips": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "answerChars": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "finalToolCallTextChars": {
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
@@ -41656,6 +42555,41 @@
           "updates"
         ],
         "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "add_foreign_key"
+          },
+          "foreign_key": {
+            "$ref": "#/components/schemas/DataForeignKey"
+          }
+        },
+        "required": [
+          "op",
+          "foreign_key"
+        ],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "properties": {
+          "op": {
+            "type": "string",
+            "const": "drop_foreign_key"
+          },
+          "column": {
+            "type": "string",
+            "description": "Column whose foreign key is removed"
+          }
+        },
+        "required": [
+          "op",
+          "column"
+        ],
+        "additionalProperties": false
       }
     ],
     "type": "object",
@@ -44258,6 +45192,11 @@
       },
       "bulk_concurrency": {
         "type": "number"
+      },
+      "modified_since": {
+        "type": "string",
+        "format": "date-time",
+        "description": "When set, reindex only documents whose updated_at is at or after this RFC3339/ISO-8601 datetime. Writes in-place into the live index (no new versioned target, no alias swap). Omit for a full reindex into a fresh versioned target."
       }
     },
     "additionalProperties": false

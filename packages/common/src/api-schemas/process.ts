@@ -1187,11 +1187,29 @@ export const UpdateProcessTestSuitePayloadSchema = CreateProcessTestSuitePayload
     id: 'UpdateProcessTestSuitePayload',
 });
 
+/**
+ * Makes starting a test run safe to retry. Starting a run is otherwise not idempotent: a request the
+ * client gave up on can still complete server-side, and resending it would start a second run.
+ */
+const ProcessTestRunIdempotencyKeySchema = z
+    .string()
+    .min(1)
+    .max(256)
+    .meta({
+        description:
+            'Client-chosen key, unique per intended run, that makes this request safe to retry. A repeat of ' +
+            'the request with the same key and the same body returns the run the first request started ' +
+            'instead of starting another. Reusing a key with a different body is rejected with 409. Keys ' +
+            'are scoped to the project and stay bound to their run for as long as it exists; once the run ' +
+            'is deleted, the same key starts a new one.',
+    });
+
 export const StartProcessTestRunPayloadSchema = z
     .strictObject({
         suite_id: z.string(),
         process_revision_id: z.string(),
         scenario_ids: z.array(z.string()).optional(),
+        idempotency_key: ProcessTestRunIdempotencyKeySchema.optional(),
     })
     .meta({ id: 'StartProcessTestRunPayload' });
 
@@ -1265,6 +1283,7 @@ export const SubmitProcessTestRunPayloadSchema = z
     .strictObject({
         process: ProcessTestTargetSchema,
         scenarios: z.array(ProcessTestScenarioSchema).min(1),
+        idempotency_key: ProcessTestRunIdempotencyKeySchema.optional(),
     })
     .meta({ id: 'SubmitProcessTestRunPayload' });
 

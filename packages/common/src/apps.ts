@@ -1,3 +1,4 @@
+import type { AuthTokenPayload } from './apikey.js';
 import type * as Wire from './wire-types.generated.js';
 
 /** Allowed values for AppUINavItem.preferredSection */
@@ -41,6 +42,7 @@ export interface AppUINavItem {
 }
 
 export type AppUIConfig = Wire.AppUIConfig;
+export type AppOAuthClientConfig = Wire.AppOAuthClientConfig;
 
 export type AppInstallationProjectsQuery = Wire.AppInstallationProjectsQuery;
 
@@ -81,11 +83,24 @@ function deriveMCPCollectionId(input: string): string {
  * @param vars - Optional endpoint variables to substitute in URLs
  * @returns Normalized ToolCollectionObject
  */
-export function normalizeToolCollection(collection: ToolCollectionObject, vars?: Endpoints): ToolCollectionObject {
+export function normalizeToolCollection(
+    collection: ToolCollectionObject,
+    vars?: Endpoints,
+    sharedParameters?: MCPToolCollectionObject['parameters'],
+): ToolCollectionObject {
     if (!collection || typeof collection !== 'object') {
         throw new TypeError('Tool collection must be an object');
     }
-    const substitutedUrl = vars && collection.url ? substituteEndpoints(collection.url, vars) : collection.url;
+    const substitutedUrl =
+        vars && collection.url
+            ? substituteEndpoints(
+                  collection.url,
+                  vars,
+                  collection.type === 'mcp'
+                      ? [...Object.keys(sharedParameters ?? {}), ...Object.keys(collection.parameters ?? {})]
+                      : [],
+              )
+            : collection.url;
     const urlChanged = substitutedUrl !== collection.url;
     if (collection.type === 'mcp') {
         const fallbackId = deriveMCPCollectionId(collection.id || collection.name || collection.url);
@@ -262,9 +277,11 @@ export interface Endpoints {
  * with the unresolved placeholder visible, rather than silently pointing nowhere).
  * Trailing slashes on replacement values are stripped to avoid `//api/...` joins.
  */
-function substituteEndpoints(url: string, endpoints?: Endpoints): string {
+function substituteEndpoints(url: string, endpoints?: Endpoints, parameterNames: string[] = []): string {
     if (!url || !endpoints) return url;
     return url.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key: string) => {
+        // Explicit installation parameters take precedence over legacy platform endpoint placeholders.
+        if (parameterNames.includes(key)) return match;
         const value = (endpoints as Record<string, string | undefined>)[key];
         if (typeof value !== 'string' || !value) return match;
         return trimTrailingSlashes(value);
@@ -632,3 +649,63 @@ export type ValidateUrlResponse = Wire.ValidateUrlResponse;
 export type AppDeleteSummary = Wire.AppDeleteSummary;
 
 export type UpdateAppInstallationOAuthApprovalPayload = Wire.UpdateAppInstallationOAuthApprovalPayload;
+
+/** Check exact installation grants; legacy app-name grants authorize only the default instance. */
+export function hasAppInstallationAccess(
+    token: AuthTokenPayload,
+    installation: { id: string; project: string; instance_key?: string; manifest: { name: string } },
+    ui = false,
+): boolean {
+    if (token.project?.id !== installation.project) return false;
+    const grants = token.app_installations;
+    if (grants !== undefined) {
+        if (grants.version !== 1 || grants.project_id !== installation.project) return false;
+        if (grants.ids.includes(installation.id)) {
+            return !ui || !grants.ui_restrictions?.includes(installation.id);
+        }
+    }
+    // Default app-name grants survive reinstalling the same app with a new installation ID.
+    // Named instances never inherit these grants, including on refreshed running-agent tokens.
+    return (
+        (!installation.instance_key || installation.instance_key === 'default') &&
+        (token.apps ?? []).includes(installation.manifest.name) &&
+        (!ui || !token.ui_restrictions?.includes(installation.manifest.name))
+    );
+}
+
+/** Persist this effective collection in catalogs so discovery and execution use the same namespace. */
+export function resolveInstallationCollection(
+    collection: ToolCollectionObject,
+    installation: Pick<AppInstallation, 'instance_key' | 'namespace_overrides' | 'namespace_conflicts'>,
+): ToolCollectionObject {
+    if (collection.type === 'mcp' && installation.namespace_conflicts?.includes(collection.id)) {
+        throw new Error(`Namespace conflict for MCP collection '${collection.id}'; resolve it in project app settings`);
+    }
+    if (collection.type !== 'mcp') return collection;
+    const overrides = installation.namespace_overrides;
+    if (overrides && Object.hasOwn(overrides, collection.id)) {
+        const namespace = overrides[collection.id];
+        if (typeof namespace === 'string' && namespace.length > 0) return { ...collection, namespace };
+    } else if (!installation.instance_key || installation.instance_key === 'default') {
+        return collection;
+    }
+    throw new Error(`Namespace allocation required for MCP collection '${collection.id}'`);
+}
+
+export type AppInstanceAvailability = Wire.AppInstanceAvailability;
+export type McpPublicParameter = Wire.McpPublicParameter;
+export type McpSecretParameter = Wire.McpSecretParameter;
+export type McpConnectionParameter = Wire.McpConnectionParameter;
+
+/** Whether a manifest can safely back an additional MCP-only installation. */
+export function isMcpOnlyInstanceManifest(
+    manifest: Pick<AppManifestData, 'endpoint' | 'ui' | 'capabilities' | 'tool_collections'>,
+): boolean {
+    return (
+        !manifest.endpoint &&
+        !manifest.ui &&
+        !manifest.capabilities?.some((capability) => capability !== 'tools') &&
+        !!manifest.tool_collections?.length &&
+        manifest.tool_collections.every((collection) => normalizeToolCollection(collection).type === 'mcp')
+    );
+}

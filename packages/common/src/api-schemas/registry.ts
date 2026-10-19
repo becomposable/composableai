@@ -32,44 +32,10 @@ import {
     VideoResultSchema,
 } from '@llumiverse/common/schemas';
 import type { z } from 'zod';
-import type {
-    CreateEventSubscriptionPayload,
-    EventDeliveryTarget,
-    EventDeliveryTargetInput,
-    EventSubscription,
-    EventSubscriptionMutationResponse,
-    ProcessEventDeliveryTarget,
-    UpdateEventSubscriptionPayload,
-} from '../platform-event.js';
-import type {
-    AgentRunInternals,
-    AgentRunResponse,
-    BindRunWorkflowPayload,
-    ListAgentRunsResponse,
-    ProgrammaticRunResponse,
-    RecordRunPayload,
-    SupervisedRunResponse,
-    UpdateAgentRunStatusPayload,
-} from '../store/agent-run.js';
-import type * as DSLWorkflowTypes from '../store/dsl-workflow.js';
-import type {
-    DSLChildWorkflowStep,
-    DSLWorkflowDefinition,
-    DSLWorkflowDefinitionResponse,
-    DSLWorkflowSpec,
-    DSLWorkflowSpecWithSteps,
-    DSLWorkflowStep,
-} from '../store/dsl-workflow.js';
-import type {
-    BranchNodeBranchDefinition,
-    CreateProcessDefinitionPayload,
-    NodeDefinition,
-    ProcessDefinition,
-    ProcessDefinitionBody,
-    UpdateProcessDefinitionPayload,
-} from '../store/process.js';
-import type { ViewNavigationNode } from '../views.js';
-import type { ApiComponentTypes } from '../wire-types.generated.js';
+import type { ApiComponentType } from '../api-contract/types.js';
+
+export type { ApiComponentType } from '../api-contract/types.js';
+
 import {
     ACECreatePayloadSchema,
     ACEUpdatePayloadSchema,
@@ -131,6 +97,7 @@ import {
     AppInstallationProjectsQuerySchema,
     AppInstallationProviderBindingSchema,
     AppInstallationsQuerySchema,
+    AppInstanceAvailabilitySchema,
     AppListScopeSchema,
     AppOAuthCollectionParamsSchema,
     AppOAuthProviderParamsSchema,
@@ -691,7 +658,12 @@ import {
     OAuthRegistrationSourceSchema,
     OAuthResponseTypeSchema,
     OAuthTokenEndpointAuthMethodSchema,
+    OAuthTokenExchangeRequestSchema,
+    OAuthTokenExchangeResponseSchema,
     OAuthTokenResponseSchema,
+    OidcFederationConnectionArraySchema,
+    OidcFederationConnectionPayloadSchema,
+    OidcFederationConnectionSchema,
     RevokeOAuthGrantQuerySchema,
     UpdateOAuthClientPayloadSchema,
 } from './oauth-server.js';
@@ -1021,6 +993,12 @@ const OAUTH_SCHEMAS = {
     OAuthDeviceAuthorizationRequest: OAuthDeviceAuthorizationRequestSchema,
     OAuthDeviceAuthorizationResponse: OAuthDeviceAuthorizationResponseSchema,
     OAuthTokenResponse: OAuthTokenResponseSchema,
+    OidcFederationConnectionPayload: OidcFederationConnectionPayloadSchema,
+    OidcFederationConnection: OidcFederationConnectionSchema,
+    OidcFederationConnectionArray: OidcFederationConnectionArraySchema,
+    OAuthTokenExchangeRequest: OAuthTokenExchangeRequestSchema,
+    OAuthTokenExchangeResponse: OAuthTokenExchangeResponseSchema,
+
     // Clients registered against Vertesia's own OAuth server. `OAuthClientData` is composed into
     // `OAuthClient` rather than hoisted, so it has no component of its own — as today.
     OAuthClient: OAuthClientSchema,
@@ -1429,12 +1407,6 @@ const CONTENT_TYPE_CATALOG_SCHEMAS: {
     readonly ContentObjectTypeItemArray: typeof ContentObjectTypeItemArraySchema;
     readonly ContentObjectTypeCatalogEntry: typeof ContentObjectTypeCatalogEntrySchema;
     readonly ContentObjectTypeCatalogEntryArray: typeof ContentObjectTypeCatalogEntryArraySchema;
-    readonly InCodeTypeDefinition: typeof InCodeTypeDefinitionSchema;
-    readonly CreateContentObjectTypePayload: typeof CreateContentObjectTypePayloadSchema;
-    readonly UpdateContentObjectTypePayload: typeof UpdateContentObjectTypePayloadSchema;
-    readonly ContentObjectType: typeof ContentObjectTypeSchema;
-    readonly ContentObjectTypeCatalogQuery: typeof ContentObjectTypeCatalogQuerySchema;
-    readonly ContentObjectTypeListQuery: typeof ContentObjectTypeListQuerySchema;
 } = {
     ColumnLayout: ColumnLayoutSchema,
     ContentTypeEditingPolicy: ContentTypeEditingPolicySchema,
@@ -1443,6 +1415,9 @@ const CONTENT_TYPE_CATALOG_SCHEMAS: {
     ContentObjectTypeItemArray: ContentObjectTypeItemArraySchema,
     ContentObjectTypeCatalogEntry: ContentObjectTypeCatalogEntrySchema,
     ContentObjectTypeCatalogEntryArray: ContentObjectTypeCatalogEntryArraySchema,
+} as const satisfies Record<string, z.ZodType>;
+
+const CONTENT_TYPE_AUTHORING_SCHEMAS = {
     InCodeTypeDefinition: InCodeTypeDefinitionSchema,
     CreateContentObjectTypePayload: CreateContentObjectTypePayloadSchema,
     UpdateContentObjectTypePayload: UpdateContentObjectTypePayloadSchema,
@@ -1724,6 +1699,7 @@ const CONTENT_OBJECT_SCHEMAS = {
     TranscriptSegment: ContentSchemas.TranscriptSegmentSchema,
     ContentObjectTypeArray: ContentSchemas.ContentObjectTypeArraySchema,
     ContentObjectTextResponse: ContentSchemas.ContentObjectTextResponseSchema,
+    SetObjectTextPayload: ContentSchemas.SetObjectTextPayloadSchema,
     DeleteContentObjectResult: ContentSchemas.DeleteContentObjectResultSchema,
     Transcript: ContentSchemas.TranscriptSchema,
     CreateContentObjectPayload: ContentSchemas.CreateContentObjectPayloadSchema,
@@ -2284,6 +2260,7 @@ const APP_LIFECYCLE_SCHEMAS = {
     AgentRunSearchHit: AgentRunSearchHitSchema,
     UpsertAppVersionRequest: UpsertAppVersionRequestSchema,
     AppInstallationPayload: AppInstallationPayloadSchema,
+    AppInstanceAvailability: AppInstanceAvailabilitySchema,
     AppDevelopmentTaskDetails: AppDevelopmentTaskDetailsSchema,
     AppVersionRecordArray: AppVersionRecordArraySchema,
     AppToolCollectionArray: AppToolCollectionArraySchema,
@@ -2374,6 +2351,7 @@ const APP_MANIFEST_SCHEMAS = {
     MCPOAuthConfigMap: AppRuntimeSchemas.MCPOAuthConfigMapSchema,
     AppWidgetInfo: AppRuntimeSchemas.AppWidgetInfoSchema,
     AppDashboardDefinition: AppRuntimeSchemas.AppDashboardDefinitionSchema,
+    AppOAuthClientConfig: AppRuntimeSchemas.AppOAuthClientConfigSchema,
     AppManifestData: AppRuntimeSchemas.AppManifestDataSchema,
     UpdateAppPayload: AppRuntimeSchemas.UpdateAppPayloadSchema,
     AppManifest: AppRuntimeSchemas.AppManifestSchema,
@@ -2482,6 +2460,7 @@ const API_SCHEMA_GROUPS = [
     FILE_STORAGE_SCHEMAS,
     DURABLE_TASK_SCHEMAS,
     CONTENT_TYPE_CATALOG_SCHEMAS,
+    CONTENT_TYPE_AUTHORING_SCHEMAS,
     MIGRATION_COMMAND_SCHEMAS,
     PROCESS_DSL_SCHEMAS,
     AGENT_MESSAGE_SCHEMAS,
@@ -2546,6 +2525,7 @@ type ApiSchemaMap = typeof RUN_BUDGET_SCHEMAS &
     typeof FILE_STORAGE_SCHEMAS &
     typeof DURABLE_TASK_SCHEMAS &
     typeof CONTENT_TYPE_CATALOG_SCHEMAS &
+    typeof CONTENT_TYPE_AUTHORING_SCHEMAS &
     typeof MIGRATION_COMMAND_SCHEMAS &
     typeof PROCESS_DSL_SCHEMAS &
     typeof AGENT_MESSAGE_SCHEMAS &
@@ -2591,6 +2571,10 @@ const API_SCHEMAS: Readonly<Record<ApiComponentName, z.ZodType>> = mergeComponen
  * objects, so a body carrying an undeclared property is rejected rather than quietly accepted.
  */
 const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
+    'OidcFederationConnectionPayload',
+    'OidcFederationConnection',
+    'OAuthTokenExchangeRequest',
+    'OAuthTokenExchangeResponse',
     'UpdateInteractionConfigurationPayload',
     'InteractionConfigurationRecord',
     'InteractionConfigurationResult',
@@ -2808,6 +2792,8 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'MCPOAuthConfig',
     'MCPApiKeyConfig',
     'MCPToolCollectionObject',
+    'McpPublicParameter',
+    'McpSecretParameter',
     'VertesiaSDKToolCollectionObject',
     // File, task, content-type and command components. Every one is published closed
     // today; `StringValueMap`, `MigrationListResponse`, `TaskArray`, the two content-type array
@@ -3126,6 +3112,7 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'ViewExecutionSearchConfiguration',
     'DSLRetryPolicy',
     'CreateContentObjectPayload',
+    'SetObjectTextPayload',
     'EventIngestChannelMutationResponse',
     'CreateEventIngestChannelPayload',
     'AgentRun',
@@ -3507,6 +3494,8 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'AgentRunSearchHit',
     'UpsertAppVersionRequest',
     'AppInstallationPayload',
+    'AppInstanceAvailability',
+    'AppOAuthClientConfig',
     'AppDevelopmentTaskDetails',
     'AppInstallationsQuery',
     'AppsQuery',
@@ -3650,74 +3639,6 @@ function emitRawSchemas(): Record<string, unknown> {
 export function buildApiSchemaComponents(): Readonly<Record<string, JsonObject>> {
     return toOpenApiComponents(emitRawSchemas(), { strictComponents: STRICT_COMPONENTS });
 }
-
-/**
- * Explicit TypeScript recursion boundary for schemas whose runtime graph is lazy.
- *
- * Zod cannot infer a finite named type through a mutually-recursive graph. The schemas remain the
- * runtime and OpenAPI authority; these names preserve the recursive TypeScript declarations until
- * TypeScript can infer recursive aliases without collapsing them to `unknown`.
- */
-interface ZenoRecursiveComponentTypes {
-    ViewNavigationNode: ViewNavigationNode;
-    AgentRunResponse: AgentRunResponse;
-    AgentRunInternals: AgentRunInternals;
-    BindRunWorkflowPayload: BindRunWorkflowPayload;
-    BranchNodeBranchDefinition: BranchNodeBranchDefinition;
-    CreateEventSubscriptionPayload: CreateEventSubscriptionPayload;
-    CreateProcessDefinitionPayload: CreateProcessDefinitionPayload;
-    DSLChildWorkflowStep: DSLChildWorkflowStep;
-    DSLWorkflowDefinition: DSLWorkflowDefinition;
-    DSLWorkflowDefinitionResponse: DSLWorkflowDefinitionResponse;
-    DSLWorkflowSpec: DSLWorkflowSpec;
-    DSLWorkflowSpecWithActivities: DSLWorkflowTypes.DSLWorkflowSpecWithActivities;
-    DSLWorkflowSpecWithSteps: DSLWorkflowSpecWithSteps;
-    DSLWorkflowStep: DSLWorkflowStep;
-    EventDeliveryTarget: EventDeliveryTarget;
-    EventDeliveryTargetInput: EventDeliveryTargetInput;
-    EventSubscription: EventSubscription;
-    EventSubscriptionArray: EventSubscription[];
-    EventSubscriptionMutationResponse: EventSubscriptionMutationResponse;
-    ListAgentRunsResponse: ListAgentRunsResponse;
-    NodeDefinition: NodeDefinition;
-    NodeDefinitionMap: Record<string, NodeDefinition>;
-    ProcessDefinition: ProcessDefinition;
-    ProcessDefinitionArray: ProcessDefinition[];
-    ProcessDefinitionBody: ProcessDefinitionBody;
-    ProcessEventDeliveryTarget: ProcessEventDeliveryTarget;
-    ProgrammaticRunResponse: ProgrammaticRunResponse;
-    RecordRunPayload: RecordRunPayload;
-    SupervisedRunResponse: SupervisedRunResponse;
-    UpdateAgentRunStatusPayload: UpdateAgentRunStatusPayload;
-    UpdateEventSubscriptionPayload: UpdateEventSubscriptionPayload;
-    UpdateProcessDefinitionPayload: UpdateProcessDefinitionPayload;
-    WorkflowDefinitionPayload: DSLWorkflowTypes.WorkflowDefinitionPayload;
-    WorkflowDefinitionPayloadWithActivities: DSLWorkflowTypes.WorkflowDefinitionPayloadWithActivities;
-    WorkflowDefinitionPayloadWithSteps: DSLWorkflowTypes.WorkflowDefinitionPayloadWithSteps;
-}
-
-/**
- * The wire type a component publishes.
- *
- * `ApiComponentType<'Account'>` is the plain type `gen:schemas` writes for `AccountSchema` into
- * `ApiComponentTypes`, which `wire-types.generated.test.ts` proves identical to its `z.infer`. Indexing
- * that map rather than `z.infer<ApiSchemaMap[N]>` keeps Zod's inference out of every program that names
- * a component. A component the generator has not seen yet resolves to `never`, which
- * `registry-groups.test.ts` rejects.
- *
- * It is wrapped in `NoInfer` because `N` always comes from a component-name argument and can never be
- * recovered from the wire type. Without it, a call whose result has a contextual type — a destructuring
- * `const { file } = validatedQuery(ctx, 'FileMetadataQuery')`, an `await`, a typed `return` — makes the
- * checker infer `N` from that context while `N` is still unresolved, which evaluates `z.infer` across
- * every component in the registry: about 500k types, 1 GB and 2 s of `tsc` in each consuming program.
- */
-export type ApiComponentType<N extends ApiComponentName> = NoInfer<
-    N extends keyof ZenoRecursiveComponentTypes
-        ? ZenoRecursiveComponentTypes[N]
-        : N extends keyof ApiComponentTypes
-          ? ApiComponentTypes[N]
-          : never
->;
 
 /**
  * Names a published component from inside a handler signature:

@@ -1,6 +1,6 @@
 {
     "name": "@vertesia/rich-text",
-    "version": "1.6.0-dev.20261004.085740Z",
+    "version": "1.6.0-dev.20261014.015055Z",
     "description": "Markdown-first rich-text editing primitives for Vertesia",
     "type": "module",
     "main": "./lib/index.js",
@@ -28,16 +28,16 @@
         "typecheck:test": "tsc --checkers 1 -p tsconfig.test.json --noEmit"
     },
     "dependencies": {
-        "@tiptap/core": "^3.31.3",
-        "@tiptap/extension-code-block": "^3.31.3",
-        "@tiptap/extension-image": "^3.31.3",
-        "@tiptap/extension-link": "^3.31.3",
-        "@tiptap/extension-table": "^3.31.3",
-        "@tiptap/markdown": "^3.31.3",
-        "@tiptap/pm": "^3.31.3",
-        "@tiptap/react": "^3.31.3",
-        "@tiptap/starter-kit": "^3.31.3",
-        "marked": "^18.0.14",
+        "@tiptap/core": "^3.31.4",
+        "@tiptap/extension-code-block": "^3.31.4",
+        "@tiptap/extension-image": "^3.31.4",
+        "@tiptap/extension-link": "^3.31.4",
+        "@tiptap/extension-table": "^3.31.4",
+        "@tiptap/markdown": "^3.31.4",
+        "@tiptap/pm": "^3.31.4",
+        "@tiptap/react": "^3.31.4",
+        "@tiptap/starter-kit": "^3.31.4",
+        "marked": "^18.1.0",
         "react": "catalog:",
         "react-dom": "catalog:"
     },
@@ -61,5 +61,5 @@
         "url": "https://github.com/vertesia/composableai.git",
         "directory": "packages/rich-text"
     },
-    "gitHead": "b51b6dc9262f81f55e2424d1e57190060f6068d7"
+    "gitHead": "468240ecf939f968e1324116be26386cdf5ada49"
 }

@@ -685,6 +685,7 @@ export const AppVersionStorageSchema = z
 export const AppToolCollectionSchema = z
     .strictObject({
         name: z.string().meta({ description: 'The collection name' }),
+        collection_id: z.string().optional(),
         description: z.string().meta({ description: 'Optional collection description' }).optional(),
         tools: z.array(AgentToolDefinitionSchema).meta({ description: 'the tools provided by this collection' }),
     })
@@ -855,6 +856,30 @@ export const UpsertAppVersionRequestSchema = z
 export const AppInstallationPayloadSchema = z
     .strictObject({
         app_id: z.string(),
+        instance_key: z
+            .string()
+            .regex(/^[a-z][a-z0-9_-]{0,31}$/)
+            .optional(),
+        display_name: z.string().max(120).optional().meta({
+            description: 'Optional instance label. Send an empty string to clear the saved label; omit to preserve it.',
+        }),
+        namespace_overrides: z
+            .record(
+                z.string(),
+                z
+                    .string()
+                    .max(24)
+                    .regex(/^[a-z]([a-z0-9]|_[a-z0-9])*_?$/),
+            )
+            .optional(),
+        mcp_shared_parameters: z.record(z.string(), z.string().nullable()).optional().meta({
+            description:
+                'Shared MCP parameter overrides. Omitted values are retained; null clears an override or restores its default.',
+        }),
+        mcp_parameters: z.record(z.string(), z.record(z.string(), z.string().nullable())).optional().meta({
+            description:
+                'Installation parameter overrides by MCP collection id. Omit to preserve; null clears an override. Secret inputs are write-only.',
+        }),
         settings: z.looseObject({}).optional(),
         access_control: z
             .union([AppAccessControlSchema, z.null()])
@@ -958,3 +983,7 @@ export const SystemPackageQuerySchema = z
             .optional(),
     })
     .meta({ id: 'SystemPackageQuery' });
+
+export const AppInstanceAvailabilitySchema = z
+    .strictObject({ enabled: z.boolean() })
+    .meta({ id: 'AppInstanceAvailability' });

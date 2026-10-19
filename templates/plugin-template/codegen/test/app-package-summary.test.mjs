@@ -1,6 +1,11 @@
 import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
-import { GET } from '../../api/oauth-client.js';
+import { pathToFileURL } from 'node:url';
+import { build } from 'esbuild';
+import { GET } from '../../api/oauth-client.ts';
 import { appOAuthPermissions, appOAuthScopes } from '../../src/app-permissions.ts';
 import { summarizeAppPackage } from '../../src/modules/service/scripts/app-package-summary.mjs';
 
@@ -58,4 +63,29 @@ test('browser session renewal follows the effective app OAuth permissions', () =
         offlineAccess: true,
     });
     assert.deepEqual(appOAuthPermissions(''), { scopes: [], offlineAccess: false });
+});
+
+test('packaged metadata handler runs without its original TypeScript dependency', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'template-oauth-'));
+    try {
+        const outfile = join(root, 'oauth-client.mjs');
+        await build({
+            entryPoints: [new URL('../../api/oauth-client.ts', import.meta.url).pathname],
+            bundle: true,
+            platform: 'node',
+            format: 'esm',
+            outfile,
+        });
+        const packaged = await import(pathToFileURL(outfile).href);
+        const clientId = 'https://preview-app.vercel.app/.well-known/oauth-client/vertesia-app';
+        const response = packaged.GET(new Request(clientId));
+        assert.equal(response.status, 200);
+        const metadata = await response.json();
+        assert.equal(metadata.client_id, clientId);
+        assert.deepEqual(metadata.redirect_uris, ['https://preview-app.vercel.app/app']);
+        assert.equal(metadata.token_endpoint_auth_method, 'none');
+        assert.equal(metadata.scope, appOAuthScopes.join(' '));
+    } finally {
+        rmSync(root, { recursive: true, force: true });
+    }
 });

@@ -1,6 +1,6 @@
 {
     "name": "@vertesia/jst",
-    "version": "1.6.0-dev.20261004.085740Z",
+    "version": "1.6.0-dev.20261014.015055Z",
     "type": "module",
     "description": "Javascript text template",
     "license": "Apache-2.0",
@@ -32,7 +32,7 @@
         "typecheck:test": "tsc --checkers 1 -p tsconfig.test.json --noEmit"
     },
     "peerDependencies": {
-        "handlebars": ">=4.7.9"
+        "handlebars": ">=4.7.10"
     },
     "devDependencies": {
         "@types/estree": "^1.0.9",
@@ -44,7 +44,7 @@
     },
     "dependencies": {
         "@types/node": "catalog:",
-        "acorn": "8.18.0",
+        "acorn": "8.19.0",
         "acorn-walk": "8.3.5",
         "dayjs": "^1.11.23",
         "papaparse": "^5.7.0"

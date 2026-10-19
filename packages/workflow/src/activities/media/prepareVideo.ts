@@ -21,7 +21,9 @@ import {
     execActivityFile,
     execActivityFileWithProgress,
     initializeActivityCommandDeadline,
+    isUnusableVideoContent,
     rethrowIfActivityStopped,
+    UNUSABLE_VIDEO_CONTENT,
 } from './exec.js';
 
 // Default configuration constants
@@ -35,6 +37,12 @@ const THUMBNAIL_TIMESTAMP_RATIO = 0.25; // Extract thumbnail at 25% of video dur
 const POSTER_TIMESTAMP_RATIO = 0.05; // Extract poster at 5% of video duration
 const POSTER_TIMESTAMP_MAX = 2; // Maximum poster timestamp in seconds
 const MIN_SCREENSHOT_TIMESTAMP = 1; // Minimum timestamp for screenshots in seconds
+
+/** A one-second minimum seek would miss the only frame of a short, low-frame-rate clip. */
+export function screenshotTimestamp(duration: number, ratio: number, maxTimestamp = Number.POSITIVE_INFINITY): number {
+    if (duration <= MIN_SCREENSHOT_TIMESTAMP) return 0;
+    return Math.min(Math.max(Math.min(duration * ratio, maxTimestamp), MIN_SCREENSHOT_TIMESTAMP), duration / 2);
+}
 
 // FFmpeg configuration constants
 const VIDEO_CRF = '23'; // Constant Rate Factor for video quality (18-28, lower = better)
@@ -110,7 +118,7 @@ async function getVideoMetadata(videoPath: string): Promise<VideoMetadataExtende
         const videoStream = metadata.streams.find((stream) => stream.codec_type === 'video');
 
         if (!videoStream) {
-            throw ApplicationFailure.nonRetryable('No video stream found in file');
+            throw ApplicationFailure.nonRetryable('No video stream found in file', UNUSABLE_VIDEO_CONTENT);
         }
 
         const duration = parseFloat(metadata.format.duration ?? '0') || 0;
@@ -133,10 +141,13 @@ async function getVideoMetadata(videoPath: string): Promise<VideoMetadataExtende
         return { duration, width, height, codec, bitrate, fps, hasAudio };
     } catch (error) {
         rethrowIfActivityStopped(error);
-        log.error(`Failed to get video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        const message = `Failed to get video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`;
         if (error instanceof ApplicationFailure) {
+            // Raised above: the file has no usable video stream, a property of the content.
+            log.warn(message);
             throw error;
         }
+        log.error(message);
         throw new Error(`Failed to probe video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
@@ -321,7 +332,7 @@ async function generateAudioRendition(videoPath: string, outputDir: string): Pro
 /**
  * Extract a screenshot frame from the video at a specific timestamp
  */
-async function generateScreenshot(
+export async function generateScreenshot(
     videoPath: string,
     outputDir: string,
     timestamp: number,
@@ -371,12 +382,18 @@ async function generateScreenshot(
                 height: dimensions.height,
             };
         } catch {
+            if (timestamp > 0) {
+                log.debug(`${name} seek produced no frame; retrying at frame zero`);
+                return await generateScreenshot(videoPath, outputDir, 0, maxSize, name, metadata);
+            }
             log.warn(`${name} not generated`);
             return null;
         }
     } catch (error) {
         rethrowIfActivityStopped(error);
-        log.error(`Failed to generate ${name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        // This optional rendition falls back to the source video; upload/update failures below
+        // still fail the activity and are reported as errors.
+        log.warn(`Failed to generate ${name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         return null;
     }
 }
@@ -499,11 +516,8 @@ export async function prepareVideo(
 
         // Step 3 & 4: Generate thumbnail and poster in parallel
         log.debug('Generating thumbnail and poster');
-        const thumbnailTimestamp = Math.max(metadata.duration * THUMBNAIL_TIMESTAMP_RATIO, MIN_SCREENSHOT_TIMESTAMP);
-        const posterTimestamp = Math.max(
-            Math.min(metadata.duration * POSTER_TIMESTAMP_RATIO, POSTER_TIMESTAMP_MAX),
-            MIN_SCREENSHOT_TIMESTAMP,
-        );
+        const thumbnailTimestamp = screenshotTimestamp(metadata.duration, THUMBNAIL_TIMESTAMP_RATIO);
+        const posterTimestamp = screenshotTimestamp(metadata.duration, POSTER_TIMESTAMP_RATIO, POSTER_TIMESTAMP_MAX);
 
         const [thumbnailResult, posterResult] = await Promise.all([
             generateScreenshot(videoFile, tempOutputDir, thumbnailTimestamp, thumbnailSize, 'thumbnail', metadata),
@@ -614,6 +628,10 @@ export async function prepareVideo(
         };
     } catch (error) {
         rethrowIfActivityStopped(error);
+        // The metadata probe already logged it at warn; keep its type and non-retryable flag.
+        if (isUnusableVideoContent(error)) {
+            throw error;
+        }
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         log.error(`Error preparing video: ${errorMessage}`, { error });
 

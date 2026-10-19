@@ -62,7 +62,6 @@ export type ApiKeyArray = Wire.ApiKeyArray;
 export type CreateApiKeyPayload = Wire.CreateApiKeyPayload;
 export type UpdateApiKeyPayload = Wire.UpdateApiKeyPayload;
 export type ApiKeyWithValue = Wire.ApiKeyWithValue;
-export type ApiKeyReadResponse = Wire.ApiKeyReadResponse;
 
 export interface CreatePublicKeyPayload {
     name?: string;
@@ -72,7 +71,6 @@ export interface CreatePublicKeyPayload {
 
 export type AuthTokenResponse = Wire.AuthTokenResponse;
 export type ApiKeyListQuery = Wire.ApiKeyListQuery;
-export type ApiKeyReadQuery = Wire.ApiKeyReadQuery;
 
 export interface AuthTokenPayload {
     credential_scope?: 'project' | 'account';

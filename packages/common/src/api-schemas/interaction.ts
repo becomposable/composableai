@@ -28,7 +28,7 @@ import { InferenceProfileIdSchema, InferenceProfileSnapshotSchema } from './infe
 import { AccountRefSchema } from './invites.js';
 import { ProcessAgentExecutionPolicySchema } from './process-agent-policy.js';
 import { AgentBudgetConfigurationSchema, AgentCheckpointConfigurationSchema } from './project-configuration.js';
-import { EditRevisionSchema, ExpectedEditRevisionSchema } from './schema-primitives.js';
+import { EditRevisionSchema, ExpectedEditRevisionSchema, PageCountSchema } from './schema-primitives.js';
 import { InteractionExecutionConfigurationSchema, RunDataStorageLevelSchema } from './store.js';
 
 /**
@@ -498,8 +498,8 @@ export const InteractionForkPayloadSchema = z
 
 export const InteractionEndpointQuerySchema = z
     .strictObject({
-        limit: z.number().optional(),
-        offset: z.number().optional(),
+        limit: PageCountSchema.optional(),
+        offset: PageCountSchema.optional(),
         status: InteractionStatusSchema.optional(),
         visibility: InteractionVisibilitySchema.optional(),
         version: z.number().optional(),
@@ -701,8 +701,10 @@ export const RunSearchQuerySchema = z
  */
 export const RunListQuerySchema = z
     .strictObject({
-        limit: z.number().int().meta({ description: 'Maximum number of runs to return.' }).optional(),
-        offset: z.number().int().meta({ description: 'Number of runs to skip.' }).optional(),
+        // Already published as `integer`, so these keep that type and only gain the lower bound a find
+        // `skip` needs; a negative count failed there as a 500.
+        limit: z.number().int().min(0).meta({ description: 'Maximum number of runs to return.' }).optional(),
+        offset: z.number().int().min(0).meta({ description: 'Number of runs to skip.' }).optional(),
         interaction: z
             .array(z.string())
             .meta({ description: 'Interaction ids, or in-code interaction names, to filter by.' })
@@ -1144,8 +1146,8 @@ export const RunSearchPayloadSchema = z
             })
             .optional(),
         query: RunSearchQuerySchema.optional(),
-        limit: z.number().optional(),
-        offset: z.number().optional(),
+        limit: PageCountSchema.optional(),
+        offset: PageCountSchema.optional(),
         select: z.string().optional(),
         all_revisions: z.boolean().optional(),
         from_root: z.string().optional(),

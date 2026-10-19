@@ -16,7 +16,8 @@ function decode(val: string): string {
         return decodeURIComponent(val);
     } catch (err) {
         if (err instanceof URIError) {
-            throw new ServerError(400, `Malformed percent-encoding in URL path segment: ${val}`);
+            // The segment is not echoed: it is caller input, and the error body is exposed.
+            throw new ServerError(400, 'Malformed percent-encoding in URL path');
         }
         throw err;
     }

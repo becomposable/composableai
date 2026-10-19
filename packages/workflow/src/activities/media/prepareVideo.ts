@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { ApplicationFailure, Context, log } from '@temporalio/activity';
+import { ApplicationFailure, log } from '@temporalio/activity';
 import { RequestError } from '@vertesia/api-fetch-client';
 import type { VertesiaClient } from '@vertesia/client';
 import {
@@ -54,24 +54,33 @@ export interface PrepareVideoParams {
     thumbnailSize?: number; // Max size (longest side) for thumbnail image, default 256
     posterSize?: number; // Max size (longest side) for poster image, default 1920
     generateAudio?: boolean; // Generate audio-only rendition (AAC), default true
-    videoPreset?: VideoPreset; // FFmpeg encoding preset, default medium
+    videoPreset?: VideoPreset; // FFmpeg encoding preset, default veryfast
     skipTranscode?: boolean; // Skip the main video re-encode, default false
 }
 
-export type VideoPreset = 'medium' | 'fast' | 'veryfast' | 'ultrafast';
+export const VIDEO_PRESETS = ['medium', 'fast', 'veryfast', 'ultrafast'] as const;
+export type VideoPreset = (typeof VIDEO_PRESETS)[number];
+const DEFAULT_VIDEO_PRESET: VideoPreset = 'veryfast';
 
 export function shouldTranscodeVideo(skipTranscode?: boolean): boolean {
     return skipTranscode !== true;
 }
 
-export function resolveVideoPreset(preset: VideoPreset, attempt: number): VideoPreset {
-    if (preset === 'ultrafast') {
-        return preset;
+/**
+ * Returns the requested preset, or the default when none is set. Retries keep the same preset.
+ * Workflow definitions can pass any string, so an unknown preset fails the activity without retrying.
+ */
+export function resolveVideoPreset(preset?: string): VideoPreset {
+    if (preset === undefined) {
+        return DEFAULT_VIDEO_PRESET;
     }
-
-    const retryPresets: VideoPreset[] = ['medium', 'fast', 'veryfast'];
-    const initialPresetIndex = retryPresets.indexOf(preset);
-    return retryPresets[Math.min(initialPresetIndex + attempt - 1, retryPresets.length - 1)];
+    if (!(VIDEO_PRESETS as readonly string[]).includes(preset)) {
+        throw ApplicationFailure.nonRetryable(
+            `Invalid videoPreset "${preset}"; expected one of: ${VIDEO_PRESETS.join(', ')}`,
+            'InvalidVideoPreset',
+        );
+    }
+    return preset as VideoPreset;
 }
 
 export interface PrepareVideo extends DSLActivitySpec<PrepareVideoParams> {
@@ -461,7 +470,7 @@ export async function prepareVideo(
     const posterSize = params.posterSize ?? DEFAULT_POSTER_SIZE;
     const generateAudio = params.generateAudio ?? DEFAULT_GENERATE_AUDIO;
     const skipTranscode = params.skipTranscode ?? false;
-    const videoPreset = resolveVideoPreset(params.videoPreset ?? 'medium', Context.current().info.attempt);
+    const videoPreset = resolveVideoPreset(params.videoPreset);
 
     log.debug(`Preparing video for ${objectId}`, {
         maxResolution,

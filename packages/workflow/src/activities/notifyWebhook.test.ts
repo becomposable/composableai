@@ -15,8 +15,8 @@ import {
     type NotifyWebhookParams,
     type NotifyWebhookResult,
     notifyWebhook,
-    type WebhookNotificationPayload,
     readBoundedText,
+    type WebhookNotificationPayload,
     webhookLogTarget,
 } from './notifyWebhook.js';
 

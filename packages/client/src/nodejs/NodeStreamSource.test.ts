@@ -1,3 +1,4 @@
+import { createReadStream } from 'node:fs';
 import { Readable } from 'node:stream';
 import { describe, expect, it } from 'vitest';
 import { NodeStreamSource } from './NodeStreamSource.js';
@@ -13,5 +14,12 @@ describe('NodeStreamSource', () => {
         const source = new NodeStreamSource(stream, 'a.txt');
         await source.stream.cancel();
         expect(stream.destroyed).toBe(true);
+    });
+
+    it('reports a failed open on the first read instead of crashing', async () => {
+        const stream = createReadStream('/nonexistent/upload.bin');
+        const source = new NodeStreamSource(stream, 'upload.bin');
+        await new Promise<void>((resolve) => stream.on('close', () => resolve()));
+        await expect(new Response(source.stream).text()).rejects.toThrow(/ENOENT/);
     });
 });

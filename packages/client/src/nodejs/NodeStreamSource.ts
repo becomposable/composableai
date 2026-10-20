@@ -18,6 +18,9 @@ export class NodeStreamSource extends StreamSource {
  * when nothing was read yet, so the Node.js stream would stay open. Also covers Bun, which lacks ReadableStream.from.
  */
 function readableToWebStream<T = string | Buffer>(stream: Readable): ReadableStream<T> {
+    // Nothing listens until the first read, so an error before it (e.g. a failed lazy file open) would otherwise
+    // crash the process. The iterator still reports the error on the next read.
+    stream.on('error', () => undefined);
     const it = stream[Symbol.asyncIterator]();
     return new ReadableStream<T>(
         {
@@ -32,9 +35,9 @@ function readableToWebStream<T = string | Buffer>(stream: Readable): ReadableStr
             async cancel() {
                 // no error argument: it would emit 'error', which the caller may not listen for
                 stream.destroy();
-                await it.return?.();
-                // resolve once the underlying resource is released, so callers can remove the file afterwards
-                await finished(stream).catch(() => undefined);
+                // resolve once the underlying resource is released, so callers can remove the file afterwards;
+                // bounded because some streams never report their close
+                await finished(stream, { signal: AbortSignal.timeout(5_000) }).catch(() => undefined);
             },
         },
         // read on demand, like ReadableStream.from

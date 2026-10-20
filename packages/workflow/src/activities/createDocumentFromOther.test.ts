@@ -50,7 +50,7 @@ describe('createPdfDocumentFromSource', () => {
         vi.mocked(setupActivity).mockResolvedValue({
             client,
             objectId: 'object-1',
-            params: { target_object_type: 'Pages', title: 'Pages', pages: [1, 2] },
+            params: { target_object_type: 'Pages', title: 'Pages', pages: [1, 2] } satisfies Payload['params'],
         } as unknown as Awaited<ReturnType<typeof setupActivity>>);
         vi.mocked(saveBlobToTempFile).mockResolvedValue(source);
         vi.mocked(pdfExtractPages).mockResolvedValue({ file, workDir });

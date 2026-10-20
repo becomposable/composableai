@@ -1,11 +1,12 @@
-import fs from 'node:fs';
-import { finished } from 'node:stream/promises';
+import type { ReadStream } from 'node:fs';
 import { Context, log } from '@temporalio/activity';
 import type { VertesiaClient } from '@vertesia/client';
 import { NodeStreamSource } from '@vertesia/client/node';
 import { getRenditionPagePath, getRenditionsPath, type ImageRenditionFormat } from '@vertesia/common';
 import pLimit from 'p-limit';
 import { imageResizer } from '../conversion/image.js';
+import { removeTempFiles } from './blobs.js';
+import { closeUploadStream, createUploadStream } from './upload-stream.js';
 
 export interface ImageRenditionParams {
     max_hw: number; //maximum size of the longest side of the image
@@ -51,7 +52,7 @@ export async function uploadRenditionPages(
                     : `${params.outputPath}/${String(i).padStart(4, '0')}.${params.format}`
                 : getRenditionPagePath(contentEtag, params, i);
             let resizedImagePath: string | undefined;
-            let fileStream: fs.ReadStream | undefined;
+            let fileStream: ReadStream | undefined;
 
             try {
                 log.debug(`Resizing image for ${contentEtag} page ${i}`, {
@@ -61,11 +62,7 @@ export async function uploadRenditionPages(
                 // Resize the image using ImageMagick
                 resizedImagePath = await imageResizer(file, params.max_hw, params.format);
 
-                // Create a read stream from the resized image file
-                fileStream = fs.createReadStream(resizedImagePath);
-                // Nothing reads the stream until the upload sends its body, so a failed open would otherwise be an
-                // 'error' nobody listens for. The upload still fails on it when it reads the stream.
-                fileStream.on('error', () => undefined);
+                fileStream = createUploadStream(resizedImagePath);
                 const format = `image/${params.format}`;
                 const fileId = pageId.split('/').pop() ?? pageId;
                 const source = new NodeStreamSource(fileStream, fileId, format, pageId);
@@ -99,19 +96,8 @@ export async function uploadRenditionPages(
                 }
                 throw err;
             } finally {
-                // An upload that fails before reading its body never closes the stream: close it and wait for the
-                // descriptor to be released before removing the file, or the file's space stays allocated.
-                if (fileStream) {
-                    fileStream.destroy();
-                    await finished(fileStream).catch(() => undefined);
-                }
-                if (resizedImagePath) {
-                    try {
-                        fs.unlinkSync(resizedImagePath);
-                    } catch (err) {
-                        log.warn(`Failed to clean resized rendition file for ${contentEtag} page ${i}`, { err });
-                    }
-                }
+                await closeUploadStream(fileStream);
+                await removeTempFiles(resizedImagePath);
             }
         }),
     );

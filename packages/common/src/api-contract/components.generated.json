@@ -42335,7 +42335,10 @@
     "properties": {
       "name": {
         "type": "string",
-        "description": "Store name (unique within project)"
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[^\\x00-\\x20\\x7f-\\x9f/\\\\.](?:[^\\x00-\\x1f\\x7f-\\x9f/\\\\]*[^\\x00-\\x20\\x7f-\\x9f/\\\\])?$",
+        "description": "Store name (unique within project). 1 to 128 characters; must not contain `/`, `\\` or control characters, start with a dot, or start or end with a space."
       },
       "description": {
         "type": "string",

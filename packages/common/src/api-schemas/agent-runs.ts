@@ -18,6 +18,7 @@ import {
 import {
     AgentEvaluateRequestSchema,
     AgentResourceReferenceSchema,
+    AgentRunIdempotencyKeySchema,
     AgentSearchScopeSchema,
     AgentToolApprovalModeSchema,
     ConversationEnrichmentFields,
@@ -1089,6 +1090,7 @@ export const CreateAgentRunPayloadSchema = z
             .string()
             .meta({ description: 'Principal ref of the user who initiated the run (for server-to-server forwarding)' })
             .optional(),
+        idempotency_key: AgentRunIdempotencyKeySchema.optional(),
     })
     .meta({ id: 'CreateAgentRunPayload', description: 'Payload to create and start a new agent run.' });
 

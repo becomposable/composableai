@@ -232,9 +232,6 @@ export type StripeBillingStatusResponseFromSchema = StripeBillingEnabled | Strip
 export type ApiKeyListQueryFromSchema = {
     level?: 'account' | 'project' | undefined;
 };
-export type ApiKeyReadQueryFromSchema = {
-    withValue?: boolean | undefined;
-};
 export type ProjectRefArrayFromSchema = ProjectRef[];
 export type ApiKeyFromSchema = {
     id: string;
@@ -277,27 +274,6 @@ export type ApiKeyWithValueFromSchema = {
     clearance?: number | undefined;
     compartments?: string[] | undefined;
     value: string;
-};
-export type ApiKeyReadResponseFromSchema = {
-    id: string;
-    name: string;
-    type: (typeof ApiKeyTypes)['secret'];
-    role: (typeof SystemRoles)[keyof typeof SystemRoles];
-    maskedValue?: string | undefined;
-    can_retrieve_value?: boolean | undefined;
-    account: string;
-    project: ProjectRef;
-    enabled: boolean;
-    scim_provisioning?: boolean | undefined;
-    created_by: string;
-    updated_by: string;
-    created_at: string;
-    updated_at: string;
-    expires_at?: string | undefined;
-    properties?: Record<string, unknown> | undefined;
-    clearance?: number | undefined;
-    compartments?: string[] | undefined;
-    value?: string | undefined;
 };
 export type CreateApiKeyPayloadFromSchema = {
     name: string;
@@ -525,10 +501,8 @@ export type ApiKeyArray = ApiKeyArrayFromSchema;
 export type CreateApiKeyPayload = CreateApiKeyPayloadFromSchema;
 export type UpdateApiKeyPayload = UpdateApiKeyPayloadFromSchema;
 export type ApiKeyWithValue = ApiKeyWithValueFromSchema;
-export type ApiKeyReadResponse = ApiKeyReadResponseFromSchema;
 export type AuthTokenResponse = AuthTokenResponseFromSchema;
 export type ApiKeyListQuery = ApiKeyListQueryFromSchema;
-export type ApiKeyReadQuery = ApiKeyReadQueryFromSchema;
 export type AccountApiKey = {
     id: string;
     name: string;
@@ -852,6 +826,7 @@ export type AppBuildProgress = {
     updated_at: string;
 };
 export type AppScaffoldModule = 'service' | 'assistant' | 'content-app' | 'examples';
+export type AppScaffoldSourceMode = 'generate' | 'existing';
 export type StartAppScaffoldRequest = {
     app_id: string;
     title?: string | undefined;
@@ -860,6 +835,10 @@ export type StartAppScaffoldRequest = {
     oauth_scopes?: string[] | undefined;
     appgen_package_spec?: string | undefined;
     create_version?: boolean | undefined;
+    source_mode?: AppScaffoldSourceMode | undefined;
+    source?: AppSourceConfig | undefined;
+    github_connection_id?: string | undefined;
+    github_repository_creation?: AppGithubRepositoryCreation | undefined;
 };
 export type StartAppScaffoldResponse = {
     workflow_id: string;
@@ -868,6 +847,69 @@ export type StartAppScaffoldResponse = {
     app_record_id?: string | undefined;
     git_url?: string | undefined;
     create_version: boolean;
+};
+export type AppGithubConfiguration = {
+    enabled: boolean;
+    app_slug?: string | undefined;
+    install_url?: string | undefined;
+    relay_url?: string | undefined;
+};
+export type StartAppGithubAuthorizationResponse = {
+    authorization_url: string;
+};
+export type ExchangeAppGithubAuthorizationRequest = {
+    code: string;
+    state: string;
+};
+export type AppGithubRepositoriesQuery = {
+    connection_id: string;
+    installation_id: string;
+};
+export type AppGithubInstallation = {
+    id: string;
+    account_login: string;
+    account_type?: string | undefined;
+    repository_selection: 'all' | 'selected';
+};
+export type AppGithubAccount = {
+    login: string;
+    account_type: string;
+    avatar_url?: string | undefined;
+};
+export type ExchangeAppGithubAuthorizationResponse = {
+    connection_id: string;
+    installations: AppGithubInstallation[];
+    accounts: AppGithubAccount[];
+};
+export type AppGithubRepository = {
+    name: string;
+    full_name: string;
+    private: boolean;
+    default_branch: string;
+    html_url: string;
+};
+export type AppGithubRepositoryCreation = {
+    name: string;
+    private?: boolean | undefined;
+};
+export type AppGithubRepositoryList = {
+    repositories: AppGithubRepository[];
+};
+export type AppGithubRepositorySetupQuery = {
+    connection_id: string;
+    installation_id: string;
+    repository: string;
+    branch: string;
+};
+export type AppGithubBranchState = {
+    name: string;
+    exists: boolean;
+    empty: boolean;
+};
+export type AppGithubRepositorySetup = {
+    default_branch: string;
+    branches: string[];
+    selected_branch: AppGithubBranchState;
 };
 export type StartAppDevelopmentTaskRequest = {
     prompt: string;
@@ -974,11 +1016,15 @@ export type UpdateAppPayload = {
     expected_edit_revision?: number | undefined;
 };
 export type AppGitSourceConfig = {
+    provider?: AppGitSourceProvider | undefined;
     url?: string | undefined;
+    installation_id?: string | undefined;
+    repository?: string | undefined;
     default_branch?: string | undefined;
     production_branch?: string | undefined;
     development_branch?: string | undefined;
 };
+export type AppGitSourceProvider = 'vertesia' | 'github';
 export type AppSourceConfig = {
     kind: 'git';
     git?: AppGitSourceConfig | undefined;
@@ -1238,7 +1284,10 @@ export type AppManifest = {
 export type AppManifestSource = {
     kind: 'git';
     git: {
+        provider?: AppGitSourceProvider | undefined;
         url: string;
+        installation_id?: string | undefined;
+        repository?: string | undefined;
         default_branch?: string | undefined;
         production_branch?: string | undefined;
         development_branch?: string | undefined;
@@ -10913,8 +10962,6 @@ export interface ApiComponentTypes {
     AccountApiKeyArray: AccountApiKeyArray;
     CreateAccountApiKeyPayload: CreateAccountApiKeyPayload;
     UpdateAccountApiKeyPayload: UpdateAccountApiKeyPayload;
-    ApiKeyReadResponse: ApiKeyReadResponseFromSchema;
-    ApiKeyReadQuery: ApiKeyReadQueryFromSchema;
     CreateApiKeyPayload: CreateApiKeyPayloadFromSchema;
     UpdateApiKeyPayload: UpdateApiKeyPayloadFromSchema;
     AuthTokenResponse: AuthTokenResponseFromSchema;
@@ -10956,6 +11003,7 @@ export interface ApiComponentTypes {
     AppCapabilities: AppCapabilities;
     AppAccessControl: AppAccessControl;
     AppSourceConfig: AppSourceConfig;
+    AppGitSourceProvider: AppGitSourceProvider;
     AppManifestSource: AppManifestSource;
     SuccessResponse: SuccessResponse;
     OAuthProvider: OAuthProvider;
@@ -11961,6 +12009,20 @@ export interface ApiComponentTypes {
     AppRepoBranch: AppRepoBranch;
     AppRepoDocumentCommit: AppRepoDocumentCommit;
     AppVersionGitSource: AppVersionGitSource;
+    AppGithubConfiguration: AppGithubConfiguration;
+    StartAppGithubAuthorizationResponse: StartAppGithubAuthorizationResponse;
+    ExchangeAppGithubAuthorizationRequest: ExchangeAppGithubAuthorizationRequest;
+    AppGithubRepositoriesQuery: AppGithubRepositoriesQuery;
+    ExchangeAppGithubAuthorizationResponse: ExchangeAppGithubAuthorizationResponse;
+    AppGithubInstallation: AppGithubInstallation;
+    AppGithubAccount: AppGithubAccount;
+    AppGithubRepository: AppGithubRepository;
+    AppGithubRepositoryCreation: AppGithubRepositoryCreation;
+    AppGithubRepositoryList: AppGithubRepositoryList;
+    AppGithubRepositorySetupQuery: AppGithubRepositorySetupQuery;
+    AppGithubBranchState: AppGithubBranchState;
+    AppGithubRepositorySetup: AppGithubRepositorySetup;
+    AppScaffoldSourceMode: AppScaffoldSourceMode;
     StartAppScaffoldRequest: StartAppScaffoldRequest;
     StartAppDevelopmentTaskRequest: StartAppDevelopmentTaskRequest;
     StartAppBuildRequest: StartAppBuildRequest;

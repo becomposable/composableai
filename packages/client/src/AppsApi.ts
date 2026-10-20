@@ -150,6 +150,16 @@ export default class AppsApi extends ApiTopic {
         return this.post(`/versions/${recordId}/promote`);
     }
 
+    /** Assign or move a stable deployment alias to an immutable app version. */
+    assignVersionAlias(recordId: string, alias: string): Promise<AppVersionRecord> {
+        return this.put(`/versions/${recordId}/aliases/${encodeURIComponent(alias)}`);
+    }
+
+    /** Remove an alias only when it still points to the specified app version. */
+    removeVersionAlias(recordId: string, alias: string): Promise<AppVersionRecord> {
+        return this.del(`/versions/${recordId}/aliases/${encodeURIComponent(alias)}`);
+    }
+
     rebuildVersion(recordId: string): Promise<StartAppBuildResponse> {
         return this.post(`/versions/${recordId}/rebuild`);
     }

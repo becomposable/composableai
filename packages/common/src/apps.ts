@@ -189,6 +189,8 @@ export const APP_VERSION_HEADER = 'x-vertesia-app-version';
 export type AppAvailableIn = Wire.AppAvailableIn;
 
 export type AppVersionKind = Wire.AppVersionKind;
+export type AppDeploymentAlias = Wire.AppDeploymentAlias;
+export type AppDeploymentAliasTarget = Wire.AppDeploymentAliasTarget;
 export type AppVersionState = Wire.AppVersionState;
 export type AppVersionTarget = Wire.AppVersionTarget;
 export type AppVersionGitRefType = Wire.AppVersionGitRefType;
@@ -199,6 +201,14 @@ export type AppVersionStorage = Wire.AppVersionStorage;
 export type AppVersionGitSource = Wire.AppVersionGitSource;
 
 export type AppVersionUrls = Wire.AppVersionUrls;
+
+/**
+ * Stable, user-defined deployment alias (for example `production` or `customer-preview`).
+ *
+ * Aliases are deliberately DNS-label compatible so the app gateway can expose each alias through
+ * both a shared-origin path and a dedicated application hostname without a second naming rule.
+ */
+export const APP_DEPLOYMENT_ALIAS_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 
 export type AppVersionRecord = Wire.AppVersionRecord;
 

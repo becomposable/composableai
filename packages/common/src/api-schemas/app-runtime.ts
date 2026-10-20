@@ -8,6 +8,7 @@ import type { InCodeProcessDefinition } from '../store/process.js';
 import { SystemRolesSchema } from './apikey.js';
 import {
     AgentToolDefinitionSchema,
+    AppDeploymentAliasSchema,
     AppInstallationOAuthBindingSchema,
     AppInstallationProviderBindingSchema,
     AppVersionRecordSchema,
@@ -43,6 +44,16 @@ import { ViewExperienceConfigurationSchema } from './view-execution.js';
 const JSONSchemaRefSchema: z.ZodType<JSONSchema> = z.any().meta({
     $ref: '#/components/schemas/JSONSchema',
 });
+
+export const AppDeploymentAliasTargetSchema = z
+    .strictObject({
+        version_id: z.string().min(1).meta({ description: 'Immutable AppGen version id.' }),
+        version_record_id: z
+            .string()
+            .min(1)
+            .meta({ description: 'Globally unique app-version record id used to resolve the exact build.' }),
+    })
+    .meta({ id: 'AppDeploymentAliasTarget' });
 
 export const ProjectPluginArraySchema = z.array(z.string()).meta({ id: 'ProjectPluginArray' });
 
@@ -637,6 +648,12 @@ export const AppManifestSchema = z
         version: z
             .string()
             .meta({ description: 'Optional app version string (e.g. "1.0.0") — informational.' })
+            .optional(),
+        deployment_aliases: z
+            .record(AppDeploymentAliasSchema, AppDeploymentAliasTargetSchema)
+            .meta({
+                description: 'Vertesia-managed mapping from stable deployment aliases to immutable AppGen versions.',
+            })
             .optional(),
         source: AppManifestSourceSchema.meta({
             description: 'Source metadata for generated or synced app manifests.',

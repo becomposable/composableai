@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { APPGEN_PACKAGE_SPEC_PATTERN } from '../appgen.js';
+import { APP_DEPLOYMENT_ALIAS_PATTERN } from '../apps.js';
 import {
     AppAccessControlSchema,
     AppAvailableInSchema,
@@ -84,6 +85,12 @@ export const AppVersionTargetSchema = z.enum(['static', 'service']).meta({ id: '
 export const AppVersionStateSchema = z.enum(['ready', 'failed', 'expired']).meta({ id: 'AppVersionState' });
 
 export const AppVersionKindSchema = z.enum(['design', 'version']).meta({ id: 'AppVersionKind' });
+
+export const AppDeploymentAliasSchema = z.string().regex(APP_DEPLOYMENT_ALIAS_PATTERN).meta({
+    id: 'AppDeploymentAlias',
+    description:
+        'Stable, lowercase deployment alias for an immutable app version, such as `production`, `preview`, or `customer-demo`.',
+});
 
 export const StartAppScaffoldResponseSchema = z
     .strictObject({
@@ -872,6 +879,10 @@ export const AppVersionRecordSchema = z
         kind: AppVersionKindSchema,
         state: AppVersionStateSchema,
         promoted: z.boolean().optional(),
+        aliases: z
+            .array(AppDeploymentAliasSchema)
+            .meta({ description: 'Deployment aliases that currently resolve to this immutable version.' })
+            .optional(),
         target: AppVersionTargetSchema.optional(),
         agent_run_id: z.string().optional(),
         development_task_id: z

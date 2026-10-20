@@ -676,6 +676,11 @@ export type AppCapabilities =
     | 'dashboards';
 export type AppAvailableIn = 'app_portal' | 'composite_app';
 export type AppVersionKind = 'design' | 'version';
+export type AppDeploymentAlias = string;
+export type AppDeploymentAliasTarget = {
+    version_id: string;
+    version_record_id: string;
+};
 export type AppVersionState = 'ready' | 'failed' | 'expired';
 export type AppVersionTarget = 'static' | 'service';
 export type AppVersionGitRefType = 'branch' | 'tag' | 'commit' | 'detached';
@@ -721,6 +726,7 @@ export type AppVersionRecord = {
     kind: AppVersionKind;
     state: AppVersionState;
     promoted?: boolean | undefined;
+    aliases?: AppDeploymentAlias[] | undefined;
     target?: AppVersionTarget | undefined;
     agent_run_id?: string | undefined;
     development_task_id?: string | undefined;
@@ -1273,6 +1279,7 @@ export type AppManifest = {
     endpoint?: string | undefined;
     endpoint_overrides?: StringValueMap | undefined;
     version?: string | undefined;
+    deployment_aliases?: Record<AppDeploymentAlias, AppDeploymentAliasTarget> | undefined;
     source?: AppManifestSource | undefined;
     tags?: string[] | undefined;
     access_control?: AppAccessControl | undefined;
@@ -11935,6 +11942,8 @@ export interface ApiComponentTypes {
     AppVersionTarget: AppVersionTarget;
     AppVersionState: AppVersionState;
     AppVersionKind: AppVersionKind;
+    AppDeploymentAlias: AppDeploymentAlias;
+    AppDeploymentAliasTarget: AppDeploymentAliasTarget;
     StartAppScaffoldResponse: StartAppScaffoldResponse;
     AppScaffoldModule: AppScaffoldModule;
     AppBuildTrigger: AppBuildTrigger;

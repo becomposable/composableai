@@ -340,6 +340,14 @@ interface Checks {
         W.AppVersionKind,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppVersionKindSchema>
     >;
+    AppDeploymentAlias: Same<
+        W.AppDeploymentAlias,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppDeploymentAliasSchema>
+    >;
+    AppDeploymentAliasTarget: Same<
+        W.AppDeploymentAliasTarget,
+        z.infer<typeof import('./api-schemas/app-runtime.js').AppDeploymentAliasTargetSchema>
+    >;
     AppVersionState: Same<
         W.AppVersionState,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppVersionStateSchema>
@@ -8818,6 +8826,14 @@ interface Checks {
         W.ApiComponentTypes['AppVersionKind'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppVersionKindSchema>
     >;
+    'component:AppDeploymentAlias': Same<
+        W.ApiComponentTypes['AppDeploymentAlias'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppDeploymentAliasSchema>
+    >;
+    'component:AppDeploymentAliasTarget': Same<
+        W.ApiComponentTypes['AppDeploymentAliasTarget'],
+        z.infer<typeof import('./api-schemas/app-runtime.js').AppDeploymentAliasTargetSchema>
+    >;
     'component:StartAppScaffoldResponse': Same<
         W.ApiComponentTypes['StartAppScaffoldResponse'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').StartAppScaffoldResponseSchema>
@@ -9748,6 +9764,8 @@ const checks: Checks = {
     AppCapabilities: true,
     AppAvailableIn: true,
     AppVersionKind: true,
+    AppDeploymentAlias: true,
+    AppDeploymentAliasTarget: true,
     AppVersionState: true,
     AppVersionTarget: true,
     AppVersionGitRefType: true,
@@ -11983,6 +12001,8 @@ const checks: Checks = {
     'component:AppVersionTarget': true,
     'component:AppVersionState': true,
     'component:AppVersionKind': true,
+    'component:AppDeploymentAlias': true,
+    'component:AppDeploymentAliasTarget': true,
     'component:StartAppScaffoldResponse': true,
     'component:AppScaffoldModule': true,
     'component:AppBuildTrigger': true,
@@ -12195,6 +12215,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2540);
+        expect(Object.keys(checks)).toHaveLength(2544);
     });
 });

@@ -19379,6 +19379,30 @@
       "version"
     ]
   },
+  "AppDeploymentAlias": {
+    "type": "string",
+    "pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+    "description": "Stable, lowercase deployment alias for an immutable app version, such as `production`, `preview`, or `customer-demo`."
+  },
+  "AppDeploymentAliasTarget": {
+    "type": "object",
+    "properties": {
+      "version_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Immutable AppGen version id."
+      },
+      "version_record_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Globally unique app-version record id used to resolve the exact build."
+      }
+    },
+    "required": [
+      "version_id",
+      "version_record_id"
+    ]
+  },
   "StartAppScaffoldResponse": {
     "type": "object",
     "properties": {
@@ -20950,6 +20974,13 @@
       },
       "promoted": {
         "type": "boolean"
+      },
+      "aliases": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AppDeploymentAlias"
+        },
+        "description": "Deployment aliases that currently resolve to this immutable version."
       },
       "target": {
         "$ref": "#/components/schemas/AppVersionTarget"
@@ -24234,6 +24265,16 @@
       "version": {
         "type": "string",
         "description": "Optional app version string (e.g. \"1.0.0\") — informational."
+      },
+      "deployment_aliases": {
+        "type": "object",
+        "propertyNames": {
+          "$ref": "#/components/schemas/AppDeploymentAlias"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/AppDeploymentAliasTarget"
+        },
+        "description": "Vertesia-managed mapping from stable deployment aliases to immutable AppGen versions."
       },
       "source": {
         "$ref": "#/components/schemas/AppManifestSource",

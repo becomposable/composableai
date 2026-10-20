@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { APPGEN_PACKAGE_SPEC_PATTERN } from '../appgen.js';
-import { AppAccessControlSchema, AppAvailableInSchema, MCPToolAnnotationsSchema } from './apps.js';
+import {
+    AppAccessControlSchema,
+    AppAvailableInSchema,
+    AppSourceConfigSchema,
+    MCPToolAnnotationsSchema,
+} from './apps.js';
 import { EventCategorySchema } from './audit-trail.js';
 import { AgentBudgetConfigurationSchema } from './project-configuration.js';
 
@@ -94,6 +99,12 @@ export const StartAppScaffoldResponseSchema = z
 export const AppScaffoldModuleSchema = z
     .enum(['service', 'assistant', 'content-app', 'examples'])
     .meta({ id: 'AppScaffoldModule' });
+
+export const AppScaffoldSourceModeSchema = z.enum(['generate', 'existing']).meta({
+    id: 'AppScaffoldSourceMode',
+    description:
+        'How App Builder should use a connected source repository. `generate` writes a starter app to an empty branch; `existing` only binds the repository.',
+});
 
 export const AppBuildTriggerSchema = z.enum(['ui', 'git_push', 'agent', 'api']).meta({ id: 'AppBuildTrigger' });
 
@@ -405,6 +416,22 @@ export const AppVersionGitSourceSchema = z
     })
     .meta({ id: 'AppVersionGitSource' });
 
+export const AppGithubRepositoryCreationSchema = z
+    .strictObject({
+        name: z
+            .string()
+            .trim()
+            .min(1)
+            .max(100)
+            .regex(/^[A-Za-z0-9][A-Za-z0-9._-]*$/)
+            .meta({ description: 'Name of the empty GitHub repository to create in the verified installation.' }),
+        private: z
+            .boolean()
+            .optional()
+            .meta({ description: 'Create a private repository. Defaults to true when omitted.' }),
+    })
+    .meta({ id: 'AppGithubRepositoryCreation' });
+
 export const StartAppScaffoldRequestSchema = z
     .strictObject({
         app_id: z.string().meta({
@@ -431,8 +458,114 @@ export const StartAppScaffoldRequestSchema = z
                 description: 'Start an initial app version build after the source has been pushed. Defaults to true.',
             })
             .optional(),
+        source_mode: AppScaffoldSourceModeSchema.optional().meta({
+            description:
+                'Explicit source setup behavior for external repositories. Omit to retain the legacy automatic behavior.',
+        }),
+        source: AppSourceConfigSchema.optional().meta({
+            description:
+                'Source repository to bind to the app. Omit to create and scaffold a Vertesia-managed repository.',
+        }),
+        github_connection_id: z.string().optional().meta({
+            description: 'Short-lived proof that the current user verified the selected GitHub installation.',
+        }),
+        github_repository_creation: AppGithubRepositoryCreationSchema.optional().meta({
+            description:
+                'Create an empty repository in the verified GitHub installation before generating the app source.',
+        }),
     })
     .meta({ id: 'StartAppScaffoldRequest' });
+
+export const AppGithubConfigurationSchema = z
+    .strictObject({
+        enabled: z.boolean(),
+        app_slug: z.string().optional(),
+        install_url: z.string().optional(),
+        relay_url: z.string().optional(),
+    })
+    .meta({ id: 'AppGithubConfiguration' });
+
+export const StartAppGithubAuthorizationResponseSchema = z
+    .strictObject({ authorization_url: z.string() })
+    .meta({ id: 'StartAppGithubAuthorizationResponse' });
+
+export const ExchangeAppGithubAuthorizationRequestSchema = z
+    .strictObject({ code: z.string(), state: z.string() })
+    .meta({ id: 'ExchangeAppGithubAuthorizationRequest' });
+
+export const AppGithubRepositoriesQuerySchema = z
+    .strictObject({
+        connection_id: z.string().trim().min(1),
+        installation_id: z.string().trim().min(1),
+    })
+    .meta({ id: 'AppGithubRepositoriesQuery' });
+
+export const AppGithubInstallationSchema = z
+    .strictObject({
+        id: z.string(),
+        account_login: z.string(),
+        account_type: z.string().optional(),
+        repository_selection: z.enum(['all', 'selected']),
+    })
+    .meta({ id: 'AppGithubInstallation' });
+
+export const AppGithubAccountSchema = z
+    .strictObject({
+        login: z.string(),
+        account_type: z.string(),
+        avatar_url: z.string().optional(),
+    })
+    .meta({ id: 'AppGithubAccount' });
+
+export const ExchangeAppGithubAuthorizationResponseSchema = z
+    .strictObject({
+        connection_id: z.string(),
+        installations: z.array(AppGithubInstallationSchema),
+        accounts: z.array(AppGithubAccountSchema),
+    })
+    .meta({ id: 'ExchangeAppGithubAuthorizationResponse' });
+
+export const AppGithubRepositorySchema = z
+    .strictObject({
+        name: z.string(),
+        full_name: z.string(),
+        private: z.boolean(),
+        default_branch: z.string(),
+        html_url: z.string(),
+    })
+    .meta({ id: 'AppGithubRepository' });
+
+export const AppGithubRepositoryListSchema = z
+    .strictObject({ repositories: z.array(AppGithubRepositorySchema) })
+    .meta({ id: 'AppGithubRepositoryList' });
+
+export const AppGithubRepositorySetupQuerySchema = z
+    .strictObject({
+        connection_id: z.string().trim().min(1),
+        installation_id: z.string().trim().min(1),
+        repository: z.string().trim().min(1),
+        branch: z.string().trim().min(1),
+    })
+    .meta({ id: 'AppGithubRepositorySetupQuery' });
+
+export const AppGithubBranchStateSchema = z
+    .strictObject({
+        name: z.string(),
+        exists: z.boolean(),
+        empty: z.boolean(),
+    })
+    .meta({ id: 'AppGithubBranchState' });
+
+export const AppGithubRepositorySetupSchema = z
+    .strictObject({
+        default_branch: z.string(),
+        branches: z.array(z.string()),
+        selected_branch: AppGithubBranchStateSchema,
+    })
+    .meta({
+        id: 'AppGithubRepositorySetup',
+        description: 'Branch choices and write-safety state for a verified GitHub repository.',
+    });
 
 export const StartAppDevelopmentTaskRequestSchema = z
     .strictObject({

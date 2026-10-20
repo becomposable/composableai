@@ -404,6 +404,10 @@ interface Checks {
         W.AppScaffoldModule,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppScaffoldModuleSchema>
     >;
+    AppScaffoldSourceMode: Same<
+        W.AppScaffoldSourceMode,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppScaffoldSourceModeSchema>
+    >;
     StartAppScaffoldRequest: Same<
         W.StartAppScaffoldRequest,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').StartAppScaffoldRequestSchema>
@@ -411,6 +415,58 @@ interface Checks {
     StartAppScaffoldResponse: Same<
         W.StartAppScaffoldResponse,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').StartAppScaffoldResponseSchema>
+    >;
+    AppGithubConfiguration: Same<
+        W.AppGithubConfiguration,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubConfigurationSchema>
+    >;
+    StartAppGithubAuthorizationResponse: Same<
+        W.StartAppGithubAuthorizationResponse,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').StartAppGithubAuthorizationResponseSchema>
+    >;
+    ExchangeAppGithubAuthorizationRequest: Same<
+        W.ExchangeAppGithubAuthorizationRequest,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').ExchangeAppGithubAuthorizationRequestSchema>
+    >;
+    AppGithubRepositoriesQuery: Same<
+        W.AppGithubRepositoriesQuery,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoriesQuerySchema>
+    >;
+    AppGithubInstallation: Same<
+        W.AppGithubInstallation,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubInstallationSchema>
+    >;
+    AppGithubAccount: Same<
+        W.AppGithubAccount,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubAccountSchema>
+    >;
+    ExchangeAppGithubAuthorizationResponse: Same<
+        W.ExchangeAppGithubAuthorizationResponse,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').ExchangeAppGithubAuthorizationResponseSchema>
+    >;
+    AppGithubRepository: Same<
+        W.AppGithubRepository,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySchema>
+    >;
+    AppGithubRepositoryCreation: Same<
+        W.AppGithubRepositoryCreation,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoryCreationSchema>
+    >;
+    AppGithubRepositoryList: Same<
+        W.AppGithubRepositoryList,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoryListSchema>
+    >;
+    AppGithubRepositorySetupQuery: Same<
+        W.AppGithubRepositorySetupQuery,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySetupQuerySchema>
+    >;
+    AppGithubBranchState: Same<
+        W.AppGithubBranchState,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubBranchStateSchema>
+    >;
+    AppGithubRepositorySetup: Same<
+        W.AppGithubRepositorySetup,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySetupSchema>
     >;
     StartAppDevelopmentTaskRequest: Same<
         W.StartAppDevelopmentTaskRequest,
@@ -436,6 +492,10 @@ interface Checks {
     AppGitSourceConfig: Same<
         W.AppGitSourceConfig,
         z.infer<typeof import('./api-schemas/apps.js').AppGitSourceConfigSchema>
+    >;
+    AppGitSourceProvider: Same<
+        W.AppGitSourceProvider,
+        z.infer<typeof import('./api-schemas/apps.js').AppGitSourceProviderSchema>
     >;
     AppSourceConfig: Same<W.AppSourceConfig, z.infer<typeof import('./api-schemas/apps.js').AppSourceConfigSchema>>;
     AppRepoTreeEntry: Same<
@@ -4957,6 +5017,10 @@ interface Checks {
         W.ApiComponentTypes['AppSourceConfig'],
         z.infer<typeof import('./api-schemas/apps.js').AppSourceConfigSchema>
     >;
+    'component:AppGitSourceProvider': Same<
+        W.ApiComponentTypes['AppGitSourceProvider'],
+        z.infer<typeof import('./api-schemas/apps.js').AppGitSourceProviderSchema>
+    >;
     'component:AppManifestSource': Same<
         W.ApiComponentTypes['AppManifestSource'],
         z.infer<typeof import('./api-schemas/apps.js').AppManifestSourceSchema>
@@ -8874,6 +8938,62 @@ interface Checks {
         W.ApiComponentTypes['AppVersionGitSource'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppVersionGitSourceSchema>
     >;
+    'component:AppGithubConfiguration': Same<
+        W.ApiComponentTypes['AppGithubConfiguration'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubConfigurationSchema>
+    >;
+    'component:StartAppGithubAuthorizationResponse': Same<
+        W.ApiComponentTypes['StartAppGithubAuthorizationResponse'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').StartAppGithubAuthorizationResponseSchema>
+    >;
+    'component:ExchangeAppGithubAuthorizationRequest': Same<
+        W.ApiComponentTypes['ExchangeAppGithubAuthorizationRequest'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').ExchangeAppGithubAuthorizationRequestSchema>
+    >;
+    'component:AppGithubRepositoriesQuery': Same<
+        W.ApiComponentTypes['AppGithubRepositoriesQuery'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoriesQuerySchema>
+    >;
+    'component:ExchangeAppGithubAuthorizationResponse': Same<
+        W.ApiComponentTypes['ExchangeAppGithubAuthorizationResponse'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').ExchangeAppGithubAuthorizationResponseSchema>
+    >;
+    'component:AppGithubInstallation': Same<
+        W.ApiComponentTypes['AppGithubInstallation'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubInstallationSchema>
+    >;
+    'component:AppGithubAccount': Same<
+        W.ApiComponentTypes['AppGithubAccount'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubAccountSchema>
+    >;
+    'component:AppGithubRepository': Same<
+        W.ApiComponentTypes['AppGithubRepository'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySchema>
+    >;
+    'component:AppGithubRepositoryCreation': Same<
+        W.ApiComponentTypes['AppGithubRepositoryCreation'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoryCreationSchema>
+    >;
+    'component:AppGithubRepositoryList': Same<
+        W.ApiComponentTypes['AppGithubRepositoryList'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositoryListSchema>
+    >;
+    'component:AppGithubRepositorySetupQuery': Same<
+        W.ApiComponentTypes['AppGithubRepositorySetupQuery'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySetupQuerySchema>
+    >;
+    'component:AppGithubBranchState': Same<
+        W.ApiComponentTypes['AppGithubBranchState'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubBranchStateSchema>
+    >;
+    'component:AppGithubRepositorySetup': Same<
+        W.ApiComponentTypes['AppGithubRepositorySetup'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppGithubRepositorySetupSchema>
+    >;
+    'component:AppScaffoldSourceMode': Same<
+        W.ApiComponentTypes['AppScaffoldSourceMode'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppScaffoldSourceModeSchema>
+    >;
     'component:StartAppScaffoldRequest': Same<
         W.ApiComponentTypes['StartAppScaffoldRequest'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').StartAppScaffoldRequestSchema>
@@ -9644,8 +9764,22 @@ const checks: Checks = {
     AppBuildProgressStatus: true,
     AppBuildProgress: true,
     AppScaffoldModule: true,
+    AppScaffoldSourceMode: true,
     StartAppScaffoldRequest: true,
     StartAppScaffoldResponse: true,
+    AppGithubConfiguration: true,
+    StartAppGithubAuthorizationResponse: true,
+    ExchangeAppGithubAuthorizationRequest: true,
+    AppGithubRepositoriesQuery: true,
+    AppGithubInstallation: true,
+    AppGithubAccount: true,
+    ExchangeAppGithubAuthorizationResponse: true,
+    AppGithubRepository: true,
+    AppGithubRepositoryCreation: true,
+    AppGithubRepositoryList: true,
+    AppGithubRepositorySetupQuery: true,
+    AppGithubBranchState: true,
+    AppGithubRepositorySetup: true,
     StartAppDevelopmentTaskRequest: true,
     AppScaffoldProgressStatus: true,
     AppScaffoldProgress: true,
@@ -9653,6 +9787,7 @@ const checks: Checks = {
     AppManifestData: true,
     UpdateAppPayload: true,
     AppGitSourceConfig: true,
+    AppGitSourceProvider: true,
     AppSourceConfig: true,
     AppRepoTreeEntry: true,
     AppRepoTree: true,
@@ -10897,6 +11032,7 @@ const checks: Checks = {
     'component:AppCapabilities': true,
     'component:AppAccessControl': true,
     'component:AppSourceConfig': true,
+    'component:AppGitSourceProvider': true,
     'component:AppManifestSource': true,
     'component:SuccessResponse': true,
     'component:OAuthProvider': true,
@@ -11877,6 +12013,20 @@ const checks: Checks = {
     'component:AppRepoBranch': true,
     'component:AppRepoDocumentCommit': true,
     'component:AppVersionGitSource': true,
+    'component:AppGithubConfiguration': true,
+    'component:StartAppGithubAuthorizationResponse': true,
+    'component:ExchangeAppGithubAuthorizationRequest': true,
+    'component:AppGithubRepositoriesQuery': true,
+    'component:ExchangeAppGithubAuthorizationResponse': true,
+    'component:AppGithubInstallation': true,
+    'component:AppGithubAccount': true,
+    'component:AppGithubRepository': true,
+    'component:AppGithubRepositoryCreation': true,
+    'component:AppGithubRepositoryList': true,
+    'component:AppGithubRepositorySetupQuery': true,
+    'component:AppGithubBranchState': true,
+    'component:AppGithubRepositorySetup': true,
+    'component:AppScaffoldSourceMode': true,
     'component:StartAppScaffoldRequest': true,
     'component:StartAppDevelopmentTaskRequest': true,
     'component:StartAppBuildRequest': true,
@@ -12045,6 +12195,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2510);
+        expect(Object.keys(checks)).toHaveLength(2540);
     });
 });

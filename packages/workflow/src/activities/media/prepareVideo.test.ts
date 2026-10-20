@@ -20,7 +20,10 @@ vi.mock('@temporalio/activity', async (importOriginal) => ({
     log: { debug: vi.fn(), error: vi.fn(), info: vi.fn(), warn: vi.fn() },
 }));
 vi.mock('../../dsl/setup/ActivityContext.js', () => ({ setupActivity: vi.fn() }));
-vi.mock('../../utils/blobs.js', () => ({ saveBlobToTempFile: vi.fn() }));
+vi.mock('../../utils/blobs.js', async (importOriginal) => ({
+    ...(await importOriginal<typeof import('../../utils/blobs.js')>()),
+    saveBlobToTempFile: vi.fn(),
+}));
 
 describe('screenshotTimestamp', () => {
     it.each([0.1, 0.5, 1])('extracts the first frame of a %s-second clip', (duration) => {

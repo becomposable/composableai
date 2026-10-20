@@ -14,7 +14,8 @@ import {
 } from '@vertesia/common';
 import { setupActivity } from '../../dsl/setup/ActivityContext.js';
 import { DocumentNotFoundError, InvalidContentTypeError } from '../../errors.js';
-import { saveBlobToTempFile } from '../../utils/blobs.js';
+import { removeTempFiles, saveBlobToTempFile } from '../../utils/blobs.js';
+import { closeUploadStream, createUploadStream } from '../../utils/upload-stream.js';
 import {
     execActivityFile,
     execActivityFileWithProgress,
@@ -164,7 +165,7 @@ async function uploadFile(
     storagePath: string,
 ): Promise<string> {
     const { NodeStreamSource } = await import('@vertesia/client/node');
-    const fileStream = fs.createReadStream(filePath);
+    const fileStream = createUploadStream(filePath);
     const source = new NodeStreamSource(fileStream, fileName, mimeType, storagePath);
 
     try {
@@ -172,8 +173,7 @@ async function uploadFile(
         log.debug(`Uploaded file to ${storagePath}`, { result });
         return result;
     } finally {
-        // An upload that fails before reading the body leaves the file open.
-        fileStream.destroy();
+        await closeUploadStream(fileStream);
     }
 }
 
@@ -316,25 +316,6 @@ export async function prepareAudio(
         // Wrap unknown errors in Error
         throw new Error(`Failed to prepare audio ${objectId}: ${errorMessage}`);
     } finally {
-        // Clean up temporary files
-        const cleanupPromises: Promise<void>[] = [];
-
-        if (audioFile) {
-            cleanupPromises.push(
-                fs.promises.unlink(audioFile).catch((err) => {
-                    log.warn(`Failed to cleanup audio file: ${audioFile}`, { err });
-                }),
-            );
-        }
-
-        if (tempOutputDir) {
-            cleanupPromises.push(
-                fs.promises.rm(tempOutputDir, { recursive: true, force: true }).catch((err) => {
-                    log.warn(`Failed to cleanup temp directory: ${tempOutputDir}`, { err });
-                }),
-            );
-        }
-
-        await Promise.allSettled(cleanupPromises);
+        await removeTempFiles(audioFile, tempOutputDir);
     }
 }

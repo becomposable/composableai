@@ -5,7 +5,7 @@ import path from 'node:path';
 import type { VertesiaClient } from '@vertesia/client';
 import tmp from 'tmp';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { saveBlobToTempFile } from './blobs.js';
+import { removeTempFiles, saveBlobToTempFile, withBlobTempFile } from './blobs.js';
 
 // Pass-through, so a test can make the cleanup of a failed download fail.
 vi.mock('node:fs/promises', async (importOriginal) => {
@@ -24,20 +24,20 @@ function openDescriptorCount(): number {
     return fs.readdirSync('/dev/fd').length;
 }
 
+let tempDir: string;
+
+beforeEach(() => {
+    tempDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'blobs-test-')));
+    vi.stubEnv('TMPDIR', tempDir);
+});
+
+afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+    fs.rmSync(tempDir, { recursive: true, force: true });
+});
+
 describe('saveBlobToTempFile', () => {
-    let tempDir: string;
-
-    beforeEach(() => {
-        tempDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'blobs-test-')));
-        vi.stubEnv('TMPDIR', tempDir);
-    });
-
-    afterEach(() => {
-        vi.restoreAllMocks();
-        vi.unstubAllEnvs();
-        fs.rmSync(tempDir, { recursive: true, force: true });
-    });
-
     it('should write the blob to a new file with the requested extension', async () => {
         const file = await saveBlobToTempFile(clientReturning('blob contents'), 'gs://bucket/source', 'pdf');
 
@@ -132,5 +132,74 @@ describe('saveBlobToTempFile', () => {
 
         expect(openDescriptorCount()).toBe(before);
         expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+});
+
+describe('withBlobTempFile', () => {
+    it('should hand the downloaded file to the callback and return its result', async () => {
+        const result = await withBlobTempFile(
+            clientReturning('blob contents'),
+            'gs://bucket/source',
+            '.pdf',
+            (file) => {
+                expect(path.extname(file)).toBe('.pdf');
+                return fs.promises.readFile(file, 'utf8');
+            },
+        );
+
+        expect(result).toBe('blob contents');
+        expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+
+    it('should remove the work directory and the files written into it when the callback fails', async () => {
+        const before = openDescriptorCount();
+
+        await expect(
+            withBlobTempFile(clientReturning('blob contents'), 'gs://bucket/source', 'pdf', async (_file, dir) => {
+                fs.writeFileSync(path.join(dir, 'output.txt'), 'output');
+                throw new Error('callback failed');
+            }),
+        ).rejects.toThrow('callback failed');
+
+        expect(openDescriptorCount()).toBe(before);
+        expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+
+    it('should not run the callback and should leave nothing behind when the download fails', async () => {
+        const client = {
+            files: { downloadFile: vi.fn().mockRejectedValue(new Error('download failed')) },
+        } as unknown as VertesiaClient;
+        const fn = vi.fn();
+
+        await expect(withBlobTempFile(client, 'gs://bucket/source', 'pdf', fn)).rejects.toThrow('download failed');
+
+        expect(fn).not.toHaveBeenCalled();
+        expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+});
+
+describe('removeTempFiles', () => {
+    it('should remove files and directories and skip missing or undefined paths', async () => {
+        const file = path.join(tempDir, 'file.txt');
+        const dir = path.join(tempDir, 'dir');
+        fs.writeFileSync(file, 'file');
+        fs.mkdirSync(dir);
+        fs.writeFileSync(path.join(dir, 'nested.txt'), 'nested');
+
+        await removeTempFiles(file, dir, undefined, path.join(tempDir, 'missing'));
+
+        expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+
+    it('should log a failure outside an activity instead of throwing', async () => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+        vi.mocked(rm).mockRejectedValueOnce(new Error('cleanup failed'));
+
+        await expect(removeTempFiles('/tmp/some-file')).resolves.toBeUndefined();
+
+        expect(warn).toHaveBeenCalledWith('Failed to remove temporary file', {
+            path: '/tmp/some-file',
+            error: 'cleanup failed',
+        });
     });
 });

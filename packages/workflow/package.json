@@ -123,6 +123,10 @@
         "./activities/executeInteraction": {
             "types": "./lib/activities/executeInteraction.d.ts",
             "default": "./lib/activities/executeInteraction.js"
+        },
+        "./utils/upload-stream": {
+            "types": "./lib/utils/upload-stream.d.ts",
+            "default": "./lib/utils/upload-stream.js"
         }
     },
     "repository": {

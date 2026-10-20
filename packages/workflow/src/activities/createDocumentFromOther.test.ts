@@ -6,12 +6,10 @@ import type { VertesiaClient } from '@vertesia/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { pdfExtractPages } from '../conversion/mutool.js';
 import { setupActivity } from '../dsl/setup/ActivityContext.js';
-import { saveBlobToTempFile } from '../utils/blobs.js';
 import { createPdfDocumentFromSource } from './createDocumentFromOther.js';
 
 vi.mock('../conversion/mutool.js', () => ({ pdfExtractPages: vi.fn() }));
 vi.mock('../dsl/setup/ActivityContext.js', () => ({ setupActivity: vi.fn() }));
-vi.mock('../utils/blobs.js', () => ({ saveBlobToTempFile: vi.fn() }));
 
 type Payload = Parameters<typeof createPdfDocumentFromSource>[0];
 
@@ -28,8 +26,6 @@ describe('createPdfDocumentFromSource', () => {
     });
 
     function setup(upload: () => Promise<unknown>) {
-        const source = path.join(root, 'source.pdf');
-        fs.writeFileSync(source, '%PDF source');
         // The output sits below the work directory, so removing its parent directory would leave the work directory.
         const workDir = path.join(root, 'work');
         const file = path.join(workDir, 'nested', 'output.pdf');
@@ -37,6 +33,7 @@ describe('createPdfDocumentFromSource', () => {
         fs.writeFileSync(file, '%PDF pages');
 
         const client = {
+            files: { downloadFile: vi.fn().mockResolvedValue(new Blob(['%PDF source']).stream()) },
             objects: {
                 retrieve: vi.fn().mockResolvedValue({
                     id: 'object-1',
@@ -52,21 +49,23 @@ describe('createPdfDocumentFromSource', () => {
             objectId: 'object-1',
             params: { target_object_type: 'Pages', title: 'Pages', pages: [1, 2] } satisfies Payload['params'],
         } as unknown as Awaited<ReturnType<typeof setupActivity>>);
-        vi.mocked(saveBlobToTempFile).mockResolvedValue(source);
         vi.mocked(pdfExtractPages).mockResolvedValue({ file, workDir });
-        return { source, workDir };
+        return { workDir };
     }
 
     const payload = {} as Payload;
 
     it('removes the work directory pdfExtractPages reports after the upload', async () => {
-        const { source, workDir } = setup(async () => ({ source: 'gs://bucket/pages.pdf', name: 'pages-1-2.pdf' }));
+        const { workDir } = setup(async () => ({ source: 'gs://bucket/pages.pdf', name: 'pages-1-2.pdf' }));
 
         const result = await new MockActivityEnvironment().run(createPdfDocumentFromSource, payload);
 
         expect(result).toEqual({ newObjectId: 'object-2', uploadedFile: 'pages-1-2.pdf' });
         expect(fs.existsSync(workDir)).toBe(false);
-        expect(fs.existsSync(source)).toBe(false);
+        // The downloaded source is removed once the pages are extracted.
+        const source = vi.mocked(pdfExtractPages).mock.calls[0]?.[0];
+        expect(source).toBeDefined();
+        expect(fs.existsSync(path.dirname(source as string))).toBe(false);
     });
 
     it('removes the work directory when the upload fails', async () => {
@@ -78,5 +77,8 @@ describe('createPdfDocumentFromSource', () => {
             'upload failed',
         );
         expect(fs.existsSync(workDir)).toBe(false);
+        const source = vi.mocked(pdfExtractPages).mock.calls[0]?.[0];
+        expect(source).toBeDefined();
+        expect(fs.existsSync(path.dirname(source as string))).toBe(false);
     });
 });

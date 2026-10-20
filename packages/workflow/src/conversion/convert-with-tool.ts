@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import { log } from '@temporalio/activity';
 import tmp from 'tmp';
 import { execActivityFile } from '../activities/media/exec.js';
+import { removeTempFiles } from '../utils/blobs.js';
 
 /** Bound on the tool output kept in memory; a tool that writes more fails instead of growing the buffer. */
 const TOOL_MAX_BUFFER = 10 * 1024 * 1024;
@@ -54,23 +55,6 @@ export async function writeNewFile(file: string, data: Buffer): Promise<void> {
         }
         throw err;
     }
-}
-
-/**
- * Remove temporary files or directories, ignoring ones that are already gone. A failure is logged, never thrown,
- * so cleanup cannot mask the result or error of the conversion that created them.
- */
-export async function removeTempFiles(...files: Array<string | undefined>): Promise<void> {
-    await Promise.all(
-        files.map(async (file) => {
-            if (!file) {
-                return;
-            }
-            await fs.promises.rm(file, { force: true, recursive: true }).catch((err: unknown) => {
-                log.warn('Failed to remove temporary file', { file, err });
-            });
-        }),
-    );
 }
 
 function toPostfix(ext: string | undefined): string {

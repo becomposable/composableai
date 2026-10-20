@@ -234,9 +234,11 @@ export async function prepareAudio(
 
     // Download audio to temp file
     const audioFile = await saveBlobToTempFile(client, inputObject.content.source);
-    const tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), 'prepare-audio-'));
+    // Created inside the try, so a failure here still removes the download in the finally.
+    let tempOutputDir: string | undefined;
 
     try {
+        tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), 'prepare-audio-'));
         // Step 1: Extract audio metadata
         log.info('Extracting audio metadata');
         const metadata = await getAudioMetadata(audioFile);

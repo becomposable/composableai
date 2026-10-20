@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import path from 'node:path';
 import { finished } from 'node:stream/promises';
 import { log } from '@temporalio/activity';
 import { NodeStreamSource } from '@vertesia/client/node';
@@ -67,11 +66,12 @@ export async function createPdfDocumentFromSource(
     }
 
     const tmpFile = await saveBlobToTempFile(client, inputObject.content.source, 'pdf');
-    let newPdf: string | undefined;
+    let extracted: { file: string; workDir: string } | undefined;
     let uploadStream: fs.ReadStream | undefined;
     try {
         // Only the extraction reads the source, so release it before the upload.
-        newPdf = await pdfExtractPages(tmpFile, pages).finally(() => removeTempFiles(tmpFile));
+        extracted = await pdfExtractPages(tmpFile, pages).finally(() => removeTempFiles(tmpFile));
+        const newPdf = extracted.file;
         log.info(`PDF created from pages ${pages.join(', ')} `, { newPdf });
         const name = `pages-${pages.join('-')}.pdf`;
 
@@ -104,6 +104,6 @@ export async function createPdfDocumentFromSource(
             await finished(uploadStream).catch(() => undefined);
         }
         // pdfExtractPages writes its output into a work directory of its own, which the caller owns.
-        await removeTempFiles(newPdf && path.dirname(newPdf));
+        await removeTempFiles(extracted?.workDir);
     }
 }

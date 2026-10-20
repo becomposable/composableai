@@ -63,10 +63,16 @@ test(
         const pages = [7, 8, 9];
 
         console.log('Running pdfGetPages');
-        const result: string = await activityContext.run(pdfExtractPages, filename, pages);
+        const result: { file: string; workDir: string } = await activityContext.run(pdfExtractPages, filename, pages);
         console.log(result);
 
-        expect(result).toContain('.pdf');
+        try {
+            expect(result.file).toContain('.pdf');
+            expect(path.dirname(result.file)).toBe(result.workDir);
+            expect(fs.existsSync(result.file)).toBe(true);
+        } finally {
+            fs.rmSync(result.workDir, { recursive: true, force: true });
+        }
     },
     TIMEOUT,
 );
@@ -78,10 +84,16 @@ test(
         const pages = [12];
 
         console.log('Running pdfGetPages');
-        const result: string = await activityContext.run(pdfExtractPages, filename, pages);
+        const result: { file: string; workDir: string } = await activityContext.run(pdfExtractPages, filename, pages);
         console.log(result);
 
-        expect(result).toContain('.pdf');
+        try {
+            expect(result.file).toContain('.pdf');
+            expect(path.dirname(result.file)).toBe(result.workDir);
+            expect(fs.existsSync(result.file)).toBe(true);
+        } finally {
+            fs.rmSync(result.workDir, { recursive: true, force: true });
+        }
     },
     TIMEOUT,
 );

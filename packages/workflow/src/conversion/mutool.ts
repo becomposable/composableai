@@ -46,9 +46,12 @@ export async function pdfToImages(file: Buffer | string, pages?: number[]): Prom
 /**
  * Get some pages from a PDF to create a new one
  *
- * @returns the new PDF's path, inside a work directory the caller owns and must remove
+ * @returns the new PDF's path, and the work directory holding it, which the caller owns and must remove
  */
-export async function pdfExtractPages(file: Buffer | string, pages: number[]): Promise<string> {
+export async function pdfExtractPages(
+    file: Buffer | string,
+    pages: number[],
+): Promise<{ file: string; workDir: string }> {
     return withMutoolWorkDir(async (workDir) => {
         log.info(`Getting pages from pdf`, { workDir, input_type: typeof file, pages });
         const filename = await inputPdfPath(workDir, file);
@@ -57,7 +60,7 @@ export async function pdfExtractPages(file: Buffer | string, pages: number[]): P
         await runTool('mutool', ['merge', '-o', output, '-O', 'garbage=compact,sanitize', filename, pages.join(',')]);
 
         log.info(`Extracted pages from pdf`, { pages, file: output });
-        return output;
+        return { file: output, workDir };
     });
 }
 

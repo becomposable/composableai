@@ -1,11 +1,12 @@
 import crypto from 'node:crypto';
-import { createWriteStream } from 'node:fs';
+import { open, rm } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import type { VertesiaClient } from '@vertesia/client';
 import tmp from 'tmp';
 import { DocumentNotFoundError } from '../errors.js';
 
+// Process-wide: other tmp users rely on exit-time cleanup. saveBlobToTempFile registers nothing with tmp.
 tmp.setGracefulCleanup();
 
 export async function fetchBlobAsStream(client: VertesiaClient, blobUri: string): Promise<ReadableStream<Uint8Array>> {
@@ -37,29 +38,31 @@ export async function fetchBlobAsBase64(client: VertesiaClient, blobUri: string)
     return buffer.toString('base64');
 }
 
-async function saveBlobToFile(client: VertesiaClient, blobUri: string, toFile: string): Promise<void> {
-    const stream = await fetchBlobAsStream(client, blobUri);
-
-    const nodeReadable = Readable.from(stream);
-    const out = createWriteStream(toFile);
-
-    await pipeline(nodeReadable, out); // Ensures completion before continuing
-}
-
+/**
+ * Download a blob to a new temporary file and return its path.
+ *
+ * The caller owns the file and must remove it (e.g. `fs.promises.rm(path, { force: true })` in a `finally`).
+ * No descriptor is left open and nothing is registered for exit-time cleanup, so removing the path frees its space.
+ */
 export async function saveBlobToTempFile(client: VertesiaClient, blobUri: string, fileExt?: string): Promise<string> {
-    const tmpFile = tmp.fileSync({
+    const fileName = tmp.tmpNameSync({
         prefix: 'vertesia-activity-',
-        postfix: fileExt ? `.${fileExt}` : '',
+        postfix: fileExt ? `.${fileExt.replace(/^\./, '')}` : '',
     });
+    // Create the file before downloading: a name that is already taken fails before any request, and only a file
+    // this call created is ever removed.
+    const file = await open(fileName, 'wx', 0o600);
     try {
-        await saveBlobToFile(client, blobUri, tmpFile.name);
-        return tmpFile.name;
+        const stream = await fetchBlobAsStream(client, blobUri);
+        // The write stream closes the descriptor once the pipeline settles.
+        await pipeline(Readable.from(stream), file.createWriteStream());
+        return fileName;
     } catch (err: unknown) {
-        try {
-            tmpFile.removeCallback();
-        } catch {
-            // Preserve the download failure, which is the actionable error for the caller.
-        }
+        // A failed download never handed the descriptor to a write stream; closing an already closed one is a no-op.
+        await file.close();
+        // Best effort, and silent: this utility may run outside an activity, and the download failure is the
+        // actionable error for the caller.
+        await rm(fileName, { force: true }).catch(() => undefined);
         throw err;
     }
 }

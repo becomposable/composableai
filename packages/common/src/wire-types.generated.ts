@@ -4334,6 +4334,7 @@ export type AsyncConversationExecutionPayload = {
     asyncCompletion?: AsyncCompletionOptions | undefined;
     type: 'conversation';
     notify_endpoints?: string[] | undefined;
+    idempotency_key?: string | undefined;
     task_queue?: string | undefined;
     tool_approval_mode?: AgentToolApprovalMode | undefined;
     visibility?: ConversationVisibility | undefined;
@@ -9981,6 +9982,7 @@ export type CreateAgentRunPayloadWire = {
     notify_endpoints?: string[] | undefined;
     debug_mode?: boolean | undefined;
     started_by?: string | undefined;
+    idempotency_key?: string | undefined;
 };
 export type DSLActivitySpecWire = {
     name: string;

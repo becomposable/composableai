@@ -2133,6 +2133,20 @@ export const AgentEvaluateRequestSchema = z.boolean().optional().meta({
         'Request LLM evaluation when the project evaluation policy is opt_in. Defaults to false. Cannot override disabled or opt out of always_on.',
 });
 
+export const AgentRunIdempotencyKeySchema = z
+    .string()
+    .min(1)
+    .max(256)
+    .meta({
+        description:
+            'Client-chosen key, unique per intended run, that makes this request safe to retry. A repeat of ' +
+            'the request with the same key and the same body returns the agent run the first request started ' +
+            'instead of starting another. Reusing a key with a different body is rejected with 409, and a ' +
+            'repeat that arrives while the first request is still starting the run may be answered with 503 ' +
+            'and `Retry-After`. Keys are scoped to the project and stay bound to their run for as long as it ' +
+            'exists; once the run is deleted, the same key starts a new one.',
+    });
+
 export const ConversationEnrichmentFields = {
     title: z.string().min(1).meta({ description: 'Caller-provided conversation title.' }).optional(),
     topic: z
@@ -2208,6 +2222,7 @@ export const AsyncConversationExecutionPayloadSchema = z
             .array(z.string())
             .meta({ description: 'An array of endpoint URLs to be notified upon execution' })
             .optional(),
+        idempotency_key: AgentRunIdempotencyKeySchema.optional(),
         task_queue: z.string().optional(),
         tool_approval_mode: AgentToolApprovalModeSchema.meta({
             description: 'Effective tool approval mode for interactive agent conversations.',

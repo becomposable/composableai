@@ -167,8 +167,13 @@ export async function executeInteractionAsync(
     client: VertesiaClient,
     payload: AsyncExecutionPayload,
 ): Promise<AsyncExecutionResult> {
+    // A conversation starts an agent run: without `idempotency_key` a replay could start a second one,
+    // so opt out of any client-level retry policy (see `AgentsApi.start`). With a key, a replay
+    // returns the run the first request started.
+    const unkeyedConversation = payload.type === 'conversation' && !payload.idempotency_key;
     return await client.post('/api/v1/execute/async', {
         payload,
+        retryPolicy: unkeyedConversation ? false : undefined,
     });
 }
 

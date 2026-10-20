@@ -7,7 +7,8 @@ import { mutoolPdfToText, pdfExtractPages, pdfToImages } from './mutool.js';
 let activityContext: MockActivityEnvironment;
 
 beforeAll(async () => {
-    activityContext = new MockActivityEnvironment();
+    // mutool runs are bounded by the activity's start-to-close timeout, which defaults to 1s in the mock.
+    activityContext = new MockActivityEnvironment({ startToCloseTimeoutMs: 60_000 });
 });
 
 const TIMEOUT = 60000;

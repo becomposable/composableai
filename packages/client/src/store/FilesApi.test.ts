@@ -1,10 +1,42 @@
+import { once } from 'node:events';
+import { createReadStream, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { NodeStreamSource } from '../nodejs/NodeStreamSource.js';
 import { ZenoClient } from './client.js';
+
+const openDescriptorCount = (): number => readdirSync('/dev/fd').length;
 
 describe('FilesApi', () => {
     afterEach(() => {
         vi.restoreAllMocks();
         vi.unstubAllGlobals();
+    });
+
+    it('releases a Node.js read stream when the signed upload URL cannot be created', async () => {
+        const dir = mkdtempSync(join(tmpdir(), 'files-api-'));
+        try {
+            const file = join(dir, 'upload.bin');
+            writeFileSync(file, 'content');
+            const before = openDescriptorCount();
+            const stream = createReadStream(file);
+            await once(stream, 'open');
+            expect(openDescriptorCount()).toBe(before + 1);
+
+            const client = new ZenoClient({
+                serverUrl: 'https://store.test',
+                apikey: 'token',
+                fetch: async () => Response.json({ message: 'denied' }, { status: 403 }),
+            });
+
+            await expect(client.files.uploadFile(new NodeStreamSource(stream, 'upload.bin'))).rejects.toThrow();
+
+            expect(stream.destroyed).toBe(true);
+            expect(openDescriptorCount()).toBe(before);
+        } finally {
+            rmSync(dir, { recursive: true, force: true });
+        }
     });
 
     it('retries signed upload URL creation after a transient connection failure', async () => {

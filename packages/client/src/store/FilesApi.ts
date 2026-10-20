@@ -243,6 +243,22 @@ export class FilesApi extends ApiTopic {
      * @returns the uploaded file id and storage path
      */
     async uploadFileWithPath(source: StreamSource | File): Promise<{ id: string; path: string }> {
+        if (!(source instanceof StreamSource)) {
+            return this.uploadSource(source);
+        }
+        try {
+            return await this.uploadSource(source);
+        } catch (err) {
+            // A failure before fetch reads the body (e.g. getUploadUrl) leaves the stream unread and
+            // unlocked; cancel it so the underlying resource (a Node.js file descriptor) is released before we rethrow.
+            if (!source.stream.locked) {
+                await source.stream.cancel(err).catch(() => undefined);
+            }
+            throw err;
+        }
+    }
+
+    private async uploadSource(source: StreamSource | File): Promise<{ id: string; path: string }> {
         const isStream = source instanceof StreamSource;
         const { url, id, path, mime_type } = await this.getUploadUrl({
             id: isStream ? source.id : undefined,

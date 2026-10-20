@@ -11,7 +11,9 @@ import {
     execActivityFile,
     execActivityFileWithProgress,
     initializeActivityCommandDeadline,
+    isUnusableVideoContent,
     rethrowIfActivityStopped,
+    UNUSABLE_VIDEO_CONTENT,
 } from '../media/exec.js';
 
 interface GenerateVideoRenditionParams extends ImageRenditionParams {}
@@ -31,7 +33,7 @@ interface VideoMetadata {
     height: number;
 }
 
-async function getVideoMetadata(videoPath: string): Promise<VideoMetadata> {
+export async function getVideoMetadata(videoPath: string): Promise<VideoMetadata> {
     try {
         const args = ['-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videoPath];
         const { stdout } = await execActivityFile('ffprobe', args);
@@ -46,16 +48,19 @@ async function getVideoMetadata(videoPath: string): Promise<VideoMetadata> {
         const height = videoStream?.height || 0;
 
         if (!videoStream || duration <= 0) {
-            throw ApplicationFailure.nonRetryable('Video has no usable stream or duration');
+            throw ApplicationFailure.nonRetryable('Video has no usable stream or duration', UNUSABLE_VIDEO_CONTENT);
         }
 
         return { duration, width, height };
     } catch (error) {
         rethrowIfActivityStopped(error);
-        log.error(`Failed to get video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        const message = `Failed to get video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`;
         if (error instanceof ApplicationFailure) {
+            // Raised above: the file has no usable video stream, a property of the content.
+            log.warn(message);
             throw error;
         }
+        log.error(message);
         throw ApplicationFailure.nonRetryable(
             `Failed to probe video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
@@ -259,6 +264,10 @@ export async function generateVideoRendition(payload: DSLActivityExecutionPayloa
         };
     } catch (error) {
         rethrowIfActivityStopped(error);
+        // The metadata probe already logged it at warn.
+        if (isUnusableVideoContent(error)) {
+            throw error;
+        }
         log.error(`Error generating thumbnails for video: ${error instanceof Error ? error.message : 'Unknown error'}`);
         if (error instanceof ApplicationFailure) {
             throw error;

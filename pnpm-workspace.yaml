@@ -43,7 +43,7 @@ catalog:
   # Keep this synchronized with Studio and Llumiverse: each repository generates schemas from
   # its own local workspace and lockfile, so an override in another repository cannot control it.
   zod: "4.6.5"
-  vitest: "5.0.3"
+  vitest: "5.0.4"
   typescript: "7.0.2"
   typescript-legacy: "npm:typescript@6.0.3"
   react: "19.3.0"
@@ -51,7 +51,7 @@ catalog:
   "@types/node": "^24.19.1"
   "@types/react": "19.3.0"
   "@types/react-dom": "19.3.0"
-  vite: "8.3.3"
+  vite: "8.3.4"
   rolldown: "1.2.12"
 # These declarations import React types without declaring the type peer.
 packageExtensions:
@@ -138,6 +138,14 @@ overrides:
   "shell-quote@>=1.8.4 <1.11.0": 1.11.0
   # GHSA-r5fr-rjxr-66jc and GHSA-f23m-r3pf-42rh: template injection and prototype pollution.
   "lodash-es@<4.18.1": 4.18.1
+  path-to-regexp@>=4.0.0 <6.3.0: ^6.3.0
+  # create-plugin's @vercel/node pins undici 5.28.4 (WebSocket/decompression DoS, request smuggling,
+  # CRLF and cookie injection; GHSA-vxpw-j846-p89q and others) even on its latest release. It only
+  # imports Headers and request from its dev server, so move it onto the undici line the workspace
+  # already uses. undici 7 has no @fastify/busboy dependency (GHSA-x8mw-p69m-v3mx, GHSA-gxm5-99cw-xjw9).
+  "@vercel/node>undici": ^7.30.0
+  # GHSA-2g4f-4pwh-qvx6: ReDoS with the $data option; @vercel/static-config pins ajv 8.6.3.
+  "@vercel/static-config>ajv": ^8.20.0
 
 # Share package directories across local worktrees.
 virtualStoreType: global

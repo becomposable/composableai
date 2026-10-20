@@ -2,6 +2,7 @@ import type {
     CompletionResult,
     ExecutionTokenUsage,
     JSONSchema,
+    // biome-ignore lint/suspicious/noDeprecatedImports: Legacy output_modality contracts still require this enum.
     Modalities,
     PromptCacheDiagnostic,
     StatelessExecutionOptions,

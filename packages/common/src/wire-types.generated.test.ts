@@ -104,10 +104,6 @@ interface Checks {
         W.ApiKeyListQueryFromSchema,
         z.infer<typeof import('./api-schemas/apikey.js').ApiKeyListQuerySchema>
     >;
-    ApiKeyReadQueryFromSchema: Same<
-        W.ApiKeyReadQueryFromSchema,
-        z.infer<typeof import('./api-schemas/apikey.js').ApiKeyReadQuerySchema>
-    >;
     ProjectRefArrayFromSchema: Same<
         W.ProjectRefArrayFromSchema,
         z.infer<typeof import('./api-schemas/apikey.js').ProjectRefArraySchema>
@@ -120,10 +116,6 @@ interface Checks {
     ApiKeyWithValueFromSchema: Same<
         W.ApiKeyWithValueFromSchema,
         z.infer<typeof import('./api-schemas/apikey.js').ApiKeyWithValueSchema>
-    >;
-    ApiKeyReadResponseFromSchema: Same<
-        W.ApiKeyReadResponseFromSchema,
-        z.infer<typeof import('./api-schemas/apikey.js').ApiKeyReadResponseSchema>
     >;
     CreateApiKeyPayloadFromSchema: Same<
         W.CreateApiKeyPayloadFromSchema,
@@ -271,16 +263,11 @@ interface Checks {
         z.infer<typeof import('./api-schemas/apikey.js').UpdateApiKeyPayloadSchema>
     >;
     ApiKeyWithValue: Same<W.ApiKeyWithValue, z.infer<typeof import('./api-schemas/apikey.js').ApiKeyWithValueSchema>>;
-    ApiKeyReadResponse: Same<
-        W.ApiKeyReadResponse,
-        z.infer<typeof import('./api-schemas/apikey.js').ApiKeyReadResponseSchema>
-    >;
     AuthTokenResponse: Same<
         W.AuthTokenResponse,
         z.infer<typeof import('./api-schemas/apikey.js').AuthTokenResponseSchema>
     >;
     ApiKeyListQuery: Same<W.ApiKeyListQuery, z.infer<typeof import('./api-schemas/apikey.js').ApiKeyListQuerySchema>>;
-    ApiKeyReadQuery: Same<W.ApiKeyReadQuery, z.infer<typeof import('./api-schemas/apikey.js').ApiKeyReadQuerySchema>>;
     AccountApiKey: Same<W.AccountApiKey, z.infer<typeof import('./api-schemas/apikey.js').AccountApiKeySchema>>;
     AccountApiKeyWithValue: Same<
         W.AccountApiKeyWithValue,
@@ -701,6 +688,10 @@ interface Checks {
     UpdateAppInstallationOAuthApprovalPayload: Same<
         W.UpdateAppInstallationOAuthApprovalPayload,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').UpdateAppInstallationOAuthApprovalPayloadSchema>
+    >;
+    AppInstanceAvailability: Same<
+        W.AppInstanceAvailability,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstanceAvailabilitySchema>
     >;
     McpPublicParameter: Same<
         W.McpPublicParameter,
@@ -1988,6 +1979,26 @@ interface Checks {
     OAuthLoginUserNotFoundResponse: Same<
         W.OAuthLoginUserNotFoundResponse,
         z.infer<typeof import('./api-schemas/oauth-server.js').OAuthLoginUserNotFoundResponseSchema>
+    >;
+    OidcFederationConnectionPayload: Same<
+        W.OidcFederationConnectionPayload,
+        z.infer<typeof import('./api-schemas/oauth-server.js').OidcFederationConnectionPayloadSchema>
+    >;
+    OidcFederationConnection: Same<
+        W.OidcFederationConnection,
+        z.infer<typeof import('./api-schemas/oauth-server.js').OidcFederationConnectionSchema>
+    >;
+    OidcFederationConnectionArray: Same<
+        W.OidcFederationConnectionArray,
+        z.infer<typeof import('./api-schemas/oauth-server.js').OidcFederationConnectionArraySchema>
+    >;
+    OAuthTokenExchangeRequest: Same<
+        W.OAuthTokenExchangeRequest,
+        z.infer<typeof import('./api-schemas/oauth-server.js').OAuthTokenExchangeRequestSchema>
+    >;
+    OAuthTokenExchangeResponse: Same<
+        W.OAuthTokenExchangeResponse,
+        z.infer<typeof import('./api-schemas/oauth-server.js').OAuthTokenExchangeResponseSchema>
     >;
     OAuthProviderData: Same<
         W.OAuthProviderData,
@@ -4782,14 +4793,6 @@ interface Checks {
         W.ApiComponentTypes['UpdateAccountApiKeyPayload'],
         z.infer<typeof import('./api-schemas/apikey.js').UpdateAccountApiKeyPayloadSchema>
     >;
-    'component:ApiKeyReadResponse': Same<
-        W.ApiComponentTypes['ApiKeyReadResponse'],
-        z.infer<typeof import('./api-schemas/apikey.js').ApiKeyReadResponseSchema>
-    >;
-    'component:ApiKeyReadQuery': Same<
-        W.ApiComponentTypes['ApiKeyReadQuery'],
-        z.infer<typeof import('./api-schemas/apikey.js').ApiKeyReadQuerySchema>
-    >;
     'component:CreateApiKeyPayload': Same<
         W.ApiComponentTypes['CreateApiKeyPayload'],
         z.infer<typeof import('./api-schemas/apikey.js').CreateApiKeyPayloadSchema>
@@ -5101,6 +5104,26 @@ interface Checks {
     'component:OAuthTokenResponse': Same<
         W.ApiComponentTypes['OAuthTokenResponse'],
         z.infer<typeof import('./api-schemas/oauth-server.js').OAuthTokenResponseSchema>
+    >;
+    'component:OidcFederationConnectionPayload': Same<
+        W.ApiComponentTypes['OidcFederationConnectionPayload'],
+        z.infer<typeof import('./api-schemas/oauth-server.js').OidcFederationConnectionPayloadSchema>
+    >;
+    'component:OidcFederationConnection': Same<
+        W.ApiComponentTypes['OidcFederationConnection'],
+        z.infer<typeof import('./api-schemas/oauth-server.js').OidcFederationConnectionSchema>
+    >;
+    'component:OidcFederationConnectionArray': Same<
+        W.ApiComponentTypes['OidcFederationConnectionArray'],
+        z.infer<typeof import('./api-schemas/oauth-server.js').OidcFederationConnectionArraySchema>
+    >;
+    'component:OAuthTokenExchangeRequest': Same<
+        W.ApiComponentTypes['OAuthTokenExchangeRequest'],
+        z.infer<typeof import('./api-schemas/oauth-server.js').OAuthTokenExchangeRequestSchema>
+    >;
+    'component:OAuthTokenExchangeResponse': Same<
+        W.ApiComponentTypes['OAuthTokenExchangeResponse'],
+        z.infer<typeof import('./api-schemas/oauth-server.js').OAuthTokenExchangeResponseSchema>
     >;
     'component:OAuthClient': Same<
         W.ApiComponentTypes['OAuthClient'],
@@ -8947,6 +8970,10 @@ interface Checks {
         W.ApiComponentTypes['AppInstallationPayload'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstallationPayloadSchema>
     >;
+    'component:AppInstanceAvailability': Same<
+        W.ApiComponentTypes['AppInstanceAvailability'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstanceAvailabilitySchema>
+    >;
     'component:AppDevelopmentTaskDetails': Same<
         W.ApiComponentTypes['AppDevelopmentTaskDetails'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppDevelopmentTaskDetailsSchema>
@@ -9530,12 +9557,10 @@ const checks: Checks = {
     UpdateAccountPayloadFromSchema: true,
     StripeBillingStatusResponseFromSchema: true,
     ApiKeyListQueryFromSchema: true,
-    ApiKeyReadQueryFromSchema: true,
     ProjectRefArrayFromSchema: true,
     ApiKeyFromSchema: true,
     ApiKeyArrayFromSchema: true,
     ApiKeyWithValueFromSchema: true,
-    ApiKeyReadResponseFromSchema: true,
     CreateApiKeyPayloadFromSchema: true,
     UpdateApiKeyPayloadFromSchema: true,
     AuthTokenResponseFromSchema: true,
@@ -9577,10 +9602,8 @@ const checks: Checks = {
     CreateApiKeyPayload: true,
     UpdateApiKeyPayload: true,
     ApiKeyWithValue: true,
-    ApiKeyReadResponse: true,
     AuthTokenResponse: true,
     ApiKeyListQuery: true,
-    ApiKeyReadQuery: true,
     AccountApiKey: true,
     AccountApiKeyWithValue: true,
     AccountApiKeyArray: true,
@@ -9702,6 +9725,7 @@ const checks: Checks = {
     ValidateUrlResponse: true,
     AppDeleteSummary: true,
     UpdateAppInstallationOAuthApprovalPayload: true,
+    AppInstanceAvailability: true,
     McpPublicParameter: true,
     McpSecretParameter: true,
     McpConnectionParameter: true,
@@ -10053,6 +10077,11 @@ const checks: Checks = {
     OAuthLoginPayload: true,
     OAuthLoginDecisionResponse: true,
     OAuthLoginUserNotFoundResponse: true,
+    OidcFederationConnectionPayload: true,
+    OidcFederationConnection: true,
+    OidcFederationConnectionArray: true,
+    OAuthTokenExchangeRequest: true,
+    OAuthTokenExchangeResponse: true,
     OAuthProviderData: true,
     OAuthProvider: true,
     CreateOAuthProviderPayload: true,
@@ -10827,8 +10856,6 @@ const checks: Checks = {
     'component:AccountApiKeyArray': true,
     'component:CreateAccountApiKeyPayload': true,
     'component:UpdateAccountApiKeyPayload': true,
-    'component:ApiKeyReadResponse': true,
-    'component:ApiKeyReadQuery': true,
     'component:CreateApiKeyPayload': true,
     'component:UpdateApiKeyPayload': true,
     'component:AuthTokenResponse': true,
@@ -10907,6 +10934,11 @@ const checks: Checks = {
     'component:OAuthDeviceAuthorizationRequest': true,
     'component:OAuthDeviceAuthorizationResponse': true,
     'component:OAuthTokenResponse': true,
+    'component:OidcFederationConnectionPayload': true,
+    'component:OidcFederationConnection': true,
+    'component:OidcFederationConnectionArray': true,
+    'component:OAuthTokenExchangeRequest': true,
+    'component:OAuthTokenExchangeResponse': true,
     'component:OAuthClient': true,
     'component:OAuthClientArray': true,
     'component:OAuthClientCreateResponse': true,
@@ -11869,6 +11901,7 @@ const checks: Checks = {
     'component:AgentRunSearchHit': true,
     'component:UpsertAppVersionRequest': true,
     'component:AppInstallationPayload': true,
+    'component:AppInstanceAvailability': true,
     'component:AppDevelopmentTaskDetails': true,
     'component:AppVersionRecordArray': true,
     'component:AppToolCollectionArray': true,
@@ -12012,6 +12045,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2504);
+        expect(Object.keys(checks)).toHaveLength(2510);
     });
 });

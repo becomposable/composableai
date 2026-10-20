@@ -62,7 +62,6 @@ export type ApiKeyArray = Wire.ApiKeyArray;
 export type CreateApiKeyPayload = Wire.CreateApiKeyPayload;
 export type UpdateApiKeyPayload = Wire.UpdateApiKeyPayload;
 export type ApiKeyWithValue = Wire.ApiKeyWithValue;
-export type ApiKeyReadResponse = Wire.ApiKeyReadResponse;
 
 export interface CreatePublicKeyPayload {
     name?: string;
@@ -72,7 +71,6 @@ export interface CreatePublicKeyPayload {
 
 export type AuthTokenResponse = Wire.AuthTokenResponse;
 export type ApiKeyListQuery = Wire.ApiKeyListQuery;
-export type ApiKeyReadQuery = Wire.ApiKeyReadQuery;
 
 export interface AuthTokenPayload {
     credential_scope?: 'project' | 'account';
@@ -96,6 +94,14 @@ export interface AuthTokenPayload {
      * The app names enabled for this token. Defaults to an empty array if no apps are enabled.
      */
     apps: string[];
+
+    /** Versioned grants for installations in the selected project. Absence means a legacy token. */
+    app_installations?: {
+        version: 1;
+        project_id: string;
+        ids: string[];
+        ui_restrictions?: string[];
+    };
 
     /**
      * Apps in `apps[]` whose UI surface is restricted for this principal — present only on

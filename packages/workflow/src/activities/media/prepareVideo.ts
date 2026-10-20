@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { ApplicationFailure, Context, log } from '@temporalio/activity';
+import { ApplicationFailure, log } from '@temporalio/activity';
 import { RequestError } from '@vertesia/api-fetch-client';
 import type { VertesiaClient } from '@vertesia/client';
 import {
@@ -21,7 +21,9 @@ import {
     execActivityFile,
     execActivityFileWithProgress,
     initializeActivityCommandDeadline,
+    isUnusableVideoContent,
     rethrowIfActivityStopped,
+    UNUSABLE_VIDEO_CONTENT,
 } from './exec.js';
 
 // Default configuration constants
@@ -52,24 +54,33 @@ export interface PrepareVideoParams {
     thumbnailSize?: number; // Max size (longest side) for thumbnail image, default 256
     posterSize?: number; // Max size (longest side) for poster image, default 1920
     generateAudio?: boolean; // Generate audio-only rendition (AAC), default true
-    videoPreset?: VideoPreset; // FFmpeg encoding preset, default medium
+    videoPreset?: VideoPreset; // FFmpeg encoding preset, default veryfast
     skipTranscode?: boolean; // Skip the main video re-encode, default false
 }
 
-export type VideoPreset = 'medium' | 'fast' | 'veryfast' | 'ultrafast';
+export const VIDEO_PRESETS = ['medium', 'fast', 'veryfast', 'ultrafast'] as const;
+export type VideoPreset = (typeof VIDEO_PRESETS)[number];
+const DEFAULT_VIDEO_PRESET: VideoPreset = 'veryfast';
 
 export function shouldTranscodeVideo(skipTranscode?: boolean): boolean {
     return skipTranscode !== true;
 }
 
-export function resolveVideoPreset(preset: VideoPreset, attempt: number): VideoPreset {
-    if (preset === 'ultrafast') {
-        return preset;
+/**
+ * Returns the requested preset, or the default when none is set. Retries keep the same preset.
+ * Workflow definitions can pass any string, so an unknown preset fails the activity without retrying.
+ */
+export function resolveVideoPreset(preset?: string): VideoPreset {
+    if (preset === undefined) {
+        return DEFAULT_VIDEO_PRESET;
     }
-
-    const retryPresets: VideoPreset[] = ['medium', 'fast', 'veryfast'];
-    const initialPresetIndex = retryPresets.indexOf(preset);
-    return retryPresets[Math.min(initialPresetIndex + attempt - 1, retryPresets.length - 1)];
+    if (!(VIDEO_PRESETS as readonly string[]).includes(preset)) {
+        throw ApplicationFailure.nonRetryable(
+            `Invalid videoPreset "${preset}"; expected one of: ${VIDEO_PRESETS.join(', ')}`,
+            'InvalidVideoPreset',
+        );
+    }
+    return preset as VideoPreset;
 }
 
 export interface PrepareVideo extends DSLActivitySpec<PrepareVideoParams> {
@@ -116,7 +127,7 @@ async function getVideoMetadata(videoPath: string): Promise<VideoMetadataExtende
         const videoStream = metadata.streams.find((stream) => stream.codec_type === 'video');
 
         if (!videoStream) {
-            throw ApplicationFailure.nonRetryable('No video stream found in file');
+            throw ApplicationFailure.nonRetryable('No video stream found in file', UNUSABLE_VIDEO_CONTENT);
         }
 
         const duration = parseFloat(metadata.format.duration ?? '0') || 0;
@@ -139,10 +150,13 @@ async function getVideoMetadata(videoPath: string): Promise<VideoMetadataExtende
         return { duration, width, height, codec, bitrate, fps, hasAudio };
     } catch (error) {
         rethrowIfActivityStopped(error);
-        log.error(`Failed to get video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        const message = `Failed to get video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`;
         if (error instanceof ApplicationFailure) {
+            // Raised above: the file has no usable video stream, a property of the content.
+            log.warn(message);
             throw error;
         }
+        log.error(message);
         throw new Error(`Failed to probe video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
@@ -456,7 +470,7 @@ export async function prepareVideo(
     const posterSize = params.posterSize ?? DEFAULT_POSTER_SIZE;
     const generateAudio = params.generateAudio ?? DEFAULT_GENERATE_AUDIO;
     const skipTranscode = params.skipTranscode ?? false;
-    const videoPreset = resolveVideoPreset(params.videoPreset ?? 'medium', Context.current().info.attempt);
+    const videoPreset = resolveVideoPreset(params.videoPreset);
 
     log.debug(`Preparing video for ${objectId}`, {
         maxResolution,
@@ -623,6 +637,10 @@ export async function prepareVideo(
         };
     } catch (error) {
         rethrowIfActivityStopped(error);
+        // The metadata probe already logged it at warn; keep its type and non-retryable flag.
+        if (isUnusableVideoContent(error)) {
+            throw error;
+        }
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         log.error(`Error preparing video: ${errorMessage}`, { error });
 

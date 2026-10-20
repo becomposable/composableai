@@ -62,8 +62,6 @@ import {
     AccountApiKeyWithValueSchema,
     ApiKeyArraySchema,
     ApiKeyListQuerySchema,
-    ApiKeyReadQuerySchema,
-    ApiKeyReadResponseSchema,
     ApiKeySchema,
     ApiKeyWithValueSchema,
     AuthTokenResponseSchema,
@@ -97,6 +95,7 @@ import {
     AppInstallationProjectsQuerySchema,
     AppInstallationProviderBindingSchema,
     AppInstallationsQuerySchema,
+    AppInstanceAvailabilitySchema,
     AppListScopeSchema,
     AppOAuthCollectionParamsSchema,
     AppOAuthProviderParamsSchema,
@@ -657,7 +656,12 @@ import {
     OAuthRegistrationSourceSchema,
     OAuthResponseTypeSchema,
     OAuthTokenEndpointAuthMethodSchema,
+    OAuthTokenExchangeRequestSchema,
+    OAuthTokenExchangeResponseSchema,
     OAuthTokenResponseSchema,
+    OidcFederationConnectionArraySchema,
+    OidcFederationConnectionPayloadSchema,
+    OidcFederationConnectionSchema,
     RevokeOAuthGrantQuerySchema,
     UpdateOAuthClientPayloadSchema,
 } from './oauth-server.js';
@@ -871,8 +875,6 @@ const IAM_AND_ACCOUNT_SCHEMAS = {
     CreateAccountApiKeyPayload: CreateAccountApiKeyPayloadSchema,
     UpdateAccountApiKeyPayload: UpdateAccountApiKeyPayloadSchema,
 
-    ApiKeyReadResponse: ApiKeyReadResponseSchema,
-    ApiKeyReadQuery: ApiKeyReadQuerySchema,
     CreateApiKeyPayload: CreateApiKeyPayloadSchema,
     UpdateApiKeyPayload: UpdateApiKeyPayloadSchema,
     AuthTokenResponse: AuthTokenResponseSchema,
@@ -987,6 +989,12 @@ const OAUTH_SCHEMAS = {
     OAuthDeviceAuthorizationRequest: OAuthDeviceAuthorizationRequestSchema,
     OAuthDeviceAuthorizationResponse: OAuthDeviceAuthorizationResponseSchema,
     OAuthTokenResponse: OAuthTokenResponseSchema,
+    OidcFederationConnectionPayload: OidcFederationConnectionPayloadSchema,
+    OidcFederationConnection: OidcFederationConnectionSchema,
+    OidcFederationConnectionArray: OidcFederationConnectionArraySchema,
+    OAuthTokenExchangeRequest: OAuthTokenExchangeRequestSchema,
+    OAuthTokenExchangeResponse: OAuthTokenExchangeResponseSchema,
+
     // Clients registered against Vertesia's own OAuth server. `OAuthClientData` is composed into
     // `OAuthClient` rather than hoisted, so it has no component of its own — as today.
     OAuthClient: OAuthClientSchema,
@@ -2248,6 +2256,7 @@ const APP_LIFECYCLE_SCHEMAS = {
     AgentRunSearchHit: AgentRunSearchHitSchema,
     UpsertAppVersionRequest: UpsertAppVersionRequestSchema,
     AppInstallationPayload: AppInstallationPayloadSchema,
+    AppInstanceAvailability: AppInstanceAvailabilitySchema,
     AppDevelopmentTaskDetails: AppDevelopmentTaskDetailsSchema,
     AppVersionRecordArray: AppVersionRecordArraySchema,
     AppToolCollectionArray: AppToolCollectionArraySchema,
@@ -2558,6 +2567,10 @@ const API_SCHEMAS: Readonly<Record<ApiComponentName, z.ZodType>> = mergeComponen
  * objects, so a body carrying an undeclared property is rejected rather than quietly accepted.
  */
 const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
+    'OidcFederationConnectionPayload',
+    'OidcFederationConnection',
+    'OAuthTokenExchangeRequest',
+    'OAuthTokenExchangeResponse',
     'UpdateInteractionConfigurationPayload',
     'InteractionConfigurationRecord',
     'InteractionConfigurationResult',
@@ -2684,8 +2697,6 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'AccountRef',
     'ApiKey',
     'ApiKeyWithValue',
-    'ApiKeyReadResponse',
-    'ApiKeyReadQuery',
     'CreateApiKeyPayload',
     'UpdateApiKeyPayload',
     'AuthTokenResponse',
@@ -3477,6 +3488,7 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'AgentRunSearchHit',
     'UpsertAppVersionRequest',
     'AppInstallationPayload',
+    'AppInstanceAvailability',
     'AppOAuthClientConfig',
     'AppDevelopmentTaskDetails',
     'AppInstallationsQuery',

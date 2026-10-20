@@ -1,4 +1,26 @@
-import { get_encoding, type TiktokenEncoding } from 'tiktoken';
+import { get_encoding, type Tiktoken, type TiktokenEncoding } from 'tiktoken';
+
+// Building an encoder parses the encoding's whole rank table, which costs far more than encoding a
+// typical document, and each encoder holds WASM memory that is only released by free(). Build each
+// encoding once per process and keep it.
+const encoders = new Map<TiktokenEncoding, Tiktoken>();
+
+const utf8Decoder = new TextDecoder();
+
+function getEncoding(encoding: TiktokenEncoding): Tiktoken {
+    let encoder = encoders.get(encoding);
+    if (!encoder) {
+        encoder = get_encoding(encoding);
+        encoders.set(encoding, encoder);
+    }
+    return encoder;
+}
+
+// First guess of characters per token when slicing before encoding; English prose averages about 4.
+const CHARS_PER_TOKEN_GUESS = 4;
+// Tokens past the cut may differ from those of the full text, because the tokenizer only sees part
+// of the last word. Encoding this many extra tokens keeps the kept ones well clear of the cut.
+const CUT_MARGIN_TOKENS = 64;
 
 export type TruncateSpec =
     | number
@@ -17,21 +39,26 @@ export function truncByMaxTokens(content: string, by: TruncateSpec) {
         maxTokens = by.max_tokens;
         encoding = by.encoding || 'cl100k_base';
     }
-    const enc = get_encoding(encoding);
-    let tokens = enc.encode(content);
-    if (tokens.length > maxTokens) {
-        tokens = tokens.slice(0, maxTokens);
-        return new TextDecoder().decode(enc.decode(tokens));
-    } else {
-        return content;
+    const enc = getEncoding(encoding);
+    // Encode a growing prefix rather than the whole text: callers truncate full documents to a few
+    // thousand tokens, and encoding the rest would be wasted work.
+    let window = Math.max(maxTokens + CUT_MARGIN_TOKENS, 1) * CHARS_PER_TOKEN_GUESS;
+    while (window < content.length) {
+        const tokens = enc.encode(content.slice(0, window));
+        if (tokens.length > maxTokens + CUT_MARGIN_TOKENS) {
+            return utf8Decoder.decode(enc.decode(tokens.slice(0, maxTokens)));
+        }
+        window *= 2;
     }
+    const tokens = enc.encode(content);
+    if (tokens.length > maxTokens) {
+        return utf8Decoder.decode(enc.decode(tokens.slice(0, maxTokens)));
+    }
+    return content;
 }
 
 export function countTokens(text: string, encoding: TiktokenEncoding = 'cl100k_base') {
-    const encoder = get_encoding(encoding);
-    if (!encoder) {
-        throw new Error(`Unknown encoding ${encoding}`);
-    }
+    const encoder = getEncoding(encoding);
 
     const tokens = encoder.encode(text);
 

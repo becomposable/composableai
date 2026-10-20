@@ -7,6 +7,7 @@ import { pdfExtractPages } from '../conversion/mutool.js';
 import { setupActivity } from '../dsl/setup/ActivityContext.js';
 import { DocumentNotFoundError } from '../errors.js';
 import { saveBlobToTempFile } from '../utils/blobs.js';
+import { initializeActivityCommandDeadline } from './media/exec.js';
 
 interface CreatePdfDocumentFromSourceParams {
     target_object_type: string; //type of the object to create
@@ -27,6 +28,8 @@ export interface CreatePdfDocumentFromSource extends DSLActivitySpec<CreatePdfDo
 export async function createPdfDocumentFromSource(
     payload: DSLActivityExecutionPayload<CreatePdfDocumentFromSourceParams>,
 ) {
+    // mutool is bounded by the activity deadline, measured from here rather than from its first run.
+    initializeActivityCommandDeadline();
     const { client, objectId, params } = await setupActivity<CreatePdfDocumentFromSourceParams>(payload);
     const inputObject = await client.objects.retrieve(objectId);
 

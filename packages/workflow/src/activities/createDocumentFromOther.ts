@@ -1,13 +1,12 @@
-import fs from 'node:fs';
-import { finished } from 'node:stream/promises';
+import type { ReadStream } from 'node:fs';
 import { log } from '@temporalio/activity';
 import { NodeStreamSource } from '@vertesia/client/node';
 import type { DSLActivityExecutionPayload, DSLActivitySpec } from '@vertesia/common';
-import { removeTempFiles } from '../conversion/convert-with-tool.js';
 import { pdfExtractPages } from '../conversion/mutool.js';
 import { setupActivity } from '../dsl/setup/ActivityContext.js';
 import { DocumentNotFoundError } from '../errors.js';
-import { saveBlobToTempFile } from '../utils/blobs.js';
+import { removeTempFiles, withBlobTempFile } from '../utils/blobs.js';
+import { closeUploadStream, createUploadStream } from '../utils/upload-stream.js';
 import { initializeActivityCommandDeadline } from './media/exec.js';
 
 interface CreatePdfDocumentFromSourceParams {
@@ -65,20 +64,18 @@ export async function createPdfDocumentFromSource(
         throw new DocumentNotFoundError(`Type ${params.target_object_type} not found`);
     }
 
-    const tmpFile = await saveBlobToTempFile(client, inputObject.content.source, 'pdf');
     let extracted: { file: string; workDir: string } | undefined;
-    let uploadStream: fs.ReadStream | undefined;
+    let uploadStream: ReadStream | undefined;
     try {
         // Only the extraction reads the source, so release it before the upload.
-        extracted = await pdfExtractPages(tmpFile, pages).finally(() => removeTempFiles(tmpFile));
+        extracted = await withBlobTempFile(client, inputObject.content.source, 'pdf', (file) =>
+            pdfExtractPages(file, pages),
+        );
         const newPdf = extracted.file;
         log.info(`PDF created from pages ${pages.join(', ')} `, { newPdf });
         const name = `pages-${pages.join('-')}.pdf`;
 
-        uploadStream = fs.createReadStream(newPdf);
-        // Nothing reads the stream until the upload sends its body, so a failed lazy open would otherwise be an
-        // 'error' nobody listens for. The upload still fails on it when it reads the stream.
-        uploadStream.on('error', () => undefined);
+        uploadStream = createUploadStream(newPdf);
         const sourceToUpload = new NodeStreamSource(uploadStream, name, 'application/pdf');
 
         log.info(`Uploading file ${newPdf} `);
@@ -98,11 +95,7 @@ export async function createPdfDocumentFromSource(
 
         return { newObjectId: newObject.id, uploadedFile: upload.name };
     } finally {
-        // An upload that fails before reading its body never closes the stream; release its descriptor first.
-        if (uploadStream) {
-            uploadStream.destroy();
-            await finished(uploadStream).catch(() => undefined);
-        }
+        await closeUploadStream(uploadStream);
         // pdfExtractPages writes its output into a work directory of its own, which the caller owns.
         await removeTempFiles(extracted?.workDir);
     }

@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { log } from '@temporalio/activity';
-import { convertWithTool, removeTempFiles, runTool } from './convert-with-tool.js';
+import { removeTempFiles } from '../utils/blobs.js';
+import { convertWithTool, runTool } from './convert-with-tool.js';
 
 /**
  * Convert a pdf file to text

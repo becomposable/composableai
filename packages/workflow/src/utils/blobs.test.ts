@@ -113,6 +113,13 @@ describe('saveBlobToTempFile', () => {
                         new ReadableStream<Uint8Array>({
                             start(controller) {
                                 controller.enqueue(new TextEncoder().encode('partial'));
+                            },
+                            // Fail only once the first chunk is on disk, so the cleanup has a partial file to remove.
+                            async pull(controller) {
+                                await vi.waitFor(() => {
+                                    const [file] = fs.readdirSync(tempDir);
+                                    expect(fs.readFileSync(path.join(tempDir, file), 'utf8')).toBe('partial');
+                                });
                                 controller.error(new Error('stream broke'));
                             },
                         }),

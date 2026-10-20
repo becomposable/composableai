@@ -104,10 +104,6 @@ interface Checks {
         W.ApiKeyListQueryFromSchema,
         z.infer<typeof import('./api-schemas/apikey.js').ApiKeyListQuerySchema>
     >;
-    ApiKeyReadQueryFromSchema: Same<
-        W.ApiKeyReadQueryFromSchema,
-        z.infer<typeof import('./api-schemas/apikey.js').ApiKeyReadQuerySchema>
-    >;
     ProjectRefArrayFromSchema: Same<
         W.ProjectRefArrayFromSchema,
         z.infer<typeof import('./api-schemas/apikey.js').ProjectRefArraySchema>
@@ -120,10 +116,6 @@ interface Checks {
     ApiKeyWithValueFromSchema: Same<
         W.ApiKeyWithValueFromSchema,
         z.infer<typeof import('./api-schemas/apikey.js').ApiKeyWithValueSchema>
-    >;
-    ApiKeyReadResponseFromSchema: Same<
-        W.ApiKeyReadResponseFromSchema,
-        z.infer<typeof import('./api-schemas/apikey.js').ApiKeyReadResponseSchema>
     >;
     CreateApiKeyPayloadFromSchema: Same<
         W.CreateApiKeyPayloadFromSchema,
@@ -271,16 +263,11 @@ interface Checks {
         z.infer<typeof import('./api-schemas/apikey.js').UpdateApiKeyPayloadSchema>
     >;
     ApiKeyWithValue: Same<W.ApiKeyWithValue, z.infer<typeof import('./api-schemas/apikey.js').ApiKeyWithValueSchema>>;
-    ApiKeyReadResponse: Same<
-        W.ApiKeyReadResponse,
-        z.infer<typeof import('./api-schemas/apikey.js').ApiKeyReadResponseSchema>
-    >;
     AuthTokenResponse: Same<
         W.AuthTokenResponse,
         z.infer<typeof import('./api-schemas/apikey.js').AuthTokenResponseSchema>
     >;
     ApiKeyListQuery: Same<W.ApiKeyListQuery, z.infer<typeof import('./api-schemas/apikey.js').ApiKeyListQuerySchema>>;
-    ApiKeyReadQuery: Same<W.ApiKeyReadQuery, z.infer<typeof import('./api-schemas/apikey.js').ApiKeyReadQuerySchema>>;
     AccountApiKey: Same<W.AccountApiKey, z.infer<typeof import('./api-schemas/apikey.js').AccountApiKeySchema>>;
     AccountApiKeyWithValue: Same<
         W.AccountApiKeyWithValue,
@@ -4865,14 +4852,6 @@ interface Checks {
     'component:UpdateAccountApiKeyPayload': Same<
         W.ApiComponentTypes['UpdateAccountApiKeyPayload'],
         z.infer<typeof import('./api-schemas/apikey.js').UpdateAccountApiKeyPayloadSchema>
-    >;
-    'component:ApiKeyReadResponse': Same<
-        W.ApiComponentTypes['ApiKeyReadResponse'],
-        z.infer<typeof import('./api-schemas/apikey.js').ApiKeyReadResponseSchema>
-    >;
-    'component:ApiKeyReadQuery': Same<
-        W.ApiComponentTypes['ApiKeyReadQuery'],
-        z.infer<typeof import('./api-schemas/apikey.js').ApiKeyReadQuerySchema>
     >;
     'component:CreateApiKeyPayload': Same<
         W.ApiComponentTypes['CreateApiKeyPayload'],
@@ -9698,12 +9677,10 @@ const checks: Checks = {
     UpdateAccountPayloadFromSchema: true,
     StripeBillingStatusResponseFromSchema: true,
     ApiKeyListQueryFromSchema: true,
-    ApiKeyReadQueryFromSchema: true,
     ProjectRefArrayFromSchema: true,
     ApiKeyFromSchema: true,
     ApiKeyArrayFromSchema: true,
     ApiKeyWithValueFromSchema: true,
-    ApiKeyReadResponseFromSchema: true,
     CreateApiKeyPayloadFromSchema: true,
     UpdateApiKeyPayloadFromSchema: true,
     AuthTokenResponseFromSchema: true,
@@ -9745,10 +9722,8 @@ const checks: Checks = {
     CreateApiKeyPayload: true,
     UpdateApiKeyPayload: true,
     ApiKeyWithValue: true,
-    ApiKeyReadResponse: true,
     AuthTokenResponse: true,
     ApiKeyListQuery: true,
-    ApiKeyReadQuery: true,
     AccountApiKey: true,
     AccountApiKeyWithValue: true,
     AccountApiKeyArray: true,
@@ -11016,8 +10991,6 @@ const checks: Checks = {
     'component:AccountApiKeyArray': true,
     'component:CreateAccountApiKeyPayload': true,
     'component:UpdateAccountApiKeyPayload': true,
-    'component:ApiKeyReadResponse': true,
-    'component:ApiKeyReadQuery': true,
     'component:CreateApiKeyPayload': true,
     'component:UpdateApiKeyPayload': true,
     'component:AuthTokenResponse': true,
@@ -12222,6 +12195,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2546);
+        expect(Object.keys(checks)).toHaveLength(2540);
     });
 });

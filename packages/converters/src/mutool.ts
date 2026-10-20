@@ -39,6 +39,7 @@ export async function pdfToTextBuffer(buffer: Buffer): Promise<Buffer> {
         await pdfFileToText(inputFile, targetFileName);
         return await readFile(targetFileName);
     } finally {
-        await Promise.all([inputFile, targetFileName].map((file) => rm(file, { force: true })));
+        // Ignore cleanup failures so they cannot replace the conversion's result or error.
+        await Promise.all([inputFile, targetFileName].map((file) => rm(file, { force: true }).catch(() => undefined)));
     }
 }

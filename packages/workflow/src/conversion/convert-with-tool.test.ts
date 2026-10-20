@@ -1,3 +1,4 @@
+import { spawn } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -27,7 +28,7 @@ vi.mock('node:child_process', () => ({
 }));
 
 import { markdownWithMarkitdown } from './markitdown.js';
-import { mutoolPdfToText } from './mutool.js';
+import { mutoolPdfToText, pdfExtractPages } from './mutool.js';
 
 function openDescriptorCount(): number {
     // /dev/fd lists this process's open descriptors on both Linux and macOS.
@@ -36,7 +37,7 @@ function openDescriptorCount(): number {
 
 describe.each([
     { name: 'mutoolPdfToText', convert: (buffer: Buffer) => mutoolPdfToText(buffer) },
-    { name: 'markdownWithMarkitdown', convert: (buffer: Buffer) => markdownWithMarkitdown(buffer, '.docx') },
+    { name: 'markdownWithMarkitdown', convert: (buffer: Buffer) => markdownWithMarkitdown(buffer, 'docx') },
 ])('$name temporary files', ({ convert }) => {
     let tempDir: string;
 
@@ -69,6 +70,36 @@ describe.each([
         await expect(convert(Buffer.from('input'))).rejects.toThrow('exited with code 1');
 
         expect(openDescriptorCount()).toBe(before);
+        expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+});
+
+describe('conversion temporary files', () => {
+    let tempDir: string;
+
+    beforeEach(() => {
+        toolExitCode.value = 0;
+        tempDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'conversion-test-')));
+        vi.stubEnv('TMPDIR', tempDir);
+    });
+
+    afterEach(() => {
+        vi.unstubAllEnvs();
+        fs.rmSync(tempDir, { recursive: true, force: true });
+    });
+
+    it('should give markitdown an input file with a dotted extension', async () => {
+        await markdownWithMarkitdown(Buffer.from('input'), 'docx');
+
+        const [, args] = vi.mocked(spawn).mock.calls.at(-1) ?? [];
+        expect(args?.[0]).toMatch(/[^.]\.docx$/);
+    });
+
+    it('should remove the pdfExtractPages work directory when mutool fails', async () => {
+        toolExitCode.value = 1;
+
+        await expect(pdfExtractPages(Buffer.from('%PDF'), [1])).rejects.toThrow('exited with code 1');
+
         expect(fs.readdirSync(tempDir)).toEqual([]);
     });
 });

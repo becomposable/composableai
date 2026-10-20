@@ -2,7 +2,7 @@ import { execFile as execFileCallback } from 'node:child_process';
 import fs from 'node:fs';
 import { promisify } from 'node:util';
 import { log } from '@temporalio/activity';
-import { file } from 'tmp-promise';
+import { tmpName } from 'tmp-promise';
 import { ImageConversionError } from '../errors.js';
 
 const execFile = promisify(execFileCallback);
@@ -47,8 +47,9 @@ export async function imageResizer(
 
     //check that inputPath exists
     // Create a temporary file
-    // The caller owns the returned path; discard the descriptor so removing the path frees its space.
-    const { path: outputPath, cleanup } = await file({ postfix: `.${format}`, discardDescriptor: true });
+    // Only reserve a name: the caller owns the returned path and removes it, so nothing should keep a descriptor or a
+    // tmp cleanup registration for it.
+    const outputPath = await tmpName({ postfix: `.${format}` });
     try {
         // Check if input file exists
         if (!fs.existsSync(inputPath)) {
@@ -172,11 +173,9 @@ export async function imageResizer(
 
         return outputPath;
     } catch (error: unknown) {
-        try {
-            await cleanup();
-        } catch (cleanupError: unknown) {
+        await fs.promises.rm(outputPath, { force: true }).catch((cleanupError: unknown) => {
             log.warn('Failed to clean temporary image output after conversion failure', { cleanupError });
-        }
+        });
 
         const errorMessage = error instanceof Error ? error.message : String(error);
         log.error(`Image conversion failed: ${errorMessage}`);

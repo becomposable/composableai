@@ -1,5 +1,3 @@
-import { spawn } from 'node:child_process';
-import { EventEmitter } from 'node:events';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -11,22 +9,18 @@ vi.mock('@temporalio/activity', () => ({
 
 const toolExitCode = vi.hoisted(() => ({ value: 0 }));
 
-// Stand-in for mutool and markitdown: write the `-o` target, then exit with the configured code.
-vi.mock('node:child_process', () => ({
-    spawn: vi.fn((_tool: string, args: string[]) => {
-        const child = new EventEmitter() as EventEmitter & { stderr: EventEmitter };
-        child.stderr = new EventEmitter();
-        setImmediate(() => {
-            if (toolExitCode.value === 0) {
-                fs.writeFileSync(args[args.indexOf('-o') + 1], 'converted text');
-            }
-            child.emit('exit', toolExitCode.value);
-            child.emit('close', toolExitCode.value);
-        });
-        return child;
+// Stand-in for mutool and markitdown: write the `-o` target, or fail like execFile does for a non-zero exit.
+vi.mock('../activities/media/exec.js', () => ({
+    execActivityFile: vi.fn(async (tool: string, args: string[]) => {
+        if (toolExitCode.value !== 0) {
+            throw new Error(`Command failed: ${tool} ${args.join(' ')}\nexit code ${toolExitCode.value}`);
+        }
+        fs.writeFileSync(args[args.indexOf('-o') + 1], 'converted text');
+        return { stdout: '', stderr: '' };
     }),
 }));
 
+import { execActivityFile } from '../activities/media/exec.js';
 import { markdownWithMarkitdown } from './markitdown.js';
 import { mutoolPdfToText, pdfExtractPages } from './mutool.js';
 
@@ -67,7 +61,7 @@ describe.each([
         toolExitCode.value = 1;
         const before = openDescriptorCount();
 
-        await expect(convert(Buffer.from('input'))).rejects.toThrow('exited with code 1');
+        await expect(convert(Buffer.from('input'))).rejects.toThrow('Command failed');
 
         expect(openDescriptorCount()).toBe(before);
         expect(fs.readdirSync(tempDir)).toEqual([]);
@@ -91,14 +85,14 @@ describe('conversion temporary files', () => {
     it('should give markitdown an input file with a dotted extension', async () => {
         await markdownWithMarkitdown(Buffer.from('input'), 'docx');
 
-        const [, args] = vi.mocked(spawn).mock.calls.at(-1) ?? [];
+        const [, args] = vi.mocked(execActivityFile).mock.calls.at(-1) ?? [];
         expect(args?.[0]).toMatch(/[^.]\.docx$/);
     });
 
     it('should remove the pdfExtractPages work directory when mutool fails', async () => {
         toolExitCode.value = 1;
 
-        await expect(pdfExtractPages(Buffer.from('%PDF'), [1])).rejects.toThrow('exited with code 1');
+        await expect(pdfExtractPages(Buffer.from('%PDF'), [1])).rejects.toThrow('Command failed');
 
         expect(fs.readdirSync(tempDir)).toEqual([]);
     });

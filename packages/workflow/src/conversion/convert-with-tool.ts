@@ -1,7 +1,10 @@
-import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import { log } from '@temporalio/activity';
 import tmp from 'tmp';
+import { execActivityFile } from '../activities/media/exec.js';
+
+/** Bound on the tool output kept in memory; a tool that writes more fails instead of growing the buffer. */
+const TOOL_MAX_BUFFER = 10 * 1024 * 1024;
 
 /**
  * Write `input` to a temporary file, run `tool` with the arguments built by `args(inputFile, outputFile)`, and
@@ -20,8 +23,8 @@ export async function convertWithTool(
     const inputFile = tmp.tmpNameSync({ postfix: toPostfix(inputExt) });
     const outputFile = tmp.tmpNameSync({ postfix: toPostfix(outputExt) });
 
+    await writeNewFile(inputFile, input);
     try {
-        await fs.promises.writeFile(inputFile, input, { flag: 'wx', mode: 0o600 });
         log.info(`Converting with ${tool}`, { inputFile, outputFile });
         await runTool(tool, args(inputFile, outputFile));
         return await fs.promises.readFile(outputFile, 'utf8');
@@ -31,8 +34,31 @@ export async function convertWithTool(
 }
 
 /**
- * Remove temporary files, ignoring ones that are already gone. A failure is logged, never thrown,
- * so cleanup cannot mask the result or error of the conversion that created the files.
+ * Run a conversion tool inside the current activity. Its output is drained (so a chatty tool cannot block on a full
+ * pipe), its stderr is part of the error when it fails or is killed, and it is stopped when the activity is cancelled
+ * or about to time out.
+ */
+export async function runTool(tool: string, args: string[]): Promise<void> {
+    await execActivityFile(tool, args, { maxBuffer: TOOL_MAX_BUFFER });
+}
+
+/**
+ * Create `file` with `data`, failing if it already exists. Only a file this call created is removed on failure.
+ */
+export async function writeNewFile(file: string, data: Buffer): Promise<void> {
+    try {
+        await fs.promises.writeFile(file, data, { flag: 'wx', mode: 0o600 });
+    } catch (err: unknown) {
+        if ((err as NodeJS.ErrnoException).code !== 'EEXIST') {
+            await removeTempFiles(file);
+        }
+        throw err;
+    }
+}
+
+/**
+ * Remove temporary files or directories, ignoring ones that are already gone. A failure is logged, never thrown,
+ * so cleanup cannot mask the result or error of the conversion that created them.
  */
 export async function removeTempFiles(...files: string[]): Promise<void> {
     await Promise.all(
@@ -42,20 +68,6 @@ export async function removeTempFiles(...files: string[]): Promise<void> {
             }),
         ),
     );
-}
-
-function runTool(tool: string, args: string[]): Promise<void> {
-    return new Promise((resolve, reject) => {
-        const command = spawn(tool, args);
-        command.on('error', reject);
-        command.on('close', (code, signal) => {
-            if (code === 0) {
-                resolve();
-            } else {
-                reject(new Error(`${tool} exited with code ${code ?? signal}`));
-            }
-        });
-    });
 }
 
 function toPostfix(ext: string | undefined): string {

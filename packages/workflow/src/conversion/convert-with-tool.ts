@@ -60,13 +60,16 @@ export async function writeNewFile(file: string, data: Buffer): Promise<void> {
  * Remove temporary files or directories, ignoring ones that are already gone. A failure is logged, never thrown,
  * so cleanup cannot mask the result or error of the conversion that created them.
  */
-export async function removeTempFiles(...files: string[]): Promise<void> {
+export async function removeTempFiles(...files: Array<string | undefined>): Promise<void> {
     await Promise.all(
-        files.map((file) =>
-            fs.promises.rm(file, { force: true, recursive: true }).catch((err: unknown) => {
+        files.map(async (file) => {
+            if (!file) {
+                return;
+            }
+            await fs.promises.rm(file, { force: true, recursive: true }).catch((err: unknown) => {
                 log.warn('Failed to remove temporary file', { file, err });
-            }),
-        ),
+            });
+        }),
     );
 }
 

@@ -57,14 +57,17 @@ async function saveBlobToFile(client: VertesiaClient, blobUri: string, toFile: s
 export async function saveBlobToTempFile(client: VertesiaClient, blobUri: string, fileExt?: string): Promise<string> {
     const fileName = tmp.tmpNameSync({
         prefix: 'vertesia-activity-',
-        postfix: fileExt ? `.${fileExt}` : '',
+        postfix: fileExt ? `.${fileExt.replace(/^\./, '')}` : '',
     });
     try {
         await saveBlobToFile(client, blobUri, fileName);
         return fileName;
     } catch (err: unknown) {
-        // Preserve the download failure, which is the actionable error for the caller.
-        await rm(fileName, { force: true }).catch(() => undefined);
+        // Preserve the download failure, which is the actionable error for the caller. EEXIST means the exclusive
+        // create found someone else's file at this name, which is not ours to remove.
+        if ((err as NodeJS.ErrnoException).code !== 'EEXIST') {
+            await rm(fileName, { force: true }).catch(() => undefined);
+        }
         throw err;
     }
 }

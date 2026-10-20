@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import type { VertesiaClient } from '@vertesia/client';
+import tmp from 'tmp';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { saveBlobToTempFile } from './blobs.js';
 
@@ -35,6 +36,25 @@ describe('saveBlobToTempFile', () => {
         expect(path.dirname(file)).toBe(tempDir);
         expect(path.basename(file)).toMatch(/^vertesia-activity-.*\.pdf$/);
         expect(fs.readFileSync(file, 'utf8')).toBe('blob contents');
+    });
+
+    it('should accept an extension given with its leading dot', async () => {
+        const file = await saveBlobToTempFile(clientReturning('blob contents'), 'gs://bucket/source', '.pdf');
+
+        expect(path.basename(file)).toMatch(/[^.]\.pdf$/);
+    });
+
+    it('should not remove an existing file it failed to create', async () => {
+        const existing = path.join(tempDir, 'vertesia-activity-existing.pdf');
+        fs.writeFileSync(existing, 'someone else');
+        const nameSpy = vi.spyOn(tmp, 'tmpNameSync').mockReturnValueOnce(existing);
+
+        await expect(saveBlobToTempFile(clientReturning('blob contents'), 'gs://bucket/source', 'pdf')).rejects.toThrow(
+            'EEXIST',
+        );
+
+        expect(fs.readFileSync(existing, 'utf8')).toBe('someone else');
+        nameSpy.mockRestore();
     });
 
     it('should leave no descriptor open after it returns', async () => {

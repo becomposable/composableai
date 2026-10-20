@@ -96,6 +96,15 @@ describe('ImageMagick image resizing', () => {
         fs.rmSync(resizedImagePath);
     });
 
+    test('should create the output file readable by its owner only', async () => {
+        const inputImagePath = path.join(__dirname, '../../fixtures', 'cat-picture.jpg');
+
+        const output = await imageResizer(inputImagePath, 64, 'png');
+
+        expect(fs.statSync(output).mode & 0o777).toBe(0o600);
+        fs.rmSync(output);
+    });
+
     test('should leave no descriptor open on the returned output file', async () => {
         const inputImagePath = path.join(__dirname, '../../fixtures', 'cat-picture.jpg');
         // /dev/fd lists this process's open descriptors on both Linux and macOS.

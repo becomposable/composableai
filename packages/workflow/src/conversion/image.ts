@@ -47,9 +47,11 @@ export async function imageResizer(
 
     //check that inputPath exists
     // Create a temporary file
-    // Only reserve a name: the caller owns the returned path and removes it, so nothing should keep a descriptor or a
-    // tmp cleanup registration for it.
+    // The caller owns the returned path and removes it, so reserve a name rather than keep a descriptor or a tmp cleanup
+    // registration for it. Create the file exclusively and private (0600) before ImageMagick writes into it; this stays
+    // outside the cleanup below so a failed create never removes another process's file.
     const outputPath = await tmpName({ postfix: `.${format}` });
+    await (await fs.promises.open(outputPath, 'wx', 0o600)).close();
     try {
         // Check if input file exists
         if (!fs.existsSync(inputPath)) {

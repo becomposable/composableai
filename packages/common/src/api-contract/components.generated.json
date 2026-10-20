@@ -21324,6 +21324,10 @@
       "app_id": {
         "type": "string"
       },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Optional stable deployment alias to follow for this installation instead of the app's promoted version."
+      },
       "instance_key": {
         "type": "string",
         "pattern": "^[a-z][a-z0-9_-]{0,31}$"
@@ -25524,6 +25528,10 @@
           "type": "string"
         }
       },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Stable deployment alias selected for this installation. The alias is resolved to its current immutable app version at request time."
+      },
       "manifest": {
         "type": "string"
       },
@@ -25691,6 +25699,10 @@
         "items": {
           "type": "string"
         }
+      },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Stable deployment alias selected for this installation. The alias is resolved to its current immutable app version at request time."
       },
       "mcp_configuration": {
         "type": "object",
@@ -25860,6 +25872,10 @@
         "items": {
           "type": "string"
         }
+      },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Stable deployment alias selected for this installation. The alias is resolved to its current immutable app version at request time."
       },
       "mcp_configuration": {
         "type": "object",

@@ -1000,6 +1000,10 @@ export const UpsertAppVersionRequestSchema = z
 export const AppInstallationPayloadSchema = z
     .strictObject({
         app_id: z.string(),
+        deployment_alias: AppDeploymentAliasSchema.meta({
+            description:
+                "Optional stable deployment alias to follow for this installation instead of the app's promoted version.",
+        }).optional(),
         instance_key: z
             .string()
             .regex(/^[a-z][a-z0-9_-]{0,31}$/)

@@ -424,12 +424,15 @@ export default class AppsApi extends ApiTopic {
         apiKeyParams?: AppApiKeyCollectionParams,
         mcpParameters?: AppInstallationPayload['mcp_parameters'],
         mcpSharedParameters?: AppInstallationPayload['mcp_shared_parameters'],
-        instance?: Pick<AppInstallationPayload, 'instance_key' | 'display_name' | 'namespace_overrides'>,
+        installation?: Pick<
+            AppInstallationPayload,
+            'deployment_alias' | 'instance_key' | 'display_name' | 'namespace_overrides'
+        >,
     ): Promise<AppInstallation> {
         return this.post(`/install`, {
             payload: {
                 app_id: appId,
-                ...instance,
+                ...installation,
                 settings,
                 oauth_params: oauthParams,
                 oauth_provider_params: oauthProviderParams,

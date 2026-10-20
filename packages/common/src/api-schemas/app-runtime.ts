@@ -292,6 +292,10 @@ export const AppInstallationSchema = z
         namespace_overrides: z.record(z.string(), z.string()).optional(),
         reserved_namespaces: z.array(z.string()).min(1).optional(),
         namespace_conflicts: z.array(z.string()).optional(),
+        deployment_alias: AppDeploymentAliasSchema.meta({
+            description:
+                'Stable deployment alias selected for this installation. The alias is resolved to its current immutable app version at request time.',
+        }).optional(),
         manifest: z.string(),
         mcp_configuration: mcpConfigurationSchema.optional(),
         oauth_approval: appOAuthApprovalSchema.optional(),
@@ -699,6 +703,10 @@ export const AppInstallationWithManifestSchema = z
         namespace_overrides: z.record(z.string(), z.string()).optional(),
         reserved_namespaces: z.array(z.string()).min(1).optional(),
         namespace_conflicts: z.array(z.string()).optional(),
+        deployment_alias: AppDeploymentAliasSchema.meta({
+            description:
+                'Stable deployment alias selected for this installation. The alias is resolved to its current immutable app version at request time.',
+        }).optional(),
         mcp_configuration: mcpConfigurationSchema.optional(),
         oauth_approval: appOAuthApprovalSchema.optional(),
         oauth_client_id: z.string().optional(),
@@ -753,6 +761,10 @@ export const AppInstallationListEntrySchema = z
         namespace_overrides: z.record(z.string(), z.string()).optional(),
         reserved_namespaces: z.array(z.string()).min(1).optional(),
         namespace_conflicts: z.array(z.string()).optional(),
+        deployment_alias: AppDeploymentAliasSchema.meta({
+            description:
+                'Stable deployment alias selected for this installation. The alias is resolved to its current immutable app version at request time.',
+        }).optional(),
         mcp_configuration: mcpConfigurationSchema.optional(),
         oauth_approval: appOAuthApprovalSchema.optional(),
         oauth_client_id: z.string().optional(),

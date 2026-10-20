@@ -1329,6 +1329,7 @@ export type AppInstallation = {
     namespace_overrides?: Record<string, string> | undefined;
     reserved_namespaces?: string[] | undefined;
     namespace_conflicts?: string[] | undefined;
+    deployment_alias?: AppDeploymentAlias | undefined;
     manifest: string;
     mcp_configuration?:
         | {
@@ -1368,6 +1369,7 @@ export type AppInstallationWithManifest = {
     namespace_overrides?: Record<string, string> | undefined;
     reserved_namespaces?: string[] | undefined;
     namespace_conflicts?: string[] | undefined;
+    deployment_alias?: AppDeploymentAlias | undefined;
     mcp_configuration?:
         | {
               revision: string;
@@ -1408,6 +1410,7 @@ export type AppInstallationListEntry = {
     namespace_overrides?: Record<string, string> | undefined;
     reserved_namespaces?: string[] | undefined;
     namespace_conflicts?: string[] | undefined;
+    deployment_alias?: AppDeploymentAlias | undefined;
     mcp_configuration?:
         | {
               revision: string;
@@ -1458,6 +1461,7 @@ export type AppApiKeyCollectionParams = {
 export type AppOAuthProviderParams = AppOAuthCollectionParams;
 export type AppInstallationPayload = {
     app_id: string;
+    deployment_alias?: AppDeploymentAlias | undefined;
     instance_key?: string | undefined;
     display_name?: string | undefined;
     namespace_overrides?: Record<string, string> | undefined;

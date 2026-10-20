@@ -409,10 +409,14 @@ async function uploadFile(
     const fileStream = fs.createReadStream(filePath);
     const source = new NodeStreamSource(fileStream, fileName, mimeType, storagePath);
 
-    const result = await client.files.uploadFile(source);
-    log.debug(`Uploaded file to ${storagePath}`, { result });
-
-    return result;
+    try {
+        const result = await client.files.uploadFile(source);
+        log.debug(`Uploaded file to ${storagePath}`, { result });
+        return result;
+    } finally {
+        // An upload that fails before reading the body leaves the file open.
+        fileStream.destroy();
+    }
 }
 
 /**

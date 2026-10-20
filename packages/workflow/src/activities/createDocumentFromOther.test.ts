@@ -77,5 +77,8 @@ describe('createPdfDocumentFromSource', () => {
             'upload failed',
         );
         expect(fs.existsSync(workDir)).toBe(false);
+        const source = vi.mocked(pdfExtractPages).mock.calls[0]?.[0];
+        expect(source).toBeDefined();
+        expect(fs.existsSync(path.dirname(source as string))).toBe(false);
     });
 });

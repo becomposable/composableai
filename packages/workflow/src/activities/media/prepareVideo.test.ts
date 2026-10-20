@@ -24,10 +24,6 @@ vi.mock('../../utils/blobs.js', async (importOriginal) => ({
     ...(await importOriginal<typeof import('../../utils/blobs.js')>()),
     saveBlobToTempFile: vi.fn(),
 }));
-vi.mock('./exec.js', async (importOriginal) => ({
-    ...(await importOriginal<typeof import('./exec.js')>()),
-    execActivityFile: vi.fn(),
-}));
 
 describe('screenshotTimestamp', () => {
     it.each([0.1, 0.5, 1])('extracts the first frame of a %s-second clip', (duration) => {

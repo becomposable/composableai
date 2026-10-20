@@ -58,7 +58,7 @@ export async function saveBlobToTempFile(client: VertesiaClient, blobUri: string
         await saveBlobToNewFile(client, blobUri, fileName);
         return fileName;
     } catch (err: unknown) {
-        if ((err as NodeJS.ErrnoException).code !== 'EEXIST') {
+        if ((err as NodeJS.ErrnoException | undefined)?.code !== 'EEXIST') {
             // Best effort, and silent: the download failure is the actionable error for the caller.
             await rm(fileName, { force: true }).catch(() => undefined);
         }

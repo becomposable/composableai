@@ -489,9 +489,11 @@ export async function prepareVideo(
 
     // Download video to temp file
     const videoFile = await saveBlobToTempFile(client, inputObject.content.source);
-    const tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), 'prepare-video-'));
+    // Created inside the try, so a failure here still removes the download in the finally.
+    let tempOutputDir: string | undefined;
 
     try {
+        tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), 'prepare-video-'));
         // Step 1: Extract video metadata
         log.info('Extracting video metadata');
         const metadata = await getVideoMetadata(videoFile);

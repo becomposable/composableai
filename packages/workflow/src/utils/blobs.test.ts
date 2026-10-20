@@ -1,10 +1,17 @@
 import fs from 'node:fs';
+import { rm } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import type { VertesiaClient } from '@vertesia/client';
 import tmp from 'tmp';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { saveBlobToTempFile } from './blobs.js';
+
+// Pass-through, so a test can make the cleanup of a failed download fail.
+vi.mock('node:fs/promises', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('node:fs/promises')>();
+    return { ...actual, rm: vi.fn(actual.rm) };
+});
 
 function clientReturning(content: string): VertesiaClient {
     return {
@@ -26,6 +33,7 @@ describe('saveBlobToTempFile', () => {
     });
 
     afterEach(() => {
+        vi.restoreAllMocks();
         vi.unstubAllEnvs();
         fs.rmSync(tempDir, { recursive: true, force: true });
     });
@@ -47,14 +55,13 @@ describe('saveBlobToTempFile', () => {
     it('should not remove an existing file it failed to create', async () => {
         const existing = path.join(tempDir, 'vertesia-activity-existing.pdf');
         fs.writeFileSync(existing, 'someone else');
-        const nameSpy = vi.spyOn(tmp, 'tmpNameSync').mockReturnValueOnce(existing);
+        vi.spyOn(tmp, 'tmpNameSync').mockReturnValueOnce(existing);
+        const client = clientReturning('blob contents');
 
-        await expect(saveBlobToTempFile(clientReturning('blob contents'), 'gs://bucket/source', 'pdf')).rejects.toThrow(
-            'EEXIST',
-        );
+        await expect(saveBlobToTempFile(client, 'gs://bucket/source', 'pdf')).rejects.toThrow('EEXIST');
 
         expect(fs.readFileSync(existing, 'utf8')).toBe('someone else');
-        nameSpy.mockRestore();
+        expect(client.files.downloadFile).not.toHaveBeenCalled();
     });
 
     it('should leave no descriptor open after it returns', async () => {
@@ -85,6 +92,17 @@ describe('saveBlobToTempFile', () => {
 
         expect(openDescriptorCount()).toBe(before);
         expect(fs.readdirSync(tempDir)).toEqual([]);
+    });
+
+    it('should preserve the download failure when removing the file also fails', async () => {
+        const client = {
+            files: { downloadFile: vi.fn().mockRejectedValue(new Error('download failed')) },
+        } as unknown as VertesiaClient;
+        vi.mocked(rm).mockRejectedValueOnce(new Error('cleanup failed'));
+
+        await expect(saveBlobToTempFile(client, 'gs://bucket/source')).rejects.toThrow(
+            'Failed to download blob gs://bucket/source: download failed',
+        );
     });
 
     it('should remove the partial file when the blob stream fails mid-download', async () => {

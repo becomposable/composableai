@@ -4,6 +4,7 @@ import { finished } from 'node:stream/promises';
 import { log } from '@temporalio/activity';
 import { NodeStreamSource } from '@vertesia/client/node';
 import type { DSLActivityExecutionPayload, DSLActivitySpec } from '@vertesia/common';
+import { removeTempFiles } from '../conversion/convert-with-tool.js';
 import { pdfExtractPages } from '../conversion/mutool.js';
 import { setupActivity } from '../dsl/setup/ActivityContext.js';
 import { DocumentNotFoundError } from '../errors.js';
@@ -69,7 +70,8 @@ export async function createPdfDocumentFromSource(
     let newPdf: string | undefined;
     let uploadStream: fs.ReadStream | undefined;
     try {
-        newPdf = await pdfExtractPages(tmpFile, pages);
+        // Only the extraction reads the source, so release it before the upload.
+        newPdf = await pdfExtractPages(tmpFile, pages).finally(() => removeTempFiles(tmpFile));
         log.info(`PDF created from pages ${pages.join(', ')} `, { newPdf });
         const name = `pages-${pages.join('-')}.pdf`;
 
@@ -101,13 +103,7 @@ export async function createPdfDocumentFromSource(
             uploadStream.destroy();
             await finished(uploadStream).catch(() => undefined);
         }
-        // pdfExtractPages writes its output into a work directory of its own.
-        for (const temporaryPath of [tmpFile, newPdf && path.dirname(newPdf)]) {
-            if (temporaryPath) {
-                await fs.promises.rm(temporaryPath, { recursive: true, force: true }).catch((err: unknown) => {
-                    log.warn('Failed to clean up temporary PDF path', { err, temporaryPath });
-                });
-            }
-        }
+        // pdfExtractPages writes its output into a work directory of its own, which the caller owns.
+        await removeTempFiles(newPdf && path.dirname(newPdf));
     }
 }

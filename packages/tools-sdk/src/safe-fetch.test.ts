@@ -29,7 +29,7 @@ beforeAll(async () => {
     server = createServer((req, res) => {
         hits.push(req.url ?? '');
         const route = routes.get(req.url ?? '');
-        if (route) {
+        if (typeof route === 'function') {
             route(req, res);
         } else {
             res.writeHead(404).end();

@@ -150,6 +150,54 @@ describe('executeInteractionByName', () => {
     });
 });
 
+describe('executeInteractionByName request options', () => {
+    function mockClient() {
+        const post = vi.fn().mockResolvedValue({ id: 'run-1', status: 'completed' });
+        return { post, client: { post } as unknown as VertesiaClient };
+    }
+
+    it('forwards the typed execute query', async () => {
+        const { post, client } = mockClient();
+
+        await executeInteractionByName(client, 'sys:test', {}, undefined, { query: { include_prompt: false } });
+
+        expect(post).toHaveBeenCalledWith(
+            '/api/v1/execute',
+            expect.objectContaining({ query: { include_prompt: false } }),
+        );
+    });
+
+    it('keeps the long execution timeout when none is given', async () => {
+        const { post, client } = mockClient();
+
+        await executeInteractionByName(client, 'sys:test', {});
+
+        expect(post.mock.calls[0][1].timeoutMs).toEqual(expect.any(Number));
+        expect(post.mock.calls[0][1].timeoutMs).toBeGreaterThan(0);
+    });
+
+    it.each([null, false, 0, 5_000] as const)('honours an explicit timeoutMs of %s', async (timeoutMs) => {
+        const { post, client } = mockClient();
+
+        await executeInteractionByName(client, 'sys:test', {}, undefined, { timeoutMs });
+
+        expect(post.mock.calls[0][1].timeoutMs).toBe(timeoutMs);
+    });
+
+    it('rejects options the method cannot honour at compile time', () => {
+        const { client } = mockClient();
+        const calls = [
+            // @ts-expect-error the method parses the JSON execution result itself
+            () => executeInteractionByName(client, 'sys:test', {}, undefined, { reader: 'sse' }),
+            // @ts-expect-error the method serializes the payload it builds
+            () => executeInteractionByName(client, 'sys:test', {}, undefined, { jsonPayload: false }),
+            // @ts-expect-error the query is the published execute query, so a misspelt parameter fails
+            () => executeInteractionByName(client, 'sys:test', {}, undefined, { query: { include_promt: false } }),
+        ];
+        expect(calls).toHaveLength(3);
+    });
+});
+
 describe('executeInteractionAsync retries', () => {
     /** A client whose own policy retries POST; the server fails the first attempt with a retryable 503. */
     function createRetryingClient(bodies: string[]) {

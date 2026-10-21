@@ -157,10 +157,24 @@ and base-version validation still applies. A successful real publish uploads
 `sdk-publish-source/sdk-publish-source.json` containing the input source SHA,
 published version, and pushed version-commit SHA for downstream consumers.
 
-Retries verify each existing package version's `gitHead`, reuse the same release
-tag/version commit, and refuse to overwrite a branch that moved to a different
-tree. `dry_run=true` performs no registry uploads or branch/tag pushes.
+`dry_run=true` performs no registry uploads or branch/tag pushes.
 
 When `llumiverse_sha` is supplied, both CLI and package builds use that immutable
 Llumiverse commit. The publisher includes its submodule pointer and the updated
 lockfile in the same commit as the package versions; no separate sync PR is needed.
+
+Release retries use immutable `vX.Y.Z` or `vX.Y.Z-dev.YYYYMMDD.HHMMSSZ`
+source tags. Before any Git or registry write, the publisher checks source membership
+on the selected branch and ownership of every existing package version. Package
+metadata records `releaseIdentity` (source commit, dependency pin, and lockfile hash).
+After publishing, the tagged version commit is merged into the current branch tip;
+ordinary commits that land during the build are preserved. A rejected push retries
+against the new tip. Genuine version conflicts stop with the durable tag available
+for recovery, without changing the artifact's source identity.
+
+A preparation job resolves the selected Llumiverse dependency once, refreshes the
+lockfile, builds `@llumiverse/common`, and regenerates all committed common schemas
+and wire types. CLI and package builds download the same prepared files and validate
+their identity. Tagged retries restore that exact dependency and lockfile. Published
+smoke tests check out the immutable release tree; source propagation must succeed
+before the workflow emits its published-source artifact.

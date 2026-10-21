@@ -57,7 +57,7 @@ jobs:
   prepare-release:
     name: Prepare release version
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -65,6 +65,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          submodules: recursive
           ref: ${{ inputs.source_sha || github.sha }}
           fetch-depth: 0
       - name: Calculate package version
@@ -100,6 +101,26 @@ jobs:
           fi
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Prepare shared dependency, lockfile and schemas
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
+          LLUMIVERSE_INPUT_SHA: ${{ inputs.llumiverse_sha }}
+        run: bash .github/bin/prepare-release-source.sh "$RELEASE_VERSION" "$RELEASE_SOURCE_SHA" "$LLUMIVERSE_INPUT_SHA"
+      - name: Upload prepared release source
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          overwrite: true
+          name: prepared-release-source
+          path: ${{ runner.temp }}/prepared-release-source/
+          if-no-files-found: error
+
   build-macos-cli:
     name: Build and sign macOS CLI
     runs-on: macos-14
@@ -118,14 +139,16 @@ jobs:
           ref: ${{ inputs.source_sha || github.sha }}
           fetch-depth: 0
 
-      - name: Select published Llumiverse source
-        if: inputs.llumiverse_sha != ''
+      - name: Restore prepared release source
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: prepared-release-source
+          path: .
+      - name: Load prepared dependency identity
         env:
-          LLUMIVERSE_SHA: ${{ inputs.llumiverse_sha }}
-        run: |
-          [[ "$LLUMIVERSE_SHA" =~ ^[0-9a-f]{40}$ ]]
-          git -C llumiverse fetch origin "$LLUMIVERSE_SHA"
-          git -C llumiverse checkout --detach "$LLUMIVERSE_SHA"
+          RELEASE_SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
+          LLUMIVERSE_INPUT_SHA: ${{ inputs.llumiverse_sha }}
+        run: bash .github/bin/load-release-source.sh
 
       - name: Install pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -149,7 +172,7 @@ jobs:
 
       - name: Install workspace dependencies
         timeout-minutes: 5
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Save pnpm store cache
         if: steps.pnpm-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -276,6 +299,7 @@ jobs:
       - name: Upload signed CLI executables
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
+          overwrite: true
           name: native-cli-darwin
           path: |
             packages/cli-darwin-arm64/bin/vertesia
@@ -310,6 +334,7 @@ jobs:
       npm_tag: ${{ steps.publish.outputs.npm_tag }}
       publish_status: ${{ steps.publish.outputs.publish_status }}
       published_packages: ${{ steps.publish.outputs.published_packages }}
+      release_sha: ${{ steps.record.outputs.release_sha }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -319,14 +344,16 @@ jobs:
           ref: ${{ inputs.source_sha || github.sha }}
           fetch-depth: 0
 
-      - name: Select published Llumiverse source
-        if: inputs.llumiverse_sha != ''
+      - name: Restore prepared release source
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: prepared-release-source
+          path: .
+      - name: Load prepared dependency identity
         env:
-          LLUMIVERSE_SHA: ${{ inputs.llumiverse_sha }}
-        run: |
-          [[ "$LLUMIVERSE_SHA" =~ ^[0-9a-f]{40}$ ]]
-          git -C llumiverse fetch origin "$LLUMIVERSE_SHA"
-          git -C llumiverse checkout --detach "$LLUMIVERSE_SHA"
+          RELEASE_SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
+          LLUMIVERSE_INPUT_SHA: ${{ inputs.llumiverse_sha }}
+        run: bash .github/bin/load-release-source.sh
 
       - name: Install pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -357,7 +384,7 @@ jobs:
 
       - name: Install workspace dependencies
         timeout-minutes: 5
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
       - name: Save pnpm store cache
         if: steps.pnpm-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -385,8 +412,7 @@ jobs:
           DRY_RUN: ${{ inputs.dry_run }}
           COORDINATED_RELEASE: ${{ inputs.request_id != '' }}
           VERSION_OVERRIDE: ${{ needs.prepare-release.outputs.version }}
-          LLUMIVERSE_SHA: ${{ inputs.llumiverse_sha }}
-          REQUIRE_SOURCE_PUSH: ${{ inputs.request_id != '' }}
+          RELEASE_SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
         run: |
           deploy_key_path="${RUNNER_TEMP}/publish-deploy-key"
@@ -404,6 +430,7 @@ jobs:
 
 
       - name: Record published source
+        id: record
         if: inputs.dry_run == false
         env:
           PACKAGE_VERSION: ${{ needs.prepare-release.outputs.version }}
@@ -412,7 +439,8 @@ jobs:
           node --input-type=module -e '
             import fs from "node:fs";
             import {execFileSync} from "node:child_process";
-            const release_sha=execFileSync("git", ["rev-parse", "HEAD"], {encoding:"utf8"}).trim();
+            const release_sha=execFileSync("git", ["rev-parse", `refs/tags/v${process.env.PACKAGE_VERSION}^{commit}`], {encoding:"utf8"}).trim();
+            fs.appendFileSync(process.env.GITHUB_OUTPUT,`release_sha=${release_sha}\n`);
             fs.writeFileSync("sdk-publish-source.json", JSON.stringify({version:process.env.PACKAGE_VERSION,
               source_sha:process.env.SOURCE_SHA, release_sha}));'
 
@@ -420,6 +448,7 @@ jobs:
         if: inputs.dry_run == false
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
+          overwrite: true
           name: sdk-publish-source
           path: sdk-publish-source.json
           if-no-files-found: error
@@ -452,7 +481,7 @@ jobs:
   # integration test, especially the macOS runner.
   wait-for-npm:
     name: Wait for published npm packages
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest # Registry scanning can exceed the 15-minute slim runner limit.
     timeout-minutes: 20
     needs: publish
     if: inputs.dry_run == false
@@ -510,7 +539,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ inputs.source_sha || github.sha }}
+          ref: ${{ needs.publish.outputs.release_sha }}
           fetch-depth: 0
       - name: Install Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -537,17 +566,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ inputs.source_sha || github.sha }}
+          ref: ${{ needs.publish.outputs.release_sha }}
+          submodules: recursive
           fetch-depth: 0
-      - name: Select published Llumiverse source
-        if: inputs.llumiverse_sha != ''
-        env:
-          LLUMIVERSE_SHA: ${{ inputs.llumiverse_sha }}
-        run: |
-          [[ "$LLUMIVERSE_SHA" =~ ^[0-9a-f]{40}$ ]]
-          git -C llumiverse fetch origin "$LLUMIVERSE_SHA"
-          git -C llumiverse checkout --detach "$LLUMIVERSE_SHA"
-
       - name: Install pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - name: Resolve pnpm store directory

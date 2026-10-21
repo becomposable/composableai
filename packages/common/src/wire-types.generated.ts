@@ -5102,6 +5102,7 @@ export type OAuthAuthorizationRequestGeneratedApp = {
     tenant_id: string;
     app_name: string;
     version_id?: string | undefined;
+    deployment_alias?: string | undefined;
 };
 export type OAuthLoginPayload = {
     id_token: string;

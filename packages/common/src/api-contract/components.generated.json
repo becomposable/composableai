@@ -6774,6 +6774,9 @@
       },
       "version_id": {
         "type": "string"
+      },
+      "deployment_alias": {
+        "type": "string"
       }
     },
     "required": [

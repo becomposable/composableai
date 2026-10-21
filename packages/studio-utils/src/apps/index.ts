@@ -10,6 +10,7 @@ declare const URL: {
     new (
         url: string,
     ): {
+        origin: string;
         pathname: string;
         toString(): string;
     };
@@ -21,6 +22,11 @@ export interface ResolveAppEndpointOptions {
     requestedOverride?: string;
     version?: string;
     deploymentAlias?: string;
+    /**
+     * Tenant that executes an installed gateway app. Its immutable artifacts may still live under
+     * the tenant recorded in the manifest; App Gateway resolves that indirection server-side.
+     */
+    gatewayTenantId?: string;
 }
 
 /**
@@ -117,16 +123,29 @@ export function resolveAppEndpoint(
     const baseEndpoint = substituteEndpoints(manifest.endpoint, options.vars);
     const gateway = parseGatewayAppEndpoint(baseEndpoint);
     if (gateway) {
-        return resolveGatewayAppEndpoint(gateway, options.version, options.deploymentAlias);
+        const gatewayTenantId = isConfiguredGatewayOrigin(gateway.origin, options.vars?.gateway)
+            ? options.gatewayTenantId
+            : undefined;
+        return resolveGatewayAppEndpoint(gateway, options.version, options.deploymentAlias, gatewayTenantId);
     }
 
     return resolveRegularAppEndpoint(manifest, manifest.endpoint, options);
+}
+
+function isConfiguredGatewayOrigin(endpointOrigin: string, configuredGateway?: string): boolean {
+    if (!configuredGateway) return false;
+    try {
+        return new URL(configuredGateway).origin === endpointOrigin;
+    } catch {
+        return false;
+    }
 }
 
 function resolveGatewayAppEndpoint(
     gateway: { origin: string; tenant: string; appId: string; version?: string; deploymentAlias?: string },
     version?: string,
     deploymentAlias?: string,
+    gatewayTenantId?: string,
 ): string {
     const effectiveVersion = version || gateway.version;
     const effectiveAlias = effectiveVersion ? undefined : deploymentAlias || gateway.deploymentAlias;
@@ -135,7 +154,8 @@ function resolveGatewayAppEndpoint(
         : effectiveAlias
           ? `/aliases/${encodeURIComponent(effectiveAlias)}`
           : '';
-    return `${gateway.origin}/tenants/${gateway.tenant}/apps/${gateway.appId}${selector}/api/package`;
+    const tenant = gatewayTenantId || gateway.tenant;
+    return `${gateway.origin}/tenants/${encodeURIComponent(tenant)}/apps/${gateway.appId}${selector}/api/package`;
 }
 
 function resolveRegularAppEndpoint(

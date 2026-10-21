@@ -1,8 +1,26 @@
 name: (publish) NPM packages
 
+run-name: ${{ inputs.request_id || github.workflow }}
+
 on:
   workflow_dispatch:
     inputs:
+      request_id:
+        description: Optional caller correlation ID
+        type: string
+        default: ""
+      source_sha:
+        description: Optional immutable source commit
+        type: string
+        default: ""
+      version:
+        description: Optional exact cohort version (same base as the source)
+        type: string
+        default: ""
+      llumiverse_sha:
+        description: Optional published Llumiverse commit to include in the version commit
+        type: string
+        default: ""
       release_type:
         description: Release Type
         required: true
@@ -47,12 +65,15 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ inputs.source_sha || github.sha }}
+          fetch-depth: 0
       - name: Calculate package version
         id: version
         shell: bash
         env:
           RELEASE_TYPE: ${{ inputs.release_type }}
           BUMP_TYPE: ${{ inputs.bump_type }}
+          EXACT_VERSION: ${{ inputs.version }}
         run: |
           current_version="$(node -p "require('./package.json').version")"
           base_version="${current_version%%-dev*}"
@@ -65,6 +86,17 @@ jobs:
               version="${base_version}-dev.$(date -u +'%Y%m%d.%H%M%SZ')"
           else
               version="${base_version}"
+          fi
+          if [[ -n "$EXACT_VERSION" ]]; then
+              expected_pattern="^${base_version//./[.]}$"
+              if [[ "$RELEASE_TYPE" == "snapshot" ]]; then
+                  expected_pattern="^${base_version//./[.]}-dev\.[0-9]{8}\.[0-9]{6}Z$"
+              fi
+              if [[ ! "$EXACT_VERSION" =~ $expected_pattern ]]; then
+                  echo "Exact version does not match the computed release base/channel" >&2
+                  exit 1
+              fi
+              version="$EXACT_VERSION"
           fi
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
 
@@ -83,6 +115,17 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
+          ref: ${{ inputs.source_sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Select published Llumiverse source
+        if: inputs.llumiverse_sha != ''
+        env:
+          LLUMIVERSE_SHA: ${{ inputs.llumiverse_sha }}
+        run: |
+          [[ "$LLUMIVERSE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git -C llumiverse fetch origin "$LLUMIVERSE_SHA"
+          git -C llumiverse checkout --detach "$LLUMIVERSE_SHA"
 
       - name: Install pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -117,9 +160,9 @@ jobs:
         env:
           CLI_VERSION: ${{ needs.prepare-release.outputs.version }}
         run: |
-          npm version "${CLI_VERSION}" --no-git-tag-version --workspaces=false
+          npm version "${CLI_VERSION}" --no-git-tag-version --allow-same-version --workspaces=false
           pnpm -r --filter "./packages/**" --filter "./libraries/jst" \
-              exec npm version "${CLI_VERSION}" --no-git-tag-version
+              exec npm version "${CLI_VERSION}" --no-git-tag-version --allow-same-version
       - name: Build CLI workspace dependencies
         run: pnpm exec turbo run build --filter=@vertesia/cli...
 
@@ -273,6 +316,17 @@ jobs:
         with:
           submodules: recursive
           persist-credentials: false
+          ref: ${{ inputs.source_sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Select published Llumiverse source
+        if: inputs.llumiverse_sha != ''
+        env:
+          LLUMIVERSE_SHA: ${{ inputs.llumiverse_sha }}
+        run: |
+          [[ "$LLUMIVERSE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git -C llumiverse fetch origin "$LLUMIVERSE_SHA"
+          git -C llumiverse checkout --detach "$LLUMIVERSE_SHA"
 
       - name: Install pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
@@ -297,7 +351,9 @@ jobs:
         run: npm --version
 
       - name: Test package channel policy
-        run: bash ./.github/bin/lib-package-channel.test.sh
+        run: |
+          bash ./.github/bin/lib-package-channel.test.sh
+          bash ./.github/bin/lib-release-cohort.test.sh
 
       - name: Install workspace dependencies
         timeout-minutes: 5
@@ -327,7 +383,10 @@ jobs:
           RELEASE_TYPE: ${{ inputs.release_type }}
           BUMP_TYPE: ${{ inputs.bump_type }}
           DRY_RUN: ${{ inputs.dry_run }}
+          COORDINATED_RELEASE: ${{ inputs.request_id != '' }}
           VERSION_OVERRIDE: ${{ needs.prepare-release.outputs.version }}
+          LLUMIVERSE_SHA: ${{ inputs.llumiverse_sha }}
+          REQUIRE_SOURCE_PUSH: ${{ inputs.request_id != '' }}
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
         run: |
           deploy_key_path="${RUNNER_TEMP}/publish-deploy-key"
@@ -342,6 +401,28 @@ jobs:
               --release-type "${RELEASE_TYPE}" \
               --bump-type "${BUMP_TYPE}" \
               --dry-run "${DRY_RUN}"
+
+
+      - name: Record published source
+        if: inputs.dry_run == false
+        env:
+          PACKAGE_VERSION: ${{ needs.prepare-release.outputs.version }}
+          SOURCE_SHA: ${{ inputs.source_sha || github.sha }}
+        run: |
+          node --input-type=module -e '
+            import fs from "node:fs";
+            import {execFileSync} from "node:child_process";
+            const release_sha=execFileSync("git", ["rev-parse", "HEAD"], {encoding:"utf8"}).trim();
+            fs.writeFileSync("sdk-publish-source.json", JSON.stringify({version:process.env.PACKAGE_VERSION,
+              source_sha:process.env.SOURCE_SHA, release_sha}));'
+
+      - name: Upload published source
+        if: inputs.dry_run == false
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sdk-publish-source
+          path: sdk-publish-source.json
+          if-no-files-found: error
 
       # Template integration tests using local verdaccio registry (dry-run only)
       - name: Template integration test - Plugin
@@ -429,6 +510,8 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ inputs.source_sha || github.sha }}
+          fetch-depth: 0
       - name: Install Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -454,6 +537,17 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ inputs.source_sha || github.sha }}
+          fetch-depth: 0
+      - name: Select published Llumiverse source
+        if: inputs.llumiverse_sha != ''
+        env:
+          LLUMIVERSE_SHA: ${{ inputs.llumiverse_sha }}
+        run: |
+          [[ "$LLUMIVERSE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git -C llumiverse fetch origin "$LLUMIVERSE_SHA"
+          git -C llumiverse checkout --detach "$LLUMIVERSE_SHA"
+
       - name: Install pnpm
         uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
       - name: Resolve pnpm store directory

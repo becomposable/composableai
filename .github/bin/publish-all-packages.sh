@@ -3,6 +3,7 @@ set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib-package-channel.sh"
+source "${SCRIPT_DIR}/lib-release-cohort.sh"
 
 # Script to publish all composableai packages to NPM
 # Usage: publish-all-packages.sh --ref <ref> --release-type <type> --bump-type <type> [--dry-run [true|false]]
@@ -69,10 +70,10 @@ update_package_versions() {
   fi
 
   # Update root package.json
-  npm version "${new_version}" --no-git-tag-version --workspaces=false
+  npm version "${new_version}" --no-git-tag-version --allow-same-version --workspaces=false
 
   # Update all workspace packages (excluding llumiverse and libraries/koa-stack/*)
-  pnpm -r --filter "./packages/**" --filter "./libraries/jst" exec npm version "${new_version}" --no-git-tag-version
+  pnpm -r --filter "./packages/**" --filter "./libraries/jst" exec npm version "${new_version}" --no-git-tag-version --allow-same-version
 
   # Stamp the source commit so a published @vertesia version can be mapped back to its
   # composableai source. `pnpm publish` (unlike `npm publish`) does not set `gitHead`, so
@@ -82,7 +83,7 @@ update_package_versions() {
   git_head=$(git rev-parse HEAD)
   echo "Stamping gitHead ${git_head} on all packages"
   npm pkg set gitHead="${git_head}" --workspaces=false
-  pnpm -r --filter "./packages/**" exec npm pkg set gitHead="${git_head}"
+  pnpm -r --filter "./packages/**" --filter "./libraries/jst" exec npm pkg set gitHead="${git_head}"
 }
 
 publish_packages() {
@@ -126,6 +127,24 @@ publish_package() {
   fi
 
   echo "Publishing @vertesia/${pkg_name}@${pkg_version} with tag ${npm_tag}"
+
+  # Published versions are immutable. Verify the recorded source before skipping a retry.
+  if [ "$DRY_RUN" = "false" ]; then
+    local existing_json existing_head expected_head
+    if existing_json="$(npm view "@vertesia/${pkg_name}@${pkg_version}" --json 2>/dev/null)"; then
+      existing_head="$(printf '%s' "$existing_json" | node -e '
+        let data="";process.stdin.on("data", c=>data+=c);process.stdin.on("end",()=>console.log(JSON.parse(data).gitHead || ""));')"
+      expected_head="$(node -p "require('./package.json').gitHead")"
+      if [[ "$existing_head" != "$expected_head" ]]; then
+        echo "Version already exists without the expected source commit" >&2
+        PUBLISH_FAILURES="${PUBLISH_FAILURES} @vertesia/${pkg_name}"
+      else
+        PUBLISHED_PACKAGES="${PUBLISHED_PACKAGES} @vertesia/${pkg_name}"
+      fi
+      cd "$(git rev-parse --show-toplevel)"
+      return
+    fi
+  fi
 
   # Publish. Don't let one package's failure (e.g. a new package whose npm OIDC
   # trusted-publisher isn't configured yet) abort the whole run and strand the
@@ -203,7 +222,7 @@ update_template_versions() {
         continue
       fi
       cd "$tpl_dir"
-      npm version "${new_version}" --no-git-tag-version
+      npm version "${new_version}" --no-git-tag-version --allow-same-version
       echo "  Updated ${tpl_dir}/package.json version to ${new_version}"
       cd ../..
     fi
@@ -219,21 +238,30 @@ commit_and_push() {
   git config user.email "github-actions[bot]@users.noreply.github.com"
   git config user.name "github-actions[bot]"
   git add .
-
-  if [ "$RELEASE_TYPE" = "release" ]; then
-    git commit -m "chore: release ${version}"
-  else
-    git commit -m "chore: snapshot ${version}"
+  local reuse_status=0
+  reuse_pushed_tree "$REF" || reuse_status=$?
+  if [ "$reuse_status" -eq 0 ]; then
+    echo "Reusing the version commit already pushed by this cohort"
+  elif [ "$reuse_status" -ne 1 ]; then
+    return "$reuse_status"
   fi
 
-  git push origin "$REF"
+  if [[ "$reuse_status" == "1" ]]; then
+    local message="chore: snapshot ${version}"
+    if [[ "$RELEASE_TYPE" == "release" ]]; then message="chore: release ${version}"; fi
+    if [[ "${COORDINATED_RELEASE:-false}" == "true" ]]; then
+      git commit -m "$message" -m "Coordinated-Release: true" || return 2
+    else
+      git commit -m "$message" || return 2
+    fi
+    git push origin "HEAD:refs/heads/$REF" || return 2
+  fi
 
-  # Create git tag for template stability on releases
-  if [ "$RELEASE_TYPE" = "release" ]; then
-    tag_name="v${version}"
-    git tag "$tag_name"
-    git push origin "$tag_name"
-    echo "Created and pushed tag: ${tag_name}"
+  if [[ "$RELEASE_TYPE" == "release" ]]; then
+    if ! git rev-parse --verify "refs/tags/v$version" >/dev/null 2>&1; then
+      git tag "v$version" || return 2
+    fi
+    git push origin "v$version" || return 2
   fi
 
   echo "Version changes pushed to ${REF}"
@@ -422,16 +450,33 @@ echo "Target tag: ${npm_tag}"
 # Main flow
 # =============================================================================
 
-update_package_versions
+resume_release=false
+if [[ "$RELEASE_TYPE" == "release" && -n "${VERSION_OVERRIDE:-}" ]]; then
+  resume_status=0
+  resume_release_tag "$VERSION_OVERRIDE" "$source_sha" || resume_status=$?
+  if [[ "$resume_status" -eq 0 ]]; then
+    resume_release=true
+    new_version="$VERSION_OVERRIDE"
+  elif [[ "$resume_status" -ne 1 ]]; then
+    exit "$resume_status"
+  fi
+fi
+if [[ "$resume_release" == "false" ]]; then
+  update_package_versions
+  update_template_versions
+fi
 
-update_template_versions
+if [[ -n "${LLUMIVERSE_SHA:-}" && "$(git -C llumiverse rev-parse HEAD)" != "$LLUMIVERSE_SHA" ]]; then
+  echo "Release source does not pin the requested Llumiverse commit" >&2
+  exit 1
+fi
 
 echo "=== Building all packages ==="
 pnpm build
 
 # For a RELEASE, keep the strict commit-then-publish order so a release is never
 # published without its version-bump commit + tag.
-if [ "$DRY_RUN" = "false" ] && [ "$RELEASE_TYPE" = "release" ]; then
+if [ "$DRY_RUN" = "false" ] && [ "$RELEASE_TYPE" = "release" ] && [ "$resume_release" = "false" ]; then
   commit_and_push
 fi
 
@@ -451,7 +496,13 @@ fi
 # branch-push failure — e.g. a deploy key without write access to a feature
 # branch — cannot block the npm publish, and treat the push as best-effort.
 if [ "$DRY_RUN" = "false" ] && [ "$RELEASE_TYPE" = "snapshot" ]; then
-  commit_and_push || echo "[WARN] snapshot version-bump push to ${REF} failed; packages were published, update create-plugin templateVersions on the branch manually."
+  if ! commit_and_push; then
+    if [[ "${REQUIRE_SOURCE_PUSH:-false}" == "true" ]]; then
+      echo "Coordinated release requires its version commit to propagate" >&2
+      exit 1
+    fi
+    echo "[WARN] snapshot version-bump push to ${REF} failed; packages were published, update create-plugin templateVersions on the branch manually."
+  fi
 fi
 
 PUBLISH_STATUS="complete"

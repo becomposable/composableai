@@ -147,3 +147,20 @@ Test hashes distinguish CI runners from local runs and include the runner image 
 `@vertesia/common` tests cache their package-owned schemas and build artifacts. Client
 bundle checks live in the client package. Downstream consumers own checks against their
 published API documents and generated-client fixtures; package tests never read those files.
+
+## Coordinated publish callers
+
+The NPM packages workflow accepts optional `source_sha`, `version`, and
+`request_id` inputs. These pin the source commit, set one exact version for the
+whole package cohort, and correlate a dispatched workflow run. Existing channel
+and base-version validation still applies. A successful real publish uploads
+`sdk-publish-source/sdk-publish-source.json` containing the input source SHA,
+published version, and pushed version-commit SHA for downstream consumers.
+
+Retries verify each existing package version's `gitHead`, reuse the same release
+tag/version commit, and refuse to overwrite a branch that moved to a different
+tree. `dry_run=true` performs no registry uploads or branch/tag pushes.
+
+When `llumiverse_sha` is supplied, both CLI and package builds use that immutable
+Llumiverse commit. The publisher includes its submodule pointer and the updated
+lockfile in the same commit as the package versions; no separate sync PR is needed.

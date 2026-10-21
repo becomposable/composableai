@@ -242,6 +242,8 @@ export async function executeInteraction(payload: DSLActivityExecutionPayload<Ex
             params,
             prompt_data,
             payload.debug_mode,
+            // A projection can read any field of the response as `#`, including `#.prompt`.
+            { includePrompt: !!payload.activity.projection },
         );
 
         let completionResult: CompletionResult[] = res.result;
@@ -365,6 +367,13 @@ export async function executeInteractionFromActivity(
     params: InteractionExecutionParams,
     prompt_data: Record<string, unknown>,
     debug?: boolean,
+    options: {
+        /**
+         * Return the rendered prompt sent to the model. Off by default: it can be tens of MB when
+         * media is inlined, and it stays stored with the run either way.
+         */
+        includePrompt?: boolean;
+    } = {},
 ) {
     const userTags = params.tags;
     const info = activityInfo();
@@ -444,8 +453,6 @@ export async function executeInteractionFromActivity(
 
     log.debug(`About to execute interaction ${interactionName}`, { config, data, result_schema, tags, workflow });
 
-    // Activities never read the rendered prompt, which can be tens of MB when media is inlined.
-    // It is still stored with the run.
     const res = await client.interactions
         .executeByName(
             interactionName,
@@ -458,7 +465,7 @@ export async function executeInteractionFromActivity(
                 workflow,
             },
             undefined,
-            { include_prompt: false },
+            options.includePrompt ? undefined : { include_prompt: false },
         )
         .catch((error: unknown) => {
             // Logged once by the caller's catch (executeInteraction) — do not log here as well.

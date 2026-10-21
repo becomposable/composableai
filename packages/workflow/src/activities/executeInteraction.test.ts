@@ -190,6 +190,38 @@ describe('executeInteraction retryability', () => {
         expect(requestSlot.mock.calls[0][0].rate_limit_id).toBe(executeByName.mock.calls[0][1].workflow.rate_limit_id);
     });
 
+    it('should keep the prompt for an activity whose projection can read it', async () => {
+        const { setupActivity } = await import('../dsl/setup/ActivityContext.js');
+        const executeByName = vi.fn().mockResolvedValue({
+            id: 'run-id',
+            status: ExecutionRunStatus.completed,
+            result: [],
+            prompt: 'rendered prompt',
+        });
+        const mockClient = {
+            interactions: {
+                requestSlot: vi.fn().mockResolvedValue({ delay_ms: 0 }),
+                executeByName,
+            },
+        } as unknown as VertesiaClient;
+        const payload = createPayload();
+        payload.activity = {
+            ...payload.activity,
+            projection: { rendered_prompt: '${#.prompt}' },
+        };
+
+        vi.mocked(setupActivity).mockResolvedValue({
+            client: mockClient,
+            inputType: 'objectIds',
+            params: payload.params,
+        } as unknown as ActivityContext<ExecuteInteractionParams>);
+
+        await expect(testEnv.run(executeInteraction, payload)).resolves.toEqual({
+            rendered_prompt: 'rendered prompt',
+        });
+        expect(executeByName).toHaveBeenCalledWith('testInteraction', expect.any(Object), undefined, undefined);
+    });
+
     it('should leave 412 rendition-in-progress failures retryable', async () => {
         await mockInteractionError(Object.assign(new Error('rendition in progress'), { statusCode: 412 }));
 

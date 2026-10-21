@@ -174,8 +174,12 @@ for recovery, without changing the artifact's source identity.
 
 A preparation job resolves the selected Llumiverse dependency once, refreshes the
 lockfile, builds `@llumiverse/common`, and regenerates all committed common schemas
-and wire types. CLI and package builds download the same prepared files and validate
+and wire types. The prepared source includes generated additions, changes, and
+deletions discovered through Git, so new generator outputs are passed along automatically.
+CLI and package builds download the same prepared files and validate
 their identity. Tagged retries restore that exact dependency and lockfile. Published
 smoke tests execute helpers from the pinned caller source and consume the exact npm
-versions and immutable template tag. Source propagation must succeed before the
-workflow emits its published-source artifact.
+versions and immutable template tag. Main, release, maintenance, and coordinated
+publications require successful branch propagation before emitting the source artifact.
+Independent feature-branch snapshots warn if the deploy key cannot update the branch;
+the workflow still records the immutable source tag and runs the published-package smoke tests.

@@ -447,7 +447,9 @@ if [[ "$DRY_RUN" == "false" ]]; then
     check_npm_identity "$package_name" "$new_version" || ownership=$?
     [[ "$ownership" != "2" ]] || exit 1
   done < <(workspace_package_dirs)
-  if [[ "$resume_release" == "false" ]]; then persist_release_commit "$new_version"; fi
+  if [[ "$resume_release" == "false" ]]; then
+    persist_release_commit "$new_version"
+  fi
 fi
 
 publish_packages
@@ -462,7 +464,7 @@ if [ -n "${PUBLISH_FAILURES// /}" ]; then
 fi
 
 if [[ "$DRY_RUN" == "false" ]]; then
-  propagate_release "$REF" "$new_version"
+  propagate_published_release "$REF" "$new_version"
 fi
 
 PUBLISH_STATUS="complete"

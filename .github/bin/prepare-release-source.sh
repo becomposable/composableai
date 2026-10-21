@@ -21,14 +21,26 @@ else
   pnpm --dir packages/common run gen:schemas
 fi
 prepared="$RUNNER_TEMP/prepared-release-source"
-mkdir -p "$prepared"
-paths=(pnpm-lock.yaml packages/common/src/api-contract/components.generated.json
-  packages/common/src/store/intake-policy-schema.generated.ts
-  packages/common/src/store/editing-policy-schema.generated.ts
-  packages/common/src/wire-types.generated.ts packages/common/src/wire-types.generated.test.ts)
-for path in "${paths[@]}"; do
-  mkdir -p "$prepared/$(dirname "$path")"
-  cp "$path" "$prepared/$path"
-done
+# Capture every generated addition/change/deletion, including files introduced by future generators.
+# Comparing against the pinned source also works after resuming an immutable version tag.
+node --input-type=module - "$prepared" "$source_sha" <<'JS'
+import fs from 'node:fs';
+import path from 'node:path';
+import {execFileSync} from 'node:child_process';
+const [target,source]=process.argv.slice(2);
+const names=(args)=>execFileSync('git',args,{encoding:'utf8'}).split('\0').filter(Boolean);
+const paths=new Set(['pnpm-lock.yaml',
+  ...names(['diff','--name-only','--ignore-submodules=all','-z',source,'--']),
+  ...names(['ls-files','--others','--exclude-standard','-z'])]);
+fs.rmSync(target,{recursive:true,force:true});fs.mkdirSync(target,{recursive:true});
+const deleted=[];
+for(const file of paths){
+  if(!fs.existsSync(file)){deleted.push(file);continue;}
+  const destination=path.join(target,file);
+  fs.mkdirSync(path.dirname(destination),{recursive:true});fs.copyFileSync(file,destination);
+}
+fs.writeFileSync(path.join(target,'release-deleted-files.json'),JSON.stringify(deleted)+'\n');
+fs.writeFileSync(path.join(target,'release-generated-files.json'),JSON.stringify([...paths].filter(file=>!deleted.includes(file)))+'\n');
+JS
 identity="$(release_identity "$source_sha" "$LLUMIVERSE_SHA")"
 printf '%s\n' "$identity" > "$prepared/release-inputs.json"

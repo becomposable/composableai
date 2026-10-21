@@ -89,3 +89,15 @@ if check_npm_identity @example/package "$version"; then exit 1; else [[ "$?" == 
 registry_metadata='{"error":{"code":"E403"}}'
 if check_npm_identity @example/package "$version"; then exit 1; else [[ "$?" == "2" ]]; fi
 echo 'Moving main, rejected push, durable snapshot, retry, source membership and registry identity tests passed'
+
+# A denied feature-branch propagation does not suppress post-publish records/smoke tests.
+propagate_release() { return 2; }
+RELEASE_TYPE=snapshot COORDINATED_RELEASE=false
+propagate_published_release feat-example 1.6.0-dev.20261021.123456Z
+for ref in main release/1.6 1.6; do
+  if propagate_published_release "$ref" 1.6.0-dev.20261021.123456Z; then exit 1; fi
+done
+COORDINATED_RELEASE=true
+if propagate_published_release feat-example 1.6.0-dev.20261021.123456Z; then exit 1; fi
+RELEASE_TYPE=release COORDINATED_RELEASE=false
+if propagate_published_release feat-example 1.6.0; then exit 1; fi

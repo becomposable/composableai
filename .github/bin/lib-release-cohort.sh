@@ -113,3 +113,18 @@ propagate_release() {
   echo "Branch remains busy; resume the same immutable version tag" >&2
   return 2
 }
+
+# Feature snapshots remain useful when a deploy key can publish tags but cannot push the branch.
+# Their immutable tag still records the exact package source for smoke tests and retries.
+propagate_published_release() {
+  local ref="$1" version="$2" status=0
+  propagate_release "$ref" "$version" || status=$?
+  if [[ "$status" -eq 0 ]]; then return 0; fi
+  if [[ "$RELEASE_TYPE" == "snapshot" && "$ref" != "main" &&
+        ! "$ref" =~ ^release/[0-9]+\.[0-9]+$ && ! "$ref" =~ ^[0-9]+\.[0-9]+$ &&
+        "${COORDINATED_RELEASE:-false}" != "true" ]]; then
+    echo "::warning::Packages are published from immutable tag v$version; branch $ref was not updated."
+    return 0
+  fi
+  return "$status"
+}

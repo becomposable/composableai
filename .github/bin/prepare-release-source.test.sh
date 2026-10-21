@@ -11,13 +11,15 @@ cat > "$work/bin/pnpm" <<'JS'
 const fs=require('node:fs');
 const args=process.argv.slice(2), version=JSON.parse(fs.readFileSync('llumiverse/common/package.json')).dependencies.example;
 const files=['api-contract/components.generated.json','store/intake-policy-schema.generated.ts',
- 'store/editing-policy-schema.generated.ts','wire-types.generated.ts','wire-types.generated.test.ts'];
+ 'store/editing-policy-schema.generated.ts','wire-types.generated.ts','wire-types.generated.test.ts','future.generated.ts'];
 if(args.includes('--lockfile-only')){
  if(!args.includes('--no-frozen-lockfile'))throw new Error('Lockfile refresh must be explicit');
  fs.writeFileSync('pnpm-lock.yaml','resolved-example: '+version+'\n');
 }else if(args[0]==='install'){
  if(!args.includes('--frozen-lockfile')||!fs.readFileSync('pnpm-lock.yaml','utf8').includes(version))throw new Error('Stale lockfile');
 }else if(args.includes('gen:schemas')){
+ fs.rmSync('packages/common/src/obsolete.generated.ts',{force:true});
+ fs.writeFileSync('future-root.generated.json','new-root-output\n');
  for(const file of files)fs.writeFileSync('packages/common/src/'+file,'schema-for-example-'+version+'\n');
 }else if(!args.includes('build'))throw new Error('Unexpected pnpm call '+args.join(' '));
 JS
@@ -44,6 +46,7 @@ paths=(packages/common/src/api-contract/components.generated.json
  packages/common/src/store/editing-policy-schema.generated.ts
  packages/common/src/wire-types.generated.ts packages/common/src/wire-types.generated.test.ts)
 for path in "${paths[@]}"; do mkdir -p "$(dirname "$path")"; printf 'old-schema\n' > "$path"; done
+printf 'obsolete\n' > packages/common/src/obsolete.generated.ts
 git add .
 git commit -qm source
 source_sha="$(git rev-parse HEAD)"
@@ -69,6 +72,9 @@ for consumer in cli publisher; do
   [[ "$(git -C llumiverse rev-parse HEAD)" == "$new_dependency" ]]
   cmp pnpm-lock.yaml "$prepared/pnpm-lock.yaml"
   cmp "${paths[0]}" "$prepared/${paths[0]}"
+  cmp packages/common/src/future.generated.ts "$prepared/packages/common/src/future.generated.ts"
+  [[ ! -e packages/common/src/obsolete.generated.ts ]]
+  cmp future-root.generated.json "$prepared/future-root.generated.json"
  )
 done
 # Tampering with a restored lockfile is rejected before the dependency is consumed.
@@ -82,12 +88,23 @@ export RELEASE_IDENTITY LLUMIVERSE_SHA
 node - "$version" "$source_sha" "$RELEASE_IDENTITY" <<'JS'
 const fs=require('node:fs');fs.writeFileSync('package.json',JSON.stringify({version:process.argv[2],gitHead:process.argv[3],releaseIdentity:JSON.parse(process.argv[4])})+'\n');
 JS
+git add -- packages/common/src future-root.generated.json
 persist_release_commit "$version"
+# Downloaded new outputs are staged by the loader, so tagged retries can check them out safely.
+(cd "$work/cli"
+ git fetch -q origin "refs/tags/v$version:refs/tags/v$version"
+ source "$script_dir/lib-release-cohort.sh"
+ RELEASE_IDENTITY="$(cat release-inputs.json)" LLUMIVERSE_SHA="$new_dependency"
+ resume_release_tag "$version" "$source_sha"
+ [[ -f future-root.generated.json ]]
+)
 git checkout -q --detach "$source_sha"
 git submodule update -q --init
 [[ "$(git -C llumiverse rev-parse HEAD)" == "$old_dependency" ]]
 bash "$script_dir/prepare-release-source.sh" "$version" "$source_sha" "$new_dependency"
 [[ "$(git -C llumiverse rev-parse HEAD)" == "$new_dependency" ]]
+[[ -f "$prepared/packages/common/src/future.generated.ts" ]]
+grep -q obsolete.generated.ts "$prepared/release-deleted-files.json"
 [[ "$(git ls-tree HEAD llumiverse | awk '{print $3}')" == "$new_dependency" ]]
 git checkout -q --detach "$source_sha"
 git submodule update -q --init

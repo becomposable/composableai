@@ -108,6 +108,8 @@ export type VertesiaRuntimeConfig = (
           authUrl?: string;
           /** The serving gateway owns this standalone app's OAuth session. */
           gatewaySession?: boolean;
+          /** Optional path prefix for an ephemeral version launch on the application host. */
+          gatewayPathPrefix?: string;
       }
 ) & {
     /** Ephemeral selector injected by App Gateway for an advanced App Builder version launch. */

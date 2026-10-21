@@ -3,6 +3,31 @@ import { describe, expect, it, vi } from 'vitest';
 import { VertesiaClient } from './client.js';
 
 describe('AppsApi', () => {
+    it('lists eligible target projects for a temporary version launch', async () => {
+        const requests: Request[] = [];
+        const fetchMock = vi.fn(async () =>
+            Response.json([
+                {
+                    project: { id: 'project-1', name: 'Project', account: 'account-1' },
+                    installation_id: 'installation-1',
+                    settings: {},
+                },
+            ]),
+        );
+        const client = new VertesiaClient({
+            serverUrl: 'https://studio.example.com',
+            storeUrl: 'https://zeno.example.com',
+            fetch: fetchMock,
+            onRequest: (request) => requests.push(request),
+        });
+
+        const targets = await client.apps.listVersionLaunchTargets('record-1');
+
+        expect(targets[0]?.project.id).toBe('project-1');
+        expect(requests[0]?.method).toBe('GET');
+        expect(requests[0]?.url).toBe('https://studio.example.com/api/v1/apps/versions/record-1/launch-targets');
+    });
+
     it('starts an in-place version rebuild without a caller-controlled payload', async () => {
         const requests: Request[] = [];
         const fetchMock = vi.fn(async () =>

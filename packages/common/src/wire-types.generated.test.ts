@@ -380,6 +380,10 @@ interface Checks {
         W.AppVersionRecord,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppVersionRecordSchema>
     >;
+    AppVersionLaunchTarget: Same<
+        W.AppVersionLaunchTarget,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppVersionLaunchTargetSchema>
+    >;
     CreateAppVersionLaunchRequest: Same<
         W.CreateAppVersionLaunchRequest,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').CreateAppVersionLaunchRequestSchema>
@@ -4627,6 +4631,10 @@ interface Checks {
     AppPackageScopeWire: Same<
         W.AppPackageScopeWire,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppPackageScopeSchema>
+    >;
+    AppVersionLaunchTargetArray: Same<
+        W.AppVersionLaunchTargetArray,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppVersionLaunchTargetArraySchema>
     >;
     AppVersionRecordArray: Same<
         W.AppVersionRecordArray,
@@ -9078,6 +9086,14 @@ interface Checks {
         W.ApiComponentTypes['ContentObjectTypeRef'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').ContentObjectTypeRefSchema>
     >;
+    'component:AppVersionLaunchTarget': Same<
+        W.ApiComponentTypes['AppVersionLaunchTarget'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppVersionLaunchTargetSchema>
+    >;
+    'component:AppVersionLaunchTargetArray': Same<
+        W.ApiComponentTypes['AppVersionLaunchTargetArray'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppVersionLaunchTargetArraySchema>
+    >;
     'component:CreateAppVersionLaunchRequest': Same<
         W.ApiComponentTypes['CreateAppVersionLaunchRequest'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').CreateAppVersionLaunchRequestSchema>
@@ -9790,6 +9806,7 @@ const checks: Checks = {
     AppVersionGitSource: true,
     AppVersionUrls: true,
     AppVersionRecord: true,
+    AppVersionLaunchTarget: true,
     CreateAppVersionLaunchRequest: true,
     CreateAppVersionLaunchResponse: true,
     DeleteAppVersionResponse: true,
@@ -10966,6 +10983,7 @@ const checks: Checks = {
     ViewExperienceArray: true,
     Extract_AppVersionGitRefType_branch_tag_commit: true,
     AppPackageScopeWire: true,
+    AppVersionLaunchTargetArray: true,
     AppVersionRecordArray: true,
     AppToolCollectionArray: true,
     SystemPackageQuery: true,
@@ -12080,6 +12098,8 @@ const checks: Checks = {
     'component:AppRepoRefs': true,
     'component:AppRepoCommits': true,
     'component:ContentObjectTypeRef': true,
+    'component:AppVersionLaunchTarget': true,
+    'component:AppVersionLaunchTargetArray': true,
     'component:CreateAppVersionLaunchRequest': true,
     'component:CreateAppVersionLaunchResponse': true,
     'component:AppBuildProgress': true,
@@ -12235,6 +12255,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2548);
+        expect(Object.keys(checks)).toHaveLength(2552);
     });
 });

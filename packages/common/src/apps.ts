@@ -268,6 +268,8 @@ export function supportsAdvancedAppVersionLaunch(manifest: unknown): boolean {
     );
 }
 
+export type AppVersionLaunchTarget = Wire.AppVersionLaunchTarget;
+
 export type CreateAppVersionLaunchRequest = Wire.CreateAppVersionLaunchRequest;
 
 export type CreateAppVersionLaunchResponse = Wire.CreateAppVersionLaunchResponse;

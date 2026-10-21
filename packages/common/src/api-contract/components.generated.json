@@ -20768,9 +20768,42 @@
       "ref_type"
     ]
   },
+  "AppVersionLaunchTarget": {
+    "type": "object",
+    "properties": {
+      "project": {
+        "$ref": "#/components/schemas/ProjectRef"
+      },
+      "installation_id": {
+        "type": "string"
+      },
+      "settings": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Current settings of the app installation in the target project."
+      }
+    },
+    "required": [
+      "project",
+      "installation_id",
+      "settings"
+    ],
+    "additionalProperties": false,
+    "description": "A user-accessible project where this app version may be launched temporarily."
+  },
+  "AppVersionLaunchTargetArray": {
+    "type": "array",
+    "items": {
+      "$ref": "#/components/schemas/AppVersionLaunchTarget"
+    }
+  },
   "CreateAppVersionLaunchRequest": {
     "type": "object",
     "properties": {
+      "target_project_id": {
+        "type": "string",
+        "description": "Project in the source account where the app is already installed and the temporary version will run. Defaults to the current project."
+      },
       "settings": {
         "type": "object",
         "additionalProperties": true,

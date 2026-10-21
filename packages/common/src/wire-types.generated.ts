@@ -755,7 +755,15 @@ export type AppVersionRecord = {
     checked_at?: string | undefined;
     expires_at?: string | undefined;
 };
+export type AppVersionLaunchTarget = {
+    project: ProjectRef;
+    installation_id: string;
+    settings: {
+        [k: string]: unknown;
+    };
+};
 export type CreateAppVersionLaunchRequest = {
+    target_project_id?: string | undefined;
     settings: {
         [k: string]: unknown;
     };
@@ -10875,6 +10883,7 @@ export type AppPackageScopeWire =
     | 'hooks'
     | 'subscriptions'
     | 'all';
+export type AppVersionLaunchTargetArray = AppVersionLaunchTarget[];
 export type AppVersionRecordArray = AppVersionRecord[];
 export type AppToolCollectionArray = AppToolCollection[];
 export type SystemPackageQuery = {
@@ -12017,6 +12026,8 @@ export interface ApiComponentTypes {
     AppRepoRefs: AppRepoRefs;
     AppRepoCommits: AppRepoCommits;
     ContentObjectTypeRef: ContentObjectApiTypeRef;
+    AppVersionLaunchTarget: AppVersionLaunchTarget;
+    AppVersionLaunchTargetArray: AppVersionLaunchTargetArray;
     CreateAppVersionLaunchRequest: CreateAppVersionLaunchRequest;
     CreateAppVersionLaunchResponse: CreateAppVersionLaunchResponse;
     AppBuildProgress: AppBuildProgress;

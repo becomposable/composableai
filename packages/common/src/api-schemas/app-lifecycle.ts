@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { APPGEN_PACKAGE_SPEC_PATTERN } from '../appgen.js';
 import { APP_DEPLOYMENT_ALIAS_PATTERN } from '../apps.js';
+import { ProjectRefSchema } from './apikey.js';
 import {
     AppAccessControlSchema,
     AppAvailableInSchema,
@@ -917,6 +918,13 @@ export const AppVersionRecordSchema = z
 
 export const CreateAppVersionLaunchRequestSchema = z
     .strictObject({
+        target_project_id: z
+            .string()
+            .meta({
+                description:
+                    'Project in the source account where the app is already installed and the temporary version will run. Defaults to the current project.',
+            })
+            .optional(),
         settings: z
             .looseObject({})
             .meta({ description: 'Temporary app installation settings used only by this version launch.' }),
@@ -936,6 +944,23 @@ export const CreateAppVersionLaunchResponseSchema = z
         id: 'CreateAppVersionLaunchResponse',
         description: 'Opaque launch selector and App Gateway URL for an advanced app-version launch.',
     });
+
+export const AppVersionLaunchTargetSchema = z
+    .strictObject({
+        project: ProjectRefSchema,
+        installation_id: z.string(),
+        settings: z
+            .looseObject({})
+            .meta({ description: 'Current settings of the app installation in the target project.' }),
+    })
+    .meta({
+        id: 'AppVersionLaunchTarget',
+        description: 'A user-accessible project where this app version may be launched temporarily.',
+    });
+
+export const AppVersionLaunchTargetArraySchema = z
+    .array(AppVersionLaunchTargetSchema)
+    .meta({ id: 'AppVersionLaunchTargetArray' });
 
 export const AgentRunSearchHitSchema = z
     .strictObject({

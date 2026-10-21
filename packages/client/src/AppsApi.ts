@@ -28,6 +28,7 @@ import type {
     AppScaffoldProgress,
     AppsQuery,
     AppToolCollection,
+    AppVersionLaunchTarget,
     AppVersionListQuery,
     AppVersionRecord,
     CountResult,
@@ -158,6 +159,11 @@ export default class AppsApi extends ApiTopic {
         payload: CreateAppVersionLaunchRequest,
     ): Promise<CreateAppVersionLaunchResponse> {
         return this.post(`/versions/${recordId}/launches`, { payload });
+    }
+
+    /** List accessible projects where this app is installed and can host a temporary launch. */
+    listVersionLaunchTargets(recordId: string): Promise<AppVersionLaunchTarget[]> {
+        return this.get(`/versions/${recordId}/launch-targets`);
     }
 
     /** Assign or move a stable deployment alias to an immutable app version. */

@@ -506,6 +506,7 @@ import {
     EmailChannelSchema,
     ExecuteInteractionByEndpointHeadersSchema,
     ExecuteInteractionByEndpointQuerySchema,
+    ExecuteNamedInteractionQuerySchema,
     ExecutionResponseSchema,
     ExecutionRunDocRefSchema,
     ExecutionRunInteractionSchema,
@@ -528,6 +529,7 @@ import {
     GeneratedTestDataRecordSchema,
     GenerateInteractionPayloadSchema,
     GenerateTestDataPayloadSchema,
+    GetRunQuerySchema,
     ImprovePromptPayloadConfigSchema,
     ImprovePromptPayloadSchema,
     InCodeInteractionSchema,
@@ -1279,6 +1281,7 @@ type ExecutionRunSchemaMap = {
     ExecutionRunRefArray: typeof ExecutionRunRefArraySchema;
     UpdateExecutionRunPayload: typeof UpdateExecutionRunPayloadSchema;
     RunCreatePayload: typeof RunCreatePayloadSchema;
+    GetRunQuery: typeof GetRunQuerySchema;
     SortOrder: typeof SortOrderSchema;
     SortOption: typeof SortOptionSchema;
     RunSearchQuery: typeof RunSearchQuerySchema;
@@ -1299,6 +1302,7 @@ const EXECUTION_RUN_SCHEMAS: ExecutionRunSchemaMap = {
     ExecutionRunRefArray: ExecutionRunRefArraySchema,
     UpdateExecutionRunPayload: UpdateExecutionRunPayloadSchema,
     RunCreatePayload: RunCreatePayloadSchema,
+    GetRunQuery: GetRunQuerySchema,
     // Listing and searching runs.
     SortOrder: SortOrderSchema,
     SortOption: SortOptionSchema,
@@ -1319,6 +1323,7 @@ const EXECUTION_REQUEST_SCHEMAS: {
     InteractionExecutionConfiguration: typeof InteractionExecutionConfigurationSchema;
     InteractionExecutionError: typeof InteractionExecutionErrorSchema;
     ResultStorageOptions: typeof ResultStorageOptionsSchema;
+    ExecuteNamedInteractionQuery: typeof ExecuteNamedInteractionQuerySchema;
     ExecuteInteractionByEndpointQuery: typeof ExecuteInteractionByEndpointQuerySchema;
     ExecuteInteractionByEndpointHeaders: typeof ExecuteInteractionByEndpointHeadersSchema;
     AsyncCompletionMode: typeof AsyncCompletionModeSchema;
@@ -1354,6 +1359,7 @@ const EXECUTION_REQUEST_SCHEMAS: {
     InteractionExecutionConfiguration: InteractionExecutionConfigurationSchema,
     InteractionExecutionError: InteractionExecutionErrorSchema,
     ResultStorageOptions: ResultStorageOptionsSchema,
+    ExecuteNamedInteractionQuery: ExecuteNamedInteractionQuerySchema,
     ExecuteInteractionByEndpointQuery: ExecuteInteractionByEndpointQuerySchema,
     ExecuteInteractionByEndpointHeaders: ExecuteInteractionByEndpointHeadersSchema,
     AsyncCompletionMode: AsyncCompletionModeSchema,
@@ -3402,6 +3408,8 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'CatalogTagQuery',
     'StoredCatalogInteractionsQuery',
     'ResolveInteractionQuery',
+    'ExecuteNamedInteractionQuery',
+    'GetRunQuery',
     'ExecuteInteractionByEndpointQuery',
     'ExecuteInteractionByEndpointHeaders',
     // The prompt-authoring, project-tool, remote-MCP, audit-trail and view-experience closures.

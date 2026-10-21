@@ -81,6 +81,7 @@ export async function executeInteraction<P = unknown>(
  * @param interaction
  * @param payload
  * @param onChunk
+ * @param requestOptions request options, e.g. `{ query: { include_prompt: false } }` to omit the rendered prompt
  * @returns
  */
 export async function executeInteractionByName<P = unknown>(

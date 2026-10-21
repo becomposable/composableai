@@ -4008,6 +4008,16 @@ export type CatalogInteractionRef = {
     title: string;
     description?: string | undefined;
 };
+export type ExecuteNamedInteractionQuery = {
+    include_prompt?: boolean | undefined;
+};
+export type GetRunQuery = {
+    include_prompt?: boolean | undefined;
+};
+export type ExecuteInteractionByEndpointQuery = {
+    tag?: string | undefined;
+    include_prompt?: boolean | undefined;
+};
 export type ResolveInteractionQuery = {
     environment?: string | undefined;
     model?: string | undefined;
@@ -10438,9 +10448,6 @@ export type LegacyPopulatedExecutionRunResult = {
     conversation?: unknown | undefined;
     options?: StatelessExecutionOptions | undefined;
 };
-export type ExecuteInteractionByEndpointQueryWire = {
-    tag?: string | undefined;
-};
 export type ExecuteInteractionByEndpointHeadersWire = {
     'x-interaction-tag'?: string | undefined;
 };
@@ -11245,6 +11252,7 @@ export interface ApiComponentTypes {
     ExecutionRunRefArray: ExecutionRunRefArray;
     UpdateExecutionRunPayload: UpdateExecutionRunPayload;
     RunCreatePayload: RunCreatePayload;
+    GetRunQuery: GetRunQuery;
     SortOrder: SortOrder;
     SortOption: SortOption;
     RunSearchQuery: RunSearchQuery;
@@ -11261,7 +11269,8 @@ export interface ApiComponentTypes {
     InteractionExecutionConfiguration: InteractionExecutionConfiguration;
     InteractionExecutionError: InteractionExecutionError;
     ResultStorageOptions: ResultStorageOptions;
-    ExecuteInteractionByEndpointQuery: ExecuteInteractionByEndpointQueryWire;
+    ExecuteNamedInteractionQuery: ExecuteNamedInteractionQuery;
+    ExecuteInteractionByEndpointQuery: ExecuteInteractionByEndpointQuery;
     ExecuteInteractionByEndpointHeaders: ExecuteInteractionByEndpointHeadersWire;
     AsyncCompletionMode: AsyncCompletionMode;
     AsyncCompletionOptions: AsyncCompletionOptions;

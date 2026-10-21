@@ -2461,9 +2461,33 @@ export const StoredCatalogInteractionsQuerySchema = z
     })
     .meta({ id: 'StoredCatalogInteractionsQuery' });
 
+/** `include_prompt`: whether a response carries the rendered prompt sent to the model. */
+function includePromptQuery(description: string) {
+    return z.boolean().meta({ description }).optional();
+}
+
+export const GetRunQuerySchema = z
+    .strictObject({
+        include_prompt: includePromptQuery(
+            'Whether the run includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined), and it is then not loaded from storage.',
+        ),
+    })
+    .meta({ id: 'GetRunQuery' });
+
+const ExecutionIncludePromptQuerySchema = includePromptQuery(
+    'Whether the synchronous execution result includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined). It is still stored with the run unless run data storage is restricted.',
+);
+
+export const ExecuteNamedInteractionQuerySchema = z
+    .strictObject({
+        include_prompt: ExecutionIncludePromptQuerySchema,
+    })
+    .meta({ id: 'ExecuteNamedInteractionQuery' });
+
 export const ExecuteInteractionByEndpointQuerySchema = z
     .strictObject({
         tag: z.string().optional(),
+        include_prompt: ExecutionIncludePromptQuerySchema,
     })
     .meta({ id: 'ExecuteInteractionByEndpointQuery' });
 

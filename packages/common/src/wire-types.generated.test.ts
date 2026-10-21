@@ -1654,6 +1654,15 @@ interface Checks {
         W.CatalogInteractionRef,
         z.infer<typeof import('./api-schemas/interaction.js').CatalogInteractionRefSchema>
     >;
+    ExecuteNamedInteractionQuery: Same<
+        W.ExecuteNamedInteractionQuery,
+        z.infer<typeof import('./api-schemas/interaction.js').ExecuteNamedInteractionQuerySchema>
+    >;
+    GetRunQuery: Same<W.GetRunQuery, z.infer<typeof import('./api-schemas/interaction.js').GetRunQuerySchema>>;
+    ExecuteInteractionByEndpointQuery: Same<
+        W.ExecuteInteractionByEndpointQuery,
+        z.infer<typeof import('./api-schemas/interaction.js').ExecuteInteractionByEndpointQuerySchema>
+    >;
     ResolveInteractionQuery: Same<
         W.ResolveInteractionQuery,
         z.infer<typeof import('./api-schemas/interaction.js').ResolveInteractionQuerySchema>
@@ -4150,10 +4159,6 @@ interface Checks {
         W.LegacyPopulatedExecutionRunResult,
         z.infer<typeof import('./api-schemas/interaction.js').LegacyPopulatedExecutionRunResultSchema>
     >;
-    ExecuteInteractionByEndpointQueryWire: Same<
-        W.ExecuteInteractionByEndpointQueryWire,
-        z.infer<typeof import('./api-schemas/interaction.js').ExecuteInteractionByEndpointQuerySchema>
-    >;
     ExecuteInteractionByEndpointHeadersWire: Same<
         W.ExecuteInteractionByEndpointHeadersWire,
         z.infer<typeof import('./api-schemas/interaction.js').ExecuteInteractionByEndpointHeadersSchema>
@@ -5941,6 +5946,10 @@ interface Checks {
         W.ApiComponentTypes['RunCreatePayload'],
         z.infer<typeof import('./api-schemas/interaction.js').RunCreatePayloadSchema>
     >;
+    'component:GetRunQuery': Same<
+        W.ApiComponentTypes['GetRunQuery'],
+        z.infer<typeof import('./api-schemas/interaction.js').GetRunQuerySchema>
+    >;
     'component:SortOrder': Same<
         W.ApiComponentTypes['SortOrder'],
         z.infer<typeof import('./api-schemas/interaction.js').SortOrderSchema>
@@ -6004,6 +6013,10 @@ interface Checks {
     'component:ResultStorageOptions': Same<
         W.ApiComponentTypes['ResultStorageOptions'],
         z.infer<typeof import('./api-schemas/interaction.js').ResultStorageOptionsSchema>
+    >;
+    'component:ExecuteNamedInteractionQuery': Same<
+        W.ApiComponentTypes['ExecuteNamedInteractionQuery'],
+        z.infer<typeof import('./api-schemas/interaction.js').ExecuteNamedInteractionQuerySchema>
     >;
     'component:ExecuteInteractionByEndpointQuery': Same<
         W.ApiComponentTypes['ExecuteInteractionByEndpointQuery'],
@@ -10108,6 +10121,9 @@ const checks: Checks = {
     InteractionExecutionError: true,
     ConversationStripOptions: true,
     CatalogInteractionRef: true,
+    ExecuteNamedInteractionQuery: true,
+    GetRunQuery: true,
+    ExecuteInteractionByEndpointQuery: true,
     ResolveInteractionQuery: true,
     InCodePrompt: true,
     InCodeInteraction: true,
@@ -10807,7 +10823,6 @@ const checks: Checks = {
     InteractionExecutionResultWire: true,
     LegacyExecutionRunResult: true,
     LegacyPopulatedExecutionRunResult: true,
-    ExecuteInteractionByEndpointQueryWire: true,
     ExecuteInteractionByEndpointHeadersWire: true,
     ExecutionResponse: true,
     StringValueMap: true,
@@ -11263,6 +11278,7 @@ const checks: Checks = {
     'component:ExecutionRunRefArray': true,
     'component:UpdateExecutionRunPayload': true,
     'component:RunCreatePayload': true,
+    'component:GetRunQuery': true,
     'component:SortOrder': true,
     'component:SortOption': true,
     'component:RunSearchQuery': true,
@@ -11279,6 +11295,7 @@ const checks: Checks = {
     'component:InteractionExecutionConfiguration': true,
     'component:InteractionExecutionError': true,
     'component:ResultStorageOptions': true,
+    'component:ExecuteNamedInteractionQuery': true,
     'component:ExecuteInteractionByEndpointQuery': true,
     'component:ExecuteInteractionByEndpointHeaders': true,
     'component:AsyncCompletionMode': true,
@@ -12195,6 +12212,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2540);
+        expect(Object.keys(checks)).toHaveLength(2544);
     });
 });

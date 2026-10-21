@@ -222,6 +222,7 @@ export default class InteractionsApi extends ApiTopic {
      * @param nameWithTag
      * @param payload
      * @param onChunk
+     * @param requestOptions request options, e.g. `{ query: { include_prompt: false } }` to omit the rendered prompt
      * @returns
      */
     async executeByName<ResultT = unknown, ParamsT = unknown>(

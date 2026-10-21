@@ -13574,6 +13574,16 @@
     "additionalProperties": false,
     "description": "Interaction execution payload for creating a new run It uses interaction field (from NamedInteractionExecutionPayload) to pass the interaction ID to run"
   },
+  "GetRunQuery": {
+    "type": "object",
+    "properties": {
+      "include_prompt": {
+        "type": "boolean",
+        "description": "Whether the run includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined), and it is then not loaded from storage."
+      }
+    },
+    "additionalProperties": false
+  },
   "SortOrder": {
     "type": "string",
     "enum": [
@@ -14715,11 +14725,25 @@
     "additionalProperties": false,
     "description": "A retrieved execution run whose completion result is reported in the pre-versioning format. A run that has no result yet is returned unchanged, so `result` may still hold the current array form."
   },
+  "ExecuteNamedInteractionQuery": {
+    "type": "object",
+    "properties": {
+      "include_prompt": {
+        "type": "boolean",
+        "description": "Whether the synchronous execution result includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined). It is still stored with the run unless run data storage is restricted."
+      }
+    },
+    "additionalProperties": false
+  },
   "ExecuteInteractionByEndpointQuery": {
     "type": "object",
     "properties": {
       "tag": {
         "type": "string"
+      },
+      "include_prompt": {
+        "type": "boolean",
+        "description": "Whether the synchronous execution result includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined). It is still stored with the run unless run data storage is restricted."
       }
     },
     "additionalProperties": false

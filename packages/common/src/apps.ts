@@ -212,6 +212,62 @@ export const APP_DEPLOYMENT_ALIAS_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9]
 
 export type AppVersionRecord = Wire.AppVersionRecord;
 
+export interface AppGenTemplateMetadata {
+    name: string;
+    version: number;
+    runtime_features: Record<string, number>;
+}
+
+export const ADVANCED_APP_VERSION_LAUNCH_FEATURE = 'advanced_launch';
+export const ADVANCED_APP_VERSION_LAUNCH_PROTOCOL_VERSION = 1;
+
+function recordValue(value: unknown): Record<string, unknown> | undefined {
+    return value !== null && typeof value === 'object' && !Array.isArray(value)
+        ? (value as Record<string, unknown>)
+        : undefined;
+}
+
+/** Read template provenance captured in an immutable AppGen version manifest. */
+export function getAppGenTemplateMetadata(manifest: unknown): AppGenTemplateMetadata | undefined {
+    const packageArtifacts = recordValue(recordValue(manifest)?.package_artifacts);
+    const metadata = recordValue(packageArtifacts?.appgen_template);
+    const runtimeFeatures = recordValue(metadata?.runtime_features);
+    const name = typeof metadata?.name === 'string' ? metadata.name.trim() : '';
+    if (
+        !metadata ||
+        !name ||
+        !Number.isInteger(metadata.version) ||
+        (metadata.version as number) < 1 ||
+        !runtimeFeatures
+    ) {
+        return undefined;
+    }
+
+    const normalizedFeatures: Record<string, number> = {};
+    for (const [feature, protocolVersion] of Object.entries(runtimeFeatures)) {
+        if (Number.isInteger(protocolVersion) && (protocolVersion as number) > 0) {
+            normalizedFeatures[feature] = protocolVersion as number;
+        }
+    }
+    return {
+        name,
+        version: metadata.version as number,
+        runtime_features: normalizedFeatures,
+    };
+}
+
+/** Return the protocol version implemented by one generated-app runtime feature. */
+export function getAppVersionRuntimeFeatureVersion(manifest: unknown, feature: string): number | undefined {
+    return getAppGenTemplateMetadata(manifest)?.runtime_features[feature];
+}
+
+export function supportsAdvancedAppVersionLaunch(manifest: unknown): boolean {
+    return (
+        (getAppVersionRuntimeFeatureVersion(manifest, ADVANCED_APP_VERSION_LAUNCH_FEATURE) ?? 0) >=
+        ADVANCED_APP_VERSION_LAUNCH_PROTOCOL_VERSION
+    );
+}
+
 export type CreateAppVersionLaunchRequest = Wire.CreateAppVersionLaunchRequest;
 
 export type CreateAppVersionLaunchResponse = Wire.CreateAppVersionLaunchResponse;

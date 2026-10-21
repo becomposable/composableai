@@ -144,6 +144,11 @@ test('appgen module selects the service entry and cleans inactive modules', () =
         assert.match(serverModules, /modules\/app\/resources\/index\.js/);
         assert.doesNotMatch(serverModules, /modules\/examples/);
         assert.equal(packageJson.scripts['service:quality'], 'node src/modules/service/scripts/app-quality-check.mjs');
+        assert.deepEqual(packageJson['vertesia-appgen'], {
+            name: 'plugin-template',
+            version: 1,
+            runtime_features: { advanced_launch: 1 },
+        });
         assert.equal(
             packageJson.scripts['build:sandbox'],
             'node src/modules/service/scripts/build-server-esbuild.mjs --sandbox',
@@ -178,7 +183,7 @@ test('appgen module selects the service entry and cleans inactive modules', () =
         const versionScope = fs.readFileSync(path.join(templateRoot, 'src/ui/shell/AppVersionScope.tsx'), 'utf8');
         assert.doesNotMatch(appRoutes, /Document Library/);
         assert.match(serviceEntry, /<AppVersionScope>/);
-        assert.match(versionScope, /getRuntimeAppVersionSelector\(\) \?\? import\.meta\.env\.VITE_APP_VERSION/);
+        assert.match(versionScope, /runtimeAppVersionSelector\(\) \?\? import\.meta\.env\.VITE_APP_VERSION/);
         assert.match(versionScope, /client\.withAppVersion\(appVersionSelector\)/);
         assert.doesNotMatch(versionScope, /useEffect/);
         assert.doesNotMatch(serviceEntry, /useEffect/);

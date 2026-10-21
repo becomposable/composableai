@@ -1179,6 +1179,23 @@ export const SystemPackageQuerySchema = z
     })
     .meta({ id: 'SystemPackageQuery' });
 
+export const AppPackageQuerySchema = z
+    .strictObject({
+        scope: z
+            .array(AppPackageScopeSchema)
+            .meta({
+                description:
+                    'Which capabilities to include in the returned package. Defaults to `all`. ' +
+                    'Comma-joined (`?scope=ui,tools`) or repeated.',
+            })
+            .optional(),
+        deployment_alias: AppDeploymentAliasSchema.meta({
+            description:
+                'Resolve the package from this named deployment. Used before installation to load the selected deployment configuration.',
+        }).optional(),
+    })
+    .meta({ id: 'AppPackageQuery' });
+
 export const AppInstanceAvailabilitySchema = z
     .strictObject({ enabled: z.boolean() })
     .meta({ id: 'AppInstanceAvailability' });

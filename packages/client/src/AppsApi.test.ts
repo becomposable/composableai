@@ -3,6 +3,22 @@ import { describe, expect, it, vi } from 'vitest';
 import { VertesiaClient } from './client.js';
 
 describe('AppsApi', () => {
+    it('loads a package from a selected deployment alias', async () => {
+        const requests: Request[] = [];
+        const client = new VertesiaClient({
+            serverUrl: 'https://studio.example.com',
+            storeUrl: 'https://zeno.example.com',
+            fetch: vi.fn(async () => Response.json({ settings_schema: { type: 'object' } })),
+            onRequest: (request) => requests.push(request),
+        });
+
+        await client.apps.getAppPackage('sample-app', 'settings', 'customer-preview');
+
+        expect(requests[0]?.url).toBe(
+            'https://studio.example.com/api/v1/apps/sample-app/package?scope=settings&deployment_alias=customer-preview',
+        );
+    });
+
     it('lists eligible target projects for a temporary version launch', async () => {
         const requests: Request[] = [];
         const fetchMock = vi.fn(async () =>

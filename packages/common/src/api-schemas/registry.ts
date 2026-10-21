@@ -110,6 +110,7 @@ import {
     AppListScopeSchema,
     AppOAuthCollectionParamsSchema,
     AppOAuthProviderParamsSchema,
+    AppPackageQuerySchema,
     AppPackageScopeSchema,
     AppRepoBranchSchema,
     AppRepoCommitSchema,
@@ -2312,6 +2313,7 @@ const APP_LIFECYCLE_SCHEMAS = {
     AppListScope: AppListScopeSchema,
     AppsQuery: AppsQuerySchema,
     AppInstallationProjectsQuery: AppInstallationProjectsQuerySchema,
+    AppPackageQuery: AppPackageQuerySchema,
     SystemPackageQuery: SystemPackageQuerySchema,
 } as const satisfies Record<string, z.ZodType>;
 
@@ -3547,6 +3549,7 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'AppInstallationsQuery',
     'AppsQuery',
     'AppInstallationProjectsQuery',
+    'AppPackageQuery',
     'SystemPackageQuery',
     'WebsiteCredentialTotpMetadata',
     'WebsiteCredentialSecretInput',

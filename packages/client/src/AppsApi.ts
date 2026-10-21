@@ -390,9 +390,16 @@ export default class AppsApi extends ApiTopic {
      * package-resolved (no per-id route), so this is how a client reads the full definition — type
      * schema, interaction prompt, process definition, dashboard spec — to visualize an exposed id.
      */
-    getAppPackage(appIdOrName: string, scope: AppPackageScope | AppPackageScope[] = 'all'): Promise<AppPackage> {
+    getAppPackage(
+        appIdOrName: string,
+        scope: AppPackageScope | AppPackageScope[] = 'all',
+        deploymentAlias?: string,
+    ): Promise<AppPackage> {
         return this.get(`/${encodeURIComponent(appIdOrName)}/package`, {
-            query: { scope: Array.isArray(scope) ? scope.join(',') : scope },
+            query: {
+                scope: Array.isArray(scope) ? scope.join(',') : scope,
+                ...(deploymentAlias ? { deployment_alias: deploymentAlias } : {}),
+            },
         });
     }
 

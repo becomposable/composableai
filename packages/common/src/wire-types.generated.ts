@@ -10893,6 +10893,10 @@ export type AppPackageScopeWire =
 export type AppVersionLaunchTargetArray = AppVersionLaunchTarget[];
 export type AppVersionRecordArray = AppVersionRecord[];
 export type AppToolCollectionArray = AppToolCollection[];
+export type AppPackageQuery = {
+    scope?: AppPackageScopeWire[] | undefined;
+    deployment_alias?: AppDeploymentAlias | undefined;
+};
 export type SystemPackageQuery = {
     scope?: AppPackageScopeWire[] | undefined;
 };
@@ -12057,6 +12061,7 @@ export interface ApiComponentTypes {
     AppListScope: AppListScope;
     AppsQuery: AppsQuery;
     AppInstallationProjectsQuery: AppInstallationProjectsQuery;
+    AppPackageQuery: AppPackageQuery;
     SystemPackageQuery: SystemPackageQuery;
     WebsiteCredentialTotpAlgorithm: WebsiteCredentialTotpAlgorithm;
     WebsiteCredentialTotpMetadata: WebsiteCredentialTotpMetadata;

@@ -21624,6 +21624,23 @@
     "additionalProperties": false,
     "description": "Exactly one of `name` or `id` identifies the app. Neither is required by the component because the endpoint answers 400 for the empty case with a message naming both."
   },
+  "AppPackageQuery": {
+    "type": "object",
+    "properties": {
+      "scope": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AppPackageScope"
+        },
+        "description": "Which capabilities to include in the returned package. Defaults to `all`. Comma-joined (`?scope=ui,tools`) or repeated."
+      },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Resolve the package from this named deployment. Used before installation to load the selected deployment configuration."
+      }
+    },
+    "additionalProperties": false
+  },
   "SystemPackageQuery": {
     "type": "object",
     "properties": {

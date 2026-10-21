@@ -4649,6 +4649,10 @@ interface Checks {
         W.AppToolCollectionArray,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppToolCollectionArraySchema>
     >;
+    AppPackageQuery: Same<
+        W.AppPackageQuery,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppPackageQuerySchema>
+    >;
     SystemPackageQuery: Same<
         W.SystemPackageQuery,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').SystemPackageQuerySchema>
@@ -9187,6 +9191,10 @@ interface Checks {
         W.ApiComponentTypes['AppInstallationProjectsQuery'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppInstallationProjectsQuerySchema>
     >;
+    'component:AppPackageQuery': Same<
+        W.ApiComponentTypes['AppPackageQuery'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').AppPackageQuerySchema>
+    >;
     'component:SystemPackageQuery': Same<
         W.ApiComponentTypes['SystemPackageQuery'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').SystemPackageQuerySchema>
@@ -11001,6 +11009,7 @@ const checks: Checks = {
     AppVersionLaunchTargetArray: true,
     AppVersionRecordArray: true,
     AppToolCollectionArray: true,
+    AppPackageQuery: true,
     SystemPackageQuery: true,
     SupportedIntegrations_ask_user_webhook: true,
     SupportedIntegrations_resend: true,
@@ -12137,6 +12146,7 @@ const checks: Checks = {
     'component:AppListScope': true,
     'component:AppsQuery': true,
     'component:AppInstallationProjectsQuery': true,
+    'component:AppPackageQuery': true,
     'component:SystemPackageQuery': true,
     'component:WebsiteCredentialTotpAlgorithm': true,
     'component:WebsiteCredentialTotpMetadata': true,
@@ -12272,6 +12282,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2556);
+        expect(Object.keys(checks)).toHaveLength(2558);
     });
 });

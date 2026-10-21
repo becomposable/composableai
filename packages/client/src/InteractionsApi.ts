@@ -5,6 +5,7 @@ import type {
     ComputedFacetResponse,
     ComputeInteractionFacetPayload,
     DeleteByIdResult,
+    ExecuteNamedInteractionQuery,
     GeneratedInteractionDefinition,
     GeneratedTestDataRecord,
     GenerateInteractionPayload,
@@ -222,18 +223,21 @@ export default class InteractionsApi extends ApiTopic {
      * @param nameWithTag
      * @param payload
      * @param onChunk
+     * @param query response options, e.g. `{ include_prompt: false }` to omit the rendered prompt
      * @returns
      */
     async executeByName<ResultT = unknown, ParamsT = unknown>(
         nameWithTag: string,
         payload: InteractionExecutionPayload = {},
         onChunk?: (chunk: string) => void,
+        query?: ExecuteNamedInteractionQuery,
     ): Promise<EnhancedInteractionExecutionResult<ResultT, ParamsT>> {
         const r = await executeInteractionByName<ParamsT>(
             this.client as VertesiaClient,
             nameWithTag,
             payload,
             onChunk,
+            query,
         ).catch((err) => {
             if (err instanceof ServerError && hasIdPayload(err.payload)) {
                 throw err.updateDetails({ run_id: err.payload.id });

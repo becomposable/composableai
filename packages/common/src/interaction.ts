@@ -23,6 +23,8 @@ import type {
     CatalogInteractionRefSchema,
     ConversationStripOptionsSchema,
     ConversationVisibilitySchema,
+    ExecuteInteractionByEndpointQuerySchema,
+    ExecuteNamedInteractionQuerySchema,
     ExecutionRunInteractionSchema,
     ExecutionRunRefSchema,
     ExecutionRunWorkflowSchema,
@@ -32,6 +34,7 @@ import type {
     GeneratedTestDataRecordSchema,
     GenerateInteractionPayloadSchema,
     GenerateTestDataPayloadSchema,
+    GetRunQuerySchema,
     ImprovePromptPayloadConfigSchema,
     ImprovePromptPayloadSchema,
     InCodeInteractionSchema,
@@ -114,9 +117,11 @@ export interface StoredCatalogInteractionsQuery extends CatalogTagQuery {
     published?: boolean;
 }
 
-export interface ExecuteInteractionByEndpointQuery {
-    tag?: string;
-}
+export type ExecuteNamedInteractionQuery = z.infer<typeof ExecuteNamedInteractionQuerySchema>;
+
+export type GetRunQuery = z.infer<typeof GetRunQuerySchema>;
+
+export type ExecuteInteractionByEndpointQuery = z.infer<typeof ExecuteInteractionByEndpointQuerySchema>;
 
 export interface ExecuteInteractionByEndpointHeaders {
     'x-interaction-tag'?: string;

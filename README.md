@@ -176,5 +176,6 @@ A preparation job resolves the selected Llumiverse dependency once, refreshes th
 lockfile, builds `@llumiverse/common`, and regenerates all committed common schemas
 and wire types. CLI and package builds download the same prepared files and validate
 their identity. Tagged retries restore that exact dependency and lockfile. Published
-smoke tests check out the immutable release tree; source propagation must succeed
-before the workflow emits its published-source artifact.
+smoke tests execute helpers from the pinned caller source and consume the exact npm
+versions and immutable template tag. Source propagation must succeed before the
+workflow emits its published-source artifact.

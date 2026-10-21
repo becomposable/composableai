@@ -539,7 +539,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ needs.publish.outputs.release_sha }}
+          ref: ${{ inputs.source_sha || github.sha }}
           fetch-depth: 0
       - name: Install Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -561,13 +561,13 @@ jobs:
       - publish
       - wait-for-npm
     if: inputs.dry_run == false
-    # Published source comes from another job; keep this smoke test out of shared branch caches.
+    # Execute helpers from the pinned caller source; consume exact published package/template versions.
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          ref: ${{ needs.publish.outputs.release_sha }}
+          ref: ${{ inputs.source_sha || github.sha }}
           submodules: recursive
           fetch-depth: 0
       - name: Install pnpm
@@ -591,10 +591,11 @@ jobs:
         env:
           RELEASE_TYPE: ${{ inputs.release_type }}
           PACKAGE_VERSION: ${{ needs.publish.outputs.version }}
+          TEMPLATE_SOURCE_REF: v${{ needs.publish.outputs.version }}
         run: >-
           ./.github/bin/test-template-smoke.sh
           --release-type "${RELEASE_TYPE}"
           --template "Vertesia Plugin"
-          --branch "${GITHUB_REF_NAME}"
+          --branch "${TEMPLATE_SOURCE_REF}"
           --package-version "${PACKAGE_VERSION}"
           --wait

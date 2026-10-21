@@ -176,6 +176,8 @@ describe('executeInteraction retryability', () => {
                     rate_limit_id: expect.stringMatching(/:testInteraction$/),
                 }),
             }),
+            undefined,
+            { include_prompt: false },
         );
         expect(requestSlot).toHaveBeenCalledWith(
             expect.objectContaining({

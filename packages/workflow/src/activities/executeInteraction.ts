@@ -400,7 +400,7 @@ export async function executeInteractionFromActivity(
 
             if (previousRun) {
                 log.debug('Found previous run', { prev_run_id: previousRun.id });
-                previousStudioExecutionRun = await client.runs.retrieve(previousRun.id);
+                previousStudioExecutionRun = await client.runs.retrieve(previousRun.id, { include_prompt: false });
             }
         }
     }
@@ -444,15 +444,22 @@ export async function executeInteractionFromActivity(
 
     log.debug(`About to execute interaction ${interactionName}`, { config, data, result_schema, tags, workflow });
 
+    // Activities never read the rendered prompt, which can be tens of MB when media is inlined.
+    // It is still stored with the run.
     const res = await client.interactions
-        .executeByName(interactionName, {
-            config,
-            data,
-            result_schema,
-            tags,
-            stream: false,
-            workflow,
-        })
+        .executeByName(
+            interactionName,
+            {
+                config,
+                data,
+                result_schema,
+                tags,
+                stream: false,
+                workflow,
+            },
+            undefined,
+            { include_prompt: false },
+        )
         .catch((error: unknown) => {
             // Logged once by the caller's catch (executeInteraction) — do not log here as well.
             const rateLimitFailure = getInteractionRateLimitFailure(error, interactionName);

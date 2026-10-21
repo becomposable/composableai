@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { gzipSync } from 'node:zlib';
+import { brotliCompressSync, gzipSync } from 'node:zlib';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { lookup } = vi.hoisted(() => ({ lookup: vi.fn() }));
@@ -76,6 +76,8 @@ describe('isPublicAddress', () => {
         'fd00::1',
         '::ffff:127.0.0.1',
         '::ffff:a9fe:a9fe',
+        '::ffff:0:127.0.0.1',
+        '::ffff:0:a9fe:a9fe',
         'not-an-ip',
     ])('refuses %s', (address) => {
         expect(isPublicAddress(address)).toBe(false);
@@ -168,6 +170,18 @@ describe('safeFetch limits', () => {
         );
     });
 
+    it('times out when a compressed body stalls after its headers', async () => {
+        routes.set('/stall', (_req, res) => {
+            res.writeHead(200, { 'content-encoding': 'gzip' });
+            // Half of a gzip stream, then nothing: the decoder waits for more input.
+            const gzipped = gzipSync('x'.repeat(10_000));
+            res.write(gzipped.subarray(0, gzipped.length >> 1));
+        });
+        await expect(safeFetch(`${origin}/stall`, { ...allowLoopback, timeoutMs: 200 })).rejects.toThrow(
+            /timed out after 200 ms/,
+        );
+    });
+
     it('times out on a server that never answers', async () => {
         routes.set('/hang', () => {});
         await expect(safeFetch(`${origin}/hang`, { ...allowLoopback, timeoutMs: 100 })).rejects.toThrow(
@@ -200,6 +214,59 @@ describe('safeFetch success', () => {
         expect(response.headers.has('content-encoding')).toBe(false);
         expect(await response.text()).toBe('<rss>application/rss+xml</rss>');
         expect(hits).toEqual(['/old', '/feed.xml']);
+    });
+
+    it('decodes a list of content codings in reverse order', async () => {
+        // "gzip, br": gzip was applied first, then br.
+        routes.set('/layered', (_req, res) =>
+            res.writeHead(200, { 'content-encoding': 'gzip, br' }).end(brotliCompressSync(gzipSync('<rss/>'))),
+        );
+        const response = await safeFetch(`${origin}/layered`, allowLoopback);
+        expect(await response.text()).toBe('<rss/>');
+    });
+
+    it('refuses a content coding it cannot decode', async () => {
+        routes.set('/compress', (_req, res) => res.writeHead(200, { 'content-encoding': 'compress' }).end('x'));
+        await expect(safeFetch(`${origin}/compress`, allowLoopback)).rejects.toThrow(
+            /Unsupported content-encoding compress/,
+        );
+    });
+
+    it('returns a 304 without reading or size-checking a body', async () => {
+        routes.set('/cached', (_req, res) =>
+            res.writeHead(304, { 'content-length': '999999999', 'content-encoding': 'gzip', etag: '"v1"' }).end(),
+        );
+        const response = await safeFetch(`${origin}/cached`, { ...allowLoopback, maxBytes: 1000 });
+        expect(response.status).toBe(304);
+        expect(response.headers.get('etag')).toBe('"v1"');
+        expect(response.body).toBeNull();
+    });
+
+    it('drops credential headers when a redirect leaves the origin, and keeps them within it', async () => {
+        const received: Record<string, IncomingMessage['headers']> = {};
+        routes.set('/same', (_req, res) => res.writeHead(302, { location: '/dest-same' }).end());
+        routes.set('/cross', (_req, res) =>
+            res.writeHead(302, { location: `${origin.replace('127.0.0.1', 'loopback.test')}/dest-cross` }).end(),
+        );
+        for (const path of ['/dest-same', '/dest-cross']) {
+            routes.set(path, (req, res) => {
+                received[path] = req.headers;
+                res.writeHead(200).end('ok');
+            });
+        }
+        const headers = {
+            Authorization: 'Bearer secret',
+            cookie: 'session=1',
+            'Proxy-Authorization': 'x',
+            'x-trace': 't',
+        };
+        await safeFetch(`${origin}/same`, { ...allowLoopback, headers });
+        await safeFetch(`${origin}/cross`, { ...allowLoopback, headers });
+        expect(received['/dest-same']).toMatchObject({ authorization: 'Bearer secret', cookie: 'session=1' });
+        expect(received['/dest-cross']).toMatchObject({ 'x-trace': 't' });
+        expect(received['/dest-cross']).not.toHaveProperty('authorization');
+        expect(received['/dest-cross']).not.toHaveProperty('cookie');
+        expect(received['/dest-cross']).not.toHaveProperty('proxy-authorization');
     });
 
     it('returns a non-2xx response instead of throwing', async () => {

@@ -2,7 +2,7 @@ import { type LookupAddress, lookup } from 'node:dns';
 import { request as httpRequest, type IncomingMessage } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 import { BlockList, isIP, type LookupFunction } from 'node:net';
-import type { Readable } from 'node:stream';
+import type { Readable, Transform } from 'node:stream';
 import { createBrotliDecompress, createGunzip, createInflate } from 'node:zlib';
 
 // Every IANA special-purpose IPv4 range, plus multicast and the reserved block: loopback, private,
@@ -39,6 +39,8 @@ const blocked6 = new BlockList();
 for (const [address, prefix] of [
     ['::', 96],
     ['::ffff:0:0', 96],
+    // IPv4-translated (RFC 2765), distinct from IPv4-mapped above: ::ffff:0:127.0.0.1 embeds loopback.
+    ['::ffff:0:0:0', 96],
     ['64:ff9b::', 96],
     ['64:ff9b:1::', 48],
     ['100::', 64],
@@ -87,7 +89,11 @@ export class SafeFetchError extends Error {
 }
 
 export interface SafeFetchOptions {
-    /** Request headers, sent on every hop. */
+    /**
+     * Request headers, sent on every hop. `Authorization`, `Cookie` and `Proxy-Authorization` are dropped
+     * once a redirect leaves the original origin (scheme, host and port), so a redirect cannot carry
+     * credentials to another server.
+     */
     headers?: Record<string, string>;
     /** Accept `http:` URLs as well as `https:`. Defaults to false. */
     allowHttp?: boolean;
@@ -107,6 +113,7 @@ export interface SafeFetchOptions {
 const DEFAULT_MAX_REDIRECTS = 5;
 const DEFAULT_TIMEOUT_MS = 15_000;
 const DEFAULT_MAX_BYTES = 5 * 1024 * 1024;
+const CREDENTIAL_HEADERS = new Set(['authorization', 'cookie', 'proxy-authorization']);
 
 /**
  * GET a caller-supplied URL from a tool server without letting it reach internal hosts (SSRF).
@@ -132,9 +139,11 @@ export async function safeFetch(url: string, options: SafeFetchOptions = {}): Pr
         allowAddress = isPublicAddress,
     } = options;
     const signal = AbortSignal.timeout(timeoutMs);
-    let current = parseTarget(url, allowHttp, allowAddress);
+    const first = parseTarget(url, allowHttp, allowAddress);
+    let current = first;
+    let headers = options.headers ?? {};
     for (let redirects = 0; ; redirects++) {
-        const res = await send(current, options.headers ?? {}, signal, timeoutMs, allowAddress);
+        const res = await send(current, headers, signal, timeoutMs, allowAddress);
         const location = res.headers.location;
         const status = res.statusCode ?? 0;
         if (status >= 300 && status < 400 && location) {
@@ -143,24 +152,35 @@ export async function safeFetch(url: string, options: SafeFetchOptions = {}): Pr
                 throw new SafeFetchError(`Too many redirects (more than ${maxRedirects})`);
             }
             current = parseTarget(new URL(location, current).toString(), allowHttp, allowAddress);
+            if (current.origin !== first.origin) {
+                headers = withoutCredentials(headers);
+            }
             continue;
         }
-        const body = await readBody(res, maxBytes, signal, timeoutMs);
-        const headers = new Headers();
+        // These statuses never carry a body, whatever their Content-Length or Content-Encoding describe.
+        const nullBody = status === 204 || status === 205 || status === 304;
+        if (nullBody) {
+            res.destroy();
+        }
+        const body = nullBody ? null : await readBody(res, maxBytes, signal, timeoutMs);
+        const responseHeaders = new Headers();
         for (const [name, value] of Object.entries(res.headers)) {
             // The body is already decoded, so its original encoding and length no longer apply.
             if (value === undefined || name === 'content-encoding' || name === 'content-length') {
                 continue;
             }
             for (const v of Array.isArray(value) ? value : [value]) {
-                headers.append(name, v);
+                responseHeaders.append(name, v);
             }
         }
-        const nullBody = status === 204 || status === 205 || status === 304;
-        const response = new Response(nullBody ? null : new Uint8Array(body), { status, headers });
+        const response = new Response(body && new Uint8Array(body), { status, headers: responseHeaders });
         Object.defineProperty(response, 'url', { value: current.toString() });
         return response;
     }
+}
+
+function withoutCredentials(headers: Record<string, string>): Record<string, string> {
+    return Object.fromEntries(Object.entries(headers).filter(([name]) => !CREDENTIAL_HEADERS.has(name.toLowerCase())));
 }
 
 function parseTarget(url: string, allowHttp: boolean, allowAddress: (address: string) => boolean): URL {
@@ -239,19 +259,30 @@ async function readBody(
         res.destroy();
         throw new SafeFetchError(`Response is larger than ${maxBytes} bytes`);
     }
-    const encoding = res.headers['content-encoding']?.toLowerCase();
-    let stream: Readable = res;
-    if (encoding === 'gzip' || encoding === 'x-gzip') {
-        stream = res.pipe(createGunzip());
-    } else if (encoding === 'deflate') {
-        stream = res.pipe(createInflate());
-    } else if (encoding === 'br') {
-        stream = res.pipe(createBrotliDecompress());
-    }
+    // Codings are listed in the order they were applied, so undo them from the last one back.
+    const codings = (res.headers['content-encoding'] ?? '')
+        .split(',')
+        .map((coding) => coding.trim().toLowerCase())
+        .filter((coding) => coding && coding !== 'identity')
+        .reverse();
+    const streams: Readable[] = [res];
     const chunks: Buffer[] = [];
     let size = 0;
     try {
-        for await (const chunk of stream) {
+        for (const coding of codings) {
+            const decoder = decoderFor(coding);
+            const source = streams[streams.length - 1];
+            // pipe() does not pass a source's failure on: without this, a response destroyed mid-body (the
+            // deadline aborting the request, a dropped connection) would leave the decoder waiting forever.
+            source.on('error', (error) => decoder.destroy(error));
+            source.on('close', () => {
+                if (!source.readableEnded) {
+                    decoder.destroy(new SafeFetchError('Response ended before its body was complete'));
+                }
+            });
+            streams.push(source.pipe(decoder));
+        }
+        for await (const chunk of streams[streams.length - 1]) {
             size += (chunk as Buffer).length;
             if (size > maxBytes) {
                 throw new SafeFetchError(`Response is larger than ${maxBytes} bytes`);
@@ -261,12 +292,25 @@ async function readBody(
     } catch (error) {
         throw toFetchError(error, signal, timeoutMs);
     } finally {
-        res.destroy();
-        if (stream !== res) {
+        for (const stream of streams) {
             stream.destroy();
         }
     }
     return Buffer.concat(chunks);
+}
+
+function decoderFor(coding: string): Transform {
+    switch (coding) {
+        case 'gzip':
+        case 'x-gzip':
+            return createGunzip();
+        case 'deflate':
+            return createInflate();
+        case 'br':
+            return createBrotliDecompress();
+        default:
+            throw new SafeFetchError(`Unsupported content-encoding ${coding}`);
+    }
 }
 
 function toFetchError(error: unknown, signal: AbortSignal, timeoutMs: number): unknown {

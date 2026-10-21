@@ -34,6 +34,17 @@ test('publishes declared OAuth scopes in the build summary', () => {
     assert.deepEqual(summarizeAppPackage({}).oauth_scopes, []);
 });
 
+test('publishes the immutable settings schema used by advanced launches', () => {
+    const settingsSchema = {
+        type: 'object',
+        properties: { region: { type: 'string' } },
+        required: ['region'],
+    };
+
+    assert.deepEqual(summarizeAppPackage({ settings_schema: settingsSchema }).settings_schema, settingsSchema);
+    assert.equal('settings_schema' in summarizeAppPackage({}), false);
+});
+
 test('publishes AppGen template provenance and versioned runtime features', () => {
     const metadata = {
         name: 'plugin-template',

@@ -51,6 +51,7 @@ export function summarizeAppPackage(pkg, packageJson) {
         oauth_scopes: pkg.oauth_scopes ?? [],
         ui: Boolean(pkg.ui),
         settings: Boolean(pkg.settings_schema),
+        ...(pkg.settings_schema ? { settings_schema: pkg.settings_schema } : {}),
         tools: tools.filter((name) => !name.startsWith('learn_')),
         skills: tools.filter((name) => name.startsWith('learn_')),
         interactions: names(pkg.interactions, (interaction) => interaction.id || interaction.name),

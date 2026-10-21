@@ -33,7 +33,13 @@ import type {
     ResolveInteractionQuery,
 } from '@vertesia/common';
 import type { VertesiaClient } from './client.js';
-import { checkRateLimit, executeInteraction, executeInteractionAsync, executeInteractionByName } from './execute.js';
+import {
+    checkRateLimit,
+    type ExecuteInteractionRequestOptions,
+    executeInteraction,
+    executeInteractionAsync,
+    executeInteractionByName,
+} from './execute.js';
 import { InteractionCatalogApi } from './InteractionCatalogApi.js';
 import { type EnhancedInteractionExecutionResult, enhanceInteractionExecutionResult } from './InteractionOutput.js';
 
@@ -229,7 +235,7 @@ export default class InteractionsApi extends ApiTopic {
         nameWithTag: string,
         payload: InteractionExecutionPayload = {},
         onChunk?: (chunk: string) => void,
-        requestOptions?: IRequestParams,
+        requestOptions?: ExecuteInteractionRequestOptions,
     ): Promise<EnhancedInteractionExecutionResult<ResultT, ParamsT>> {
         const r = await executeInteractionByName<ParamsT>(
             this.client as VertesiaClient,

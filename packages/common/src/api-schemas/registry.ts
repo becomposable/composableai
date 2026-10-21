@@ -1224,6 +1224,7 @@ const EXECUTION_RUN_SCHEMAS = {
     ExecutionRunRefArray: ExecutionRunRefArraySchema,
     UpdateExecutionRunPayload: UpdateExecutionRunPayloadSchema,
     RunCreatePayload: RunCreatePayloadSchema,
+    GetRunQuery: GetRunQuerySchema,
     // Listing and searching runs.
     SortOrder: SortOrderSchema,
     SortOption: SortOptionSchema,
@@ -1254,7 +1255,6 @@ const INTERACTION_EXECUTION_SCHEMAS = {
     InteractionExecutionError: InteractionExecutionErrorSchema,
     ResultStorageOptions: ResultStorageOptionsSchema,
     ExecuteNamedInteractionQuery: ExecuteNamedInteractionQuerySchema,
-    GetRunQuery: GetRunQuerySchema,
     ExecuteInteractionByEndpointQuery: ExecuteInteractionByEndpointQuerySchema,
     ExecuteInteractionByEndpointHeaders: ExecuteInteractionByEndpointHeadersSchema,
     AsyncCompletionMode: AsyncCompletionModeSchema,

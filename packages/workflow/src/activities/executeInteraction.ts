@@ -13,7 +13,7 @@ import { NodeStreamSource } from '@vertesia/client/node';
 import {
     type DSLActivityExecutionPayload,
     type DSLActivitySpec,
-    type ExecutionRun,
+    type ExecutionRunRef,
     ExecutionRunStatus,
     type ExecutionRunWorkflow,
     type InteractionExecutionConfiguration,
@@ -242,8 +242,7 @@ export async function executeInteraction(payload: DSLActivityExecutionPayload<Ex
             params,
             prompt_data,
             payload.debug_mode,
-            // A projection can read any field of the response as `#`, including `#.prompt`.
-            { includePrompt: !!payload.activity.projection },
+            { includePrompt: projectionReadsPrompt(payload.activity.projection) },
         );
 
         let completionResult: CompletionResult[] = res.result;
@@ -361,6 +360,15 @@ export async function executeInteraction(payload: DSLActivityExecutionPayload<Ex
     }
 }
 
+/**
+ * Whether an activity projection can read the rendered prompt of the execution response, which it
+ * sees as `#`: through `#.prompt`, or through `#` itself. Any other use of `#` (`#.result`, ...) cannot.
+ * A `#` this cannot rule out, such as one inside a literal, keeps the prompt.
+ */
+function projectionReadsPrompt(projection: unknown): boolean {
+    return projection !== undefined && /#(?!\.)|#\.prompt\b/.test(JSON.stringify(projection));
+}
+
 export async function executeInteractionFromActivity(
     client: VertesiaClient,
     interactionName: string,
@@ -389,7 +397,7 @@ export async function executeInteractionFromActivity(
         activity_type: info.activityType,
     };
 
-    let previousStudioExecutionRun: ExecutionRun | undefined;
+    let previousError: ExecutionRunRef['error'];
     if (params.include_previous_error) {
         //retrieve last failed run if any
         if (info.attempt > 1) {
@@ -409,12 +417,13 @@ export async function executeInteractionFromActivity(
 
             if (previousRun) {
                 log.debug('Found previous run', { prev_run_id: previousRun.id });
-                previousStudioExecutionRun = await client.runs.retrieve(previousRun.id, { include_prompt: false });
+                // The search result already carries the error, so the whole run is not fetched.
+                previousError = previousRun.error;
             }
         }
     }
-    if (debug && previousStudioExecutionRun?.error) {
-        log.info(`Found  previous run error`, { error: previousStudioExecutionRun?.error });
+    if (debug && previousError) {
+        log.info(`Found  previous run error`, { error: previousError });
     }
 
     const configDefaults = params.config ?? {};
@@ -428,7 +437,7 @@ export async function executeInteractionFromActivity(
     };
     const data = {
         ...prompt_data,
-        previous_error: previousStudioExecutionRun?.error,
+        previous_error: previousError,
     };
 
     const result_schema = params.result_schema;

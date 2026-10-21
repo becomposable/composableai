@@ -11770,6 +11770,16 @@
     "additionalProperties": false,
     "description": "Interaction execution payload for creating a new run It uses interaction field (from NamedInteractionExecutionPayload) to pass the interaction ID to run"
   },
+  "GetRunQuery": {
+    "type": "object",
+    "properties": {
+      "include_prompt": {
+        "type": "boolean",
+        "description": "Whether the run includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined), and it is then not loaded from storage."
+      }
+    },
+    "additionalProperties": false
+  },
   "SortOrder": {
     "type": "string",
     "enum": [
@@ -12897,17 +12907,7 @@
     "properties": {
       "include_prompt": {
         "type": "boolean",
-        "description": "Whether the synchronous execution result includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined), and it remains retrievable from the stored run."
-      }
-    },
-    "additionalProperties": false
-  },
-  "GetRunQuery": {
-    "type": "object",
-    "properties": {
-      "include_prompt": {
-        "type": "boolean",
-        "description": "Whether the run includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined), and it is then not loaded from storage."
+        "description": "Whether the synchronous execution result includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined). It is still stored with the run unless run data storage is restricted."
       }
     },
     "additionalProperties": false
@@ -12920,7 +12920,7 @@
       },
       "include_prompt": {
         "type": "boolean",
-        "description": "Whether the synchronous execution result includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined), and it remains retrievable from the stored run."
+        "description": "Whether the synchronous execution result includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined). It is still stored with the run unless run data storage is restricted."
       }
     },
     "additionalProperties": false

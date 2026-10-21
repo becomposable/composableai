@@ -212,6 +212,10 @@ export const APP_DEPLOYMENT_ALIAS_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9]
 
 export type AppVersionRecord = Wire.AppVersionRecord;
 
+export type CreateAppVersionLaunchRequest = Wire.CreateAppVersionLaunchRequest;
+
+export type CreateAppVersionLaunchResponse = Wire.CreateAppVersionLaunchResponse;
+
 export type DeleteAppVersionResponse = Wire.DeleteAppVersionResponse;
 
 export type UpsertAppVersionRequest = Wire.UpsertAppVersionRequest;

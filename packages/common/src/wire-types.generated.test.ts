@@ -380,6 +380,14 @@ interface Checks {
         W.AppVersionRecord,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppVersionRecordSchema>
     >;
+    CreateAppVersionLaunchRequest: Same<
+        W.CreateAppVersionLaunchRequest,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').CreateAppVersionLaunchRequestSchema>
+    >;
+    CreateAppVersionLaunchResponse: Same<
+        W.CreateAppVersionLaunchResponse,
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').CreateAppVersionLaunchResponseSchema>
+    >;
     DeleteAppVersionResponse: Same<
         W.DeleteAppVersionResponse,
         z.infer<typeof import('./api-schemas/app-lifecycle.js').DeleteAppVersionResponseSchema>
@@ -9070,6 +9078,14 @@ interface Checks {
         W.ApiComponentTypes['ContentObjectTypeRef'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').ContentObjectTypeRefSchema>
     >;
+    'component:CreateAppVersionLaunchRequest': Same<
+        W.ApiComponentTypes['CreateAppVersionLaunchRequest'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').CreateAppVersionLaunchRequestSchema>
+    >;
+    'component:CreateAppVersionLaunchResponse': Same<
+        W.ApiComponentTypes['CreateAppVersionLaunchResponse'],
+        z.infer<typeof import('./api-schemas/app-lifecycle.js').CreateAppVersionLaunchResponseSchema>
+    >;
     'component:AppBuildProgress': Same<
         W.ApiComponentTypes['AppBuildProgress'],
         z.infer<typeof import('./api-schemas/app-lifecycle.js').AppBuildProgressSchema>
@@ -9774,6 +9790,8 @@ const checks: Checks = {
     AppVersionGitSource: true,
     AppVersionUrls: true,
     AppVersionRecord: true,
+    CreateAppVersionLaunchRequest: true,
+    CreateAppVersionLaunchResponse: true,
     DeleteAppVersionResponse: true,
     UpsertAppVersionRequest: true,
     PromoteAppVersionResponse: true,
@@ -12062,6 +12080,8 @@ const checks: Checks = {
     'component:AppRepoRefs': true,
     'component:AppRepoCommits': true,
     'component:ContentObjectTypeRef': true,
+    'component:CreateAppVersionLaunchRequest': true,
+    'component:CreateAppVersionLaunchResponse': true,
     'component:AppBuildProgress': true,
     'component:AppVersionStorage': true,
     'component:AppToolCollection': true,
@@ -12215,6 +12235,6 @@ const checks: Checks = {
 
 describe('wire-types.generated', () => {
     it('asserts every generated type against its schema', () => {
-        expect(Object.keys(checks)).toHaveLength(2544);
+        expect(Object.keys(checks)).toHaveLength(2548);
     });
 });

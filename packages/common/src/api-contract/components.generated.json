@@ -20768,6 +20768,42 @@
       "ref_type"
     ]
   },
+  "CreateAppVersionLaunchRequest": {
+    "type": "object",
+    "properties": {
+      "settings": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Temporary app installation settings used only by this version launch."
+      }
+    },
+    "required": [
+      "settings"
+    ],
+    "additionalProperties": false,
+    "description": "Creates a short-lived launch of one immutable app version with temporary installation settings."
+  },
+  "CreateAppVersionLaunchResponse": {
+    "type": "object",
+    "properties": {
+      "version_launch_id": {
+        "type": "string"
+      },
+      "version_selector": {
+        "type": "string"
+      },
+      "app_url": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "version_launch_id",
+      "version_selector",
+      "app_url"
+    ],
+    "additionalProperties": false,
+    "description": "Opaque launch selector and App Gateway URL for an advanced app-version launch."
+  },
   "AppBuildProgress": {
     "type": "object",
     "properties": {

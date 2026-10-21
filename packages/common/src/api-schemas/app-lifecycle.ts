@@ -915,6 +915,28 @@ export const AppVersionRecordSchema = z
     })
     .meta({ id: 'AppVersionRecord' });
 
+export const CreateAppVersionLaunchRequestSchema = z
+    .strictObject({
+        settings: z
+            .looseObject({})
+            .meta({ description: 'Temporary app installation settings used only by this version launch.' }),
+    })
+    .meta({
+        id: 'CreateAppVersionLaunchRequest',
+        description: 'Creates a short-lived launch of one immutable app version with temporary installation settings.',
+    });
+
+export const CreateAppVersionLaunchResponseSchema = z
+    .strictObject({
+        version_launch_id: z.string(),
+        version_selector: z.string(),
+        app_url: z.string(),
+    })
+    .meta({
+        id: 'CreateAppVersionLaunchResponse',
+        description: 'Opaque launch selector and App Gateway URL for an advanced app-version launch.',
+    });
+
 export const AgentRunSearchHitSchema = z
     .strictObject({
         id: z.string().meta({ description: 'Agent run ID' }),

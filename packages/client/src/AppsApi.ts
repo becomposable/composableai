@@ -32,6 +32,8 @@ import type {
     AppVersionRecord,
     CountResult,
     CreateAppRepoBranchRequest,
+    CreateAppVersionLaunchRequest,
+    CreateAppVersionLaunchResponse,
     DeleteAppVersionResponse,
     ExchangeAppGithubAuthorizationResponse,
     McpApiKeyStatus,
@@ -148,6 +150,14 @@ export default class AppsApi extends ApiTopic {
 
     promoteVersion(recordId: string): Promise<PromoteAppVersionResponse> {
         return this.post(`/versions/${recordId}/promote`);
+    }
+
+    /** Create an ephemeral launch of an immutable version with temporary installation settings. */
+    createVersionLaunch(
+        recordId: string,
+        payload: CreateAppVersionLaunchRequest,
+    ): Promise<CreateAppVersionLaunchResponse> {
+        return this.post(`/versions/${recordId}/launches`, { payload });
     }
 
     /** Assign or move a stable deployment alias to an immutable app version. */

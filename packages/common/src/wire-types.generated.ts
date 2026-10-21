@@ -755,6 +755,16 @@ export type AppVersionRecord = {
     checked_at?: string | undefined;
     expires_at?: string | undefined;
 };
+export type CreateAppVersionLaunchRequest = {
+    settings: {
+        [k: string]: unknown;
+    };
+};
+export type CreateAppVersionLaunchResponse = {
+    version_launch_id: string;
+    version_selector: string;
+    app_url: string;
+};
 export type DeleteAppVersionResponse = {
     id: string;
     app_id: string;
@@ -12007,6 +12017,8 @@ export interface ApiComponentTypes {
     AppRepoRefs: AppRepoRefs;
     AppRepoCommits: AppRepoCommits;
     ContentObjectTypeRef: ContentObjectApiTypeRef;
+    CreateAppVersionLaunchRequest: CreateAppVersionLaunchRequest;
+    CreateAppVersionLaunchResponse: CreateAppVersionLaunchResponse;
     AppBuildProgress: AppBuildProgress;
     AppVersionStorage: AppVersionStorage;
     AppToolCollection: AppToolCollection;

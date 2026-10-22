@@ -1,4 +1,4 @@
-import { CompleteAsyncError } from '@temporalio/activity';
+import { CompleteAsyncError, log } from '@temporalio/activity';
 import { MockActivityEnvironment } from '@temporalio/testing';
 import type { VertesiaClient } from '@vertesia/client';
 import {
@@ -129,8 +129,16 @@ describe('TranscribeMedia', () => {
         } as unknown as ActivityContext<TranscriptMediaParams>);
 
         const payload = createTestPayload(params, 'test-object-id');
+        const info = vi.spyOn(log, 'info');
 
         await expect(testEnv.run(transcribeMedia, payload)).rejects.toThrow(CompleteAsyncError);
+
+        // The signed media URL and the task token in the callback URL are credentials: they must not be logged.
+        expect(info).toHaveBeenCalledWith('Transcribing media with Gladia', expect.anything());
+        const logged = JSON.stringify(info.mock.calls);
+        expect(logged).not.toContain('download.example.com');
+        expect(logged).not.toContain('task_token');
+        info.mockRestore();
 
         expect(mockFetchClient.post).toHaveBeenCalledWith('/transcription', {
             payload: {

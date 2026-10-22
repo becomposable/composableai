@@ -24,6 +24,17 @@ import {
     rethrowIfActivityStopped,
     UNUSABLE_VIDEO_CONTENT,
 } from './exec.js';
+import {
+    allSettledOrThrow,
+    buildFrameGrabArgs,
+    buildProbeArgs,
+    commandFailureLog,
+    execOnVideoInput,
+    ffmpegInputArgs,
+    parseDuration,
+    type VideoInput,
+    VideoSource,
+} from './videoSource.js';
 
 // Shared steps of the video activities: prepareVideo runs them all in one Activity, while extractVideoAssets,
 // transcodeVideo and addObjectRendition run them as separate Activities so the long transcode can be scheduled apart
@@ -44,7 +55,6 @@ const MIN_SCREENSHOT_TIMESTAMP = 1; // Minimum timestamp for screenshots in seco
 // FFmpeg configuration constants
 const VIDEO_CRF = '23'; // Constant Rate Factor for video quality (18-28, lower = better)
 const AUDIO_BITRATE = '128k'; // Audio bitrate for AAC encoding
-const JPEG_QUALITY = '2'; // JPEG quality for screenshots (1-31, lower = better)
 
 export const VIDEO_PRESETS = ['medium', 'fast', 'veryfast', 'ultrafast'] as const;
 export type VideoPreset = (typeof VIDEO_PRESETS)[number];
@@ -75,6 +85,14 @@ export interface VideoMetadataExtended {
     bitrate: number;
     fps: number;
     hasAudio: boolean;
+    /** Container names as ffprobe reports them, e.g. `mov,mp4,m4a,3gp,3g2,mj2`. */
+    formatName: string;
+    /** Number of audio streams in the source. */
+    audioStreams: number;
+    /** Codec, channel count and duration (seconds) of the first audio stream. */
+    audioCodec?: string;
+    audioChannels?: number;
+    audioDuration?: number;
 }
 
 interface FFProbeStream {
@@ -83,11 +101,16 @@ interface FFProbeStream {
     width?: number;
     height?: number;
     r_frame_rate?: string;
+    channels?: number;
+    duration?: string;
+    /** Matroska and WebM keep the stream duration here, as `HH:MM:SS.nnnnnnnnn`, instead of in `duration`. */
+    tags?: { DURATION?: string };
 }
 
 interface FFProbeFormat {
     duration?: string;
     bit_rate?: string;
+    format_name?: string;
 }
 
 interface FFProbeOutput {
@@ -96,13 +119,25 @@ interface FFProbeOutput {
 }
 
 /**
+ * The video's duration in seconds, or 0 when the file gives none. The container duration is the file's playback length,
+ * which players report, so it comes first. When the container omits it, use the video stream's duration.
+ */
+export function resolvePlaybackDuration(format: FFProbeFormat, videoStream: FFProbeStream): number {
+    return (
+        parseDuration(format.duration) ??
+        parseDuration(videoStream.duration) ??
+        parseDuration(videoStream.tags?.DURATION) ??
+        0
+    );
+}
+
+/**
  * Extract comprehensive video metadata using ffprobe
  */
-export async function getVideoMetadata(videoPath: string): Promise<VideoMetadataExtended> {
+export async function getVideoMetadata(input: VideoInput): Promise<VideoMetadataExtended> {
     try {
-        const args = ['-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videoPath];
-        const { stdout } = await execActivityFile('ffprobe', args);
-        const metadata = JSON.parse(stdout.toString()) as FFProbeOutput;
+        const { stdout } = await execOnVideoInput(input, 'ffprobe', buildProbeArgs(input));
+        const metadata = JSON.parse(stdout) as FFProbeOutput;
 
         const videoStream = metadata.streams.find((stream) => stream.codec_type === 'video');
 
@@ -110,7 +145,10 @@ export async function getVideoMetadata(videoPath: string): Promise<VideoMetadata
             throw ApplicationFailure.nonRetryable('No video stream found in file', UNUSABLE_VIDEO_CONTENT);
         }
 
-        const duration = parseFloat(metadata.format.duration ?? '0') || 0;
+        const duration = resolvePlaybackDuration(metadata.format, videoStream);
+        if (duration <= 0) {
+            throw ApplicationFailure.nonRetryable('Video has no usable duration', UNUSABLE_VIDEO_CONTENT);
+        }
         const width = videoStream.width || 0;
         const height = videoStream.height || 0;
         const codec = videoStream.codec_name || 'unknown';
@@ -124,10 +162,23 @@ export async function getVideoMetadata(videoPath: string): Promise<VideoMetadata
         }
 
         // Check if video has an audio stream
-        const audioStream = metadata.streams.find((stream) => stream.codec_type === 'audio');
-        const hasAudio = !!audioStream;
+        const audioStreams = metadata.streams.filter((stream) => stream.codec_type === 'audio');
+        const audioStream = audioStreams[0];
 
-        return { duration, width, height, codec, bitrate, fps, hasAudio };
+        return {
+            duration,
+            width,
+            height,
+            codec,
+            bitrate,
+            fps,
+            hasAudio: !!audioStream,
+            formatName: metadata.format.format_name || 'unknown',
+            audioStreams: audioStreams.length,
+            audioCodec: audioStream?.codec_name,
+            audioChannels: audioStream?.channels,
+            audioDuration: parseDuration(audioStream?.duration),
+        };
     } catch (error) {
         rethrowIfActivityStopped(error);
         const message = `Failed to get video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`;
@@ -136,7 +187,7 @@ export async function getVideoMetadata(videoPath: string): Promise<VideoMetadata
             log.warn(message);
             throw error;
         }
-        log.error(message);
+        commandFailureLog(input)(message);
         throw new Error(`Failed to probe video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
@@ -318,48 +369,141 @@ export async function generateAudioRendition(videoPath: string, outputDir: strin
 }
 
 /**
+ * Whether the audio rendition can copy the source's audio track instead of encoding it: a single AAC track with at most
+ * two channels, which is what the encode would produce anyway.
+ */
+export function isAudioCopyEligible(metadata: VideoMetadataExtended): boolean {
+    const channels = metadata.audioChannels ?? 0;
+    return metadata.audioStreams === 1 && metadata.audioCodec === 'aac' && channels >= 1 && channels <= 2;
+}
+
+/**
+ * Copy the audio track without decoding it. `-xerror` makes a broken input fail the command: without it, ffmpeg ends a
+ * stream cut short with a truncated file and exit code 0.
+ */
+export function buildAudioCopyArgs(input: VideoInput, outputFile: string): string[] {
+    return ['-y', '-xerror', ...ffmpegInputArgs(input), '-vn', '-c:a', 'copy', outputFile];
+}
+
+/** Tolerance for {@link isAudioDurationComplete}: the larger of one second and 1% of the expected duration. */
+export function isAudioDurationComplete(actual: number, expected: number): boolean {
+    return actual >= expected - Math.max(1, expected * 0.01);
+}
+
+/**
+ * Duration in seconds of a local file: of its container (`format=duration`), or of its first audio stream
+ * (`stream=duration`). Undefined when ffprobe reports none.
+ */
+async function probeDuration(file: string, entry: 'format=duration' | 'stream=duration'): Promise<number | undefined> {
+    const select = entry === 'stream=duration' ? ['-select_streams', 'a:0'] : [];
+    const { stdout } = await execActivityFile('ffprobe', [
+        '-v',
+        'quiet',
+        ...select,
+        '-show_entries',
+        entry,
+        '-of',
+        'csv=p=0',
+        file,
+    ]);
+    return parseDuration(stdout.trim());
+}
+
+/**
+ * Fast path for the audio rendition: copy the AAC track from a local rendition or the source.
+ * Returns the file, or undefined when the copy fails or comes out shorter than `expected` seconds.
+ */
+async function copyAudioRendition(input: VideoInput, outputDir: string, expected: number): Promise<string | undefined> {
+    const outputFile = path.join(outputDir, 'audio.m4a');
+    try {
+        await execOnVideoInput(input, 'ffmpeg', buildAudioCopyArgs(input, outputFile), {
+            progress: true,
+            logMessage: 'Copying audio track for audio-only rendition',
+        });
+        const actual = await probeDuration(outputFile, 'format=duration');
+        if (actual === undefined || !isAudioDurationComplete(actual, expected)) {
+            log.warn('Copied audio track is incomplete; encoding it from a download instead', { actual, expected });
+            return undefined;
+        }
+        return outputFile;
+    } catch (error) {
+        rethrowIfActivityStopped(error);
+        log.warn('Failed to copy audio track; encoding it from a download instead', {
+            error: error instanceof Error ? error.message : String(error),
+        });
+        return undefined;
+    }
+}
+
+export type AudioRenditionMode = 'copy' | 'encode';
+
+/**
+ * Reuse the video rendition's AAC track when available, avoiding another source read and audio encode. Without a video
+ * rendition, copy an eligible source track. Fall back to encoding the downloaded source when a copy fails.
+ */
+export async function extractAudioRendition(
+    source: VideoSource,
+    outputDir: string,
+    metadata: VideoMetadataExtended,
+    videoRendition: MediaResult | null,
+): Promise<{ file: string; mode: AudioRenditionMode } | null> {
+    if (videoRendition || isAudioCopyEligible(metadata)) {
+        const copyInput: VideoInput = videoRendition
+            ? { kind: 'file', path: videoRendition.file }
+            : await source.partialInput();
+        // Compare with the track being copied. The transcode picks its own audio track from a multi-track source, so the
+        // rendition's track, not the source's first one, is the reference. A source copy needs a single track, so there
+        // the probed source track is the one copied.
+        const expected =
+            (videoRendition
+                ? await probeDuration(videoRendition.file, 'stream=duration').catch(() => undefined)
+                : undefined) ??
+            metadata.audioDuration ??
+            metadata.duration;
+        const copied = await copyAudioRendition(copyInput, outputDir, expected);
+        if (copied) {
+            return { file: copied, mode: 'copy' };
+        }
+    }
+    const encoded = await generateAudioRendition(await source.localPath(), outputDir);
+    return encoded ? { file: encoded, mode: 'encode' } : null;
+}
+
+/**
  * Extract a screenshot frame from the video at a specific timestamp
  */
+export function buildScreenshotArgs(
+    input: VideoInput,
+    outputFile: string,
+    timestamp: number,
+    dimensions: { width: number; height: number },
+): string[] {
+    return buildFrameGrabArgs(input, outputFile, timestamp, `scale=${dimensions.width}:${dimensions.height}`);
+}
+
 export async function generateScreenshot(
-    videoPath: string,
+    input: VideoInput,
     outputDir: string,
     timestamp: number,
     maxSize: number,
     name: string,
     metadata: VideoMetadataExtended,
-): Promise<MediaResult | null> {
+): Promise<MediaResult | undefined> {
     const outputFile = path.join(outputDir, `${name}.jpg`);
 
     // Calculate scaled dimensions
     const dimensions = calculateScaledDimensions(metadata.width, metadata.height, maxSize);
 
-    const scaleFilter = `scale=${dimensions.width}:${dimensions.height}`;
-
-    const command = [
-        '-y',
-        ...ffmpegInputThreadArgs(),
-        '-ss',
-        timestamp.toString(),
-        '-i',
-        videoPath,
-        '-vframes',
-        '1',
-        '-vf',
-        scaleFilter,
-        '-q:v',
-        JPEG_QUALITY, // High quality JPEG
-        ...ffmpegOutputThreadArgs(),
-        outputFile,
-    ];
-
-    log.debug(`Generating ${name} at ${timestamp}s`, { command: 'ffmpeg', args: command });
-
     try {
-        const { stderr } = await execActivityFile('ffmpeg', command);
-        const stderrText = stderr.toString();
+        const { stderr } = await execOnVideoInput(
+            input,
+            'ffmpeg',
+            buildScreenshotArgs(input, outputFile, timestamp, dimensions),
+            { logMessage: `Generating ${name} at ${timestamp}s` },
+        );
 
-        if (stderrText && !stderrText.includes('frame=')) {
-            log.debug(`FFmpeg stderr for ${name}: ${stderrText}`);
+        if (stderr && !stderr.includes('frame=')) {
+            log.debug(`FFmpeg stderr for ${name}: ${stderr}`);
         }
 
         // Verify output file was created
@@ -373,12 +517,14 @@ export async function generateScreenshot(
             };
         } catch {
             log.warn(`${name} not generated`);
-            return null;
+            return undefined;
         }
     } catch (error) {
         rethrowIfActivityStopped(error);
-        log.error(`Failed to generate ${name}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        return null;
+        commandFailureLog(input)(
+            `Failed to generate ${name}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+        return undefined;
     }
 }
 
@@ -500,16 +646,46 @@ export async function withVideoWorkspace<T>(
     }
 }
 
+/**
+ * Open the video for reading over a signed URL, create a temp output directory, run `work`, then remove the directory
+ * and any download the work made. Probes and frame grabs read the URL; a step that needs the whole file downloads it
+ * once with {@link VideoSource.localPath}.
+ */
+export async function withVideoSource<T>(
+    client: VertesiaClient,
+    sourceUri: string,
+    outputDirPrefix: string,
+    work: (source: VideoSource, outputDir: string) => Promise<T>,
+): Promise<T> {
+    const source = await VideoSource.open(client, sourceUri);
+    let tempOutputDir: string | undefined;
+
+    try {
+        tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), outputDirPrefix));
+        return await work(source, tempOutputDir);
+    } finally {
+        const outputDir = tempOutputDir;
+        await Promise.allSettled([
+            source.dispose(),
+            outputDir
+                ? fs.promises.rm(outputDir, { recursive: true, force: true }).catch((err) => {
+                      log.warn(`Failed to cleanup temp directory: ${outputDir}`, { err });
+                  })
+                : Promise.resolve(),
+        ]);
+    }
+}
+
 export interface VideoFrames {
-    thumbnail: MediaResult | null;
-    poster: MediaResult | null;
+    thumbnail: MediaResult | undefined;
+    poster: MediaResult | undefined;
 }
 
 /**
- * Extract the thumbnail and poster frames in parallel.
+ * Extract the thumbnail and poster frames in parallel, each over the source's URL with a download fallback.
  */
 export async function extractVideoFrames(
-    videoFile: string,
+    source: VideoSource,
     outputDir: string,
     metadata: VideoMetadataExtended,
     thumbnailSize: number,
@@ -521,9 +697,13 @@ export async function extractVideoFrames(
         MIN_SCREENSHOT_TIMESTAMP,
     );
 
-    const [thumbnail, poster] = await Promise.all([
-        generateScreenshot(videoFile, outputDir, thumbnailTimestamp, thumbnailSize, 'thumbnail', metadata),
-        generateScreenshot(videoFile, outputDir, posterTimestamp, posterSize, 'poster', metadata),
+    const [thumbnail, poster] = await allSettledOrThrow([
+        source.withFallback((input) =>
+            generateScreenshot(input, outputDir, thumbnailTimestamp, thumbnailSize, 'thumbnail', metadata),
+        ),
+        source.withFallback((input) =>
+            generateScreenshot(input, outputDir, posterTimestamp, posterSize, 'poster', metadata),
+        ),
     ]);
     return { thumbnail, poster };
 }

@@ -115,12 +115,11 @@ export async function transcribeMedia(
         throw new DocumentNotFoundError(`Error fetching media URL for ${mediaSource}`);
     }
 
-    log.info(`Using media URL for transcription`, { storageId, mediaUrl: mediaSource });
-
     const taskToken = Buffer.from(activityInfo().taskToken).toString('base64url');
     const callbackUrl = generateCallbackUrlForGladia(client.store.baseUrl, taskToken);
 
-    log.info(`Transcribing media ${mediaUrl} with Gladia`, { storageId, callbackUrl });
+    // The signed media URL and the callback URL (which carries the activity task token) grant access: never log them.
+    log.info('Transcribing media with Gladia', { storageId, mediaSource });
 
     try {
         const res = (await gladiaClient.post('/transcription', {

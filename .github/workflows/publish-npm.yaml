@@ -319,7 +319,7 @@ jobs:
   publish:
     name: Publish all packages
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     needs:
       - prepare-release
       - build-macos-cli
@@ -400,7 +400,8 @@ jobs:
 
       - name: Publish all packages
         id: publish
-        timeout-minutes: 5
+        # A full cohort signs npm provenance separately for every package.
+        timeout-minutes: 20
         env:
           RELEASE_TYPE: ${{ inputs.release_type }}
           BUMP_TYPE: ${{ inputs.bump_type }}

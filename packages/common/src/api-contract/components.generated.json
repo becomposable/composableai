@@ -6774,6 +6774,9 @@
       },
       "version_id": {
         "type": "string"
+      },
+      "deployment_alias": {
+        "type": "string"
       }
     },
     "required": [
@@ -19403,6 +19406,30 @@
       "version"
     ]
   },
+  "AppDeploymentAlias": {
+    "type": "string",
+    "pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+    "description": "Stable, lowercase deployment alias for an immutable app version, such as `production`, `preview`, or `customer-demo`."
+  },
+  "AppDeploymentAliasTarget": {
+    "type": "object",
+    "properties": {
+      "version_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Immutable AppGen version id."
+      },
+      "version_record_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Globally unique app-version record id used to resolve the exact build."
+      }
+    },
+    "required": [
+      "version_id",
+      "version_record_id"
+    ]
+  },
   "StartAppScaffoldResponse": {
     "type": "object",
     "properties": {
@@ -20768,6 +20795,75 @@
       "ref_type"
     ]
   },
+  "AppVersionLaunchTarget": {
+    "type": "object",
+    "properties": {
+      "project": {
+        "$ref": "#/components/schemas/ProjectRef"
+      },
+      "installation_id": {
+        "type": "string"
+      },
+      "settings": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Current settings of the app installation in the target project."
+      }
+    },
+    "required": [
+      "project",
+      "installation_id",
+      "settings"
+    ],
+    "additionalProperties": false,
+    "description": "A user-accessible project where this app version may be launched temporarily."
+  },
+  "AppVersionLaunchTargetArray": {
+    "type": "array",
+    "items": {
+      "$ref": "#/components/schemas/AppVersionLaunchTarget"
+    }
+  },
+  "CreateAppVersionLaunchRequest": {
+    "type": "object",
+    "properties": {
+      "target_project_id": {
+        "type": "string",
+        "description": "Project in the source account where the app is already installed and the temporary version will run. Defaults to the current project."
+      },
+      "settings": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Temporary app installation settings used only by this version launch."
+      }
+    },
+    "required": [
+      "settings"
+    ],
+    "additionalProperties": false,
+    "description": "Creates a short-lived launch of one immutable app version with temporary installation settings."
+  },
+  "CreateAppVersionLaunchResponse": {
+    "type": "object",
+    "properties": {
+      "version_launch_id": {
+        "type": "string"
+      },
+      "version_selector": {
+        "type": "string"
+      },
+      "app_url": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "version_launch_id",
+      "version_selector",
+      "app_url"
+    ],
+    "additionalProperties": false,
+    "description": "Opaque launch selector and App Gateway URL for an advanced app-version launch."
+  },
   "AppBuildProgress": {
     "type": "object",
     "properties": {
@@ -20974,6 +21070,13 @@
       },
       "promoted": {
         "type": "boolean"
+      },
+      "aliases": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AppDeploymentAlias"
+        },
+        "description": "Deployment aliases that currently resolve to this immutable version."
       },
       "target": {
         "$ref": "#/components/schemas/AppVersionTarget"
@@ -21317,6 +21420,10 @@
       "app_id": {
         "type": "string"
       },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Optional stable deployment alias to follow for this installation instead of the app's promoted version."
+      },
       "instance_key": {
         "type": "string",
         "pattern": "^[a-z][a-z0-9_-]{0,31}$"
@@ -21519,6 +21626,23 @@
     },
     "additionalProperties": false,
     "description": "Exactly one of `name` or `id` identifies the app. Neither is required by the component because the endpoint answers 400 for the empty case with a message naming both."
+  },
+  "AppPackageQuery": {
+    "type": "object",
+    "properties": {
+      "scope": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AppPackageScope"
+        },
+        "description": "Which capabilities to include in the returned package. Defaults to `all`. Comma-joined (`?scope=ui,tools`) or repeated."
+      },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Resolve the package from this named deployment. Used before installation to load the selected deployment configuration."
+      }
+    },
+    "additionalProperties": false
   },
   "SystemPackageQuery": {
     "type": "object",
@@ -24259,6 +24383,16 @@
         "type": "string",
         "description": "Optional app version string (e.g. \"1.0.0\") — informational."
       },
+      "deployment_aliases": {
+        "type": "object",
+        "propertyNames": {
+          "$ref": "#/components/schemas/AppDeploymentAlias"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/AppDeploymentAliasTarget"
+        },
+        "description": "Vertesia-managed mapping from stable deployment aliases to immutable AppGen versions."
+      },
       "source": {
         "$ref": "#/components/schemas/AppManifestSource",
         "description": "Source metadata for generated or synced app manifests."
@@ -25507,6 +25641,10 @@
           "type": "string"
         }
       },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Stable deployment alias selected for this installation. The alias is resolved to its current immutable app version at request time."
+      },
       "manifest": {
         "type": "string"
       },
@@ -25674,6 +25812,10 @@
         "items": {
           "type": "string"
         }
+      },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Stable deployment alias selected for this installation. The alias is resolved to its current immutable app version at request time."
       },
       "mcp_configuration": {
         "type": "object",
@@ -25843,6 +25985,10 @@
         "items": {
           "type": "string"
         }
+      },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Stable deployment alias selected for this installation. The alias is resolved to its current immutable app version at request time."
       },
       "mcp_configuration": {
         "type": "object",

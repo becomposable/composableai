@@ -5,18 +5,23 @@ import { ApplicationFailure, log } from '@temporalio/activity';
 import type { DSLActivityExecutionPayload, DSLActivitySpec } from '@vertesia/common';
 import { setupActivity } from '../../dsl/setup/ActivityContext.js';
 import { DocumentNotFoundError, WorkflowParamNotFoundError } from '../../errors.js';
-import { saveBlobToTempFile } from '../../utils/blobs.js';
 import { type ImageRenditionParams, uploadRenditionPages } from '../../utils/renditions.js';
 import {
-    execActivityFile,
-    execActivityFileWithProgress,
-    ffmpegInputThreadArgs,
-    ffmpegOutputThreadArgs,
     initializeActivityCommandDeadline,
     isUnusableVideoContent,
     rethrowIfActivityStopped,
     UNUSABLE_VIDEO_CONTENT,
 } from '../media/exec.js';
+import {
+    allSettledOrThrow,
+    buildFrameGrabArgs,
+    buildProbeArgs,
+    commandFailureLog,
+    execOnVideoInput,
+    parseDuration,
+    type VideoInput,
+    VideoSource,
+} from '../media/videoSource.js';
 
 interface GenerateVideoRenditionParams extends ImageRenditionParams {}
 
@@ -35,17 +40,26 @@ interface VideoMetadata {
     height: number;
 }
 
-export async function getVideoMetadata(videoPath: string): Promise<VideoMetadata> {
+export async function getVideoMetadata(input: VideoInput): Promise<VideoMetadata> {
     try {
-        const args = ['-v', 'quiet', '-print_format', 'json', '-show_format', '-show_streams', videoPath];
-        const { stdout } = await execActivityFile('ffprobe', args);
-        const metadata = JSON.parse(stdout.toString()) as {
-            streams?: Array<{ codec_type?: string; duration?: string; width?: number; height?: number }>;
+        const { stdout } = await execOnVideoInput(input, 'ffprobe', buildProbeArgs(input));
+        const metadata = JSON.parse(stdout) as {
+            streams?: Array<{
+                codec_type?: string;
+                duration?: string;
+                width?: number;
+                height?: number;
+                tags?: { DURATION?: string };
+            }>;
             format?: { duration?: string };
         };
 
         const videoStream = metadata.streams?.find((stream) => stream.codec_type === 'video');
-        const duration = resolveVideoDuration(videoStream?.duration, metadata.format?.duration);
+        // Matroska and WebM keep the stream duration in a DURATION tag instead of the duration field.
+        const duration = resolveVideoDuration(
+            videoStream?.duration ?? videoStream?.tags?.DURATION,
+            metadata.format?.duration,
+        );
         const width = videoStream?.width || 0;
         const height = videoStream?.height || 0;
 
@@ -62,7 +76,7 @@ export async function getVideoMetadata(videoPath: string): Promise<VideoMetadata
             log.warn(message);
             throw error;
         }
-        log.error(message);
+        commandFailureLog(input)(message);
         throw ApplicationFailure.nonRetryable(
             `Failed to probe video metadata: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
@@ -70,13 +84,8 @@ export async function getVideoMetadata(videoPath: string): Promise<VideoMetadata
 }
 
 export function resolveVideoDuration(videoStreamDuration?: string, containerDuration?: string): number {
-    for (const rawDuration of [videoStreamDuration, containerDuration]) {
-        const duration = Number(rawDuration);
-        if (Number.isFinite(duration) && duration > 0) {
-            return duration;
-        }
-    }
-    return 0;
+    // The video stream comes first so thumbnail seeks stay inside the video track.
+    return parseDuration(videoStreamDuration) ?? parseDuration(containerDuration) ?? 0;
 }
 
 export function calculateThumbnailTimestamps(duration: number, thumbnailCount: number): number[] {
@@ -94,7 +103,7 @@ export async function generateThumbnailsWithFallback(
     timestamps: number[],
     generateAt: (timestamp: number) => Promise<string | undefined>,
 ): Promise<Array<string | undefined>> {
-    const thumbnails = await Promise.all(timestamps.map(generateAt));
+    const thumbnails = await allSettledOrThrow(timestamps.map(generateAt));
     if (thumbnails.some((thumbnail) => thumbnail !== undefined) || timestamps.includes(0)) {
         return thumbnails;
     }
@@ -119,43 +128,40 @@ function calculateThumbnailCount(duration: number): number {
     return 20;
 }
 
+export function buildThumbnailArgs(
+    input: VideoInput,
+    outputFile: string,
+    timestamp: number,
+    maxSize: number,
+): string[] {
+    // Fit within maxSize x maxSize, keeping the aspect ratio.
+    return buildFrameGrabArgs(
+        input,
+        outputFile,
+        timestamp,
+        `scale=${maxSize}:${maxSize}:force_original_aspect_ratio=decrease`,
+    );
+}
+
 async function generateThumbnail(
-    videoPath: string,
+    input: VideoInput,
     outputDir: string,
     timestamp: number,
     maxSize: number,
 ): Promise<string | undefined> {
     //pad timestamp to 5 digits as filename
     const outputFile = path.join(outputDir, `thumb-${timestamp.toString().padStart(5, '0')}.jpg`);
-
-    // FFmpeg command to extract thumbnail at specific timestamp
-    // Use proper scale filter syntax: scale=w:h:force_original_aspect_ratio=decrease
-    const scaleFilter = `scale=${maxSize}:${maxSize}:force_original_aspect_ratio=decrease`;
-
-    const command = [
-        '-y', // Overwrite output files
-        ...ffmpegInputThreadArgs(),
-        '-ss',
-        timestamp.toString(), // Seek to timestamp
-        '-i',
-        videoPath, // Input file
-        '-vframes',
-        '1', // Extract only 1 frame
-        '-vf',
-        scaleFilter, // Scale maintaining aspect ratio
-        '-q:v',
-        '2', // High quality
-        ...ffmpegOutputThreadArgs(),
-        outputFile,
-    ];
-    log.info(`Generating thumbnail at ${timestamp}s`, { command: 'ffmpeg', args: command });
     try {
-        const { stderr } = await execActivityFileWithProgress('ffmpeg', command);
-        const stderrText = stderr.toString();
+        const { stderr } = await execOnVideoInput(
+            input,
+            'ffmpeg',
+            buildThumbnailArgs(input, outputFile, timestamp, maxSize),
+            { progress: true, logMessage: `Generating thumbnail at ${timestamp}s` },
+        );
 
         // Log any warnings from ffmpeg
-        if (stderrText && !stderrText.includes('frame=')) {
-            log.debug(`FFmpeg stderr for thumbnail at ${timestamp}s: ${stderrText}`);
+        if (stderr && !stderr.includes('frame=')) {
+            log.debug(`FFmpeg stderr for thumbnail at ${timestamp}s: ${stderr}`);
         }
 
         // Verify the file was created
@@ -168,7 +174,7 @@ async function generateThumbnail(
         }
     } catch (error) {
         rethrowIfActivityStopped(error);
-        log.error(
+        commandFailureLog(input)(
             `Failed to generate thumbnail at ${timestamp}s: ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
         return undefined;
@@ -216,7 +222,9 @@ export async function generateVideoRendition(payload: DSLActivityExecutionPayloa
         throw new DocumentNotFoundError(`Document ${objectId} is not a video: ${inputObject.content.type}`, [objectId]);
     }
 
-    const videoFile = await saveBlobToTempFile(client, inputObject.content.source);
+    // Probing and single-frame seeks read a small part of the file, so read it over a signed URL and download it only
+    // when that fails.
+    const source = await VideoSource.open(client, inputObject.content.source);
     let tempOutputDir: string | undefined;
 
     try {
@@ -224,7 +232,7 @@ export async function generateVideoRendition(payload: DSLActivityExecutionPayloa
         const outputDir = tempOutputDir;
 
         // Get video metadata using command line ffprobe
-        const metadata = await getVideoMetadata(videoFile);
+        const metadata = await source.withFallback(getVideoMetadata);
         const duration = metadata.duration;
 
         const thumbnailCount = calculateThumbnailCount(duration);
@@ -241,12 +249,10 @@ export async function generateVideoRendition(payload: DSLActivityExecutionPayloa
         });
 
         // Generate thumbnails using command line ffmpeg
-        const generatedThumbnails = requireGeneratedThumbnails(
-            await generateThumbnailsWithFallback(timestamps, (timestamp) =>
-                generateThumbnail(videoFile, outputDir, timestamp, params.max_hw),
-            ),
-            objectId,
+        const thumbnails = await generateThumbnailsWithFallback(timestamps, (timestamp) =>
+            source.withFallback((input) => generateThumbnail(input, outputDir, timestamp, params.max_hw)),
         );
+        const generatedThumbnails = requireGeneratedThumbnails(thumbnails, objectId);
 
         log.info(`Successfully generated ${generatedThumbnails.length} thumbnails for ${objectId}`, {
             objectId,
@@ -278,14 +284,12 @@ export async function generateVideoRendition(payload: DSLActivityExecutionPayloa
         }
         throw new Error(`Failed to generate thumbnails for video: ${objectId}`, { cause: error });
     } finally {
-        for (const temporaryPath of [videoFile, tempOutputDir]) {
-            if (!temporaryPath) {
-                continue;
-            }
+        await source.dispose();
+        if (tempOutputDir) {
             try {
-                fs.rmSync(temporaryPath, { force: true, recursive: true });
+                fs.rmSync(tempOutputDir, { force: true, recursive: true });
             } catch (error) {
-                log.warn(`Failed to clean up temporary video rendition path`, { error, temporaryPath });
+                log.warn(`Failed to clean up temporary video rendition path`, { error, temporaryPath: tempOutputDir });
             }
         }
     }

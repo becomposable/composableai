@@ -9,6 +9,7 @@ import {
     execActivityFileWithProgress,
     ffmpegInputThreadArgs,
     ffmpegOutputThreadArgs,
+    keepTailLines,
     libx264ThreadArgs,
 } from './exec.js';
 
@@ -245,4 +246,55 @@ describe('execActivityFileWithProgress', () => {
         },
         TIMING_TEST_TIMEOUT_MS,
     );
+});
+
+describe('execActivityFileWithProgress redaction', () => {
+    it('redacts a secret before keeping only the tail of stderr in the error', async () => {
+        const secret = `https://storage.example.com/video.mp4?signature=${'s'.repeat(400)}`;
+        // The error keeps the last 2000 characters of stderr; place the secret so that boundary falls inside it.
+        const script = `process.stderr.write(${JSON.stringify(secret)} + 'x'.repeat(1800)); process.exit(1)`;
+
+        const failure = await new MockActivityEnvironment({ startToCloseTimeoutMs: 60_000 })
+            .run(() =>
+                execActivityFileWithProgress(process.execPath, ['-e', script], {
+                    redact: (text) => text.split(secret).join('<redacted>'),
+                }),
+            )
+            .catch((error: unknown) => error as Error);
+
+        expect(failure).toBeInstanceOf(Error);
+        expect((failure as Error).message).not.toContain('sss');
+    });
+});
+
+describe('keepTailLines', () => {
+    it('keeps short text unchanged', () => {
+        expect(keepTailLines('one\ntwo', 100)).toBe('one\ntwo');
+    });
+
+    it('drops the partial first line of a cut tail', () => {
+        expect(keepTailLines('first line\nsecond\nthird', 12)).toBe('third');
+        expect(keepTailLines('aaaa\rprogress=1\rprogress=2', 20)).toBe('progress=2');
+    });
+
+    it('falls back to a plain cut when the tail has no line break', () => {
+        expect(keepTailLines('x'.repeat(10), 4)).toBe('xxxx');
+    });
+});
+
+describe('execActivityFileWithProgress bounded output', () => {
+    it('never retains a secret cut in half when the buffer drops old output', async () => {
+        const secret = `https://storage.example.com/video.mp4?signature=${'s'.repeat(200)}`;
+        // The buffer keeps the last 150 characters, which would start inside the secret's line.
+        const script = `process.stderr.write(${JSON.stringify(`${secret}\nframe=1 done\n`)})`;
+
+        const result = (await new MockActivityEnvironment({ startToCloseTimeoutMs: 60_000 }).run(() =>
+            execActivityFileWithProgress(process.execPath, ['-e', script], {
+                maxBuffer: 150,
+                redact: (text) => text.split(secret).join('<redacted>'),
+            }),
+        )) as { stderr: string };
+
+        expect(result.stderr).toBe('frame=1 done\n');
+    });
 });

@@ -53,7 +53,8 @@ export async function transcodeVideo(
 
     return await withVideoWorkspace(client, source, 'transcode-video-', async (videoFile, outputDir) => {
         try {
-            const metadata = await getVideoMetadata(videoFile);
+            // The encode reads the whole file, so probe the download rather than the URL.
+            const metadata = await getVideoMetadata({ kind: 'file', path: videoFile });
             const result = await generateRenditionWithDimensions(
                 videoFile,
                 outputDir,

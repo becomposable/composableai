@@ -53,6 +53,7 @@ describe('uploadRenditionPages', () => {
         const resizedImagePath = fileURLToPath(import.meta.url);
         const uploadError = new Error('upload failed');
         const unlinkSpy = vi.spyOn(fs, 'unlinkSync').mockImplementation(() => undefined);
+        const streamSpy = vi.spyOn(fs, 'createReadStream');
         vi.mocked(imageResizer).mockResolvedValue(resizedImagePath);
         const client = {
             files: { uploadFile: vi.fn().mockRejectedValue(uploadError) },
@@ -66,6 +67,9 @@ describe('uploadRenditionPages', () => {
         ).rejects.toBe(uploadError);
 
         expect(unlinkSpy).toHaveBeenCalledWith(resizedImagePath);
+        // The upload never read the stream; it must be closed so the unlinked file's descriptor is released.
+        const [stream] = streamSpy.mock.results;
+        expect((stream.value as fs.ReadStream).closed).toBe(true);
         expect(log.error).toHaveBeenCalledWith('Failed to upload rendition for etag page 0', { error: uploadError });
     });
 

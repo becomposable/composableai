@@ -83,15 +83,17 @@ describe('shouldTranscodeVideo', () => {
 });
 
 describe('resolveVideoPreset', () => {
-    it.each([
-        { preset: 'medium', attempt: 1, expected: 'medium' },
-        { preset: 'medium', attempt: 2, expected: 'fast' },
-        { preset: 'medium', attempt: 3, expected: 'veryfast' },
-        { preset: 'medium', attempt: 5, expected: 'veryfast' },
-        { preset: 'fast', attempt: 1, expected: 'fast' },
-        { preset: 'fast', attempt: 2, expected: 'veryfast' },
-        { preset: 'ultrafast', attempt: 2, expected: 'ultrafast' },
-    ] as const)('uses $expected for $preset on attempt $attempt', ({ preset, attempt, expected }) => {
-        expect(resolveVideoPreset(preset, attempt)).toBe(expected);
+    it('defaults to veryfast', () => {
+        expect(resolveVideoPreset()).toBe('veryfast');
+    });
+
+    it.each(['medium', 'fast', 'veryfast', 'ultrafast'] as const)('keeps the requested %s preset', (preset) => {
+        expect(resolveVideoPreset(preset)).toBe(preset);
+    });
+
+    it('rejects an unknown preset without retrying', () => {
+        expect(() => resolveVideoPreset('slow')).toThrow(
+            expect.objectContaining({ type: 'InvalidVideoPreset', nonRetryable: true }),
+        );
     });
 });

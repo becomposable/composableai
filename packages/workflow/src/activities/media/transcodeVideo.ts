@@ -1,4 +1,4 @@
-import { Context, log } from '@temporalio/activity';
+import { log } from '@temporalio/activity';
 import type { DSLActivityExecutionPayload, DSLActivitySpec, RenditionWithDimensions } from '@vertesia/common';
 import { setupActivity } from '../../dsl/setup/ActivityContext.js';
 import { DocumentNotFoundError, InvalidContentTypeError } from '../../errors.js';
@@ -16,7 +16,7 @@ import {
 
 export interface TranscodeVideoParams {
     maxResolution?: number; // Max resolution (longest side) for the web rendition, default 1920 (1080p)
-    videoPreset?: VideoPreset; // FFmpeg encoding preset, default medium; each retry moves to a faster one
+    videoPreset?: VideoPreset; // FFmpeg encoding preset, default veryfast
 }
 
 export interface TranscodeVideo extends DSLActivitySpec<TranscodeVideoParams> {
@@ -44,7 +44,7 @@ export async function transcodeVideo(
     const { client, objectId, params } = await setupActivity<TranscodeVideoParams>(payload);
 
     const maxResolution = params.maxResolution ?? DEFAULT_MAX_RESOLUTION;
-    const videoPreset = resolveVideoPreset(params.videoPreset ?? 'medium', Context.current().info.attempt);
+    const videoPreset = resolveVideoPreset(params.videoPreset);
 
     log.debug(`Transcoding video for ${objectId}`, { maxResolution, videoPreset });
 

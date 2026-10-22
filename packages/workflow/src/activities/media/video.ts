@@ -46,16 +46,25 @@ const VIDEO_CRF = '23'; // Constant Rate Factor for video quality (18-28, lower 
 const AUDIO_BITRATE = '128k'; // Audio bitrate for AAC encoding
 const JPEG_QUALITY = '2'; // JPEG quality for screenshots (1-31, lower = better)
 
-export type VideoPreset = 'medium' | 'fast' | 'veryfast' | 'ultrafast';
+export const VIDEO_PRESETS = ['medium', 'fast', 'veryfast', 'ultrafast'] as const;
+export type VideoPreset = (typeof VIDEO_PRESETS)[number];
+const DEFAULT_VIDEO_PRESET: VideoPreset = 'veryfast';
 
-export function resolveVideoPreset(preset: VideoPreset, attempt: number): VideoPreset {
-    if (preset === 'ultrafast') {
-        return preset;
+/**
+ * Returns the requested preset, or the default when none is set. Retries keep the same preset.
+ * Workflow definitions can pass any string, so an unknown preset fails the activity without retrying.
+ */
+export function resolveVideoPreset(preset?: string): VideoPreset {
+    if (preset === undefined) {
+        return DEFAULT_VIDEO_PRESET;
     }
-
-    const retryPresets: VideoPreset[] = ['medium', 'fast', 'veryfast'];
-    const initialPresetIndex = retryPresets.indexOf(preset);
-    return retryPresets[Math.min(initialPresetIndex + attempt - 1, retryPresets.length - 1)];
+    if (!(VIDEO_PRESETS as readonly string[]).includes(preset)) {
+        throw ApplicationFailure.nonRetryable(
+            `Invalid videoPreset "${preset}"; expected one of: ${VIDEO_PRESETS.join(', ')}`,
+            'InvalidVideoPreset',
+        );
+    }
+    return preset as VideoPreset;
 }
 
 export interface VideoMetadataExtended {
@@ -387,10 +396,14 @@ export async function uploadFile(
     const fileStream = fs.createReadStream(filePath);
     const source = new NodeStreamSource(fileStream, fileName, mimeType, storagePath);
 
-    const result = await client.files.uploadFile(source);
-    log.debug(`Uploaded file to ${storagePath}`, { result });
-
-    return result;
+    try {
+        const result = await client.files.uploadFile(source);
+        log.debug(`Uploaded file to ${storagePath}`, { result });
+        return result;
+    } finally {
+        // An upload that fails before reading the body leaves the file open.
+        fileStream.destroy();
+    }
 }
 
 /**
@@ -457,9 +470,11 @@ export async function withVideoWorkspace<T>(
     work: (videoFile: string, outputDir: string) => Promise<T>,
 ): Promise<T> {
     const videoFile = await saveBlobToTempFile(client, source);
-    const tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), outputDirPrefix));
+    // Created inside the try, so a failure here still removes the download in the finally.
+    let tempOutputDir: string | undefined;
 
     try {
+        tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), outputDirPrefix));
         return await work(videoFile, tempOutputDir);
     } finally {
         // Clean up temporary files

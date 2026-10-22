@@ -1,4 +1,4 @@
-import { Context, log } from '@temporalio/activity';
+import { log } from '@temporalio/activity';
 import type { DSLActivityExecutionPayload, DSLActivitySpec, RenditionWithDimensions } from '@vertesia/common';
 import { setupActivity } from '../../dsl/setup/ActivityContext.js';
 import { DocumentNotFoundError, InvalidContentTypeError } from '../../errors.js';
@@ -23,14 +23,14 @@ import {
     withVideoWorkspace,
 } from './video.js';
 
-export { buildWebRenditionArgs, resolveVideoPreset, type VideoPreset } from './video.js';
+export { buildWebRenditionArgs, resolveVideoPreset, VIDEO_PRESETS, type VideoPreset } from './video.js';
 
 export interface PrepareVideoParams {
     maxResolution?: number; // Max resolution (longest side) for video rendition, default 1920 (produces 1080p: 1920x1080 landscape or 1080x1920 portrait)
     thumbnailSize?: number; // Max size (longest side) for thumbnail image, default 256
     posterSize?: number; // Max size (longest side) for poster image, default 1920
     generateAudio?: boolean; // Generate audio-only rendition (AAC), default true
-    videoPreset?: VideoPreset; // FFmpeg encoding preset, default medium
+    videoPreset?: VideoPreset; // FFmpeg encoding preset, default veryfast
     skipTranscode?: boolean; // Skip the main video re-encode, default false
 }
 
@@ -88,7 +88,7 @@ export async function prepareVideo(
     const posterSize = params.posterSize ?? DEFAULT_POSTER_SIZE;
     const generateAudio = params.generateAudio ?? DEFAULT_GENERATE_AUDIO;
     const skipTranscode = params.skipTranscode ?? false;
-    const videoPreset = resolveVideoPreset(params.videoPreset ?? 'medium', Context.current().info.attempt);
+    const videoPreset = resolveVideoPreset(params.videoPreset);
 
     log.debug(`Preparing video for ${objectId}`, {
         maxResolution,

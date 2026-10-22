@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# Every fixture starts with an explicit environment allowlist, including local invocations.
+if [[ "${1:-}" != "--isolated-fixture" ]]; then
+  exec env -i PATH="$PATH" HOME="$HOME" bash "${BASH_SOURCE[0]}" --isolated-fixture "$@"
+fi
+shift
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$script_dir/lib-release-cohort.sh"
 work="$(mktemp -d)"

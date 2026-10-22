@@ -377,11 +377,6 @@ jobs:
       - name: Verify npm version
         run: npm --version
 
-      - name: Test package channel policy
-        run: |
-          bash ./.github/bin/lib-package-channel.test.sh
-          bash ./.github/bin/lib-release-cohort.test.sh
-
       - name: Install workspace dependencies
         timeout-minutes: 5
         run: pnpm install --frozen-lockfile

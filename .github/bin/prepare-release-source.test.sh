@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # Real superproject/submodule fixtures; only package installation/schema generation are substituted.
 set -euo pipefail
+# Every fixture starts with an explicit environment allowlist, including local invocations.
+if [[ "${1:-}" != "--isolated-fixture" ]]; then
+  exec env -i PATH="$PATH" HOME="$HOME" bash "${BASH_SOURCE[0]}" --isolated-fixture "$@"
+fi
+shift
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT

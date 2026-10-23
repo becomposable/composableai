@@ -83,6 +83,7 @@ import {
     AppBuildProgressStatusSchema,
     AppBuildTriggerSchema,
     AppDeleteSummarySchema,
+    AppDeploymentAliasSchema,
     AppDevelopmentTaskDetailsSchema,
     AppDevelopmentTaskListSchema,
     AppDevelopmentTaskSchema,
@@ -109,6 +110,7 @@ import {
     AppListScopeSchema,
     AppOAuthCollectionParamsSchema,
     AppOAuthProviderParamsSchema,
+    AppPackageQuerySchema,
     AppPackageScopeSchema,
     AppRepoBranchSchema,
     AppRepoCommitSchema,
@@ -128,6 +130,8 @@ import {
     AppVersionGitRefTypeSchema,
     AppVersionGitSourceSchema,
     AppVersionKindSchema,
+    AppVersionLaunchTargetArraySchema,
+    AppVersionLaunchTargetSchema,
     AppVersionRecordArraySchema,
     AppVersionRecordSchema,
     AppVersionStateSchema,
@@ -136,6 +140,8 @@ import {
     AppVersionUrlsSchema,
     ContentObjectTypeRefSchema,
     ConversationActivityStateSchema,
+    CreateAppVersionLaunchRequestSchema,
+    CreateAppVersionLaunchResponseSchema,
     DeleteAppVersionResponseSchema,
     EventRefSchema,
     ExchangeAppGithubAuthorizationRequestSchema,
@@ -507,6 +513,7 @@ import {
     EmailChannelSchema,
     ExecuteInteractionByEndpointHeadersSchema,
     ExecuteInteractionByEndpointQuerySchema,
+    ExecuteNamedInteractionQuerySchema,
     ExecutionResponseSchema,
     ExecutionRunDocRefSchema,
     ExecutionRunInteractionSchema,
@@ -529,6 +536,7 @@ import {
     GeneratedTestDataRecordSchema,
     GenerateInteractionPayloadSchema,
     GenerateTestDataPayloadSchema,
+    GetRunQuerySchema,
     ImprovePromptPayloadConfigSchema,
     ImprovePromptPayloadSchema,
     InCodeInteractionSchema,
@@ -1287,6 +1295,7 @@ type ExecutionRunSchemaMap = {
     ExecutionRunRefArray: typeof ExecutionRunRefArraySchema;
     UpdateExecutionRunPayload: typeof UpdateExecutionRunPayloadSchema;
     RunCreatePayload: typeof RunCreatePayloadSchema;
+    GetRunQuery: typeof GetRunQuerySchema;
     SortOrder: typeof SortOrderSchema;
     SortOption: typeof SortOptionSchema;
     RunSearchQuery: typeof RunSearchQuerySchema;
@@ -1307,6 +1316,7 @@ const EXECUTION_RUN_SCHEMAS: ExecutionRunSchemaMap = {
     ExecutionRunRefArray: ExecutionRunRefArraySchema,
     UpdateExecutionRunPayload: UpdateExecutionRunPayloadSchema,
     RunCreatePayload: RunCreatePayloadSchema,
+    GetRunQuery: GetRunQuerySchema,
     // Listing and searching runs.
     SortOrder: SortOrderSchema,
     SortOption: SortOptionSchema,
@@ -1327,6 +1337,7 @@ const EXECUTION_REQUEST_SCHEMAS: {
     InteractionExecutionConfiguration: typeof InteractionExecutionConfigurationSchema;
     InteractionExecutionError: typeof InteractionExecutionErrorSchema;
     ResultStorageOptions: typeof ResultStorageOptionsSchema;
+    ExecuteNamedInteractionQuery: typeof ExecuteNamedInteractionQuerySchema;
     ExecuteInteractionByEndpointQuery: typeof ExecuteInteractionByEndpointQuerySchema;
     ExecuteInteractionByEndpointHeaders: typeof ExecuteInteractionByEndpointHeadersSchema;
     AsyncCompletionMode: typeof AsyncCompletionModeSchema;
@@ -1362,6 +1373,7 @@ const EXECUTION_REQUEST_SCHEMAS: {
     InteractionExecutionConfiguration: InteractionExecutionConfigurationSchema,
     InteractionExecutionError: InteractionExecutionErrorSchema,
     ResultStorageOptions: ResultStorageOptionsSchema,
+    ExecuteNamedInteractionQuery: ExecuteNamedInteractionQuerySchema,
     ExecuteInteractionByEndpointQuery: ExecuteInteractionByEndpointQuerySchema,
     ExecuteInteractionByEndpointHeaders: ExecuteInteractionByEndpointHeadersSchema,
     AsyncCompletionMode: AsyncCompletionModeSchema,
@@ -2231,6 +2243,8 @@ const APP_LIFECYCLE_SCHEMAS = {
     AppVersionTarget: AppVersionTargetSchema,
     AppVersionState: AppVersionStateSchema,
     AppVersionKind: AppVersionKindSchema,
+    AppDeploymentAlias: AppDeploymentAliasSchema,
+    AppDeploymentAliasTarget: AppRuntimeSchemas.AppDeploymentAliasTargetSchema,
     StartAppScaffoldResponse: StartAppScaffoldResponseSchema,
     AppScaffoldModule: AppScaffoldModuleSchema,
     AppBuildTrigger: AppBuildTriggerSchema,
@@ -2290,6 +2304,10 @@ const APP_LIFECYCLE_SCHEMAS = {
     AppRepoRefs: AppRepoRefsSchema,
     AppRepoCommits: AppRepoCommitsSchema,
     ContentObjectTypeRef: ContentObjectTypeRefSchema,
+    AppVersionLaunchTarget: AppVersionLaunchTargetSchema,
+    AppVersionLaunchTargetArray: AppVersionLaunchTargetArraySchema,
+    CreateAppVersionLaunchRequest: CreateAppVersionLaunchRequestSchema,
+    CreateAppVersionLaunchResponse: CreateAppVersionLaunchResponseSchema,
     AppBuildProgress: AppBuildProgressSchema,
     AppVersionStorage: AppVersionStorageSchema,
     AppToolCollection: AppToolCollectionSchema,
@@ -2308,6 +2326,7 @@ const APP_LIFECYCLE_SCHEMAS = {
     AppListScope: AppListScopeSchema,
     AppsQuery: AppsQuerySchema,
     AppInstallationProjectsQuery: AppInstallationProjectsQuerySchema,
+    AppPackageQuery: AppPackageQuerySchema,
     SystemPackageQuery: SystemPackageQuerySchema,
 } as const satisfies Record<string, z.ZodType>;
 
@@ -3406,6 +3425,8 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'CatalogAgentSearchQuery',
     'CatalogCallSearchQuery',
     'ResolveInteractionQuery',
+    'ExecuteNamedInteractionQuery',
+    'GetRunQuery',
     'ExecuteInteractionByEndpointQuery',
     'ExecuteInteractionByEndpointHeaders',
     // The prompt-authoring, project-tool, remote-MCP, audit-trail and view-experience closures.
@@ -3496,6 +3517,10 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'ValidateUrlResponse',
     'ValidateUrlRequest',
     'AppVersionUrls',
+    'AppVersionLaunchTarget',
+    'AppVersionLaunchTargetArray',
+    'CreateAppVersionLaunchRequest',
+    'CreateAppVersionLaunchResponse',
     'StartAppScaffoldResponse',
     'StartAppBuildResponse',
     'AppDevelopmentTask',
@@ -3539,6 +3564,7 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'AppInstallationsQuery',
     'AppsQuery',
     'AppInstallationProjectsQuery',
+    'AppPackageQuery',
     'SystemPackageQuery',
     'WebsiteCredentialTotpMetadata',
     'WebsiteCredentialSecretInput',

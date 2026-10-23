@@ -676,6 +676,11 @@ export type AppCapabilities =
     | 'dashboards';
 export type AppAvailableIn = 'app_portal' | 'composite_app';
 export type AppVersionKind = 'design' | 'version';
+export type AppDeploymentAlias = string;
+export type AppDeploymentAliasTarget = {
+    version_id: string;
+    version_record_id: string;
+};
 export type AppVersionState = 'ready' | 'failed' | 'expired';
 export type AppVersionTarget = 'static' | 'service';
 export type AppVersionGitRefType = 'branch' | 'tag' | 'commit' | 'detached';
@@ -721,6 +726,7 @@ export type AppVersionRecord = {
     kind: AppVersionKind;
     state: AppVersionState;
     promoted?: boolean | undefined;
+    aliases?: AppDeploymentAlias[] | undefined;
     target?: AppVersionTarget | undefined;
     agent_run_id?: string | undefined;
     development_task_id?: string | undefined;
@@ -748,6 +754,24 @@ export type AppVersionRecord = {
     built_at?: string | undefined;
     checked_at?: string | undefined;
     expires_at?: string | undefined;
+};
+export type AppVersionLaunchTarget = {
+    project: ProjectRef;
+    installation_id: string;
+    settings: {
+        [k: string]: unknown;
+    };
+};
+export type CreateAppVersionLaunchRequest = {
+    target_project_id?: string | undefined;
+    settings: {
+        [k: string]: unknown;
+    };
+};
+export type CreateAppVersionLaunchResponse = {
+    version_launch_id: string;
+    version_selector: string;
+    app_url: string;
 };
 export type DeleteAppVersionResponse = {
     id: string;
@@ -1273,6 +1297,7 @@ export type AppManifest = {
     endpoint?: string | undefined;
     endpoint_overrides?: StringValueMap | undefined;
     version?: string | undefined;
+    deployment_aliases?: Record<AppDeploymentAlias, AppDeploymentAliasTarget> | undefined;
     source?: AppManifestSource | undefined;
     tags?: string[] | undefined;
     access_control?: AppAccessControl | undefined;
@@ -1322,6 +1347,7 @@ export type AppInstallation = {
     namespace_overrides?: Record<string, string> | undefined;
     reserved_namespaces?: string[] | undefined;
     namespace_conflicts?: string[] | undefined;
+    deployment_alias?: AppDeploymentAlias | undefined;
     manifest: string;
     mcp_configuration?:
         | {
@@ -1361,6 +1387,7 @@ export type AppInstallationWithManifest = {
     namespace_overrides?: Record<string, string> | undefined;
     reserved_namespaces?: string[] | undefined;
     namespace_conflicts?: string[] | undefined;
+    deployment_alias?: AppDeploymentAlias | undefined;
     mcp_configuration?:
         | {
               revision: string;
@@ -1401,6 +1428,7 @@ export type AppInstallationListEntry = {
     namespace_overrides?: Record<string, string> | undefined;
     reserved_namespaces?: string[] | undefined;
     namespace_conflicts?: string[] | undefined;
+    deployment_alias?: AppDeploymentAlias | undefined;
     mcp_configuration?:
         | {
               revision: string;
@@ -1451,6 +1479,7 @@ export type AppApiKeyCollectionParams = {
 export type AppOAuthProviderParams = AppOAuthCollectionParams;
 export type AppInstallationPayload = {
     app_id: string;
+    deployment_alias?: AppDeploymentAlias | undefined;
     instance_key?: string | undefined;
     display_name?: string | undefined;
     namespace_overrides?: Record<string, string> | undefined;
@@ -4027,6 +4056,16 @@ export type CatalogAppSearchResult = {
     interactions: CatalogSearchInteractionRef[];
     unavailable_apps: string[];
 };
+export type ExecuteNamedInteractionQuery = {
+    include_prompt?: boolean | undefined;
+};
+export type GetRunQuery = {
+    include_prompt?: boolean | undefined;
+};
+export type ExecuteInteractionByEndpointQuery = {
+    tag?: string | undefined;
+    include_prompt?: boolean | undefined;
+};
 export type ResolveInteractionQuery = {
     environment?: string | undefined;
     model?: string | undefined;
@@ -4382,6 +4421,7 @@ export type AsyncConversationExecutionPayload = {
     asyncCompletion?: AsyncCompletionOptions | undefined;
     type: 'conversation';
     notify_endpoints?: string[] | undefined;
+    idempotency_key?: string | undefined;
     task_queue?: string | undefined;
     tool_approval_mode?: AgentToolApprovalMode | undefined;
     visibility?: ConversationVisibility | undefined;
@@ -5110,6 +5150,7 @@ export type OAuthAuthorizationRequestGeneratedApp = {
     tenant_id: string;
     app_name: string;
     version_id?: string | undefined;
+    deployment_alias?: string | undefined;
 };
 export type OAuthLoginPayload = {
     id_token: string;
@@ -10029,6 +10070,7 @@ export type CreateAgentRunPayloadWire = {
     notify_endpoints?: string[] | undefined;
     debug_mode?: boolean | undefined;
     started_by?: string | undefined;
+    idempotency_key?: string | undefined;
 };
 export type DSLActivitySpecWire = {
     name: string;
@@ -10454,9 +10496,6 @@ export type LegacyPopulatedExecutionRunResult = {
     tool_use?: ToolUse[] | undefined;
     conversation?: unknown | undefined;
     options?: StatelessExecutionOptions | undefined;
-};
-export type ExecuteInteractionByEndpointQueryWire = {
-    tag?: string | undefined;
 };
 export type ExecuteInteractionByEndpointHeadersWire = {
     'x-interaction-tag'?: string | undefined;
@@ -10900,8 +10939,13 @@ export type AppPackageScopeWire =
     | 'hooks'
     | 'subscriptions'
     | 'all';
+export type AppVersionLaunchTargetArray = AppVersionLaunchTarget[];
 export type AppVersionRecordArray = AppVersionRecord[];
 export type AppToolCollectionArray = AppToolCollection[];
+export type AppPackageQuery = {
+    scope?: AppPackageScopeWire[] | undefined;
+    deployment_alias?: AppDeploymentAlias | undefined;
+};
 export type SystemPackageQuery = {
     scope?: AppPackageScopeWire[] | undefined;
 };
@@ -11267,6 +11311,7 @@ export interface ApiComponentTypes {
     ExecutionRunRefArray: ExecutionRunRefArray;
     UpdateExecutionRunPayload: UpdateExecutionRunPayload;
     RunCreatePayload: RunCreatePayload;
+    GetRunQuery: GetRunQuery;
     SortOrder: SortOrder;
     SortOption: SortOption;
     RunSearchQuery: RunSearchQuery;
@@ -11283,7 +11328,8 @@ export interface ApiComponentTypes {
     InteractionExecutionConfiguration: InteractionExecutionConfiguration;
     InteractionExecutionError: InteractionExecutionError;
     ResultStorageOptions: ResultStorageOptions;
-    ExecuteInteractionByEndpointQuery: ExecuteInteractionByEndpointQueryWire;
+    ExecuteNamedInteractionQuery: ExecuteNamedInteractionQuery;
+    ExecuteInteractionByEndpointQuery: ExecuteInteractionByEndpointQuery;
     ExecuteInteractionByEndpointHeaders: ExecuteInteractionByEndpointHeadersWire;
     AsyncCompletionMode: AsyncCompletionMode;
     AsyncCompletionOptions: AsyncCompletionOptions;
@@ -11987,6 +12033,8 @@ export interface ApiComponentTypes {
     AppVersionTarget: AppVersionTarget;
     AppVersionState: AppVersionState;
     AppVersionKind: AppVersionKind;
+    AppDeploymentAlias: AppDeploymentAlias;
+    AppDeploymentAliasTarget: AppDeploymentAliasTarget;
     StartAppScaffoldResponse: StartAppScaffoldResponse;
     AppScaffoldModule: AppScaffoldModule;
     AppBuildTrigger: AppBuildTrigger;
@@ -12046,6 +12094,10 @@ export interface ApiComponentTypes {
     AppRepoRefs: AppRepoRefs;
     AppRepoCommits: AppRepoCommits;
     ContentObjectTypeRef: ContentObjectApiTypeRef;
+    AppVersionLaunchTarget: AppVersionLaunchTarget;
+    AppVersionLaunchTargetArray: AppVersionLaunchTargetArray;
+    CreateAppVersionLaunchRequest: CreateAppVersionLaunchRequest;
+    CreateAppVersionLaunchResponse: CreateAppVersionLaunchResponse;
     AppBuildProgress: AppBuildProgress;
     AppVersionStorage: AppVersionStorage;
     AppToolCollection: AppToolCollection;
@@ -12064,6 +12116,7 @@ export interface ApiComponentTypes {
     AppListScope: AppListScope;
     AppsQuery: AppsQuery;
     AppInstallationProjectsQuery: AppInstallationProjectsQuery;
+    AppPackageQuery: AppPackageQuery;
     SystemPackageQuery: SystemPackageQuery;
     WebsiteCredentialTotpAlgorithm: WebsiteCredentialTotpAlgorithm;
     WebsiteCredentialTotpMetadata: WebsiteCredentialTotpMetadata;

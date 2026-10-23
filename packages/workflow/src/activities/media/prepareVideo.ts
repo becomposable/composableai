@@ -16,7 +16,8 @@ import {
 } from '@vertesia/common';
 import { setupActivity } from '../../dsl/setup/ActivityContext.js';
 import { DocumentNotFoundError, InvalidContentTypeError } from '../../errors.js';
-import { saveBlobToTempFile } from '../../utils/blobs.js';
+import { removeTempFiles, saveBlobToTempFile } from '../../utils/blobs.js';
+import { closeUploadStream, createUploadStream } from '../../utils/upload-stream.js';
 import {
     execActivityFile,
     execActivityFileWithProgress,
@@ -418,13 +419,16 @@ async function uploadFile(
     storagePath: string,
 ): Promise<string> {
     const { NodeStreamSource } = await import('@vertesia/client/node');
-    const fileStream = fs.createReadStream(filePath);
+    const fileStream = createUploadStream(filePath);
     const source = new NodeStreamSource(fileStream, fileName, mimeType, storagePath);
 
-    const result = await client.files.uploadFile(source);
-    log.debug(`Uploaded file to ${storagePath}`, { result });
-
-    return result;
+    try {
+        const result = await client.files.uploadFile(source);
+        log.debug(`Uploaded file to ${storagePath}`, { result });
+        return result;
+    } finally {
+        await closeUploadStream(fileStream);
+    }
 }
 
 /**
@@ -501,9 +505,11 @@ export async function prepareVideo(
 
     // Download video to temp file
     const videoFile = await saveBlobToTempFile(client, inputObject.content.source);
-    const tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), 'prepare-video-'));
+    // Created inside the try, so a failure here still removes the download in the finally.
+    let tempOutputDir: string | undefined;
 
     try {
+        tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), 'prepare-video-'));
         // Step 1: Extract video metadata
         log.info('Extracting video metadata');
         const metadata = await getVideoMetadata(videoFile);
@@ -652,25 +658,6 @@ export async function prepareVideo(
         // Wrap unknown errors in Error
         throw new Error(`Failed to prepare video ${objectId}: ${errorMessage}`);
     } finally {
-        // Clean up temporary files
-        const cleanupPromises: Promise<void>[] = [];
-
-        if (videoFile) {
-            cleanupPromises.push(
-                fs.promises.unlink(videoFile).catch((err) => {
-                    log.warn(`Failed to cleanup video file: ${videoFile}`, { err });
-                }),
-            );
-        }
-
-        if (tempOutputDir) {
-            cleanupPromises.push(
-                fs.promises.rm(tempOutputDir, { recursive: true, force: true }).catch((err) => {
-                    log.warn(`Failed to cleanup temp directory: ${tempOutputDir}`, { err });
-                }),
-            );
-        }
-
-        await Promise.allSettled(cleanupPromises);
+        await removeTempFiles(videoFile, tempOutputDir);
     }
 }

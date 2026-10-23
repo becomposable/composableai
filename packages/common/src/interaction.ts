@@ -59,9 +59,11 @@ export interface StoredCatalogInteractionsQuery extends CatalogTagQuery {
     published?: boolean;
 }
 
-export interface ExecuteInteractionByEndpointQuery {
-    tag?: string;
-}
+export type ExecuteNamedInteractionQuery = Wire.ExecuteNamedInteractionQuery;
+
+export type GetRunQuery = Wire.GetRunQuery;
+
+export type ExecuteInteractionByEndpointQuery = Wire.ExecuteInteractionByEndpointQuery;
 
 export interface ExecuteInteractionByEndpointHeaders {
     'x-interaction-tag'?: string;

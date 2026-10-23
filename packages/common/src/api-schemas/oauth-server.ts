@@ -104,6 +104,7 @@ export const OAuthAuthorizationRequestGeneratedAppSchema = z
         tenant_id: z.string(),
         app_name: z.string(),
         version_id: z.string().optional(),
+        deployment_alias: z.string().optional(),
     })
     .meta({ id: 'OAuthAuthorizationRequestGeneratedApp' });
 

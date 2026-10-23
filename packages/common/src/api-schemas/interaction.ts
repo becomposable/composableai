@@ -2133,6 +2133,20 @@ export const AgentEvaluateRequestSchema = z.boolean().optional().meta({
         'Request LLM evaluation when the project evaluation policy is opt_in. Defaults to false. Cannot override disabled or opt out of always_on.',
 });
 
+export const AgentRunIdempotencyKeySchema = z
+    .string()
+    .min(1)
+    .max(256)
+    .meta({
+        description:
+            'Client-chosen key, unique per intended run, that makes this request safe to retry. A repeat of ' +
+            'the request with the same key and the same body returns the agent run the first request started ' +
+            'instead of starting another. Reusing a key with a different body is rejected with 409, and a ' +
+            'repeat that arrives while the first request is still starting the run may be answered with 503 ' +
+            'and `Retry-After`. Keys are scoped to the project and stay bound to their run for as long as it ' +
+            'exists; once the run is deleted, the same key starts a new one.',
+    });
+
 export const ConversationEnrichmentFields = {
     title: z.string().min(1).meta({ description: 'Caller-provided conversation title.' }).optional(),
     topic: z
@@ -2208,6 +2222,7 @@ export const AsyncConversationExecutionPayloadSchema = z
             .array(z.string())
             .meta({ description: 'An array of endpoint URLs to be notified upon execution' })
             .optional(),
+        idempotency_key: AgentRunIdempotencyKeySchema.optional(),
         task_queue: z.string().optional(),
         tool_approval_mode: AgentToolApprovalModeSchema.meta({
             description: 'Effective tool approval mode for interactive agent conversations.',
@@ -2446,9 +2461,33 @@ export const StoredCatalogInteractionsQuerySchema = z
     })
     .meta({ id: 'StoredCatalogInteractionsQuery' });
 
+/** `include_prompt`: whether a response carries the rendered prompt sent to the model. */
+function includePromptQuery(description: string) {
+    return z.boolean().meta({ description }).optional();
+}
+
+export const GetRunQuerySchema = z
+    .strictObject({
+        include_prompt: includePromptQuery(
+            'Whether the run includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined), and it is then not loaded from storage.',
+        ),
+    })
+    .meta({ id: 'GetRunQuery' });
+
+const ExecutionIncludePromptQuerySchema = includePromptQuery(
+    'Whether the synchronous execution result includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined). It is still stored with the run unless run data storage is restricted.',
+);
+
+export const ExecuteNamedInteractionQuerySchema = z
+    .strictObject({
+        include_prompt: ExecutionIncludePromptQuerySchema,
+    })
+    .meta({ id: 'ExecuteNamedInteractionQuery' });
+
 export const ExecuteInteractionByEndpointQuerySchema = z
     .strictObject({
         tag: z.string().optional(),
+        include_prompt: ExecutionIncludePromptQuerySchema,
     })
     .meta({ id: 'ExecuteInteractionByEndpointQuery' });
 

@@ -1797,102 +1797,6 @@
     },
     "additionalProperties": false
   },
-  "ApiKeyReadResponse": {
-    "type": "object",
-    "properties": {
-      "id": {
-        "type": "string"
-      },
-      "name": {
-        "type": "string"
-      },
-      "type": {
-        "$ref": "#/components/schemas/ApiKeyTypes"
-      },
-      "role": {
-        "$ref": "#/components/schemas/SystemRoles"
-      },
-      "maskedValue": {
-        "type": "string"
-      },
-      "can_retrieve_value": {
-        "type": "boolean"
-      },
-      "account": {
-        "type": "string"
-      },
-      "project": {
-        "$ref": "#/components/schemas/ProjectRef"
-      },
-      "enabled": {
-        "type": "boolean"
-      },
-      "scim_provisioning": {
-        "type": "boolean",
-        "description": "Organization-wide SCIM provisioning credential. Only account administrators may create or manage these keys. May be enabled by account administrators on existing keys; disable or delete to revoke access."
-      },
-      "created_by": {
-        "type": "string"
-      },
-      "updated_by": {
-        "type": "string"
-      },
-      "created_at": {
-        "type": "string",
-        "format": "date-time"
-      },
-      "updated_at": {
-        "type": "string",
-        "format": "date-time"
-      },
-      "expires_at": {
-        "type": "string",
-        "format": "date-time"
-      },
-      "properties": {
-        "type": "object",
-        "additionalProperties": true,
-        "description": "Custom properties for dynamic permission matching (PrincipalSet / $principal. conditions)"
-      },
-      "clearance": {
-        "type": "number",
-        "description": "BLP clearance level — the maximum document sensitivity the key can access"
-      },
-      "compartments": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "description": "Compartments the key belongs to — restricts access to matching documents"
-      },
-      "value": {
-        "type": "string"
-      }
-    },
-    "required": [
-      "id",
-      "name",
-      "type",
-      "role",
-      "account",
-      "project",
-      "enabled",
-      "created_by",
-      "updated_by",
-      "created_at",
-      "updated_at"
-    ],
-    "additionalProperties": false
-  },
-  "ApiKeyReadQuery": {
-    "type": "object",
-    "properties": {
-      "withValue": {
-        "type": "boolean"
-      }
-    },
-    "additionalProperties": false
-  },
   "CreateApiKeyPayload": {
     "type": "object",
     "properties": {
@@ -6227,8 +6131,20 @@
   "AppGitSourceConfig": {
     "type": "object",
     "properties": {
+      "provider": {
+        "$ref": "#/components/schemas/AppGitSourceProvider",
+        "description": "Repository provider. Missing values are treated as `vertesia` for apps created before provider support."
+      },
       "url": {
         "type": "string"
+      },
+      "installation_id": {
+        "type": "string",
+        "description": "Verified GitHub App installation id. Required when provider is `github`."
+      },
+      "repository": {
+        "type": "string",
+        "description": "GitHub repository in `owner/name` form. Required when provider is `github`."
       },
       "default_branch": {
         "type": "string"
@@ -6241,6 +6157,13 @@
       }
     },
     "additionalProperties": false
+  },
+  "AppGitSourceProvider": {
+    "type": "string",
+    "enum": [
+      "vertesia",
+      "github"
+    ]
   },
   "AppSourceConfig": {
     "type": "object",
@@ -6268,7 +6191,16 @@
       "git": {
         "type": "object",
         "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/AppGitSourceProvider"
+          },
           "url": {
+            "type": "string"
+          },
+          "installation_id": {
+            "type": "string"
+          },
+          "repository": {
             "type": "string"
           },
           "default_branch": {
@@ -6841,6 +6773,9 @@
         "type": "string"
       },
       "version_id": {
+        "type": "string"
+      },
+      "deployment_alias": {
         "type": "string"
       }
     },
@@ -13654,6 +13589,16 @@
     "additionalProperties": false,
     "description": "Interaction execution payload for creating a new run It uses interaction field (from NamedInteractionExecutionPayload) to pass the interaction ID to run"
   },
+  "GetRunQuery": {
+    "type": "object",
+    "properties": {
+      "include_prompt": {
+        "type": "boolean",
+        "description": "Whether the run includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined), and it is then not loaded from storage."
+      }
+    },
+    "additionalProperties": false
+  },
   "SortOrder": {
     "type": "string",
     "enum": [
@@ -14795,11 +14740,25 @@
     "additionalProperties": false,
     "description": "A retrieved execution run whose completion result is reported in the pre-versioning format. A run that has no result yet is returned unchanged, so `result` may still hold the current array form."
   },
+  "ExecuteNamedInteractionQuery": {
+    "type": "object",
+    "properties": {
+      "include_prompt": {
+        "type": "boolean",
+        "description": "Whether the synchronous execution result includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined). It is still stored with the run unless run data storage is restricted."
+      }
+    },
+    "additionalProperties": false
+  },
   "ExecuteInteractionByEndpointQuery": {
     "type": "object",
     "properties": {
       "tag": {
         "type": "string"
+      },
+      "include_prompt": {
+        "type": "boolean",
+        "description": "Whether the synchronous execution result includes the rendered `prompt` sent to the model. Defaults to true. Pass false when the caller does not read the prompt: it can be large (for example when media is inlined). It is still stored with the run unless run data storage is restricted."
       }
     },
     "additionalProperties": false
@@ -14902,6 +14861,12 @@
           "type": "string"
         },
         "description": "An array of endpoint URLs to be notified upon execution"
+      },
+      "idempotency_key": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "description": "Client-chosen key, unique per intended run, that makes this request safe to retry. A repeat of the request with the same key and the same body returns the agent run the first request started instead of starting another. Reusing a key with a different body is rejected with 409, and a repeat that arrives while the first request is still starting the run may be answered with 503 and `Retry-After`. Keys are scoped to the project and stay bound to their run for as long as it exists; once the run is deleted, the same key starts a new one."
       },
       "task_queue": {
         "type": "string"
@@ -19453,6 +19418,30 @@
       "version"
     ]
   },
+  "AppDeploymentAlias": {
+    "type": "string",
+    "pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+    "description": "Stable, lowercase deployment alias for an immutable app version, such as `production`, `preview`, or `customer-demo`."
+  },
+  "AppDeploymentAliasTarget": {
+    "type": "object",
+    "properties": {
+      "version_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Immutable AppGen version id."
+      },
+      "version_record_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Globally unique app-version record id used to resolve the exact build."
+      }
+    },
+    "required": [
+      "version_id",
+      "version_record_id"
+    ]
+  },
   "StartAppScaffoldResponse": {
     "type": "object",
     "properties": {
@@ -20151,6 +20140,275 @@
     },
     "additionalProperties": false
   },
+  "AppGithubConfiguration": {
+    "type": "object",
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "app_slug": {
+        "type": "string"
+      },
+      "install_url": {
+        "type": "string"
+      },
+      "relay_url": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "enabled"
+    ]
+  },
+  "StartAppGithubAuthorizationResponse": {
+    "type": "object",
+    "properties": {
+      "authorization_url": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "authorization_url"
+    ]
+  },
+  "ExchangeAppGithubAuthorizationRequest": {
+    "type": "object",
+    "properties": {
+      "code": {
+        "type": "string"
+      },
+      "state": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "code",
+      "state"
+    ]
+  },
+  "AppGithubRepositoriesQuery": {
+    "type": "object",
+    "properties": {
+      "connection_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "installation_id": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "required": [
+      "connection_id",
+      "installation_id"
+    ]
+  },
+  "AppGithubInstallation": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "account_login": {
+        "type": "string"
+      },
+      "account_type": {
+        "type": "string"
+      },
+      "repository_selection": {
+        "type": "string",
+        "enum": [
+          "all",
+          "selected"
+        ]
+      }
+    },
+    "required": [
+      "id",
+      "account_login",
+      "repository_selection"
+    ]
+  },
+  "AppGithubAccount": {
+    "type": "object",
+    "properties": {
+      "login": {
+        "type": "string"
+      },
+      "account_type": {
+        "type": "string"
+      },
+      "avatar_url": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "login",
+      "account_type"
+    ]
+  },
+  "ExchangeAppGithubAuthorizationResponse": {
+    "type": "object",
+    "properties": {
+      "connection_id": {
+        "type": "string"
+      },
+      "installations": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AppGithubInstallation"
+        }
+      },
+      "accounts": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AppGithubAccount"
+        }
+      }
+    },
+    "required": [
+      "connection_id",
+      "installations",
+      "accounts"
+    ]
+  },
+  "AppGithubRepository": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "full_name": {
+        "type": "string"
+      },
+      "private": {
+        "type": "boolean"
+      },
+      "default_branch": {
+        "type": "string"
+      },
+      "html_url": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "name",
+      "full_name",
+      "private",
+      "default_branch",
+      "html_url"
+    ]
+  },
+  "AppGithubRepositoryCreation": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+        "description": "Name of the empty GitHub repository to create in the verified installation."
+      },
+      "private": {
+        "type": "boolean",
+        "description": "Create a private repository. Defaults to true when omitted."
+      }
+    },
+    "required": [
+      "name"
+    ]
+  },
+  "AppGithubRepositoryList": {
+    "type": "object",
+    "properties": {
+      "repositories": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AppGithubRepository"
+        }
+      }
+    },
+    "required": [
+      "repositories"
+    ]
+  },
+  "AppGithubRepositorySetupQuery": {
+    "type": "object",
+    "properties": {
+      "connection_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "installation_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "repository": {
+        "type": "string",
+        "minLength": 1
+      },
+      "branch": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "required": [
+      "connection_id",
+      "installation_id",
+      "repository",
+      "branch"
+    ]
+  },
+  "AppGithubBranchState": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "exists": {
+        "type": "boolean"
+      },
+      "empty": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "name",
+      "exists",
+      "empty"
+    ]
+  },
+  "AppGithubRepositorySetup": {
+    "type": "object",
+    "properties": {
+      "default_branch": {
+        "type": "string"
+      },
+      "branches": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "selected_branch": {
+        "$ref": "#/components/schemas/AppGithubBranchState"
+      }
+    },
+    "required": [
+      "default_branch",
+      "branches",
+      "selected_branch"
+    ],
+    "description": "Branch choices and write-safety state for a verified GitHub repository."
+  },
+  "AppScaffoldSourceMode": {
+    "type": "string",
+    "enum": [
+      "generate",
+      "existing"
+    ],
+    "description": "How App Builder should use a connected source repository. `generate` writes a starter app to an empty branch; `existing` only binds the repository."
+  },
   "StartAppScaffoldRequest": {
     "type": "object",
     "properties": {
@@ -20185,6 +20443,22 @@
       "create_version": {
         "type": "boolean",
         "description": "Start an initial app version build after the source has been pushed. Defaults to true."
+      },
+      "source_mode": {
+        "$ref": "#/components/schemas/AppScaffoldSourceMode",
+        "description": "Explicit source setup behavior for external repositories. Omit to retain the legacy automatic behavior."
+      },
+      "source": {
+        "$ref": "#/components/schemas/AppSourceConfig",
+        "description": "Source repository to bind to the app. Omit to create and scaffold a Vertesia-managed repository."
+      },
+      "github_connection_id": {
+        "type": "string",
+        "description": "Short-lived proof that the current user verified the selected GitHub installation."
+      },
+      "github_repository_creation": {
+        "$ref": "#/components/schemas/AppGithubRepositoryCreation",
+        "description": "Create an empty repository in the verified GitHub installation before generating the app source."
       }
     },
     "required": [
@@ -20533,6 +20807,75 @@
       "ref_type"
     ]
   },
+  "AppVersionLaunchTarget": {
+    "type": "object",
+    "properties": {
+      "project": {
+        "$ref": "#/components/schemas/ProjectRef"
+      },
+      "installation_id": {
+        "type": "string"
+      },
+      "settings": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Current settings of the app installation in the target project."
+      }
+    },
+    "required": [
+      "project",
+      "installation_id",
+      "settings"
+    ],
+    "additionalProperties": false,
+    "description": "A user-accessible project where this app version may be launched temporarily."
+  },
+  "AppVersionLaunchTargetArray": {
+    "type": "array",
+    "items": {
+      "$ref": "#/components/schemas/AppVersionLaunchTarget"
+    }
+  },
+  "CreateAppVersionLaunchRequest": {
+    "type": "object",
+    "properties": {
+      "target_project_id": {
+        "type": "string",
+        "description": "Project in the source account where the app is already installed and the temporary version will run. Defaults to the current project."
+      },
+      "settings": {
+        "type": "object",
+        "additionalProperties": true,
+        "description": "Temporary app installation settings used only by this version launch."
+      }
+    },
+    "required": [
+      "settings"
+    ],
+    "additionalProperties": false,
+    "description": "Creates a short-lived launch of one immutable app version with temporary installation settings."
+  },
+  "CreateAppVersionLaunchResponse": {
+    "type": "object",
+    "properties": {
+      "version_launch_id": {
+        "type": "string"
+      },
+      "version_selector": {
+        "type": "string"
+      },
+      "app_url": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "version_launch_id",
+      "version_selector",
+      "app_url"
+    ],
+    "additionalProperties": false,
+    "description": "Opaque launch selector and App Gateway URL for an advanced app-version launch."
+  },
   "AppBuildProgress": {
     "type": "object",
     "properties": {
@@ -20739,6 +21082,13 @@
       },
       "promoted": {
         "type": "boolean"
+      },
+      "aliases": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AppDeploymentAlias"
+        },
+        "description": "Deployment aliases that currently resolve to this immutable version."
       },
       "target": {
         "$ref": "#/components/schemas/AppVersionTarget"
@@ -21082,6 +21432,10 @@
       "app_id": {
         "type": "string"
       },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Optional stable deployment alias to follow for this installation instead of the app's promoted version."
+      },
       "instance_key": {
         "type": "string",
         "pattern": "^[a-z][a-z0-9_-]{0,31}$"
@@ -21284,6 +21638,23 @@
     },
     "additionalProperties": false,
     "description": "Exactly one of `name` or `id` identifies the app. Neither is required by the component because the endpoint answers 400 for the empty case with a message naming both."
+  },
+  "AppPackageQuery": {
+    "type": "object",
+    "properties": {
+      "scope": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AppPackageScope"
+        },
+        "description": "Which capabilities to include in the returned package. Defaults to `all`. Comma-joined (`?scope=ui,tools`) or repeated."
+      },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Resolve the package from this named deployment. Used before installation to load the selected deployment configuration."
+      }
+    },
+    "additionalProperties": false
   },
   "SystemPackageQuery": {
     "type": "object",
@@ -24031,6 +24402,16 @@
         "type": "string",
         "description": "Optional app version string (e.g. \"1.0.0\") — informational."
       },
+      "deployment_aliases": {
+        "type": "object",
+        "propertyNames": {
+          "$ref": "#/components/schemas/AppDeploymentAlias"
+        },
+        "additionalProperties": {
+          "$ref": "#/components/schemas/AppDeploymentAliasTarget"
+        },
+        "description": "Vertesia-managed mapping from stable deployment aliases to immutable AppGen versions."
+      },
       "source": {
         "$ref": "#/components/schemas/AppManifestSource",
         "description": "Source metadata for generated or synced app manifests."
@@ -25279,6 +25660,10 @@
           "type": "string"
         }
       },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Stable deployment alias selected for this installation. The alias is resolved to its current immutable app version at request time."
+      },
       "manifest": {
         "type": "string"
       },
@@ -25446,6 +25831,10 @@
         "items": {
           "type": "string"
         }
+      },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Stable deployment alias selected for this installation. The alias is resolved to its current immutable app version at request time."
       },
       "mcp_configuration": {
         "type": "object",
@@ -25615,6 +26004,10 @@
         "items": {
           "type": "string"
         }
+      },
+      "deployment_alias": {
+        "$ref": "#/components/schemas/AppDeploymentAlias",
+        "description": "Stable deployment alias selected for this installation. The alias is resolved to its current immutable app version at request time."
       },
       "mcp_configuration": {
         "type": "object",
@@ -36673,6 +37066,12 @@
       "started_by": {
         "type": "string",
         "description": "Principal ref of the user who initiated the run (for server-to-server forwarding)"
+      },
+      "idempotency_key": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "description": "Client-chosen key, unique per intended run, that makes this request safe to retry. A repeat of the request with the same key and the same body returns the agent run the first request started instead of starting another. Reusing a key with a different body is rejected with 409, and a repeat that arrives while the first request is still starting the run may be answered with 503 and `Retry-After`. Keys are scoped to the project and stay bound to their run for as long as it exists; once the run is deleted, the same key starts a new one."
       }
     },
     "required": [
@@ -42450,7 +42849,10 @@
     "properties": {
       "name": {
         "type": "string",
-        "description": "Store name (unique within project)"
+        "minLength": 1,
+        "maxLength": 128,
+        "pattern": "^[^\\x00-\\x20\\x7f-\\x9f/\\\\.](?:[^\\x00-\\x1f\\x7f-\\x9f/\\\\]*[^\\x00-\\x20\\x7f-\\x9f/\\\\])?$",
+        "description": "Store name (unique within project). 1 to 128 characters; must not contain `/`, `\\` or control characters, start with a dot, or start or end with a space."
       },
       "description": {
         "type": "string",

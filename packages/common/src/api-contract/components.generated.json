@@ -11720,7 +11720,7 @@
       "tags",
       "title"
     ],
-    "description": "An interaction found by a catalog search: a system or a stored interaction."
+    "description": "An interaction found by a catalog search: a system, an app or a stored interaction."
   },
   "CatalogTagCount": {
     "type": "object",
@@ -11769,6 +11769,45 @@
       "tags",
       "interactions"
     ]
+  },
+  "CatalogAppSearchResult": {
+    "type": "object",
+    "properties": {
+      "total": {
+        "type": "integer",
+        "minimum": -9007199254740991,
+        "maximum": 9007199254740991,
+        "description": "The number of matching interactions."
+      },
+      "tags": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CatalogTagCount"
+        },
+        "description": "The tags of the matching interactions with their counts, most frequent first."
+      },
+      "interactions": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/CatalogSearchInteractionRef"
+        },
+        "description": "The matching app interactions, grouped by app in the order the apps are assigned."
+      },
+      "unavailable_apps": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "The apps whose interactions could not be listed in time, or at all. Their interactions are missing from the result; searching again may include them."
+      }
+    },
+    "required": [
+      "total",
+      "tags",
+      "interactions",
+      "unavailable_apps"
+    ],
+    "description": "A catalog search over the interactions provided by the apps assigned to the caller, searched separately from the system and stored interactions because each app is asked for its interactions."
   },
   "ModelSource": {
     "type": "string",

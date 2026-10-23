@@ -489,6 +489,7 @@ import {
     AsyncInteractionExecutionPayloadSchema,
     CachePolicySchema,
     CatalogAgentSearchQuerySchema,
+    CatalogAppSearchResultSchema,
     CatalogCallSearchQuerySchema,
     CatalogInteractionRefArraySchema,
     CatalogInteractionRefSchema,
@@ -1206,6 +1207,7 @@ const INTERACTION_SCHEMAS = {
     CatalogSearchInteractionRef: CatalogSearchInteractionRefSchema,
     CatalogTagCount: CatalogTagCountSchema,
     CatalogSearchResult: CatalogSearchResultSchema,
+    CatalogAppSearchResult: CatalogAppSearchResultSchema,
     // What `GET /interactions/resolve/:nameOrId` answers with.
     ModelSource: ModelSourceSchema,
     ResolvedEnvironmentInfo: ResolvedEnvironmentInfoSchema,

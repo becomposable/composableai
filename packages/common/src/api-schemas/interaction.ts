@@ -1531,7 +1531,7 @@ export const CatalogSearchInteractionRefSchema = CatalogInteractionRefSchema.ext
         .optional(),
 }).meta({
     id: 'CatalogSearchInteractionRef',
-    description: 'An interaction found by a catalog search: a system or a stored interaction.',
+    description: 'An interaction found by a catalog search: a system, an app or a stored interaction.',
 });
 
 export const CatalogTagCountSchema = z
@@ -1554,6 +1554,22 @@ export const CatalogSearchResultSchema = z
         }),
     })
     .meta({ id: 'CatalogSearchResult' });
+
+export const CatalogAppSearchResultSchema = CatalogSearchResultSchema.extend({
+    interactions: z.array(CatalogSearchInteractionRefSchema).meta({
+        description: 'The matching app interactions, grouped by app in the order the apps are assigned.',
+    }),
+    unavailable_apps: z.array(z.string()).meta({
+        description:
+            'The apps whose interactions could not be listed in time, or at all. Their interactions are missing ' +
+            'from the result; searching again may include them.',
+    }),
+}).meta({
+    id: 'CatalogAppSearchResult',
+    description:
+        'A catalog search over the interactions provided by the apps assigned to the caller, searched separately ' +
+        'from the system and stored interactions because each app is asked for its interactions.',
+});
 
 export const InteractionExecutionResultSchema = z
     .strictObject({

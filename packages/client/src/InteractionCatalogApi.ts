@@ -1,6 +1,7 @@
 import { ApiTopic, type ClientBase } from '@vertesia/api-fetch-client';
 import type {
     CatalogAgentSearchQuery,
+    CatalogAppSearchResult,
     CatalogCallSearchQuery,
     CatalogInteractionRef,
     CatalogSearchResult,
@@ -45,7 +46,7 @@ export class InteractionCatalogApi extends ApiTopic {
     /**
      * Search the system and stored project interactions configured as agents
      * (`agent_runner_options.is_agent`). Returns the matching agents with their tag counts and total.
-     * App-provided interactions are not included.
+     * App-provided interactions are searched by `listAppAgents`.
      */
     listAgents(query: CatalogAgentSearchQuery = {}): Promise<CatalogSearchResult> {
         return this.get('/agents', { query });
@@ -53,10 +54,28 @@ export class InteractionCatalogApi extends ApiTopic {
 
     /**
      * Search the system and stored project interactions that are not agents: basic, tool and skill calls.
-     * Returns the matching calls with their tag counts and total. App-provided interactions are not included.
+     * Returns the matching calls with their tag counts and total. App-provided interactions are searched by `listAppCalls`.
      */
     listCalls(query: CatalogCallSearchQuery = {}): Promise<CatalogSearchResult> {
         return this.get('/calls', { query });
+    }
+
+    /**
+     * Search the agents provided by the apps assigned to the caller, with the filters of `listAgents`. Each app
+     * is asked for its interactions, so this is slower than `listAgents` and meant to be loaded after it; apps
+     * that do not answer in time are listed in `unavailable_apps`.
+     */
+    listAppAgents(query: CatalogAgentSearchQuery = {}): Promise<CatalogAppSearchResult> {
+        return this.get('/agents/apps', { query });
+    }
+
+    /**
+     * Search the calls provided by the apps assigned to the caller, with the filters of `listCalls`. Each app
+     * is asked for its interactions, so this is slower than `listCalls` and meant to be loaded after it; apps
+     * that do not answer in time are listed in `unavailable_apps`.
+     */
+    listAppCalls(query: CatalogCallSearchQuery = {}): Promise<CatalogAppSearchResult> {
+        return this.get('/calls/apps', { query });
     }
 
     /**

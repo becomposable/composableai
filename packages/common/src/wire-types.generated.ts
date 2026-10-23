@@ -3995,7 +3995,7 @@ export type CatalogCallSearchQuery = {
     is_tool?: boolean | undefined;
     is_skill?: boolean | undefined;
 };
-/** An interaction found by a catalog search: a system interaction, or a stored one with its model, prompts and update time. */
+/** An interaction found by a catalog search: a system or app interaction, or a stored one with its model, prompts and update time. */
 export type CatalogSearchInteractionRef = {
     type: 'sys' | 'app' | 'stored' | 'draft';
     id: string;
@@ -4019,6 +4019,13 @@ export type CatalogSearchResult = {
     total: number;
     tags: CatalogTagCount[];
     interactions: CatalogSearchInteractionRef[];
+};
+/** An app catalog search result: the matching app interactions, their tag counts, the total and the apps that did not answer. */
+export type CatalogAppSearchResult = {
+    total: number;
+    tags: CatalogTagCount[];
+    interactions: CatalogSearchInteractionRef[];
+    unavailable_apps: string[];
 };
 export type ResolveInteractionQuery = {
     environment?: string | undefined;
@@ -11197,6 +11204,7 @@ export interface ApiComponentTypes {
     CatalogSearchInteractionRef: CatalogSearchInteractionRef;
     CatalogTagCount: CatalogTagCount;
     CatalogSearchResult: CatalogSearchResult;
+    CatalogAppSearchResult: CatalogAppSearchResult;
     ModelSource: ModelSourceWire;
     ResolvedEnvironmentInfo: ResolvedEnvironmentInfo;
     ResolvedInteractionExecutionInfo: ResolvedInteractionExecutionInfo;

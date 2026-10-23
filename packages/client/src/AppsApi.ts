@@ -455,7 +455,7 @@ export default class AppsApi extends ApiTopic {
         mcpSharedParameters?: AppInstallationPayload['mcp_shared_parameters'],
         installation?: Pick<
             AppInstallationPayload,
-            'deployment_alias' | 'instance_key' | 'display_name' | 'namespace_overrides'
+            'approved_scopes' | 'deployment_alias' | 'instance_key' | 'display_name' | 'namespace_overrides'
         >,
     ): Promise<AppInstallation> {
         return this.post(`/install`, {

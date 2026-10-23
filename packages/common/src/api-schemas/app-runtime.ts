@@ -373,7 +373,7 @@ export const AppOAuthClientConfigSchema = z
         redirect_uris: z.array(z.string().url()).min(1),
         require_consent: z.boolean().optional().meta({
             description:
-                'Show user consent before authorizing this app. Defaults to true. Disabling the prompt applies only within the publisher organization. Other organizations and loopback callbacks always require consent. Installation, app access, scope and project-policy enforcement are preserved.',
+                'Deprecated compatibility field. Vertesia-managed apps are authorized by project installation approval, while generic third-party OAuth clients retain per-user consent.',
         }),
     })
     .meta({

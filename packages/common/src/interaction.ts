@@ -40,6 +40,16 @@ export type ConversationStripOptions = Wire.ConversationStripOptions;
  */
 export type CatalogInteractionRef = Wire.CatalogInteractionRef;
 
+export type CatalogAgentSearchQuery = Wire.CatalogAgentSearchQuery;
+export type CatalogCallSearchQuery = Wire.CatalogCallSearchQuery;
+/** An interaction found by a catalog search: a system or app interaction, or a stored one with its model, prompts and update time. */
+export type CatalogSearchInteractionRef = Wire.CatalogSearchInteractionRef;
+export type CatalogTagCount = Wire.CatalogTagCount;
+/** A catalog search result: the matching interactions, their tag counts and the total. */
+export type CatalogSearchResult = Wire.CatalogSearchResult;
+/** An app catalog search result: the matching app interactions, their tag counts, the total and the apps that did not answer. */
+export type CatalogAppSearchResult = Wire.CatalogAppSearchResult;
+
 export interface CatalogTagQuery {
     tag?: string;
 }

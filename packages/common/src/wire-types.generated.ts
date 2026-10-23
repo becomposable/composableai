@@ -1492,6 +1492,7 @@ export type AppInstallationPayload = {
           }
         | undefined;
     access_control?: AppAccessControl | null | undefined;
+    approved_scopes?: string[] | undefined;
     oauth_params?: AppOAuthCollectionParams | undefined;
     oauth_provider_params?: AppOAuthCollectionParams | undefined;
     api_key_params?: AppApiKeyCollectionParams | undefined;

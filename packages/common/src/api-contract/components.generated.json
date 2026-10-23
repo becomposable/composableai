@@ -21499,6 +21499,15 @@
         ],
         "description": "Per-installation override of the manifest's `access_control` policy. When provided, takes precedence over the manifest default for every access check. Sibling of `settings` — admin-controlled, not part of the app's own settings JSON.\n\nThree send-time semantics on update:  - Field omitted entirely from the payload → leave the existing override unchanged.  - Explicit `null` → clear the override, fall back to the manifest default.  - String enum → set the override to that value.\n\n(On install, the same shape applies; omit or pass `null` to use the manifest default.)"
       },
+      "approved_scopes": {
+        "maxItems": 200,
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "OAuth scopes approved by the project manager during installation. The server records the approving user and timestamp; omitted defaults to all scopes requested by the selected deployment."
+      },
       "oauth_params": {
         "type": "object",
         "properties": {},
@@ -23954,7 +23963,7 @@
       },
       "require_consent": {
         "type": "boolean",
-        "description": "Show user consent before authorizing this app. Defaults to true. Disabling the prompt applies only within the publisher organization. Other organizations and loopback callbacks always require consent. Installation, app access, scope and project-policy enforcement are preserved."
+        "description": "Deprecated compatibility field. Vertesia-managed apps are authorized by project installation approval, while generic third-party OAuth clients retain per-user consent."
       }
     },
     "required": [

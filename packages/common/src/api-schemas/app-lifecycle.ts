@@ -1083,6 +1083,14 @@ export const AppInstallationPayloadSchema = z
                     "Per-installation override of the manifest's `access_control` policy. When provided, takes precedence over the manifest default for every access check. Sibling of `settings` — admin-controlled, not part of the app's own settings JSON.\n\nThree send-time semantics on update:  - Field omitted entirely from the payload → leave the existing override unchanged.  - Explicit `null` → clear the override, fall back to the manifest default.  - String enum → set the override to that value.\n\n(On install, the same shape applies; omit or pass `null` to use the manifest default.)",
             })
             .optional(),
+        approved_scopes: z
+            .array(z.string().min(1))
+            .max(200)
+            .meta({
+                description:
+                    'OAuth scopes approved by the project manager during installation. The server records the approving user and timestamp; omitted defaults to all scopes requested by the selected deployment.',
+            })
+            .optional(),
         oauth_params: AppOAuthCollectionParamsSchema.meta({
             description:
                 'OAuth credentials for each collection, keyed by collection.id. Legacy callers may still use collection.name for older manifests. Collected from the user at install time for collections with oauth_config.required_at_install.',

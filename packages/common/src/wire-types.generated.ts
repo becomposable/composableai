@@ -552,6 +552,7 @@ export type AppUIConfig = {
 };
 export type AppOAuthClientConfig = {
     redirect_uris: string[];
+    require_consent?: boolean | undefined;
 };
 export type AppInstallationProjectsQuery = {
     name?: string | undefined;
@@ -4989,6 +4990,9 @@ export type UpdateOAuthClientPayload = {
               [k: string]: unknown;
           }
         | undefined;
+};
+export type UpdateOAuthClientStatusPayload = {
+    status: OAuthClientStatus;
 };
 export type OAuthAuthorizationServerMetadata = {
     issuer: string;
@@ -11055,6 +11059,7 @@ export interface ApiComponentTypes {
     OAuthClientScopeMetadata: OAuthClientScopeMetadata;
     CreateOAuthClientPayload: CreateOAuthClientPayload;
     UpdateOAuthClientPayload: UpdateOAuthClientPayload;
+    UpdateOAuthClientStatusPayload: UpdateOAuthClientStatusPayload;
     OAuthGrant: OAuthGrant;
     ListOAuthGrantsQuery: ListOAuthGrantsQuery;
     RevokeOAuthGrantQuery: RevokeOAuthGrantQuery;

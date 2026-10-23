@@ -687,6 +687,7 @@ import {
     OidcFederationConnectionSchema,
     RevokeOAuthGrantQuerySchema,
     UpdateOAuthClientPayloadSchema,
+    UpdateOAuthClientStatusPayloadSchema,
 } from './oauth-server.js';
 import * as ProcessSchemas from './process.js';
 import {
@@ -1027,6 +1028,7 @@ const OAUTH_SCHEMAS = {
     OAuthClientScopeMetadata: OAuthClientScopeMetadataSchema,
     CreateOAuthClientPayload: CreateOAuthClientPayloadSchema,
     UpdateOAuthClientPayload: UpdateOAuthClientPayloadSchema,
+    UpdateOAuthClientStatusPayload: UpdateOAuthClientStatusPayloadSchema,
     // Grants. The two query components are registered like any other — they are expanded into
     // parameters rather than published as component bodies, which is what every query contract does.
     OAuthGrant: OAuthGrantSchema,
@@ -3253,6 +3255,7 @@ const STRICT_COMPONENTS: ReadonlySet<string> = new Set<string>([
     'OAuthClientScopeMetadata',
     'CreateOAuthClientPayload',
     'UpdateOAuthClientPayload',
+    'UpdateOAuthClientStatusPayload',
     'OAuthGrant',
     'BulkRevokeOAuthGrantsPayload',
     'OAuthGrantListResponse',

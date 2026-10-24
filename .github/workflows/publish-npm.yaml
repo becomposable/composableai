@@ -106,7 +106,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .node-version
       - name: Prepare shared dependency, lockfile and schemas
         env:
           RELEASE_VERSION: ${{ steps.version.outputs.version }}
@@ -166,7 +166,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .node-version
       - name: Install Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
 
@@ -371,7 +371,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .node-version
 
       # Node.js 24 ships with npm 11.5.1 or later, as required for trusted publishing.
       - name: Verify npm version
@@ -485,10 +485,17 @@ jobs:
     needs: publish
     if: inputs.dry_run == false
     steps:
+      - name: Checkout .node-version
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
+          persist-credentials: false
+          sparse-checkout: .node-version
+          sparse-checkout-cone-mode: false
       - name: Install Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .node-version
           package-manager-cache: false
       - name: Wait for complete published package cohort
         env:
@@ -543,7 +550,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .node-version
           package-manager-cache: false
       - name: Install and smoke test published CLI
         env:
@@ -576,7 +583,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version-file: .node-version
           package-manager-cache: false
 
       - name: Install and smoke test published CLI fallback
